@@ -1,0 +1,2 @@
+FILEPATH_WITH_SPACES=test/samplefile_with_spaces.txt
+FILEPATH_WITHOUT_SPACES=test/samplefile_without_spaces.txt

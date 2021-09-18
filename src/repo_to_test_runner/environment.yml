@@ -1,0 +1,9 @@
+# run: conda env create --file environment.yml
+# include new packages: conda env update --file environment.yml
+name: example_env
+channels:
+  - conda
+dependencies:
+- anaconda
+- conda:
+  - pytest=6.1.2

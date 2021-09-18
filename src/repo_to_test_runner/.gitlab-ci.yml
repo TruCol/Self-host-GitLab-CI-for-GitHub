@@ -1,0 +1,12 @@
+test:pytest:36:
+  image: python:3.6
+  script:
+    - whoami
+    - sudo apt-get install python
+    - sudo apt-get update --fix-missing
+    - wget -q https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh; bash miniconda.sh -b -f -p $HOME/miniconda;
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - conda env create -q -f environment.yml -n example_env --force
+    - source activate example_env
+    - conda install pytest
+    - python -m pytest

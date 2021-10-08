@@ -31,3 +31,12 @@ create_gitlab_personal_access_token() {
 	output="$(sudo docker exec -i $docker_container_id bash -c "gitlab-rails runner \"token = User.find_by_username('$gitlab_username').personal_access_tokens.create(scopes: [:api], name: '$token_name'); token.set_token('$personal_access_token'); token.save! \"")"
 }
 
+gitlab_personal_access_token_exists() {
+	echo "yes"
+}
+
+get_personal_access_token_list() {
+	personal_access_token=$(echo $GITLAB_PERSONAL_ACCESS_TOKEN | tr -d '\r')
+	token_list=$(curl --header "PRIVATE-TOKEN: somelongpersonalaccesscode3" "$gitlab_host""/api/v4/personal_access_tokens")
+	echo $token_list
+}

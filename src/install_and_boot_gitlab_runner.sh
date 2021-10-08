@@ -24,6 +24,8 @@ install_and_run_gitlab_runner() {
 		install_gitlab_runner_service
 		start_gitlab_runner_service
 		run_gitlab_runner_service
+	else
+		echo "The gitlab runner is already running"
 	fi
 	echo "COMPLETED RUNNER INSTALLATION."
 }

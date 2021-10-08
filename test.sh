@@ -8,7 +8,8 @@
 #./test/libs/bats/bin/bats test/test_install_and_boot_gitlab_runner.bats
 
 # Long tests (passing)
-./test/libs/bats/bin/bats test/modular_test_runner.bats
+#./test/libs/bats/bin/bats test/modular_test_runner.bats
+./test/libs/bats/bin/bats test/test_post_receive.bats
 #./test/libs/bats/bin/bats test/test_runner_works.bats
 
 # Short tests (failing):

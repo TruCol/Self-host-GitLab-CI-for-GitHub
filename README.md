@@ -33,3 +33,21 @@ TODO: Create script that detects once the Website has been established, continuo
 ## Setup SSH service upon boot
 TODO: Create script that adds a cronjob for this task.
 TODO: Create script that verifies the SSH is available.
+
+## How to use (for developers)
+First install the required submodules with:
+```
+cd ~/.task
+git clone git@github.com:HiveMinds-EU/tw-install.git install
+cd install
+rm -r test/libs/*
+chmod +x install-bats-libs.sh
+./install-bats-libs.sh
+```
+
+Next, run the unit tests with:
+```
+chmod +x test.sh
+./test.sh
+```
+Note: Put your unit test files (with extention .bats) in folder: `/test/`

@@ -547,3 +547,49 @@ get_build_status() {
 		echo $actual_result
 	fi
 }
+
+dir_exists() {
+	dir=$1 
+	[ -d "$dir" ] && echo "FOUND" || echo "NOTFOUND"
+}
+
+sudo_dir_exists() {
+	dir=$1 
+	if sudo test -d "$dir"; then
+		echo "FOUND"
+	else
+		echo "NOTFOUND"
+	fi
+}
+
+sudo_file_exists() {
+	filepath=$1 
+	if sudo test -f "$filepath"; then
+		echo "FOUND"
+	else
+		echo "NOTFOUND"
+	fi
+
+}
+
+sudo_create_dir() {
+	abs_dir=$1
+	if [ "$(sudo_dir_exists "$abs_dir")" == "NOTFOUND" ]; then
+		sudo mkdir $abs_dir
+	fi
+}
+
+make_user_owner_of_dir() {
+	user=$1
+	dir=$2
+	#sudo chown -R gitlab-runner: $path_to_gitlab_hook_dir
+	sudo chown -R $user: $dir
+}
+
+is_owner_of_dir() {
+	owner=$1
+	dir=$2
+	output=$(sudo ls -ld "$dir")
+	actual_result=$(lines_contain_string "$owner" "\${output}")
+	echo "$actual_result"
+}

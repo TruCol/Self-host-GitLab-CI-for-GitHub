@@ -6,6 +6,7 @@ load 'libs/bats-file/load'
 
 source src/install_and_boot_gitlab_server.sh
 source src/install_and_boot_gitlab_runner.sh
+source src/create_post_receive.sh
 source src/run_ci_job.sh
 source src/uninstall_gitlab_runner.sh
 source src/helper.sh
@@ -35,7 +36,7 @@ setup() {
 }
 
 @test "Test if the GitLab Runner CI automatically evaluates the example repository to a succesfull build." {
-	
+	skip
 	# Push the example repository to the GitLab server and verifiy the runner evaluates the build to be succesfull.
 	create_and_run_ci_job
 	
@@ -45,4 +46,34 @@ setup() {
 	EXPECTED_OUTPUT="FOUND"
 		
 	assert_equal "$successfull_build_status_is_found" "$EXPECTED_OUTPUT"	
+}
+
+@test "Test assert_gitlab_shell_dir_exists." {
+	assert_gitlab_shell_dir_exists
+}
+
+@test "Test gitlab hook dir is created." {
+	create_gitlab_hook_dir
+}
+
+@test "Test owner of hook dir." {
+	make_hooks_directory_owned_by_gitlab_user
+}
+
+
+@test "Test gitlab post_receive dir is created." {
+	create_gitlab_post_receive_dir
+}
+
+@test "Test owner of post-receive dir." {
+	make_post_receive_directory_owned_by_gitlab_user
+}
+
+@test "Test gitlab post_receive script is created." {
+	create_gitlab_post_receive_script
+}
+
+
+@test "Test gitlab post_receive script is owned by gitlab-runner." {
+	make_hooks_post_script_owned_by_gitlab_user
 }

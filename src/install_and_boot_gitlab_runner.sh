@@ -16,7 +16,7 @@ install_and_run_gitlab_runner() {
 	# its verified md5sum into hardcoded_variables.txt (possibly adding an if statement 
 	# to get_architecture().)
 	
-	if [ $(gitlab_runner_is_running $arch) == "NOTRUNNING" ]; then
+	# Install GitLab Runner regardless of whether the runner service is already running or not.
 		get_runner_package $arch
 		install_package $arch
 		register_gitlab_runner
@@ -24,6 +24,9 @@ install_and_run_gitlab_runner() {
 		install_gitlab_runner_service
 		start_gitlab_runner_service
 		run_gitlab_runner_service
+		
+	if [ $(gitlab_runner_is_running $arch) == "NOTRUNNING" ]; then
+		echo "The gitlab runner is not yet running"
 	else
 		echo "The gitlab runner is already running"
 	fi

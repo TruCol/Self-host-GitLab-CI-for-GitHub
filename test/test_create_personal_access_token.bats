@@ -33,5 +33,6 @@ source test/hardcoded_testdata.txt
 
 @test "Checking list of existing personal-access-tokens." {
 	output=$(get_personal_access_token_list "Filler")
+	echo "output=$output"
 	assert_equal "$(lines_contain_string "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME" "\${output}")" "FOUND"
 }

@@ -39,6 +39,9 @@ push_changes() {
 	repo_name=$(echo $SOURCE_FOLDERNAME | tr -d '\r')
 	gitlab_username=$(echo $gitlab_server_account | tr -d '\r')
 	gitlab_server_password=$(echo $gitlab_server_password | tr -d '\r')
+	command="http://$gitlab_username:$gitlab_server_password@127.0.0.1/$gitlab_username/$repo_name.git"
+	echo "command=$command"
+	echo "SOURCE_FOLDERNAME=$SOURCE_FOLDERNAME"
 	output=$(cd ../$SOURCE_FOLDERNAME && git push http://$gitlab_username:$gitlab_server_password@127.0.0.1/$gitlab_username/$repo_name.git)
 	echo "output=$output"
 }
@@ -76,13 +79,16 @@ create_repository() {
 	
 	# Create repo named foobar
 	repo_name=$SOURCE_FOLDERNAME
+	
+	command="curl -H Content-Type:application/json http://127.0.0.1/api/v4/projects?private_token=""$personal_access_token -d ""{ \"name\": \"""$repo_name""\" }"
+	echo "create_repo_command=$command"
 	{ # try
 		output=$(curl -H "Content-Type:application/json" http://127.0.0.1/api/v4/projects?private_token=$personal_access_token -d "{ \"name\": \"$repo_name\" }")
 		echo "output=$output"
 		#save your output
 		true
 	} || { # catch
-		# save log for exception 
+		# save log for exception
 		true
 	}
 	
@@ -120,8 +126,11 @@ clone_repository() {
 	gitlab_server_password=$(echo $gitlab_server_password | tr -d '\r')
 	
 	#sudo rm -r ../$repo_name
-	#echo "/$gitlab_server_account=$gitlab_server_account"
-	#echo "/$gitlab_server_password=$gitlab_server_password"
+	echo "/$gitlab_server_account=$gitlab_server_account"
+	echo "/$gitlab_server_password=$gitlab_server_password"
+	command="http://$gitlab_username:$gitlab_server_password@127.0.0.1/$gitlab_username/$repo_name.git"
+	echo "command=$command"
+	echo "SOURCE_FOLDERNAME=$SOURCE_FOLDERNAME"
 	output=$(cd .. && git clone http://$gitlab_username:$gitlab_server_password@127.0.0.1/$gitlab_username/$repo_name.git)
 	echo "output=$output"
 }

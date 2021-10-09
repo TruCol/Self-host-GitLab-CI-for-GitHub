@@ -28,7 +28,7 @@ create_gitlab_personal_access_token() {
 	# Create a personal access token
 	# TODO: limit scope to only required scope
 	# https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html
-	if [ "$gitlab_personal_access_token_exists" == "NOTFOUND" ]; then
+	if [ "$gitlab_personal_access_token_exists"=="NOTFOUND" ]; then
 		output="$(sudo docker exec -i $docker_container_id bash -c "gitlab-rails runner \"token = User.find_by_username('$gitlab_username').personal_access_tokens.create(scopes: [:api], name: '$token_name'); token.set_token('$personal_access_token'); token.save! \"")"
 	fi
 }
@@ -44,6 +44,9 @@ gitlab_personal_access_token_exists() {
 
 get_personal_access_token_list() {
 	personal_access_token=$(echo $GITLAB_PERSONAL_ACCESS_TOKEN | tr -d '\r')
-	token_list=$(curl --header "PRIVATE-TOKEN: somelongpersonalaccesscode3" "$gitlab_host""/api/v4/personal_access_tokens")
+	#command="curl --header \"PRIVATE-TOKEN:$personal_access_token\" ""$gitlab_host""/api/v4/personal_access_tokens"
+	#echo "Command=$command"
+	# TODO: Note used to be a space after the semicolon, check if it is required
+	token_list=$(curl --header "PRIVATE-TOKEN:$personal_access_token" "$gitlab_host""/api/v4/personal_access_tokens")
 	echo $token_list
 }

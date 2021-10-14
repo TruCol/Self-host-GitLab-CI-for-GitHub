@@ -579,6 +579,20 @@ sudo_create_dir() {
 	fi
 }
 
+docker_sudo_create_dir(){
+	abs_dir=$1
+	docker_container_id=$2
+	dir_exists=$(sudo docker exec -i "$docker_container_id" bash -c "if test -d $abs_dir; then echo 'FOUND'; fi ")
+	#read -p "dir_exists=$dir_exists" >&2
+	echo "dir_exists=$dir_exists"
+	echo "docker_container_id=$docker_container_id"
+	echo "abs_dir=$abs_dir"
+	if [ "$dir_exists" != "FOUND" ]; then
+		echo "Creating dir"
+		$(sudo docker exec -i "$docker_container_id" bash -c "mkdir $abs_dir")
+	fi
+}
+
 make_user_owner_of_dir() {
 	user=$1
 	dir=$2

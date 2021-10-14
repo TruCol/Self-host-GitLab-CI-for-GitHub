@@ -32,37 +32,40 @@ setup() {
 }
 
 @test "Trivial test." {
-	skip
-	skip
 	assert_equal "True" "True"
 }
 
+@test "Test if the GitLab Runner CI automatically evaluates the example repository to a succesfull build." {
+	skip
+	# Push the example repository to the GitLab server and verifiy the runner evaluates the build to be succesfull.
+	create_and_run_ci_job
+	
+	# Get GitLab Runner CI build status of test repository:
+	successfull_build_status_is_found=$(get_build_status)
+	
+	EXPECTED_OUTPUT="FOUND"
+		
+	assert_equal "$successfull_build_status_is_found" "$EXPECTED_OUTPUT"	
+}
+
 @test "Test assert_gitlab_shell_dir_exists." {
-	skip
-	skip
 	assert_gitlab_shell_dir_exists
 }
 
 @test "Test gitlab hook dir is created." {
-	skip
-	skip
 	create_gitlab_hook_dir
 }
 
 @test "Test owner of hook dir." {
-	skip
 	make_hooks_directory_owned_by_gitlab_user
 }
 
 
 @test "Test gitlab post_receive dir is created." {
-	skip
-	skip
 	create_gitlab_post_receive_dir
 }
 
 @test "Test owner of post-receive dir." {
-	skip
 	make_post_receive_directory_owned_by_gitlab_user
 }
 
@@ -72,6 +75,5 @@ setup() {
 
 
 @test "Test gitlab post_receive script is owned by gitlab-runner." {
-	skip
 	make_hooks_post_script_owned_by_gitlab_user
 }

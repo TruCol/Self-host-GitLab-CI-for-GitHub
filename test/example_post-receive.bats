@@ -13,7 +13,7 @@ expected_path="/var/opt/gitlab/gitlab-rails/shared/artifacts/d4/73/d4735e3a265e1
 # Commit:(newrev)
 commit_sha="9514d16aafc1d741ba6a9ff47718d632fa8d435b"
 expected_shortened_commit_sha="9514d16a"
-job_log_containing_path="/home/name/git/one-click-deploy/Self-host-GitLab-Server-and-Runner-CI/test/example_logs"
+job_log_containing_path="test/example_logs"
 
 receipe() {
 	repopath_without_dot_git=$(remove_dot_git "$repopath")
@@ -25,18 +25,17 @@ receipe() {
 	shortened_commit_sha=$(get_shortened_commit_sha "$commit_sha")
 	assert_equal "$shortened_commit_sha" "$expected_shortened_commit_sha"
 	
-	filepath_list=$(find $job_log_containing_path -name "job.log")
-	echo "filepath_list=$filepath_list"
+	#filepath_list=$(find $job_log_containing_path -name "job.log")
+	#echo "filepath_list=$filepath_list"
 	
-	filepath=$(find_job_of_commit "$filepath_list" "$shortened_commit_sha")
+	#filepath=$(find_job_of_commit "$filepath_list" "$shortened_commit_sha")
+	filepath=$(find_job_of_commit "$job_log_containing_path" "$shortened_commit_sha")
 	assert_equal "$job_log_containing_path/234/job.log" "$filepath"
 	echo "asserted filepath"
 	
 	build_status=$(get_build_status "$filepath")
 	assert_equal "success" "$build_status"
 	echo "asserted build status"
-	
-	find_job_of_commit "$job_log_containing_path" "$expected_shortened_commit_sha"
 }
 
 remove_dot_git() {
@@ -68,19 +67,19 @@ get_shortened_commit_sha() {
 }
 
 #4. loop through job.log files
-find_job_of_commit() {
-	local search_path=$1
-	local searched_commit=$2
-	filepath_list=$(find $search_path -name "job.log")
-	while IFS= read -r line; do
-		if [ "$line" != "" ]; then
-			job_log_content="$(cat $line)"
-			if [[ "$job_log_content" == *"Checking out $searched_commit"* ]]; then
-				echo "$line"
-			fi
-		fi
-	done <<< "$filepath_list"
-}
+#find_job_of_commit() {
+#	local search_path=$1
+#	local searched_commit=$2
+#	filepath_list=$(find $search_path -name "job.log")
+#	while IFS= read -r line; do
+#		if [ "$line" != "" ]; then
+#			job_log_content="$(cat $line)"
+#			if [[ "$job_log_content" == *"Checking out $searched_commit"* ]]; then
+#				echo "$line"
+#			fi
+#		fi
+#	done <<< "$filepath_list"
+#}
 
 #7. Optional, find branch name.
 
@@ -117,15 +116,18 @@ get_build_status() {
 find_job_of_commit() {
 	local search_path=$1
 	local searched_commit=$2
-	filepath=""
-	while [ "$filepath" == "" ]
-	do
-		filepath_list=$(find $search_path -name "job.log")
-		array=(${filepath_list//$'\n'/ })
-		filepath=$(get_filepath "$searched_commit" "${array[@]}")
-		sleep 1
-	done
-	echo "$filepath"
+	#query_result=$(while ! find -name "job.log" | xargs grep "Checking out $searched_commit"; do sleep 10 ; done)
+	query_result=$(while ! find "$search_path" -name "job.log" | xargs grep "Checking out $searched_commit"; do sleep 10 ; done)
+	found_filepath=$(get_lhs_of_line_till_character "$query_result" ":")
+	#filepath=""
+	#while [ "$filepath" == "" ]
+	#do
+	#	filepath_list=$(find $search_path -name "job.log")
+	#	array=(${filepath_list//$'\n'/ })
+	#	filepath=$(get_filepath "$searched_commit" "${array[@]}")
+	#	sleep 1
+	#done
+	echo "$found_filepath"
 }
 
 # loops through list of filepaths and checks if they contain a certain substring
@@ -155,6 +157,19 @@ file_contains_string() {
 	else
 		echo "NOTFOUND";
 	fi
+}
+
+get_lhs_of_line_till_character() {
+	line=$1
+	character=$2
+	
+	# TODO: implement
+	#lhs=${line%$character*}
+	#read -p "line=$line"
+	#read -p "character=$character"
+
+	lhs=$(cut -d "$character" -f1 <<< "$line")
+	echo $lhs
 }
 
 receipe

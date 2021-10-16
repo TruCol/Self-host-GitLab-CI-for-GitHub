@@ -121,6 +121,7 @@ touch general_server_output.txt'
 	
 	# Make script runnable
 	two_lines=$(sudo docker exec -i "$docker_container_id" bash -c "chmod +x $path_to_gitlab_post_receive_script")
+	two_lines=$(sudo docker exec -i "$docker_container_id" bash -c "chmod +x $path_to_gitlab_post_receive_script")
 }
 
 
@@ -148,7 +149,7 @@ get_commit_sha() {
 	
 	# Get absolute path of post-receive script
 	path_to_gitlab_post_receive_script="/opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive"
-	
+	path_to_gitlab_post_receive_backup_script="/opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive_backup"
 	
 	
 	#/opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d
@@ -185,6 +186,7 @@ echo "$PWD" >> general_server_output.txt'
 	
 	# Make script runnable
 	two_lines=$(sudo docker exec -i "$docker_container_id" bash -c "chmod +x $path_to_gitlab_post_receive_script")
+	two_lines=$(sudo docker exec -i "$docker_container_id" bash -c "chmod +x $path_to_gitlab_post_receive_backup_script")
 }
 
 
@@ -194,8 +196,10 @@ export_post_receive_file() {
 	
 	# Get absolute path of post-receive script
 	path_to_gitlab_post_receive_script="/opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive"
+	path_to_gitlab_post_receive_backup_script="/opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive_backup"
 	
 	$(sudo docker cp "src/post-receive" "$docker_container_id":"$path_to_gitlab_post_receive_script")
+	$(sudo docker cp "src/post-receive_backup" "$docker_container_id":"$path_to_gitlab_post_receive_backup_script")
 
 }
 

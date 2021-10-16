@@ -1,5 +1,8 @@
 .gitmodules
-/test/libs/*
+test/libs/bats
+test/libs/bats-assert
+test/libs/bats-files
+test/libs/bats-support
 
 # Don't sync logfiles
 *.out

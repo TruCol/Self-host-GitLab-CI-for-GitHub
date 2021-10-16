@@ -94,9 +94,10 @@ find_job_of_commit() {
 		array=(${filepath_list//$'\n'/ })
 		echo "$(date -u)" >> "post_receive_log.txt"
 		detecting_filepath=$(get_filepath "$searched_commit" "${array[@]}")
-		echo "after GETFILEPATH, detecting_filepath=$detecting_filepath" >> "post_receive_log.txt"
+		echo "after GETFILEPATH, detecting_filepath=$detecting_filepath END" >> "post_receive_log.txt"
 		sleep 10
 	done
+	echo "WHILECONDITION NOT SATISFIED" >> "post_receive_log.txt"
 	echo "$detecting_filepath"
 }
 
@@ -110,7 +111,8 @@ get_filepath() {
 		do
 			substring="Checking out $searched_commit"
 			found_commit="$(file_contains_string "$substring" "$looping_filepath")"
-			echo "looping_filepath=$looping_filepath" >> "post_receive_log.txt"
+			echo "toop_filepath=$looping_filepath" >> "post_receive_log.txt"
+			echo "substring=$substring END" >> "post_receive_log.txt"
 			if [[ "$found_commit" == "FOUND" ]]; then
 				echo "$looping_filepath"
 			fi

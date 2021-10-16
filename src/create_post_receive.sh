@@ -26,7 +26,7 @@ assert_gitlab_shell_dir_exists() {
 	
 	# check if directory exists inside GitLab Docker
 	#https://superuser.com/questions/98825/how-to-check-if-a-directory-exists-in-linux-command-line
-	#sudo docker exec -i "1a8150b37039" bash -c "if test -d /opt/gitlab/embedded/service/gitlab-shell; then echo 'FOUND'; fi "
+	#sudo docker exec -i "12dd96b73594" bash -c "if test -d /opt/gitlab/embedded/service/gitlab-shell; then echo 'FOUND'; fi "
 	dir_exists=$(sudo docker exec -i "$docker_container_id" bash -c "if test -d $path_to_gitlab_shell_dir; then echo 'FOUND'; fi ")
 	
 	assert_equal "$dir_exists" "FOUND"
@@ -98,16 +98,16 @@ create_gitlab_post_receive_script() {
 	#/opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d
 	# TODO 2.G: Add content:
 	$(sudo docker exec -i "$docker_container_id" bash -c 'echo \#!/bin/bash > '$path_to_gitlab_post_receive_script)
-	#sudo docker exec -i 1a8150b37039 bash -c "echo \"#!/bin/bash\" | tee "/opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive""
+	#sudo docker exec -i 12dd96b73594 bash -c "echo \"#!/bin/bash\" | tee "/opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive""
 	
 	# works
-	#sudo docker exec -i 1a8150b37039 bash -c 'echo \#!/bin/bash >> /opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive'
-	#sudo docker exec -i 1a8150b37039 bash -c 'rm /opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive'
-	#sudo docker exec -i 1a8150b37039 bash -c 'echo "helloworld" >> /opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive'
+	#sudo docker exec -i 12dd96b73594 bash -c 'echo \#!/bin/bash >> /opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive'
+	#sudo docker exec -i 12dd96b73594 bash -c 'rm /opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive'
+	#sudo docker exec -i 12dd96b73594 bash -c 'echo "helloworld" >> /opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive'
 	
 	#
-	#sudo docker exec -i 1a8150b37039 bash -c "if test -f /opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive; then echo 'FOUND'; fi "
-	#sudo docker exec -i 1a8150b37039 bash -c "cat /opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive"
+	#sudo docker exec -i 12dd96b73594 bash -c "if test -f /opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive; then echo 'FOUND'; fi "
+	#sudo docker exec -i 12dd96b73594 bash -c "cat /opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive"
 	first_line=$(sudo docker exec -i "$docker_container_id" bash -c "cat $path_to_gitlab_post_receive_script")
 	assert_equal "$first_line" "#!/bin/bash"
 	
@@ -127,19 +127,76 @@ touch general_server_output.txt'
 # TODO 4.E: make the post-receive file owned by user: gitlab-runner
 # Skipped as this is done automatically if the dir is created inside the GitLab docker
 
-get_hashed_repo_path() {
-	sudo docker exec -t -i 1a8150b37039 /bin/bash
-	gitlab-rails console
-	sudo gitlab-rails runner Project.find_by_full_path('root/repo_to_test_runner').disk_path
-	# returns hashed path
-	# Does something
-	##sudo docker exec -i 1a8150b37039 bash -c 'gitlab-rails console gitlab-rails runner "Project.find_by_full_path("root/repo_to_test_runner").disk_path"'
-	#sudo docker exec -i 1a8150b37039 bash -c 'gitlab-rails console "Project.find_by_full_path("root/repo_to_test_runner").disk_path"'
-	#sudo docker exec -i 1a8150b37039 bash -c 'gitlab-rails runner "Project.find_by_full_path("root/repo_to_test_runner").disk_path"'
+##get_hashed_repo_path() {
+##	sudo docker exec -t -i 12dd96b73594 /bin/bash
+##	gitlab-rails console
+##	sudo gitlab-rails runner Project.find_by_full_path('root/repo_to_test_runner').disk_path
+##	# returns hashed path
+##	# Does something
+##	##sudo docker exec -i 12dd96b73594 bash -c 'gitlab-rails console gitlab-rails runner "Project.find_by_full_path("root/repo_to_test_runner").disk_path"'
+##	#sudo docker exec -i 12dd96b73594 bash -c 'gitlab-rails console "Project.find_by_full_path("root/repo_to_test_runner").disk_path"'
+##	#sudo docker exec -i 12dd96b73594 bash -c 'gitlab-rails runner "Project.find_by_full_path("root/repo_to_test_runner").disk_path"'
+##	
+##	#docker exec -it myContainer bin/rails console
+##	#https://github.com/sameersbn/docker-gitlab/issues/1384
+##	
+##}
+
+get_commit_sha() {
+	# Get Docker container id
+	docker_container_id=$(get_docker_container_id_of_gitlab_server)
 	
-	#docker exec -it myContainer bin/rails console
-	#https://github.com/sameersbn/docker-gitlab/issues/1384
+	# Get absolute path of post-receive script
+	path_to_gitlab_post_receive_script="/opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive"
 	
+	
+	
+	#/opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d
+	# TODO 2.G: Add content:
+	$(sudo docker exec -i "$docker_container_id" bash -c 'echo \#!/bin/bash > '$path_to_gitlab_post_receive_script)
+	#sudo docker exec -i 12dd96b73594 bash -c "echo \"#!/bin/bash\" | tee "/opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive""
+	
+	# TODO 2.F: write test that verifies this file is created
+	file_exists=$(sudo docker exec -i "$docker_container_id" bash -c "if test -f $path_to_gitlab_post_receive_script; then echo 'FOUND'; fi ")
+	assert_equal "$file_exists" "FOUND"
+	
+	# Verify the first line of the post-receive script is correct.
+	first_line=$(sudo docker exec -i "$docker_container_id" bash -c "cat $path_to_gitlab_post_receive_script")
+	assert_equal "$first_line" "#!/bin/bash"
+	
+	# Add read commit sha's line
+	$(sudo docker exec -i "$docker_container_id" bash -c 'echo "read oldrev newrev refname" >> '$path_to_gitlab_post_receive_script)
+	$(sudo docker exec -i "$docker_container_id" bash -c 'echo "touch general_server_output.txt" >> '$path_to_gitlab_post_receive_script)
+	#$(sudo docker exec -i "$docker_container_id" bash -c 'echo "echo \"$oldrev\" > general_server_output.txt" >> '$path_to_gitlab_post_receive_script)
+	#$(sudo docker exec -i "$docker_container_id" bash -c 'echo "echo "$oldrev" > general_server_output.txt" >> '$path_to_gitlab_post_receive_script)
+	$(sudo docker exec -i "$docker_container_id" bash -c 'echo "echo \"\$oldrev\" >> general_server_output.txt" >> '$path_to_gitlab_post_receive_script)
+	$(sudo docker exec -i "$docker_container_id" bash -c 'echo "echo \"\$PWD\" >> general_server_output.txt" >> '$path_to_gitlab_post_receive_script)
+
+	# TODO 2.H: verify content is created (manually verified)
+	four_lines=$(sudo docker exec -i "$docker_container_id" bash -c "cat $path_to_gitlab_post_receive_script")
+	assert_equal "$four_lines" '#!/bin/bash
+read oldrev newrev refname
+touch general_server_output.txt
+echo "$oldrev" >> general_server_output.txt
+echo "$PWD" >> general_server_output.txt'
+	
+	# copy post-receive script
+	$(export_post_receive_file)
+	
+	# Make script runnable
+	two_lines=$(sudo docker exec -i "$docker_container_id" bash -c "chmod +x $path_to_gitlab_post_receive_script")
+}
+
+
+export_post_receive_file() {
+	# Get Docker container id
+	docker_container_id=$(get_docker_container_id_of_gitlab_server)
+	
+	# Get absolute path of post-receive script
+	path_to_gitlab_post_receive_script="/opt/gitlab/embedded/service/gitlab-shell/hooks/post-receive.d/post-receive"
+	
+	$(sudo docker cp "src/post-receive" "$docker_container_id":"$path_to_gitlab_post_receive_script")
+
 }
 
 # Verify if the post-receive script creates an output file

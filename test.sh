@@ -27,3 +27,5 @@
 
 # Set up post script
 ./test/libs/bats/bin/bats test/test_post_receive.bats
+# Test example post-receive
+./test/libs/bats/bin/bats test/example_post-receive.bats

@@ -32,20 +32,14 @@ setup() {
 }
 
 @test "Trivial test." {
-	skip
-	skip
 	assert_equal "True" "True"
 }
 
 @test "Test assert_gitlab_shell_dir_exists." {
-	skip
-	skip
 	assert_gitlab_shell_dir_exists
 }
 
 @test "Test gitlab hook dir is created." {
-	skip
-	skip
 	create_gitlab_hook_dir
 }
 
@@ -56,8 +50,6 @@ setup() {
 
 
 @test "Test gitlab post_receive dir is created." {
-	skip
-	skip
 	create_gitlab_post_receive_dir
 }
 
@@ -68,6 +60,15 @@ setup() {
 
 @test "Test gitlab post_receive script is created." {
 	create_gitlab_post_receive_script
+}
+
+@test "Test gitlab post_receive script is created and gets commits." {
+	get_commit_sha
+}
+
+
+@test "Test export gitlab post_receive script." {
+	export_post_receive_file
 }
 
 

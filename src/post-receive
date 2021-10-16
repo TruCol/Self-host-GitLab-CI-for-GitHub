@@ -1,0 +1,155 @@
+#!/bin/bash
+read oldrev newrev refname
+echo "PWD=$PWD"
+
+touch post_receive_log.txt
+echo "oldrev=$oldrev" > "post_receive_log.txt"
+echo "newrev=$newrev" >> "post_receive_log.txt"
+echo "refname=$refname" >> "post_receive_log.txt"
+
+#oldrev=$1
+#newrev=$2
+#refname=$3
+#echo "newrev=$newrev"
+ 
+# Script:
+#general_server_output.txt content:
+# PWD="/var/opt/gitlab/git-data/repositories/@hashed/d4/73/d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35.git"
+# Build stattus locations
+#expected_path="/var/opt/gitlab/gitlab-rails/shared/artifacts/d4/73/d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35"
+# Commit:(newrev)
+#commit_sha="9514d16aafc1d741ba6a9ff47718d632fa8d435b"
+#expected_shortened_commit_sha="9514d16a"
+#job_log_containing_path="/home/name/git/one-click-deploy/Self-host-GitLab-Server-and-Runner-CI/test/example_logs"
+
+receipe() {
+
+	shortened_commit_sha=$(get_shortened_commit_sha "$newrev")
+	#assert_equal "$shortened_commit_sha" "$expected_shortened_commit_sha"
+	echo "shortened_commit_sha=$shortened_commit_sha" >> "post_receive_log.txt"
+	
+	repopath_without_dot_git=$(remove_dot_git "$PWD")
+	echo "repopath_without_dot_git=$repopath_without_dot_git"
+	echo "repopath_without_dot_git=$repopath_without_dot_git" >> "post_receive_log.txt"
+	
+	repopath_to_artifacts=$(replace_filepath "$repopath_without_dot_git")
+	echo "repopath_to_artifacts=$repopath_to_artifacts"
+	echo "repopath_to_artifacts=$repopath_to_artifacts" >> "post_receive_log.txt"
+	
+	# TODO: assert folder repopath_to_artifacts exists. Else export log file
+	#assert_equal "$expected_path" "$repopath_to_artifacts"
+	
+	#filepath_list=$(find $repopath_to_artifacts -name "job.log")
+	#echo "filepath_list=$filepath_list"
+	#echo "filepath_list=$filepath_list" >> "post_receive_log.txt"
+	
+	#filepath=$(find_job_of_commit "$repopath_to_artifacts" "$shortened_commit_sha")
+	#filepath=$(find_job_of_commit "$filepath_list" "$shortened_commit_sha")
+	found_filepath=$(find_job_of_commit "$repopath_to_artifacts" "$shortened_commit_sha")
+	#assert_equal "$job_log_containing_path/234/job.log" "$filepath"
+	echo "found_filepath=$found_filepath" >> "post_receive_log.txt"
+	
+	build_status=$(get_build_status "$found_filepath")
+	#assert_equal "success" "$build_status"
+	echo "asserted build status"
+	echo "build_status=$build_status" >> "post_receive_log.txt"
+}
+
+remove_dot_git() {
+	local some_string=$1
+	without_dot_git=${some_string::-4}
+	echo "$without_dot_git"
+}
+
+
+#0. remove `.git` at end
+#1. replace
+#git-data/repositories/@hashed
+#2. With:
+#gitlab-rails/shared/artifacts
+replace_filepath() {
+	filepath=$1
+	step_one="${filepath/git-data/gitlab-rails}"
+	step_two="${step_one/repositories/shared}"
+	step_three="${step_two/@hashed/artifacts}"
+	echo "$step_three"
+}
+
+#/var/opt/gitlab/gitlab-rails/shared/artifacts/d4/73/d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35
+#3. Get first n characters of commit sha:
+get_shortened_commit_sha() {
+	commit=$1
+	shortened_commit=${commit::8}
+	echo "$shortened_commit"
+}
+
+#4. loop through job.log files
+find_job_of_commit() {
+	local search_path=$1
+	local searched_commit=$2
+	detecting_filepath=""
+	while [ "$detecting_filepath" == "" ]
+	do
+		filepath_list=$(find $search_path -name "job.log")
+		array=(${filepath_list//$'\n'/ })
+		echo "$(date -u)" >> "post_receive_log.txt"
+		detecting_filepath=$(get_filepath "$searched_commit" "${array[@]}")
+		echo "after GETFILEPATH, detecting_filepath=$detecting_filepath" >> "post_receive_log.txt"
+		sleep 10
+	done
+	echo "$detecting_filepath"
+}
+
+# loops through list of filepaths and checks if they contain a certain substring
+get_filepath() {
+	local searched_commit=$1
+	shift
+	file_list=("$@")
+	# loop through file list and store search_result_boolean
+	for looping_filepath in "${file_list[@]}";
+		do
+			substring="Checking out $searched_commit"
+			found_commit="$(file_contains_string "$substring" "$looping_filepath")"
+			echo "looping_filepath=$looping_filepath" >> "post_receive_log.txt"
+			if [[ "$found_commit" == "FOUND" ]]; then
+				echo "$looping_filepath"
+			fi
+      done
+}
+
+# checks if a file contains a certain substring
+# allows a string with spaces, hence allows a line
+file_contains_string() {
+	STRING=$1
+	REL_FILEPATH=$2
+	
+	if [[ ! -z $(grep "$STRING" "$REL_FILEPATH") ]]; then 
+		echo "FOUND"; 
+	else
+		echo "NOTFOUND";
+	fi
+}
+
+#7. Optional, find branch name.
+
+# Get Job build status
+get_build_status() {
+	local job_log_path=$1
+	status=""
+	while [ "$status" == "" ]
+	do
+		job_log_content="$(cat $job_log_path)"
+		if [[ "$job_log_content" == *"Job succeeded"* ]]; then
+			status="success"
+			touch "success.txt"
+		elif [[ "$job_log_content" == *"Job failed"* ]]; then
+			status="failed"
+			touch "failed.txt"
+		else
+			echo "NOTFOUND"
+			sleep 2
+		fi
+	done
+	echo "$status"
+}
+receipe

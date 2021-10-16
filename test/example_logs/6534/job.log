@@ -1,0 +1,9 @@
+ized empty Git repository in /home/gitlab-runner/builds/xdqz5HjR/0/root/repo_to_test_runner/.git/
+Created fresh repository.
+Checking out 2ce7a7cb as master...
+Skipping Git submodules setup
+Executing "step_script" stage of the job script
+01:03
+$ whoami
+gitlab-runner
+$ sudo apt-get

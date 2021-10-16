@@ -88,14 +88,14 @@ find_job_of_commit() {
 	local search_path=$1
 	local searched_commit=$2
 	detecting_filepath=""
-	while [ "$detecting_filepath" == "" ]
-	do
+	while [ "$detecting_filepath" == "" ]; do
 		filepath_list=$(find $search_path -name "job.log")
 		array=(${filepath_list//$'\n'/ })
 		echo "$(date -u)" >> "post_receive_log.txt"
 		detecting_filepath=$(get_filepath "$searched_commit" "${array[@]}")
 		echo "after GETFILEPATH, detecting_filepath=$detecting_filepath END" >> "post_receive_log.txt"
 		sleep 10
+		echo "DONE SLEEPING" >> "post_receive_log.txt"
 	done
 	echo "WHILECONDITION NOT SATISFIED" >> "post_receive_log.txt"
 	echo "$detecting_filepath"
@@ -107,16 +107,17 @@ get_filepath() {
 	shift
 	file_list=("$@")
 	# loop through file list and store search_result_boolean
-	for looping_filepath in "${file_list[@]}";
-		do
-			substring="Checking out $searched_commit"
-			found_commit="$(file_contains_string "$substring" "$looping_filepath")"
-			echo "toop_filepath=$looping_filepath" >> "post_receive_log.txt"
-			echo "substring=$substring END" >> "post_receive_log.txt"
-			if [[ "$found_commit" == "FOUND" ]]; then
-				echo "$looping_filepath"
-			fi
-      done
+	for looping_filepath in "${file_list[@]}"; do
+		substring="Checking out $searched_commit"
+		found_commit="$(file_contains_string "$substring" "$looping_filepath")"
+		echo "toop_filepath=$looping_filepath" >> "post_receive_log.txt"
+		echo "substring=$substring END" >> "post_receive_log.txt"
+		echo "found_commit=$found_commit END" >> "post_receive_log.txt"
+		if [[ "$found_commit" == "FOUND" ]]; then
+			echo "FOUND THE COMMIT FOR=$looping_filepath END" >> "post_receive_log.txt"
+			echo "$looping_filepath"
+		fi
+	done
 }
 
 # checks if a file contains a certain substring

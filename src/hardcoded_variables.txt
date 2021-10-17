@@ -28,3 +28,7 @@ GITLAB_PERSONAL_ACCESS_TOKEN_NAME=sometokenname
 # Run GitLab repository
 SOURCE_FOLDERNAME=repo_to_test_runner
 SOURCE_FOLDERPATH=src/$SOURCE_FOLDERNAME
+
+# Specify GitHub website settings.
+GITHUB_USERNAME=a-t-0
+GITHUB_STATUS_WEBSITE=website-build-statuses

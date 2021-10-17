@@ -20,6 +20,11 @@ echo "personal_access_token=$personal_access_token"
 echo "repo_name=$repo_name"
 echo "gitlab_username=$gitlab_username"
 
+# get the website repository
+git clone git@github.com:"$GITHUB_USERNAME"/"$GITHUB_STATUS_WEBSITE"
+
+
+
 ## get a list of the repositories
 #curl --header "PRIVATE-TOKEN: $TOKEN" "https://gitlab.com/api/v3/projects/?simple=yes&private=true&per_page=1000&page=1"
 ##repositories=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects")

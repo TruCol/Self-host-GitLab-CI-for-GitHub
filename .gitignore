@@ -1,8 +1,7 @@
 .gitmodules
-test/libs/bats
-test/libs/bats-assert
-test/libs/bats-files
-test/libs/bats-support
+test/libs/*
+success.txt
+
 
 # Don't sync logfiles
 *.out

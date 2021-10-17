@@ -33,8 +33,9 @@ readarray -t repo_arr <  <(echo "$repositories" | jq ".[].name")
 
 
 get_build_status_through_pipelines() {
-	branch_name=$1
-	branch_commit=$(echo "$2" | tr -d '"') # removes double quotes at start and end.
+	repository_name=$1
+	branch_name=$2
+	branch_commit=$(echo "$3" | tr -d '"') # removes double quotes at start and end.
 	
 	# curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/pipelines"
 	pipelines=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name/pipelines")
@@ -43,13 +44,17 @@ get_build_status_through_pipelines() {
 	job=$(echo $pipelines | jq -r 'map(select(.id == 46))')
 	branch=$(echo $job | jq ".[].ref")
 	status=$(echo $job | jq ".[].status")
+	read -p "repository_name=$repository_name"
 	read -p "job=$job"
 	read -p "branch=$branch"
 	read -p "status=$status"
 	
 	# Create repository folder if it does not exist yet
 	# Create branch folder in repository if it does not exist yet
+	mkdir -p "$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch"
+	
 	# Create build status icon
+	
 	
 }
 
@@ -74,7 +79,7 @@ for repo in "${repo_arr[@]}"; do
 		echo "branchname=${branch_names_arr[i]}, commit=${branch_commits_arr[i]}"
 
 		# get the data from the pipeline
-		get_build_status_through_pipelines "${branch_names_arr[i]}" "${branch_commits_arr[i]}"
+		get_build_status_through_pipelines "$simplified_repo" "${branch_names_arr[i]}" "${branch_commits_arr[i]}"
 	done
 done
 

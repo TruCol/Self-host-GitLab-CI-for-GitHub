@@ -45,20 +45,23 @@ get_build_status_through_pipelines() {
 	
 	
 	# curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/pipelines"
-	pipelines=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name/pipelines")
+	pipelines=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repository_name/pipelines")
 	
 	# get build status from pipelines
+	echo "branch_name=$branch_name"
 	echo "branch_commit=$branch_commit"
+	echo "pipelines=$pipelines"
 	#job=$(echo $pipelines | jq -r 'map(select(.id == 46))')#works
 	#job=$(echo $pipelines | jq -r 'map(select(.commit.id == 00c16a620847faae3a6b7b1dcc5d4d458f2c7986))')# works
 	#job=$(echo $pipelines | jq -r 'map(select(.commit.id == "00c16a620847faae3a6b7b1dcc5d4d458f2c7986"))')
 	#job=$(echo $pipelines | jq -r "map(select(.commit.id == "00c16a620847faae3a6b7b1dcc5d4d458f2c7986"))")
 	#job=$(echo $pipelines | jq -r 'map(select(.commit.id == '"00c16a620847faae3a6b7b1dcc5d4d458f2c7986"'))')
 	#job=$(echo $pipelines | jq -r 'map(select(.commit.id == "'"00c16a620847faae3a6b7b1dcc5d4d458f2c7986"'"))')# works
-	job=$(echo $pipelines | jq -r 'map(select(.commit.id == "'"$branch_commit"'"))')
+	#job=$(echo $pipelines | jq -r 'map(select(.commit.id == "'"$branch_commit"'"))')
+	job=$(echo $pipelines | jq -r 'map(select(.sha == "'"$branch_commit"'"))')
 	echo "job=$job"
 	#branch=$(echo $job | jq ".[].ref")
-	branch=$(echo "$(echo $job | jq ".[].ref")" | tr -d '"')
+	#branch=$(echo "$(echo $job | jq ".[].ref")" | tr -d '"')
 	#status=$(echo $job | jq ".[].status")
 	status=$(echo "$(echo $job | jq ".[].status")" | tr -d '"')
 	

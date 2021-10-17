@@ -135,6 +135,19 @@ curl --request POST --header "PRIVATE-TOKEN: $personal_access_token" "http://127
     --data "upload[http_method]=PUT" \
     --data-urlencode "upload[url]=http://github.com/a-t-0/sponsor_example.git"
 	#--data-urlencode "upload[url]=https://github.com/a-t-0/sponsor_example.git"
+	
+#curl --request PUT --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/1/export" \
+#    --data "upload[http_method]=PUT" \
+#    --data-urlencode "upload[url]=http://github.com/a-t-0/sponsor_example.git"
+	
+
+# Source: https://forum.gitlab.com/t/problems-with-triggering-pull-mirroring-proces-from-api/25867/2
+#curl -X PUT \
+#--url https://gitlab.com/api/v4/projects/<migrated-gitlab-repo-ID> \
+#--header 'Content-Type: application/json' \
+#--header 'Authorization: <gitlab-token>' \
+#--data '{"mirror": true, "import_url":"https://<gitlhub-user>:<github-token>@github.com/<org-name-id>/<repo- name>.git"}'
+
 
 ## per branch get a list of commits
 # Source:https://docs.gitlab.com/ee/api/commits.html

@@ -607,3 +607,19 @@ is_owner_of_dir() {
 	actual_result=$(lines_contain_string "$owner" "\${output}")
 	echo "$actual_result"
 }
+
+get_array() {
+	json=$1
+	identifier=$2
+	nr_of_elements=$(echo "$json" | jq 'length')
+	
+	readarray -t commit_array <  <(echo "$json" | jq ".[].$identifier")
+	# loop through elements
+	#for i in {0.."$nr_of_elements"}
+	#do
+	#	echo "Welcome $i times"
+	#	sleep 1
+	#done
+	#echo "$commit_array"
+	echo  "${commit_array[@]}"
+}

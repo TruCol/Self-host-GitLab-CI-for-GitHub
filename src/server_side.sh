@@ -10,6 +10,7 @@ source src/hardcoded_variables.txt
 source src/creds.txt
 source src/helper.sh
 yes | sudo apt install jq
+yes | sudo apt install xclip
 
 # load personal_access_token, gitlab username, repository name
 personal_access_token=$(echo $GITLAB_PERSONAL_ACCESS_TOKEN | tr -d '\r')
@@ -31,7 +32,7 @@ git clone git@github.com:"$GITHUB_USERNAME"/"$GITHUB_STATUS_WEBSITE"
 repositories=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
 readarray -t repo_arr <  <(echo "$repositories" | jq ".[].name")
 
-
+# export the build statusses to the build status website.
 get_build_status_through_pipelines() {
 	repository_name="$1"
 	branch_name=$(echo "$2" | tr -d '"') # removes double quotes at start and end.
@@ -46,10 +47,12 @@ get_build_status_through_pipelines() {
 	branch=$(echo "$(echo $job | jq ".[].ref")" | tr -d '"')
 	#status=$(echo $job | jq ".[].status")
 	status=$(echo "$(echo $job | jq ".[].status")" | tr -d '"')
-	read -p "repository_name=$repository_name"
-	read -p "job=$job"
-	read -p "branch=$branch"
-	read -p "status=$status"
+	
+	# print data
+	#read -p "repository_name=$repository_name"
+	#read -p "job=$job"
+	#read -p "branch=$branch"
+	#read -p "status=$status"
 	
 	# Create repository folder if it does not exist yet
 	# Create branch folder in repository if it does not exist yet
@@ -93,15 +96,27 @@ for repo in "${repo_arr[@]}"; do
 done
 
 
+# Generate ssh deployment keys.
+n | ssh-keygen -b 2048 -t rsa -f ~/.ssh/deploy_key -q -N ""
+# Activate ssh deploy keys
+
+# put ssh-key in deploy website
+xclip -sel clip < ~/.ssh/deploy_key.pub
+read -p "Add the key to github if you havent yet (It's copied, just ctrl+V in: https://github.com/""$GITHUB_USERNAME"/"$GITHUB_STATUS_WEBSITE""/settings/keys/new"
+
+# Push repo with deploy key
+
+
+
 
 ## per branch get a list of commits
 # Source:https://docs.gitlab.com/ee/api/commits.html
 # curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/commits"
-commits=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name/repository/commits")
-nr_of_commits=$(echo "$commits" | jq 'length')
-list_of_commits=$(echo "$commits" | jq '.[].id')
-#echo "list_of_commits=$list_of_commits"
-#echo "nr_of_commits=$nr_of_commits"
+# commits=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name/repository/commits")
+# nr_of_commits=$(echo "$commits" | jq 'length')
+# list_of_commits=$(echo "$commits" | jq '.[].id')
+# echo "list_of_commits=$list_of_commits"
+# echo "nr_of_commits=$nr_of_commits"
 
 ## per commit check the build status
 # Option I: check if it contains a gitlab yml file if it does, check if you can find its log file.

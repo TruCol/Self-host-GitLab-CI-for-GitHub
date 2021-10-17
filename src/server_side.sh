@@ -44,7 +44,7 @@ get_build_status_through_pipelines() {
 	branch_commit=$(echo "$3" | tr -d '"') # removes double quotes at start and end.
 	
 	
-	# curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/pipelines"
+	# curl --header "PRIVATE-TOKEN: <your_access_token>" "http://127.0.0.1/api/v4/projects/1/pipelines"
 	pipelines=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repository_name/pipelines")
 	
 	# get build status from pipelines
@@ -66,10 +66,10 @@ get_build_status_through_pipelines() {
 	status=$(echo "$(echo $job | jq ".[].status")" | tr -d '"')
 	
 	# print data
-	read -p "repository_name=$repository_name"
-	read -p "job=$job"
-	read -p "branch=$branch"
-	read -p "status=$status"
+	#read -p "repository_name=$repository_name"
+	#read -p "job=$job"
+	#read -p "branch=$branch"
+	#read -p "status=$status"
 	
 	# Create repository folder if it does not exist yet
 	# Create branch folder in repository if it does not exist yet
@@ -148,10 +148,31 @@ curl --request POST --header "PRIVATE-TOKEN: $personal_access_token" "http://127
 #--header 'Authorization: <gitlab-token>' \
 #--data '{"mirror": true, "import_url":"https://<gitlhub-user>:<github-token>@github.com/<org-name-id>/<repo- name>.git"}'
 
+# Source: https://stackoverflow.com/questions/69601327/import-git-repository-into-gitlab-using-api/69602373#69602373
+# Source: https://stackoverflow.com/questions/13902593/how-does-one-find-out-ones-own-repo-id/47223479
+echo "retry"
+curl --request POST \
+  --url "http://127.0.0.1/api/v4/import/github" \
+  --header "content-type: application/json" \
+  --header "PRIVATE-TOKEN: $personal_access_token" \
+  --data '{
+    "personal_access_token": "aBc123abC12aBc123abC12abC123+_A/c123",
+    "repo_id": "385243548",
+    "target_namespace": "HiveMinds",
+    "new_name": "NEW-NAME",
+    "github_hostname": "https://github.com"
+}'
+echo "retried,personal_access_token=$personal_access_token"
+#curl --request POST \
+#  --url "http://127.0.0.1/api/v4/import/github" \
+#  --header "content-type: application/json" \
+#  --header "PRIVATE-TOKEN: $personal_access_token" \
+#  --data '{ "path":"https://github.com/HiveMinds/tw-install", "name": "newrepo" }'
+#echo "RETRIED"
 
 ## per branch get a list of commits
 # Source:https://docs.gitlab.com/ee/api/commits.html
-# curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/commits"
+# curl --header "PRIVATE-TOKEN: <your_access_token>" "http://127.0.0.1/api/v4/projects/5/repository/commits"
 # commits=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name/repository/commits")
 # nr_of_commits=$(echo "$commits" | jq 'length')
 # list_of_commits=$(echo "$commits" | jq '.[].id')

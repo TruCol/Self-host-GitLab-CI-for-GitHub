@@ -3,3 +3,4 @@ gitlab_server_account=root
 gitlab_server_password=yoursecretpassword
 GITLAB_ROOT_EMAIL=root@someemailprovider.com
 GITLAB_PERSONAL_ACCESS_TOKEN=somelongpersonalaccesscode3
+GITHUB_PERSONAL_ACCESS_TOKEN=somegithubtoken

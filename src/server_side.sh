@@ -33,8 +33,8 @@ readarray -t repo_arr <  <(echo "$repositories" | jq ".[].name")
 
 
 get_build_status_through_pipelines() {
-	repository_name=$1
-	branch_name=$2
+	repository_name="$1"
+	branch_name=$(echo "$2" | tr -d '"') # removes double quotes at start and end.
 	branch_commit=$(echo "$3" | tr -d '"') # removes double quotes at start and end.
 	
 	# curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/pipelines"
@@ -42,8 +42,10 @@ get_build_status_through_pipelines() {
 	
 	# get build status from pipelines
 	job=$(echo $pipelines | jq -r 'map(select(.id == 46))')
-	branch=$(echo $job | jq ".[].ref")
-	status=$(echo $job | jq ".[].status")
+	#branch=$(echo $job | jq ".[].ref")
+	branch=$(echo "$(echo $job | jq ".[].ref")" | tr -d '"')
+	#status=$(echo $job | jq ".[].status")
+	status=$(echo "$(echo $job | jq ".[].status")" | tr -d '"')
 	read -p "repository_name=$repository_name"
 	read -p "job=$job"
 	read -p "branch=$branch"
@@ -54,8 +56,15 @@ get_build_status_through_pipelines() {
 	mkdir -p "$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch"
 	
 	# Create build status icon
-	
-	
+	if [  "$status" == "passed" ]; then
+		cp "src/svgs/passed.svg" "$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch"
+	elif [  "$status" == "failed" ]; then
+		cp "src/svgs/failed.svg" "$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch"
+	elif [  "$status" == "error" ]; then
+		cp "src/svgs/error.svg" "$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch"
+	elif [  "$status" == "unknown" ]; then
+		cp "src/svgs/unknown.svg" "$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch"
+	fi
 }
 
 ## per repository get a list of branches

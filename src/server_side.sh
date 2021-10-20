@@ -22,57 +22,41 @@ echo "repo_name=$repo_name"
 echo "gitlab_username=$gitlab_username"
 
 
-
-
-# get the website repository
+# Download the build-status-website repository.
 git clone git@github.com:"$GITHUB_USERNAME"/"$GITHUB_STATUS_WEBSITE"
 
-
-
-## get a list of the repositories
-#curl --header "PRIVATE-TOKEN: $TOKEN" "https://gitlab.com/api/v3/projects/?simple=yes&private=true&per_page=1000&page=1"
-##repositories=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects")
+# Get a list of the repositories in your own local GitLab server (that runs the GitLab runner CI).
 repositories=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
 readarray -t repo_arr <  <(echo "$repositories" | jq ".[].path")
-#echo "repositories=$repositories"
 echo "repo_arr =${repo_arr[@]}"
 
-# export the build statusses to the build status website.
-get_build_status_through_pipelines() {
+# TODO: filter to keep only  repositories of which GitHub wants the build status.
+
+# Get the GitLab build statusses and export them to the GitHub build status website.
+get_and_export_build_status_to_github_build_status_website_repo() {
 	repository_name="$1"
 	branch_name=$(echo "$2" | tr -d '"') # removes double quotes at start and end.
 	branch_commit=$(echo "$3" | tr -d '"') # removes double quotes at start and end.
-	
 	
 	# curl --header "PRIVATE-TOKEN: <your_access_token>" "http://127.0.0.1/api/v4/projects/1/pipelines"
 	pipelines=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repository_name/pipelines")
 	
 	# get build status from pipelines
-	echo "branch_name=$branch_name"
-	echo "branch_commit=$branch_commit"
-	echo "pipelines=$pipelines"
-	#job=$(echo $pipelines | jq -r 'map(select(.id == 46))')#works
-	#job=$(echo $pipelines | jq -r 'map(select(.commit.id == 00c16a620847faae3a6b7b1dcc5d4d458f2c7986))')# works
-	#job=$(echo $pipelines | jq -r 'map(select(.commit.id == "00c16a620847faae3a6b7b1dcc5d4d458f2c7986"))')
-	#job=$(echo $pipelines | jq -r "map(select(.commit.id == "00c16a620847faae3a6b7b1dcc5d4d458f2c7986"))")
-	#job=$(echo $pipelines | jq -r 'map(select(.commit.id == '"00c16a620847faae3a6b7b1dcc5d4d458f2c7986"'))')
-	#job=$(echo $pipelines | jq -r 'map(select(.commit.id == "'"00c16a620847faae3a6b7b1dcc5d4d458f2c7986"'"))')# works
-	#job=$(echo $pipelines | jq -r 'map(select(.commit.id == "'"$branch_commit"'"))')
 	job=$(echo $pipelines | jq -r 'map(select(.sha == "'"$branch_commit"'"))')
-	echo "job=$job"
-	#branch=$(echo $job | jq ".[].ref")
-	#branch=$(echo "$(echo $job | jq ".[].ref")" | tr -d '"')
-	#status=$(echo $job | jq ".[].status")
 	status=$(echo "$(echo $job | jq ".[].status")" | tr -d '"')
 	
 	# print data
+	echo "branch_name=$branch_name"
+	echo "branch_commit=$branch_commit"
+	echo "pipelines=$pipelines"
+	echo "job=$job"
 	#read -p "repository_name=$repository_name"
 	#read -p "job=$job"
 	#read -p "branch=$branch"
 	#read -p "status=$status"
 	
-	# Create repository folder if it does not exist yet
-	# Create branch folder in repository if it does not exist yet
+	# Create a folder of the repository on which a CI has been ran, inside the GitHub build status website repository, if it does not exist yet
+	# Also add a folder for the branch(es) of that GitLab CI repository, in that respective folder.
 	mkdir -p "$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch"
 	
 	# Create build status icon
@@ -87,48 +71,55 @@ get_build_status_through_pipelines() {
 	fi
 }
 
-## per repository get a list of branches
+# Export the GitLab build status of each *TODO: relevant* GitLab runner CI repository
+# to the GItHub build status website repository.
 for repo in "${repo_arr[@]}"; do
+	# Remove the double quotes from the repository.
 	simplified_repo=$(echo "$repo" | tr -d '"')
-	echo "simplified_repo=$simplified_repo"
-	#branches=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name/repository/branches")
-	#branches=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo/repository/branches")
-	branches=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$simplified_repo/repository/branches")
-	echo "branches=$branches"
+	#echo "simplified_repo=$simplified_repo"
 	
-	# Get pairs of branches and leading commits
+	# Get the branches of the GitLab CI resositories, and their latest commit.
+	branches=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$simplified_repo/repository/branches")
+	#echo "branches=$branches"
+	
+	# Get two parallel arrays of branches and their latest commits
 	readarray -t branch_names_arr <  <(echo "$branches" | jq ".[].name")
 	readarray -t branch_commits_arr <  <(echo "$branches" | jq ".[].commit.id")
 	#echo "branch_names_arr=${branch_names_arr[@]}"
 	#echo "branch_commits_arr=${branch_commits_arr[@]}"
 	
-	# loop through branches
+	# Loop through branches using a mutual index i.
 	for i in "${!branch_names_arr[@]}"; do
 	
-		# get latest commit of the branch.
-		#echo "branchname=${branch_names_arr[i]}, commit=${branch_commits_arr[i]}"
-
-		# get the data from the pipeline
-		get_build_status_through_pipelines "$simplified_repo" "${branch_names_arr[i]}" "${branch_commits_arr[i]}"
+		# Get the GitLab build statusses and export them to the GitHub build status website.
+		get_and_export_build_status_to_github_build_status_website_repo "$simplified_repo" "${branch_names_arr[i]}" "${branch_commits_arr[i]}"
 	done
 done
 
 
-# Generate ssh deployment keys.
-n | ssh-keygen -b 2048 -t rsa -f ~/.ssh/deploy_key -q -N ""
-# Activate ssh deploy keys
+## Export the GitLab build statusses in the GitHub build statusses website repository to GitHub
 
-# put ssh-key in deploy website
+# Generate ssh deployment keys. (The n prevents overwriting an existing ssh-key with a new one)
+n | ssh-keygen -b 2048 -t rsa -f ~/.ssh/deploy_key -q -N ""
+
+
+# put ssh-key in GitHub build statusses website repository
+# TODO: automate, instead of manual
 xclip -sel clip < ~/.ssh/deploy_key.pub
 read -p "Add the key to github if you havent yet (It's copied, just ctrl+V in: https://github.com/""$GITHUB_USERNAME"/"$GITHUB_STATUS_WEBSITE""/settings/keys/new"
+read -p "Now go to: https://github.com/settings/tokens/ and create a GitHub Token with repo read authorities."
+read -p "Now go to: http://127.0.0.1/import/github/status and click import 90 repositories!"
 
-# Push repo with deploy key
+# TODO: verify the deploy key works before proceeding.
+
+# Push GitHub build statusses website repository to GitHub.
 cd "$GITHUB_STATUS_WEBSITE" && git status
 git add *
 git commit -m "Updated build status."
 git push
 
 
+## TODO: move to separate shell script that mirrors the GitHub repositories.
 # Add repository mirrors:
 # Source: https://docs.gitlab.com/ee/api/remote_mirrors.html
 curl --request POST --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/1/export" \
@@ -156,11 +147,11 @@ curl --request POST \
   --header "content-type: application/json" \
   --header "PRIVATE-TOKEN: $personal_access_token" \
   --data '{
-    "personal_access_token": "aBc123abC12aBc123abC12abC123+_A/c123",
+    "personal_access_token": "$GITHUB_PERSONAL_ACCESS_TOKEN",
     "repo_id": "385243548",
-    "target_namespace": "HiveMinds",
-    "new_name": "NEW-NAME",
-    "github_hostname": "https://github.com"
+    "target_namespace": "root",
+    "new_name": "tw-install",
+    "github_hostname": "https://www.github.com"
 }'
 echo "retried,personal_access_token=$personal_access_token"
 #curl --request POST \

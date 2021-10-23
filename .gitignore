@@ -33,3 +33,6 @@ get-gitlab-runner-registration-token
 src/runner_registration_token.txt
 
 website-build-statuses
+
+# GitHub to GitLab mirrors
+src/mirrors/*

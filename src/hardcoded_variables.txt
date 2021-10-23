@@ -32,3 +32,6 @@ SOURCE_FOLDERPATH=src/$SOURCE_FOLDERNAME
 # Specify GitHub website settings.
 GITHUB_USERNAME=a-t-0
 GITHUB_STATUS_WEBSITE=website-build-statuses
+
+# Specify Mirror folder
+MIRROR_LOCATION=src/mirrors

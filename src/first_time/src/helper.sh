@@ -1,6 +1,4 @@
 #!/bin/bash
-source src/hardcoded_variables.txt
-source src/creds.txt
 
 # Determine architecture of the machine on which this service is ran.
 # Source: https://askubuntu.com/questions/189640/how-to-find-architecture-of-my-pc-and-ubuntu
@@ -570,13 +568,6 @@ sudo_file_exists() {
 		echo "NOTFOUND"
 	fi
 
-}
-
-create_dir() {
-	abs_dir=$1
-	if [ "$(dir_exists "$abs_dir")" == "NOTFOUND" ]; then
-		mkdir $abs_dir
-	fi
 }
 
 sudo_create_dir() {

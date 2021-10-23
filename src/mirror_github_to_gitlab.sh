@@ -2,6 +2,8 @@
 
 #./mirror_github_to_gitlab.sh "a-t-0" "testrepo" "filler_github" "root" "filler_gitlab"
 
+# Hardcoded data:
+echo "MIRROR_LOCATION=$MIRROR_LOCATION"
 # Get github username.
 github_username=$1
 echo "github_username=$github_username"
@@ -76,10 +78,9 @@ clone_github_repository() {
 	github_repository=$2
 	has_access=$3
 	if [ "$has_access"=="HASACCESS" ]; then
-		git clone git@github.com:"$github_username"/"$github_repository" "src/$MIRROR_LOCATION"
+		git clone git@github.com:"$github_username"/"$github_repository" "$MIRROR_LOCATION/$github_repository"
 	else
-		git clone git@github.com:"$github_username"/"$github_repository" "src/$MIRROR_LOCATION"
-		$(git clone https://github.com/"$github_username"/"$github_repository".git "src/$MIRROR_LOCATION")
+		$(git clone https://github.com/"$github_username"/"$github_repository".git "$MIRROR_LOCATION/$github_repository")
 		echo "Did not get ssh_access, downloaded using https, assumed it was a public repository."
 		# TODO: support asking for GitHub username and pw to allow cloning private repositories over HTTPS.
 		# TODO: support asking for GitHub personal access token to allow cloning private repositories over HTTPS.
@@ -88,18 +89,52 @@ clone_github_repository() {
 
 # Clone GitHub repository to folder src/mirroring/
 clone_github_repository "$github_username" "$github_repo" "$has_access"
-
 verify_github_repository_is_cloned "$github_repo"
 
 
+get_github_branches() {
+    local -n arr=$1             # use nameref for indirection
+	github_repository=$2
+	arr=() # innitialise array with branches
+	
+	# Parse branches from branch list response
+	while IFS= read -r line; do
+		
+		# Only parse remote branches.
+		if [ "${line:0:17}" == "  remotes/origin/" ]; then
+			
+			# Remove the substring that identifies a remote branch to get the actual branch name up to the first space.
+			# Assumes branch names can't contain spaces
+			branch=$(get_rhs_of_line_till_character "${line:17}" " ")
+			
+			# Filter out the HEAD branch duplicate, by filtering on a substring that indicates the duplicate.
+			if [ "${branch:0:10}" != "-> origin/" ]; then
+				
+				# Filter out git output artifacts of that do not start with a letter or number.
+				# Assumes branch names always start with a letter or number.
+				if grep '^[-0-9a-zA-Z]*$' <<<"${branch:0:1}" ;then 
+					
+					# Append the branch name to the array of branches
+					echo "branch=$branch"
+					arr+=("$branch")
+				fi			
+			fi
+		fi
+	# List branches and feed them into a line by line parser
+	done <<< $(cd "$MIRROR_LOCATION/$github_repository" && git branch --all)
+}
+
+
 # Make a list of the branches in the GitHub repository
+get_github_branches branches "$github_repo"      # call function to populate the array
+declare -p branches
 
 # Check if the mirror repository exists in GitLab
 # If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it. 
 
 
-# Loop through the GItHub repository branches.
-# If it does not yet exist, create it. 
+# Loop through the GitHub repository branches.
+# If the GitHub branch does not yet exist in the GitLab repository, create it. 
 
 # Get the latest GitHub branch commit.
 
@@ -107,6 +142,7 @@ verify_github_repository_is_cloned "$github_repo"
 
 # Check the commit in GitHub already exists in its GitLab mirror branch.
 # If not, copy the files from the GitHub branch into the GitLab branch and push the commit with the same sha.
+# TODO: write check to see if adding the files make a difference that can be committed.
 
 
 ############

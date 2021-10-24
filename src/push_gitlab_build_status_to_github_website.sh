@@ -33,7 +33,7 @@ clone_github_repository "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE" "$has_access
 # Get a list of the repositories in your own local GitLab server (that runs the GitLab runner CI).
 repositories=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
 readarray -t repo_arr <  <(echo "$repositories" | jq ".[].path")
-echo "repo_arr =${repo_arr[@]}"
+#echo "repo_arr =${repo_arr[@]}"
 
 # TODO: filter to keep only  repositories of which GitHub wants the build status.
 
@@ -70,8 +70,9 @@ get_and_export_build_status_to_github_build_status_website_repo() {
 # to the GItHub build status website repository.	
 
 # Get the branches of the GitLab CI resositories, and their latest commit.
+# TODO: switch server name
 branches=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$desired_repository/repository/branches")
-echo "branches=$branches"
+#echo "branches=$branches"
 
 # Get two parallel arrays of branches and their latest commits
 readarray -t branch_names_arr <  <(echo "$branches" | jq ".[].name")
@@ -92,9 +93,14 @@ done
 
 ## Export the GitLab build statusses in the GitHub build statusses website repository to GitHub
 # Push GitHub build statusses website repository to GitHub.
-# TODO: switch to common commit and push methods
+# Commit files to GitLab branch.
+commit_changes "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE"
 
-cd "$GITHUB_STATUS_WEBSITE" && git status
-git add *
-git commit -m "Updated build status."
-git push
+echo "before push"
+# Push committed files go GitLab.
+#push_changes "$GITHUB_STATUS_WEBSITE" "$GITHUB_USERNAME" "$personal_access_token" "github.com" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE/"
+push_to_github_repository "$GITHUB_USERNAME" "$has_access" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE/"
+echo "PUSHED"
+echo ""
+echo ""
+echo ""

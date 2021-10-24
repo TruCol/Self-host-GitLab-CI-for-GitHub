@@ -188,8 +188,15 @@ for missing_branch_in_gitlab in ${missing_branches_in_gitlab[@]}; do
 		# Checkout that branch in GitHub
 		checkout_branch "$missing_branch_in_gitlab" "GitHub" "$github_repo"
 		
+		#echo "test location=$MIRROR_LOCATION/GitLab/$github_repo/.gitlab-ci.yml"
+		#echo ""
+		#echo ""
+		#if [ "$missing_branch_in_gitlab" == "main" ]; then
+		#	echo "FOUND MAIN"
+		#	exit 124
+		#fi
 		# Check if the GitHub 	branch contains a .gitlab-ci.yml file.
-		if test -f "$MIRROR_LOCATION/GitLab/$github_repo/.gitlab-ci.yml"; then
+		if test -f "$MIRROR_LOCATION/GitHub/$github_repo/.gitlab-ci.yml"; then
 		
 			# Create new branch in GitLab
 			create_new_branch "$missing_branch_in_gitlab" "GitLab" "$github_repo"

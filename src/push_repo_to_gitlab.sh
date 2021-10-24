@@ -102,6 +102,23 @@ clone_github_repository() {
 	fi
 }
 
+push_to_github_repository() {
+	github_username=$1
+	has_access=$2
+	target_directory=$3
+	
+	if [ "$has_access"=="HASACCESS" ]; then
+		#git push git@github.com:"$github_username"/"$github_repository"
+		output=$(cd "$target_directory" && git push)
+	else
+		#$(cd "$target_directory" && git push https://github.com/"$github_username"/"$github_repository".git)
+		echo "Did not get ssh_access, downloaded using https, assumed it was a public repository."
+		# TODO: support asking for GitHub username and pw to allow cloning private repositories over HTTPS.
+		# TODO: support asking for GitHub personal access token to allow cloning private repositories over HTTPS.
+		exit 125
+	fi
+}
+
 commit_changes() {
 	target_directory=$1
 	#echo "$commit_changes"

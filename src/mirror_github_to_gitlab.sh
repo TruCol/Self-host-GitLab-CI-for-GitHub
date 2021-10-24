@@ -4,25 +4,29 @@
 
 # Hardcoded data:
 echo "MIRROR_LOCATION=$MIRROR_LOCATION"
-# Get github username.
+# Get GitHub username.
 github_username=$1
 echo "github_username=$github_username"
-# Get github repository name.
+# Get GitHub repository name.
 github_repo=$2
 echo "github_repo=$github_repo"
 # OPTIONAL: get GitHub personal access token or verify ssh access to support private repositories.
 github_personal_access_code=$3
 echo "github_personal_access_code=$github_personal_access_code"
-# Get gitlab username.
+# Get GitLab username.
 gitlab_username=$4
 echo "gitlab_username=$gitlab_username"
-# Get gitlab personal access token.
+# Get GitLab personal access token.
 gitlab_personal_access_goken=$4
 echo "gitlab_personal_access_goken=$gitlab_personal_access_goken"
+# Create GitLab mirror repository name.
+gitlab_repo="$github_repo"
+echo "gitlab_repo=$gitlab_repo"
 
 source src/helper.sh
 source src/hardcoded_variables.txt
 source src/get_gitlab_server_runner_token.sh
+source src/push_repo_to_gitlab.sh
 
 # Ensure mirrors directory is created.
 $(create_dir "$MIRROR_LOCATION")
@@ -35,7 +39,7 @@ activate_ssh_account() {
 	ssh-add ~/.ssh/"$git_username"
 }
 
-# Check ssh-access to github repo.
+# Check ssh-access to GitHub repo.
 check_ssh_access_to_repo() {
 	github_username=$1
 	github_repository=$2
@@ -129,8 +133,11 @@ get_github_branches() {
 get_github_branches branches "$github_repo"      # call function to populate the array
 declare -p branches
 
+
 # Check if the mirror repository exists in GitLab
-# If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it. 
+
+# If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
+create_repository "$gitlab_repo"
 
 
 # Loop through the GitHub repository branches.

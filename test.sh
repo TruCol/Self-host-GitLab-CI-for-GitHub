@@ -12,7 +12,7 @@
 ###./test/libs/bats/bin/bats test/test_create_personal_access_token.bats
 
 # Long tests (passing)
-###./test/libs/bats/bin/bats test/modular_test_runner.bats
+./test/libs/bats/bin/bats test/modular_test_runner.bats
 #./test/libs/bats/bin/bats test/test_runner_works.bats
 
 # Short tests (failing):
@@ -26,6 +26,6 @@
 
 
 # Set up post script
-./test/libs/bats/bin/bats test/test_post_receive.bats
+###./test/libs/bats/bin/bats test/test_post_receive.bats
 # Test example post-receive
-./test/libs/bats/bin/bats test/example_post-receive.bats
+###./test/libs/bats/bin/bats test/example_post-receive.bats

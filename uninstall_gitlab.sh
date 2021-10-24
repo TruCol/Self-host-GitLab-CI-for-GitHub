@@ -1,4 +1,4 @@
-server_soft_flag='false'
+server_preserve_flag='false'
 server_hard_flag='false'
 server_hard_yes_flag='false'
 runner_flag='false'
@@ -7,17 +7,16 @@ runner_flag='false'
 
 print_usage() {
   printf "\nUsage: write:"
-  printf "\n\n ./uninstall -s\n to do a soft uninstall of the GitLab server (preserves repositories etc.)."
+  printf "\n\n ./uninstall -p\n to do an uninstall of the GitLab server that Preserves repositories etc."
   printf "\n./uninstall -h\n to do a hard uninstallation and removal of the GitLab server (DELETES repositories, user accounts etc.)."
   printf "\n./uninstall -y\n to do a hard uninstallation and removal of the GitLab server without prompting for confirmation (DELETES repositories, user accounts etc.)."
   printf "\n./uninstall -r \n to uninstall the GitLab runners,"
-  printf "\n./uninstall -s -r \n to uninstall the GitLab server and runners.\n"
-  printf "you can also combine the separate arguments in different orders, e.g. -r -y -h etc.\n\n"
+  printf "you can also combine the separate arguments in different orders, e.g. -r -y etc.\n\n"
 }
 
 while getopts 'shyr' flag; do
   case "${flag}" in
-    s) server_soft_flag='true' ;;
+    p) server_preserve_flag='true' ;;
     h) server_hard_flag='true' ;;
     y) server_hard_yes_flag='true' ;;
     r) runner_flag='true' ;;
@@ -29,7 +28,7 @@ done
 # print the usage if no arguments are given
 [ $# -eq 0 ] && { print_usage; exit 1; }
 
-#echo "server_soft_flag=$server_soft_flag";
+#echo "server_preserve_flag=$server_preserve_flag";
 #echo "server_hard_flag=$server_hard_flag";
 #echo "server_hard_yes_flag=$server_hard_yes_flag";
 #echo "runner_flag=$runner_flag";
@@ -39,8 +38,8 @@ source src/uninstall_gitlab_runner.sh
 source src/hardcoded_variables.txt
 
 ## argument parsing logic:
-if [ "$server_hard_yes_flag" == "true" ] && [ "$server_soft_flag" == "true" ]; then
-	echo "ERROR, you chose to manually override the prompt for the soft uninstallation, but the soft uninstallation does not not prompt for confirmation."
+if [ "$server_hard_yes_flag" == "true" ] && [ "$server_preserve_flag" == "true" ]; then
+	echo "ERROR, you chose to manually override the prompt for the data preserving uninstallation, but the data preserving uninstallation does not not prompt for confirmation."
 	exit 1
 fi
 
@@ -49,7 +48,7 @@ if [ "$runner_flag" == "true" ]; then
 	uninstall_gitlab_runner
 fi
 
-if [ "$server_soft_flag" == "true" ]; then
+if [ "$server_preserve_flag" == "true" ]; then
 	uninstall_gitlab_runner
 fi
 

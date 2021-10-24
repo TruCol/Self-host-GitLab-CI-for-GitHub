@@ -76,35 +76,33 @@ delete_repository() {
 
 #source src/run_ci_job.sh && clone_repository
 clone_repository() {
-	repo_name=$(echo $SOURCE_FOLDERNAME | tr -d '\r')
-	gitlab_username=$(echo $gitlab_server_account | tr -d '\r')
-	gitlab_server_password=$(echo $gitlab_server_password | tr -d '\r')
+	repo_name=$1
+	gitlab_username=$2
+	gitlab_server_password=$3
+	gitlab_server=$4
+	target_directory=$5
 	
-	#sudo rm -r ../$repo_name
-	echo "/$gitlab_server_account=$gitlab_server_account"
-	echo "/$gitlab_server_password=$gitlab_server_password"
-	command="http://$gitlab_username:$gitlab_server_password@127.0.0.1/$gitlab_username/$repo_name.git"
-	echo "command=$command"
-	echo "SOURCE_FOLDERNAME=$SOURCE_FOLDERNAME"
-	output=$(cd .. && git clone http://$gitlab_username:$gitlab_server_password@127.0.0.1/$gitlab_username/$repo_name.git)
-	echo "output=$output"
+	# Clone the GitLab repository into the GitLab mirror storage location.
+	output=$(cd "$target_directory" && git clone http://$gitlab_username:$gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
 }
 
 commit_changes() {
-	output=$(cd ../$SOURCE_FOLDERNAME && git add *)
-	output=$(cd ../$SOURCE_FOLDERNAME && git add .gitignore)
-	output=$(cd ../$SOURCE_FOLDERNAME && git add .gitlab-ci.yml)
-	output=$(cd ../$SOURCE_FOLDERNAME && git commit -m "Uploaded files to trigger GitLab runner.")
+	target_directory=$1
+	#echo "$commit_changes"
+	output=$(cd "$target_directory" && git add *)
+	output=$(cd "$target_directory" && git add .)
+	output=$(cd "$target_directory" && git add -A)
+	output=$(cd "$target_directory" && git commit -m "Uploaded files to trigger GitLab runner.")
 }
 
 push_changes() {
-	repo_name=$(echo $SOURCE_FOLDERNAME | tr -d '\r')
-	gitlab_username=$(echo $gitlab_server_account | tr -d '\r')
-	gitlab_server_password=$(echo $gitlab_server_password | tr -d '\r')
-	command="http://$gitlab_username:$gitlab_server_password@127.0.0.1/$gitlab_username/$repo_name.git"
-	echo "command=$command"
-	echo "SOURCE_FOLDERNAME=$SOURCE_FOLDERNAME"
-	output=$(cd ../$SOURCE_FOLDERNAME && git push http://$gitlab_username:$gitlab_server_password@127.0.0.1/$gitlab_username/$repo_name.git)
+	repo_name=$1
+	gitlab_username=$2
+	gitlab_server_password=$3
+	gitlab_server=$4
+	target_directory=$5
+	
+	output=$(cd "$target_directory" && git push http://$gitlab_username:$gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
 	echo "output=$output"
 }
 

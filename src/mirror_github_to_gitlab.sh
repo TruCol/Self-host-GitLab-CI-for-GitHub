@@ -1,6 +1,12 @@
 #!/bin/bash
 
-#./mirror_github_to_gitlab.sh "a-t-0" "testrepo" "filler_github" "root" "filler_gitlab"
+#./mirror_github_to_gitlab.sh "a-t-0" "testrepo" "filler_github" "root"
+
+source src/helper.sh
+source src/hardcoded_variables.txt
+source src/creds.txt
+source src/get_gitlab_server_runner_token.sh
+source src/push_repo_to_gitlab.sh
 
 # Hardcoded data:
 echo "MIRROR_LOCATION=$MIRROR_LOCATION"
@@ -16,20 +22,19 @@ echo "github_personal_access_code=$github_personal_access_code"
 # Get GitLab username.
 gitlab_username=$4
 echo "gitlab_username=$gitlab_username"
-# Get GitLab personal access token.
-gitlab_personal_access_goken=$4
-echo "gitlab_personal_access_goken=$gitlab_personal_access_goken"
-# Create GitLab mirror repository name.
+# Get GitLab user password.
+gitlab_server_password=$(echo $gitlab_server_password | tr -d '\r')
+echo "gitlab_server_password=$gitlab_server_password"
+# Specify GitLab mirror repository name.
 gitlab_repo="$github_repo"
 echo "gitlab_repo=$gitlab_repo"
 
-source src/helper.sh
-source src/hardcoded_variables.txt
-source src/get_gitlab_server_runner_token.sh
-source src/push_repo_to_gitlab.sh
+
 
 # Ensure mirrors directory is created.
 $(create_dir "$MIRROR_LOCATION")
+$(create_dir "$MIRROR_LOCATION/GitHub")
+$(create_dir "$MIRROR_LOCATION/GitLab")
 #assert_equal "$(dir_exists "$MIRROR_LOCATION")" "FOUND" 
 
 # Activates/enables the ssh for 
@@ -70,9 +75,9 @@ echo "has_access$has_access"
 
 verify_github_repository_is_cloned() {
 	github_repository=$1
-	found_repo=$(dir_exists "$MIRROR_LOCATION/$github_repository")
+	found_repo=$(dir_exists "$MIRROR_LOCATION/GitHub/$github_repository")
 	if [ "$found_repo" == "NOTFOUND" ]; then
-		read -p "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/$github_repository"
+		read -p "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
 		exit 125
 	fi
 }
@@ -82,23 +87,24 @@ clone_github_repository() {
 	github_repository=$2
 	has_access=$3
 	if [ "$has_access"=="HASACCESS" ]; then
-		git clone git@github.com:"$github_username"/"$github_repository" "$MIRROR_LOCATION/$github_repository"
+		git clone git@github.com:"$github_username"/"$github_repository" "$MIRROR_LOCATION/GitHub/$github_repository"
 	else
-		$(git clone https://github.com/"$github_username"/"$github_repository".git "$MIRROR_LOCATION/$github_repository")
+		$(git clone https://github.com/"$github_username"/"$github_repository".git "$MIRROR_LOCATION/GitHub/$github_repository")
 		echo "Did not get ssh_access, downloaded using https, assumed it was a public repository."
 		# TODO: support asking for GitHub username and pw to allow cloning private repositories over HTTPS.
 		# TODO: support asking for GitHub personal access token to allow cloning private repositories over HTTPS.
 	fi
 }
 
-# Clone GitHub repository to folder src/mirroring/
+# Clone GitHub repository to folder src/mirror/GITHUB
 clone_github_repository "$github_username" "$github_repo" "$has_access"
 verify_github_repository_is_cloned "$github_repo"
 
 
 get_github_branches() {
     local -n arr=$1             # use nameref for indirection
-	github_repository=$2
+	company=$2
+	git_repository=$3
 	arr=() # innitialise array with branches
 	
 	# Parse branches from branch list response
@@ -125,30 +131,112 @@ get_github_branches() {
 			fi
 		fi
 	# List branches and feed them into a line by line parser
-	done <<< $(cd "$MIRROR_LOCATION/$github_repository" && git branch --all)
+	done <<< $(cd "$MIRROR_LOCATION/$company/$git_repository" && git branch --all)
 }
 
 
 # Make a list of the branches in the GitHub repository
-get_github_branches branches "$github_repo"      # call function to populate the array
-declare -p branches
+get_github_branches github_branches "GitHub" "$github_repo"      # call function to populate the array
+declare -p github_branches
 
 
-# Check if the mirror repository exists in GitLab
-
+# Check if the mirror repository exists in GitLab (Skipped)
 # If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
 create_repository "$gitlab_repo"
 
 
-# Loop through the GitHub repository branches.
-# If the GitHub branch does not yet exist in the GitLab repository, create it. 
+# Clone the GitLab repository from the GitLab server into the mirror directory
+clone_repository "$github_repo" "$gitlab_username" "$personal_access_token" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
 
-# Get the latest GitHub branch commit.
+# Get a list of GitLab repository branches
+get_github_branches gitlab_branches "GitLab" "$github_repo"      # call function to populate the array
+declare -p gitlab_branches
 
-# Get the latest GitLab mirror branch commit.
+# Get list of missing branches in GitLab
+missing_branches_in_gitlab=(`echo ${github_branches[@]} ${gitlab_branches[@]} | tr ' ' '\n' | sort | uniq -u `)
+echo "missing_branches_in_gitlab=$missing_branches_in_gitlab"
 
-# Check the commit in GitHub already exists in its GitLab mirror branch.
-# If not, copy the files from the GitHub branch into the GitLab branch and push the commit with the same sha.
+
+create_new_branch() {
+	branch_name=$1
+	company=$2
+	git_repository=$3
+	
+	# create_repo branch
+	output=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git checkout -b $branch_name)
+	
+	# TODO: assert the branch is created
+	
+	# echo output
+	echo "$output"
+}
+
+checkout_branch() {
+	branch_name=$1
+	company=$2
+	git_repository=$3
+	
+	# create_repo branch
+	output=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git checkout $branch_name)
+	
+	# TODO: assert the branch is created
+	
+	# echo output
+	echo "$output"
+}
+
+copy_files_from_github_to_gitlab_repo_branches() {
+	git_repository=$1
+	rsync -av --progress "$MIRROR_LOCATION/GitHub/$git_repository/" "$MIRROR_LOCATION/GitLab/$git_repository" --exclude .git
+}
+
+# Loop through the GitHub mirror repository branches and copy their content to GitLab if they are not yet in the GitLab repository.
+for missing_branch_in_gitlab in ${missing_branches_in_gitlab[@]}; do
+   
+   # check if the branch is contained in GitHub branch array (to filter the difference containing a branch that is (still) in GitLab but not in GitHub)
+   if [[ " ${github_branches[*]} " =~ " ${missing_branch_in_gitlab} " ]]; then
+		# whatever you want to do when array contains value
+		echo "missing_branch_in_gitlab=$missing_branch_in_gitlab"
+		
+		# Create new branch in GitLab
+		create_new_branch "$missing_branch_in_gitlab" "GitLab" "$github_repo"
+		
+		# Checkout that branch in GitHub
+		checkout_branch "$missing_branch_in_gitlab" "GitHub" "$github_repo"
+		
+		# Copy files from GitHub branch
+		copy_files_from_github_to_gitlab_repo_branches "$github_repo"
+		
+		# Commit files to GitLab branch.
+		commit_changes "$MIRROR_LOCATION/GitLab/$gitlab_repo"
+		
+		# Push committed files go GitLab.
+		push_changes "$github_repo" "$gitlab_username" "$personal_access_token" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
+		
+		# Trigger CI build (is done automatically if it contains a .gitlab-ci.yml file)
+		
+		# Export build status to GitHub build-status-website repository
+		
+		
+	fi
+
+done
+
+
+
+# If the GitHub branch does not yet exist in the GitLab mirror repository:
+	# Create the branch in the local GitLab mirror repository.
+	
+# Checkout that branch in the local GitHub mirror repository.
+# Get the latest GitHub mirror repository branch commit.
+# Get the latest GitLab mirror repository branch commit.
+# If the two commit sha's are not equal:
+	# Delete the files in the GitLab mirror repository branch
+	# Copy the files from the GitHub mirror repository into those of the GitLab repository.
+
+
+#SKIP Check the commit in GitHub already exists in its GitLab mirror branch.
+# SKIP If not, copy the files from the GitHub branch into the GitLab branch and push the commit with the same sha.
 # TODO: write check to see if adding the files make a difference that can be committed.
 
 

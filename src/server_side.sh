@@ -21,7 +21,6 @@ echo "personal_access_token=$personal_access_token"
 echo "repo_name=$repo_name"
 echo "gitlab_username=$gitlab_username"
 
-
 # Download the build-status-website repository.
 git clone git@github.com:"$GITHUB_USERNAME"/"$GITHUB_STATUS_WEBSITE"
 

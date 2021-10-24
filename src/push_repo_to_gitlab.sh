@@ -86,6 +86,22 @@ clone_repository() {
 	output=$(cd "$target_directory" && git clone http://$gitlab_username:$gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
 }
 
+clone_github_repository() {
+	github_username=$1
+	github_repository=$2
+	has_access=$3
+	target_directory=$4
+	
+	if [ "$has_access"=="HASACCESS" ]; then
+		git clone git@github.com:"$github_username"/"$github_repository" "$target_directory"
+	else
+		$(git clone https://github.com/"$github_username"/"$github_repository".git "$target_directory")
+		echo "Did not get ssh_access, downloaded using https, assumed it was a public repository."
+		# TODO: support asking for GitHub username and pw to allow cloning private repositories over HTTPS.
+		# TODO: support asking for GitHub personal access token to allow cloning private repositories over HTTPS.
+	fi
+}
+
 commit_changes() {
 	target_directory=$1
 	#echo "$commit_changes"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#./mirror_github_to_gitlab.sh "a-t-0" "testrepo" "filler_github" "root"
+#./mirror_github_to_gitlab.sh "a-t-0" "testrepo" "filler_github"
 
 source src/helper.sh
 source src/hardcoded_variables.txt
@@ -20,7 +20,7 @@ echo "github_repo=$github_repo"
 github_personal_access_code=$3
 echo "github_personal_access_code=$github_personal_access_code"
 # Get GitLab username.
-gitlab_username=$4
+gitlab_username=$(echo $gitlab_server_account | tr -d '\r')
 echo "gitlab_username=$gitlab_username"
 # Get GitLab user password.
 gitlab_server_password=$(echo $gitlab_server_password | tr -d '\r')
@@ -75,30 +75,17 @@ echo "has_access$has_access"
 
 verify_github_repository_is_cloned() {
 	github_repository=$1
-	found_repo=$(dir_exists "$MIRROR_LOCATION/GitHub/$github_repository")
+	target_directory=$2
+	found_repo=$(dir_exists "$target_directory")
 	if [ "$found_repo" == "NOTFOUND" ]; then
 		read -p "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
 		exit 125
 	fi
 }
 
-clone_github_repository() {
-	github_username=$1
-	github_repository=$2
-	has_access=$3
-	if [ "$has_access"=="HASACCESS" ]; then
-		git clone git@github.com:"$github_username"/"$github_repository" "$MIRROR_LOCATION/GitHub/$github_repository"
-	else
-		$(git clone https://github.com/"$github_username"/"$github_repository".git "$MIRROR_LOCATION/GitHub/$github_repository")
-		echo "Did not get ssh_access, downloaded using https, assumed it was a public repository."
-		# TODO: support asking for GitHub username and pw to allow cloning private repositories over HTTPS.
-		# TODO: support asking for GitHub personal access token to allow cloning private repositories over HTTPS.
-	fi
-}
-
 # Clone GitHub repository to folder src/mirror/GITHUB
-clone_github_repository "$github_username" "$github_repo" "$has_access"
-verify_github_repository_is_cloned "$github_repo"
+clone_github_repository "$github_username" "$github_repo" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo"
+verify_github_repository_is_cloned "$github_repo" "$MIRROR_LOCATION/GitHub/$github_repository"
 
 
 get_github_branches() {
@@ -198,11 +185,14 @@ for missing_branch_in_gitlab in ${missing_branches_in_gitlab[@]}; do
 		# whatever you want to do when array contains value
 		echo "missing_branch_in_gitlab=$missing_branch_in_gitlab"
 		
-		# Create new branch in GitLab
-		create_new_branch "$missing_branch_in_gitlab" "GitLab" "$github_repo"
-		
 		# Checkout that branch in GitHub
 		checkout_branch "$missing_branch_in_gitlab" "GitHub" "$github_repo"
+		
+		# Check if the GitHub 	branch contains a .gitlab-ci.yml file.
+		
+		
+		# Create new branch in GitLab
+		create_new_branch "$missing_branch_in_gitlab" "GitLab" "$github_repo"
 		
 		# Copy files from GitHub branch
 		copy_files_from_github_to_gitlab_repo_branches "$github_repo"
@@ -216,13 +206,12 @@ for missing_branch_in_gitlab in ${missing_branches_in_gitlab[@]}; do
 		# Trigger CI build (is done automatically if it contains a .gitlab-ci.yml file)
 		
 		# Export build status to GitHub build-status-website repository
-		
-		
+		src/./push_gitlab_build_status_to_github_website.sh "$github_username" "$github_repo" "$missing_branch_in_gitlab" "$has_access"
 	fi
 
 done
 
-
+echo "DONE"
 
 # If the GitHub branch does not yet exist in the GitLab mirror repository:
 	# Create the branch in the local GitLab mirror repository.

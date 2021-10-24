@@ -189,26 +189,26 @@ for missing_branch_in_gitlab in ${missing_branches_in_gitlab[@]}; do
 		checkout_branch "$missing_branch_in_gitlab" "GitHub" "$github_repo"
 		
 		# Check if the GitHub 	branch contains a .gitlab-ci.yml file.
+		if test -f "$MIRROR_LOCATION/GitLab/$github_repo/.gitlab-ci.yml"; then
 		
-		
-		# Create new branch in GitLab
-		create_new_branch "$missing_branch_in_gitlab" "GitLab" "$github_repo"
-		
-		# Copy files from GitHub branch
-		copy_files_from_github_to_gitlab_repo_branches "$github_repo"
-		
-		# Commit files to GitLab branch.
-		commit_changes "$MIRROR_LOCATION/GitLab/$gitlab_repo"
-		
-		# Push committed files go GitLab.
-		push_changes "$github_repo" "$gitlab_username" "$personal_access_token" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
-		
-		# Trigger CI build (is done automatically if it contains a .gitlab-ci.yml file)
-		
-		# Export build status to GitHub build-status-website repository
-		src/./push_gitlab_build_status_to_github_website.sh "$github_username" "$github_repo" "$missing_branch_in_gitlab" "$has_access"
+			# Create new branch in GitLab
+			create_new_branch "$missing_branch_in_gitlab" "GitLab" "$github_repo"
+			
+			# Copy files from GitHub branch
+			copy_files_from_github_to_gitlab_repo_branches "$github_repo"
+			
+			# Commit files to GitLab branch.
+			commit_changes "$MIRROR_LOCATION/GitLab/$gitlab_repo"
+			
+			# Push committed files go GitLab.
+			push_changes "$github_repo" "$gitlab_username" "$personal_access_token" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
+			
+			# Trigger CI build (is done automatically if it contains a .gitlab-ci.yml file)
+			
+			# Export build status to GitHub build-status-website repository
+			src/./push_gitlab_build_status_to_github_website.sh "$github_username" "$github_repo" "$missing_branch_in_gitlab" "$has_access"
+		fi
 	fi
-
 done
 
 echo "DONE"

@@ -52,17 +52,23 @@ get_and_export_build_status_to_github_build_status_website_repo() {
 		
 	# Create a folder of the repository on which a CI has been ran, inside the GitHub build status website repository, if it does not exist yet
 	# Also add a folder for the branch(es) of that GitLab CI repository, in that respective folder.
-	mkdir -p "$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch"
+	
+	mkdir -p "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch_name"
+	read -p "branch_name=$branch_name,status=$status"
 	
 	# Create build status icon
-	if [  "$status" == "passed" ]; then
-		cp "src/svgs/passed.svg" "$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch""/build_status.svg"
+	if [  "$status" == "pending" ] || [ "$status" == "running" ]; then
+		# start recursive loop if the status is pending
+		sleep 10
+		get_and_export_build_status_to_github_build_status_website_repo "$1" "$2" "$3"
+	elif [  "$status" == "passed" ]; then
+		cp "src/svgs/passed.svg" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch_name""/build_status.svg"
 	elif [  "$status" == "failed" ]; then
-		cp "src/svgs/failed.svg" "$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch""/build_status.svg"
+		cp "src/svgs/failed.svg" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch_name""/build_status.svg"
 	elif [  "$status" == "error" ]; then
-		cp "src/svgs/error.svg" "$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch""/build_status.svg"
+		cp "src/svgs/error.svg" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch_name""/build_status.svg"
 	elif [  "$status" == "unknown" ]; then
-		cp "src/svgs/unknown.svg" "$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch""/build_status.svg"
+		cp "src/svgs/unknown.svg" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch_name""/build_status.svg"
 	fi
 }
 
@@ -82,9 +88,9 @@ readarray -t branch_commits_arr <  <(echo "$branches" | jq ".[].commit.id")
 
 # Loop through branches using a mutual index i.
 for i in "${!branch_names_arr[@]}"; do
-
+	
 	# Only export the desired branch build status
-	if [  "${branch_names_arr[i]}" == "$desired_branch" ]; then
+	if [  "${branch_names_arr[i]}" == '"'"$desired_branch"'"' ]; then
 		# Get the GitLab build statusses and export them to the GitHub build status website.
 		get_and_export_build_status_to_github_build_status_website_repo "$desired_repository" "${branch_names_arr[i]}" "${branch_commits_arr[i]}"
 	fi

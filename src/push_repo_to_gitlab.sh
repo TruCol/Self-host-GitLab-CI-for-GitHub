@@ -136,7 +136,6 @@ push_changes() {
 	target_directory=$5
 	
 	output=$(cd "$target_directory" && git push http://$gitlab_username:$gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
-	echo "output=$output"
 }
 
 # source src/run_ci_job.sh && export_repo

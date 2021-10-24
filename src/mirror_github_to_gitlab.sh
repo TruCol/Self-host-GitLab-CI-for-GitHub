@@ -25,6 +25,9 @@ echo "gitlab_username=$gitlab_username"
 # Get GitLab user password.
 gitlab_server_password=$(echo $gitlab_server_password | tr -d '\r')
 echo "gitlab_server_password=$gitlab_server_password"
+# Get GitLab personal access token from hardcoded file.
+gitlab_personal_access_token=$(echo $GITLAB_PERSONAL_ACCESS_TOKEN | tr -d '\r')
+echo "gitlab_personal_access_token=$gitlab_personal_access_token"
 # Specify GitLab mirror repository name.
 gitlab_repo="$github_repo"
 echo "gitlab_repo=$gitlab_repo"
@@ -133,7 +136,7 @@ create_repository "$gitlab_repo"
 
 
 # Clone the GitLab repository from the GitLab server into the mirror directory
-clone_repository "$github_repo" "$gitlab_username" "$personal_access_token" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
+clone_repository "$github_repo" "$gitlab_username" "$gitlab_server_password" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
 
 # Get a list of GitLab repository branches
 get_github_branches gitlab_branches "GitLab" "$github_repo"      # call function to populate the array
@@ -208,7 +211,13 @@ for missing_branch_in_gitlab in ${missing_branches_in_gitlab[@]}; do
 			commit_changes "$MIRROR_LOCATION/GitLab/$gitlab_repo"
 			
 			# Push committed files go GitLab.
-			push_changes "$github_repo" "$gitlab_username" "$personal_access_token" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
+			#git push --set-upstream origin main
+			push_changes "$github_repo" "$gitlab_username" "$gitlab_personal_access_token" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/$gitlab_repo"
+			
+			#if [ "$missing_branch_in_gitlab" == "main" ]; then
+			#	echo "FOUND MAIN,, committed and pushed changes"
+			#	exit 124
+			#fi
 			
 			# Trigger CI build (is done automatically if it contains a .gitlab-ci.yml file)
 			

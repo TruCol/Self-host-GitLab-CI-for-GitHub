@@ -90,18 +90,22 @@ verify_github_repository_is_cloned() {
 clone_github_repository "$github_username" "$github_repo" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo"
 verify_github_repository_is_cloned "$github_repo" "$MIRROR_LOCATION/GitHub/$github_repository"
 
-
-get_github_branches() {
+get_git_branches() {
     local -n arr=$1             # use nameref for indirection
 	company=$2
 	git_repository=$3
 	arr=() # innitialise array with branches
 	
+	output=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git branch --all)
+	
 	# Parse branches from branch list response
 	while IFS= read -r line; do
-		
+		number_of_lines=$(echo "$output" | wc -l)
+		if [ "$number_of_lines" -eq 1 ]; then
+			echo "number_of_lines=$number_of_lines"
+			arr+=("${line:2}")
 		# Only parse remote branches.
-		if [ "${line:0:17}" == "  remotes/origin/" ]; then
+		elif [ "${line:0:17}" == "  remotes/origin/" ]; then
 			
 			# Remove the substring that identifies a remote branch to get the actual branch name up to the first space.
 			# Assumes branch names can't contain spaces
@@ -115,18 +119,18 @@ get_github_branches() {
 				if grep '^[-0-9a-zA-Z]*$' <<<"${branch:0:1}" ;then 
 					
 					# Append the branch name to the array of branches
-					echo "branch=$branch"
+					#echo "branch=$branch"
 					arr+=("$branch")
 				fi			
 			fi
 		fi
 	# List branches and feed them into a line by line parser
-	done <<< $(cd "$MIRROR_LOCATION/$company/$git_repository" && git branch --all)
+	done <<< "$output"
 }
 
 
 # Make a list of the branches in the GitHub repository
-get_github_branches github_branches "GitHub" "$github_repo"      # call function to populate the array
+get_git_branches github_branches "GitHub" "$github_repo"      # call function to populate the array
 declare -p github_branches
 
 
@@ -139,13 +143,13 @@ create_repository "$gitlab_repo"
 clone_repository "$github_repo" "$gitlab_username" "$gitlab_server_password" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
 
 # Get a list of GitLab repository branches
-get_github_branches gitlab_branches "GitLab" "$github_repo"      # call function to populate the array
+get_git_branches gitlab_branches "GitLab" "$github_repo"      # call function to populate the array
+#get_github_branches gitlab_branches "GitLab" "$github_repo"      # call function to populate the array
 declare -p gitlab_branches
 
 # Get list of missing branches in GitLab
 missing_branches_in_gitlab=(`echo ${github_branches[@]} ${gitlab_branches[@]} | tr ' ' '\n' | sort | uniq -u `)
-echo "missing_branches_in_gitlab=$missing_branches_in_gitlab"
-
+echo "missing_branches_in_gitlab=${missing_branches_in_gitlab[@]}"
 
 create_new_branch() {
 	branch_name=$1
@@ -180,6 +184,49 @@ copy_files_from_github_to_gitlab_repo_branches() {
 	rsync -av --progress "$MIRROR_LOCATION/GitHub/$git_repository/" "$MIRROR_LOCATION/GitLab/$git_repository" --exclude .git
 }
 
+# Loop through the GitHub mirror repository branches that are already in GitLab
+for github_branch in ${github_branches[@]}; do
+	
+	# check if the branch is contained in GitHub branch array (to filter the difference containing a branch that is (still) in GitLab but not in GitHub)
+	if [[ " ${gitlab_branches[*]} " =~ " ${github_branch} " ]]; then
+		# whatever you want to do when array contains value
+		echo "github_branch=$github_branch"
+		
+		# Checkout that branch in the local GitHub mirror repository.
+		checkout_branch "$github_branch" "GitHub" "$github_repo"
+		
+		# Check if the GitHub 	branch contains a .gitlab-ci.yml file.
+		if test -f "$MIRROR_LOCATION/GitHub/$github_repo/.gitlab-ci.yml"; then
+			
+			# Get the latest GitLab mirror repository branch commit.
+			gitlab_commit_name=$(cd "$MIRROR_LOCATION/GitHub/$git_repository" && git rev-parse HEAD)
+			echo "gitlab_commit_name=$gitlab_commit_name"
+			
+			# Get the latest GitLab mirror repository branch commit.
+			# TODO SERVER
+			gitlab_commit_name=$(get_commit_of_branch "$github_branch" "$gitlab_repo" "$gitlab_username" "$gitlab_personal_access_token")
+			echo "gitlab_commit_name=$gitlab_commit_name"
+			
+			# Checkout that branch in the local GitLab mirror repository.
+			checkout_branch "$github_branch" "GitLab" "$github_repo"
+			
+			exit
+			# If the two commit sha's are not equal:
+			if [ "$gitlab_commit_name" != "$gitlab_commit_name" ]; then
+				# Delete the files in the GitLab mirror repository branch
+				# Copy the files from the GitHub mirror repository into those of the GitLab repository.
+			fi
+		fi
+   fi
+done
+exit
+
+
+#SKIP Check the commit in GitHub already exists in its GitLab mirror branch.
+# SKIP If not, copy the files from the GitHub branch into the GitLab branch and push the commit with the same sha.
+# TODO: write check to see if adding the files make a difference that can be committed.
+
+
 # Loop through the GitHub mirror repository branches and copy their content to GitLab if they are not yet in the GitLab repository.
 for missing_branch_in_gitlab in ${missing_branches_in_gitlab[@]}; do
    
@@ -188,16 +235,9 @@ for missing_branch_in_gitlab in ${missing_branches_in_gitlab[@]}; do
 		# whatever you want to do when array contains value
 		echo "missing_branch_in_gitlab=$missing_branch_in_gitlab"
 		
-		# Checkout that branch in GitHub
+		# Checkout that branch in the local GitHub mirror repository.
 		checkout_branch "$missing_branch_in_gitlab" "GitHub" "$github_repo"
 		
-		#echo "test location=$MIRROR_LOCATION/GitLab/$github_repo/.gitlab-ci.yml"
-		#echo ""
-		#echo ""
-		#if [ "$missing_branch_in_gitlab" == "main" ]; then
-		#	echo "FOUND MAIN"
-		#	exit 124
-		#fi
 		# Check if the GitHub 	branch contains a .gitlab-ci.yml file.
 		if test -f "$MIRROR_LOCATION/GitHub/$github_repo/.gitlab-ci.yml"; then
 		
@@ -213,12 +253,7 @@ for missing_branch_in_gitlab in ${missing_branches_in_gitlab[@]}; do
 			# Push committed files go GitLab.
 			#git push --set-upstream origin main
 			push_changes "$github_repo" "$gitlab_username" "$gitlab_personal_access_token" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/$gitlab_repo"
-			
-			#if [ "$missing_branch_in_gitlab" == "main" ]; then
-			#	echo "FOUND MAIN,, committed and pushed changes"
-			#	exit 124
-			#fi
-			
+				
 			# Trigger CI build (is done automatically if it contains a .gitlab-ci.yml file)
 			
 			# Export build status to GitHub build-status-website repository
@@ -228,26 +263,3 @@ for missing_branch_in_gitlab in ${missing_branches_in_gitlab[@]}; do
 done
 
 echo "DONE"
-
-# If the GitHub branch does not yet exist in the GitLab mirror repository:
-	# Create the branch in the local GitLab mirror repository.
-	
-# Checkout that branch in the local GitHub mirror repository.
-# Get the latest GitHub mirror repository branch commit.
-# Get the latest GitLab mirror repository branch commit.
-# If the two commit sha's are not equal:
-	# Delete the files in the GitLab mirror repository branch
-	# Copy the files from the GitHub mirror repository into those of the GitLab repository.
-
-
-#SKIP Check the commit in GitHub already exists in its GitLab mirror branch.
-# SKIP If not, copy the files from the GitHub branch into the GitLab branch and push the commit with the same sha.
-# TODO: write check to see if adding the files make a difference that can be committed.
-
-
-############
-# Run the GitLab CI on that commit of that branch.
-
-# Wait until the Gitlab runner CI is finished for that commit.
-
-# Once the GitLab runner CI is finished for that commit, push the build status to the build status website.

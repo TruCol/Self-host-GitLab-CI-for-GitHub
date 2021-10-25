@@ -96,13 +96,11 @@ for i in "${!branch_names_arr[@]}"; do
 	fi
 done
 
-
 ## Export the GitLab build statusses in the GitHub build statusses website repository to GitHub
 # Push GitHub build statusses website repository to GitHub.
 # Commit files to GitLab branch.
 commit_changes "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE"
 
-echo "before push"
 # Push committed files go GitLab.
 #push_changes "$GITHUB_STATUS_WEBSITE" "$GITHUB_USERNAME" "$personal_access_token" "github.com" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE/"
 push_to_github_repository "$GITHUB_USERNAME" "$has_access" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE/"

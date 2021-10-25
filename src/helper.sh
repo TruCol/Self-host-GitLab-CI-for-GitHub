@@ -630,3 +630,31 @@ get_array() {
 	#echo "$commit_array"
 	echo  "${commit_array[@]}"
 }
+
+# TODO: remove above 20 lines with this fucntion
+get_commit_of_branch() {
+	desired_branch=$1
+	repository_name=$2
+	gitlab_username=$3
+	personal_access_token=$4
+	
+	# Get the branches of the GitLab CI resositories, and their latest commit.
+	# TODO: switch server name
+	branches=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repository_name/repository/branches")
+	
+	# Get two parallel arrays of branches and their latest commits
+	readarray -t branch_names_arr <  <(echo "$branches" | jq ".[].name")
+	readarray -t branch_commits_arr <  <(echo "$branches" | jq ".[].commit.id")
+	#echo "branch_names_arr=${branch_names_arr[@]}"
+	#echo "branch_commits_arr=${branch_commits_arr[@]}"
+
+	# Loop through branches using a mutual index i.
+	for i in "${!branch_names_arr[@]}"; do
+	
+		# Only export the desired branch build status
+		if [  "${branch_names_arr[i]}" == '"'"$desired_branch"'"' ]; then
+			# Get the GitLab build statusses and export them to the GitHub build status website.
+			echo "${branch_commits_arr[i]}"
+		fi
+	done
+}

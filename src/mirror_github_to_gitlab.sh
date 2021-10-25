@@ -210,11 +210,20 @@ for github_branch in ${github_branches[@]}; do
 			# Checkout that branch in the local GitLab mirror repository.
 			checkout_branch "$github_branch" "GitLab" "$github_repo"
 			
-			exit
 			# If the two commit sha's are not equal:
-			if [ "$gitlab_commit_name" != "$gitlab_commit_name" ]; then
+			if [ "$github_commit_name" != "$gitlab_commit_name" ]; then
 				# Delete the files in the GitLab mirror repository branch
+				#rm -r "$MIRROR_LOCATION/GitLab/$git_repository" !"$MIRROR_LOCATION/GitLab/$git_repository/.git"
+				cd "$MIRROR_LOCATION/GitLab/$git_repository" && find . ! -name '.git' -type f -exec rm -f {} +
+				#cd "$MIRROR_LOCATION/GitLab/$git_repository" && find . ! -name .git -type f -exec rm -f {} +
+				#cd "$MIRROR_LOCATION/GitLab/$git_repository" && ls | grep -v .git | parallel rm
+				#cd "$MIRROR_LOCATION/GitLab/$git_repository" && { rm -rf *; tar -x; } <<< $(tar -c ".git")
+				echo "browse into=$MIRROR_LOCATION/GitLab/$git_repository"
+
 				# Copy the files from the GitHub mirror repository into those of the GitLab repository.
+				
+				
+				exit
 			fi
 		fi
    fi

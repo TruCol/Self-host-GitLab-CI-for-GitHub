@@ -1,0 +1,13 @@
+
+Getting source from Git repository
+00:02
+Fetching changes with git depth set to 50...
+Initialized empty Git repository in /home/gitlab-runner/builds/Jj8LeMsG/0/root/repo_to_test_runner/.git/
+Created fresh repository.
+Checking out 95asdfasdf14d16a as master...
+Skipping Git submodules setup
+Executing "step_script" stage of the job script
+01:06
+$ whoami
+gitlab-runner
+$ sudo apt-get install python

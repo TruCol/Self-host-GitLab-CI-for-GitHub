@@ -38,7 +38,7 @@ setup() {
 	fi
 	
 	# Uninstall GitLab runner
-	uninstall_gitlab_runner
+	#uninstall_gitlab_runner
 }
 
 

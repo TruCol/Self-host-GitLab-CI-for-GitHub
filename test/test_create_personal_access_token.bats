@@ -4,6 +4,7 @@ load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 
 
+source src/create_personal_access_token.sh
 source src/helper.sh
 source test/helper.sh
 source src/hardcoded_variables.txt
@@ -20,4 +21,18 @@ source test/hardcoded_testdata.txt
 	EXPECTED_OUTPUT="second line"
 		
 	assert_equal "$line" "$EXPECTED_OUTPUT"
+}
+
+ 
+@test "Checking decision logic." {
+	output=$(gitlab_personal_access_token_exists "Filler")
+	EXPECTED_OUTPUT="FOUND"
+	assert_equal "$output" "$EXPECTED_OUTPUT"
+}
+
+
+@test "Checking list of existing personal-access-tokens." {
+	output=$(get_personal_access_token_list "Filler")
+	echo "output=$output"
+	assert_equal "$(lines_contain_string "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME" "\${output}")" "FOUND"
 }

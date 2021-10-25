@@ -1,0 +1,6 @@
+gitlab_server_account=root
+# notice the password is currently hardcoded in src/install_and_boot_gitlab_server.sh
+gitlab_server_password=yoursecretpassword
+GITLAB_ROOT_EMAIL=root@someemailprovider.com
+GITLAB_PERSONAL_ACCESS_TOKEN=somelongpersonalaccesscode3
+GITHUB_PERSONAL_ACCESS_TOKEN=somegithubtoken

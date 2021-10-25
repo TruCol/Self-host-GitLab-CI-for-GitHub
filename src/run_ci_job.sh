@@ -28,6 +28,7 @@ create_and_run_ci_job() {
 	push_changes
 }
 
+# TODO: remove and use its duplicate in push_repo_to_gitlab.sh
 commit_changes() {
 	output=$(cd ../$SOURCE_FOLDERNAME && git add *)
 	output=$(cd ../$SOURCE_FOLDERNAME && git add .gitignore)
@@ -35,10 +36,14 @@ commit_changes() {
 	output=$(cd ../$SOURCE_FOLDERNAME && git commit -m "Uploaded files to trigger GitLab runner.")
 }
 
+# TODO: remove and use its duplicate in push_repo_to_gitlab.sh
 push_changes() {
 	repo_name=$(echo $SOURCE_FOLDERNAME | tr -d '\r')
 	gitlab_username=$(echo $gitlab_server_account | tr -d '\r')
 	gitlab_server_password=$(echo $gitlab_server_password | tr -d '\r')
+	command="http://$gitlab_username:$gitlab_server_password@127.0.0.1/$gitlab_username/$repo_name.git"
+	echo "command=$command"
+	echo "SOURCE_FOLDERNAME=$SOURCE_FOLDERNAME"
 	output=$(cd ../$SOURCE_FOLDERNAME && git push http://$gitlab_username:$gitlab_server_password@127.0.0.1/$gitlab_username/$repo_name.git)
 	echo "output=$output"
 }
@@ -67,7 +72,7 @@ export_repo() {
 	
 }
 
-
+# TODO: remove and use its duplicate in push_repo_to_gitlab.sh
 create_repository() {
 #source src/run_ci_job.sh && create_repository
 	
@@ -76,19 +81,23 @@ create_repository() {
 	
 	# Create repo named foobar
 	repo_name=$SOURCE_FOLDERNAME
+	
+	command="curl -H Content-Type:application/json http://127.0.0.1/api/v4/projects?private_token=""$personal_access_token -d ""{ \"name\": \"""$repo_name""\" }"
+	echo "create_repo_command=$command"
 	{ # try
 		output=$(curl -H "Content-Type:application/json" http://127.0.0.1/api/v4/projects?private_token=$personal_access_token -d "{ \"name\": \"$repo_name\" }")
 		echo "output=$output"
 		#save your output
 		true
 	} || { # catch
-		# save log for exception 
+		# save log for exception
 		true
 	}
 	
 }
 
 #source src/run_ci_job.sh && delete_repository
+# TODO: remove and use its duplicate in push_repo_to_gitlab.sh
 delete_repository() {
 	# load personal_access_token
 	personal_access_token=$(echo $GITLAB_PERSONAL_ACCESS_TOKEN | tr -d '\r')
@@ -114,14 +123,18 @@ delete_repository() {
 }
 
 #source src/run_ci_job.sh && clone_repository
+# TODO: remove and use its duplicate in push_repo_to_gitlab.sh
 clone_repository() {
 	repo_name=$(echo $SOURCE_FOLDERNAME | tr -d '\r')
 	gitlab_username=$(echo $gitlab_server_account | tr -d '\r')
 	gitlab_server_password=$(echo $gitlab_server_password | tr -d '\r')
 	
 	#sudo rm -r ../$repo_name
-	#echo "/$gitlab_server_account=$gitlab_server_account"
-	#echo "/$gitlab_server_password=$gitlab_server_password"
+	echo "/$gitlab_server_account=$gitlab_server_account"
+	echo "/$gitlab_server_password=$gitlab_server_password"
+	command="http://$gitlab_username:$gitlab_server_password@127.0.0.1/$gitlab_username/$repo_name.git"
+	echo "command=$command"
+	echo "SOURCE_FOLDERNAME=$SOURCE_FOLDERNAME"
 	output=$(cd .. && git clone http://$gitlab_username:$gitlab_server_password@127.0.0.1/$gitlab_username/$repo_name.git)
 	echo "output=$output"
 }

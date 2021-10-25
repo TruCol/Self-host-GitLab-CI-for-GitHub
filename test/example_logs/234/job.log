@@ -1,0 +1,77 @@
+Running with gitlab-runner 14.1.0 (8925d9a0)
+  on trucolrunner Jj8LeMsG
+Preparing the "shell" executor
+00:00
+Using Shell executor...
+Preparing environment
+00:00
+Running on name-Inspiron-3543...
+Getting source from Git repository
+00:02
+Fetching changes with git depth set to 50...
+Initialized empty Git repository in /home/gitlab-runner/builds/Jj8LeMsG/0/root/repo_to_test_runner/.git/
+Created fresh repository.
+Checking out 9514d16a as master...
+Skipping Git submodules setup
+Executing "step_script" stage of the job script
+01:06
+$ whoami
+gitlab-runner
+$ sudo apt-get install python
+Reading package lists...
+Building dependency tree...
+Reading state information...
+python-is-python2 is already the newest version (2.7.17-4).
+0 upgraded, 0 newly installed, 0 to remove and 23 not upgraded.
+$ sudo apt-get update --fix-missing
+Hit:1 http://fr.archive.ubuntu.com/ubuntu focal InRelease
+Hit:2 http://fr.archive.ubuntu.com/ubuntu focal-updates InRelease
+Hit:3 http://ppa.launchpad.net/gezakovacs/ppa/ubuntu focal InRelease
+Hit:4 http://fr.archive.ubuntu.com/ubuntu focal-backports InRelease
+Hit:5 http://ppa.launchpad.net/jtaylor/keepass/ubuntu focal InRelease
+Hit:6 https://updates.signal.org/desktop/apt xenial InRelease
+Hit:7 https://swupdate.openvpn.net/community/openvpn3/repos focal InRelease
+Hit:8 https://brave-browser-apt-release.s3.brave.com stable InRelease
+Get:9 http://security.ubuntu.com/ubuntu focal-security InRelease [114 kB]
+Get:10 http://security.ubuntu.com/ubuntu focal-security/main amd64 DEP-11 Metadata [29,0 kB]
+Get:11 http://security.ubuntu.com/ubuntu focal-security/universe amd64 DEP-11 Metadata [62,5 kB]
+Get:12 http://security.ubuntu.com/ubuntu focal-security/multiverse amd64 DEP-11 Metadata [2 464 B]
+Hit:13 https://repo.nordvpn.com//deb/nordvpn/debian stable InRelease
+Fetched 208 kB in 2s (83,9 kB/s)
+Reading package lists...
+$ wget -q https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh; bash miniconda.sh -b -f -p $HOME/miniconda;
+PREFIX=/home/gitlab-runner/miniconda
+Unpacking payload ...
+Collecting package metadata (current_repodata.json): ...working... done
+Solving environment: ...working... done
+# All requested packages already installed.
+installation finished.
+$ export PATH="$HOME/miniconda/bin:$PATH"
+$ conda env create -q -f environment.yml -n example_env --force
+Collecting package metadata (repodata.json): ...working... done
+Solving environment: ...working... done
+Preparing transaction: ...working... done
+Verifying transaction: ...working... done
+Executing transaction: ...working... done
+$ source activate example_env
+$ conda install pytest
+Collecting package metadata (current_repodata.json): ...working... done
+Solving environment: ...working... done
+## Package Plan ##
+  environment location: /home/gitlab-runner/miniconda/envs/example_env
+  added / updated specs:
+    - pytest
+The following packages will be UPDATED:
+  pytest                               6.1.2-py39h06a4308_0 --> 6.2.4-py39h06a4308_2
+Proceed ([y]/n)? 
+Preparing transaction: ...working... done
+Verifying transaction: ...working... done
+Executing transaction: ...working... done
+$ python -m pytest
+============================= test session starts ==============================
+platform linux -- Python 3.9.7, pytest-6.2.4, py-1.10.0, pluggy-0.13.1
+rootdir: /home/gitlab-runner/builds/Jj8LeMsG/0/root/repo_to_test_runner
+collected 1 item
+test_sqrt.py .                                                           [100%]
+============================== 1 passed in 0.01s ===============================
+Job succeeded

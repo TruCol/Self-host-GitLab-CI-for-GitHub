@@ -3,6 +3,7 @@
 load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 load 'libs/bats-file/load'
+load 'assert_utils'
 
 source src/mirror_github_to_gitlab.sh
 source src/helper.sh
@@ -38,6 +39,13 @@ setup() {
 }
 
 
-@test "Trivial test." {
-	assert_equal "True" "True"
+@test "Check if mirror directories are created." {
+	create_mirror_directories
+	#assert_not_equal "True" "True"
+	assert_not_equal 'foobar' 'foobar'
+	assert_not_equal "True" ""
+}
+
+@test 'assert_not_equal()' {
+  assert_not_equal 'foobar' 'foobar'
 }

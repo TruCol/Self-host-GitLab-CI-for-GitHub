@@ -2,7 +2,9 @@
 
 load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
+# https://github.com/bats-core/bats-file#Index-of-all-functions
 load 'libs/bats-file/load'
+# https://github.com/bats-core/bats-assert#usage
 load 'assert_utils'
 
 source src/mirror_github_to_gitlab.sh
@@ -41,11 +43,23 @@ setup() {
 
 @test "Check if mirror directories are created." {
 	create_mirror_directories
-	#assert_not_equal "True" "True"
-	assert_not_equal 'foobar' 'foobar'
-	assert_not_equal "True" ""
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_exist "$MIRROR_LOCATION"
+	assert_file_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_exist "$MIRROR_LOCATION/GitLab"
 }
 
 @test 'assert_not_equal()' {
-  assert_not_equal 'foobar' 'foobar'
+  
+  # run activation function:
+  #activate_ssh_account
+  
+  # Get list of activated ssh-accounts:
+  ssh-accounts=$(ssh-add -L)
+  
+  # Split each line into 3 segments based on spaces
+  
+  
+  # Test whether the github ssh account is activated in 3rd segment
+  # Do not allow partial match but only allow complete match.
 }

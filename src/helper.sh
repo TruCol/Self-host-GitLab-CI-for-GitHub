@@ -658,3 +658,35 @@ get_commit_of_branch() {
 		fi
 	done
 }
+
+get_last_space_delimted_item_in_line() {
+	line=$1
+	stringarray=($line)
+	echo "${stringarray[-1]}"
+}
+
+
+# Returns FOUND if the incoming ssh account is activated,
+# returns NOTFOUND otherwise.
+ssh_account_is_activated() {
+	ssh_account=$1
+	eval activated_ssh_output=$2
+	found="false"
+	
+	count=0
+	while IFS= read -r line; do
+		count=$((count+1))
+		
+		username="$(get_last_space_delimted_item_in_line "$line")"
+		#echo "count=$count username"
+		#echo "$username=$username"
+		#echo "$ssh_account=ssh_account"
+		if [ "$username" == "$ssh_account" ]; then
+			echo "FOUND"
+			found="true"
+		fi
+	done <<< "$activated_ssh_output"
+	if [ "$found" == "false" ]; then
+		echo "NOTFOUND"
+	fi
+}

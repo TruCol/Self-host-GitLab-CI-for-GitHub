@@ -11,6 +11,14 @@ source src/mirror_github_to_gitlab.sh
 source src/helper.sh
 source src/hardcoded_variables.txt
 
+example_lines=$(cat <<-END
+ssh-ed25519 some_ssh_key/something some_git_username
+ssh-rsa some_ssh_key/something some_git_username/some_ssh_key/something some_git_username+some_ssh_key/something some_git_username/+some_ssh_key/something some_git_username some@git_username
+ssh-rsa some_ssh_key/something some_git_username/some_ssh_key/something some_git_username+some_ssh_key/something some_git_username/+some_ssh_key/something some_git_username some@git_username
+ssh-ed25519 something/something+something this_username_is_in_the_example
+END
+)
+
 # Method that executes all tested main code before running tests.
 setup() {
 	# print test filename to screen.
@@ -49,17 +57,24 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 }
 
-@test 'assert_not_equal()' {
-  
-  # run activation function:
-  #activate_ssh_account
-  
-  # Get list of activated ssh-accounts:
-  ssh-accounts=$(ssh-add -L)
-  
-  # Split each line into 3 segments based on spaces
-  
-  
-  # Test whether the github ssh account is activated in 3rd segment
-  # Do not allow partial match but only allow complete match.
+@test 'Get last element of line, when it is delimted using the space character.' {
+	line_one="ssh-ed25519 some_ssh_key/something some_git_username"
+	line_two="ssh-rsa some_ssh_key/something some_git_username/some_ssh_key/something some_git_username+some_ssh_key/something"
+	line_three="some_git_username/+some_ssh_key/something some_git_username some@git_username"
+	assert_equal "$(get_last_space_delimted_item_in_line "$line_one")" "some_git_username"
+	assert_equal "$(get_last_space_delimted_item_in_line "$line_two")" "some_git_username+some_ssh_key/something"
+	assert_equal "$(get_last_space_delimted_item_in_line "$line_three")" "some@git_username"
+}
+
+@test 'If ssh account is activated, FOUND is returned' {
+	assert_equal "$(ssh_account_is_activated "this_username_is_in_the_example" "\${example_lines}")" "FOUND"
+}
+
+@test 'If ssh account is not activated, NOTFOUND is returned' {
+	assert_equal "$(ssh_account_is_activated "this_username_is_in_not_inthe_example" "\${example_lines}")" "NOTFOUND"
+}
+
+# Do not allow partial match but only allow complete match.
+@test 'If ssh account is not activated, yet if it is a subset of an ssh account that IS activated, NOTFOUND is (still) returned' {
+	assert_equal "$(ssh_account_is_activated "some" "\${example_lines}")" "NOTFOUND"
 }

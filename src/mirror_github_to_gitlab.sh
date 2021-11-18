@@ -56,7 +56,9 @@ create_mirror_directories() {
 activate_ssh_account() {
 	git_username=$1
 	eval "$(ssh-agent -s)"
-	ssh-add ~/.ssh/"$git_username"
+	#$(eval "$(ssh-agent -s)")
+	#$("$(ssh-agent -s)")
+	$(ssh-add ~/.ssh/"$git_username")
 }
 
 # Check ssh-access to GitHub repo.

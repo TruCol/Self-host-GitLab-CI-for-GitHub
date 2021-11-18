@@ -94,7 +94,7 @@ setup() {
 @test "Check if ssh-account is activated after activating it." {
 	activate_ssh_account "$GITHUB_USERNAME"
 	assert_equal "$GITHUB_USERNAME" a-t-0
-	#assert_equal "$(ssh_account_is_activated "$GITHUB_USERNAME" "$(ssh-add -L)")" "FOUND"
+	assert_equal "$(ssh_account_is_activated "$GITHUB_USERNAME" "$(ssh-add -L)")" "FOUND"
 	
 #Agent pid 123
 #Identity added: /home/name/.ssh/a-t-0 (some@email.domain)

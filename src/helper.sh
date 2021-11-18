@@ -660,7 +660,7 @@ get_commit_of_branch() {
 }
 
 get_last_space_delimted_item_in_line() {
-	line=$1
+	line="$1"
 	IFS=' ' # let's make sure we split on newline chars
 	var=(${lines}) # parse the lines into a variable that is countable
 	stringarray=($line)
@@ -672,16 +672,19 @@ get_last_space_delimted_item_in_line() {
 # returns NOTFOUND otherwise.
 ssh_account_is_activated() {
 	local ssh_account=$1
-	local activated_ssh_output="$2"
+	#local activated_ssh_output="$2"
+	eval activated_ssh_output="$2"
+	#local activated_ssh_output=("$@")
 	found="false"
 	
 	count=0
 	while IFS= read -r line; do
 		count=$((count+1))
 		
-		username="$(get_last_space_delimted_item_in_line "$line")"
-		#echo "count=$count username"
-		#echo "$username=$username"
+		local username="$(get_last_space_delimted_item_in_line "$line")"
+		#echo "$line=line"
+		#echo "$count=count"
+		#echo "$username=username"
 		#echo "$ssh_account=ssh_account"
 		if [ "$username" == "$ssh_account" ]; then
 			if [ "$found" == "false" ]; then
@@ -692,11 +695,12 @@ ssh_account_is_activated() {
 	done <<< "$activated_ssh_output"
 	if [ "$found" == "false" ]; then
 	
-		in_ssh_pub_file="$(check_if_ssh_account_activated_using_email_identifier "$ssh_account" "$activated_ssh_output")"
-		echo "in_ssh_pub_file=$in_ssh_pub_file"
-		if [ "$in_ssh_pub_file" == "NOTFOUND" ]; then
-			echo "NOTFOUND"
-		fi
+		#in_ssh_pub_file="$(check_if_ssh_account_activated_using_email_identifier "$ssh_account" "$activated_ssh_output")"
+		#echo "in_ssh_pub_file=$in_ssh_pub_file"
+		#if [ "$in_ssh_pub_file" == "NOTFOUND" ]; then
+			#echo "NOTFOUND"
+		#fi
+		echo "NOTFOUND"
 	fi
 }
 
@@ -707,20 +711,20 @@ check_if_ssh_account_activated_using_email_identifier() {
 	local username=$(whoami)
 	# Read the ssh pub file.
 	local public_ssh_content=$(cat "/home/$username/.ssh/$ssh_account.pub")
-	echo "public_ssh_content=$public_ssh_content"
-	echo "username=$username"
-	echo "ssh_account=$ssh_account"
+	#echo "public_ssh_content=$public_ssh_content"
+	#echo "username=$username"
+	#echo "ssh_account=$ssh_account"
 	
 	# Get email from ssh pub file.
 	local email=$(get_last_space_delimted_item_in_line "$public_ssh_content")
-	echo "email=$email"
-	exit
+	#echo "email=$email"
+	#exit
 	
 	if [ "$email" == "$ssh_account" ]; then
 		echo "NOTFOUND"
 	else
-		echo "$email=email"
-		echo "$ssh_account=ssh_account"
-		#ssh_account_is_activated "$email" "$activated_ssh_output"
+		#echo "$email=email"
+		#echo "$ssh_account=ssh_account"
+		ssh_account_is_activated "$email" "$activated_ssh_output"
 	fi
 }

@@ -65,52 +65,6 @@ setup() {
 
 
 
-# 1 Verify invalid repository is not cloned
-@test "Verify an error is thrown, if non-existant repository cloning is attempted LATEST." {
-	non_existant_repository="NON_EXISTANT_REPOSITORY"
-	
-	# Assert the GitHub username is correct
-	assert_equal "$GITHUB_USERNAME" a-t-0
-	
-	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
-	
-	# Specify the variables as they are inside the function
-	github_username="$GITHUB_USERNAME"
-	github_repository="$non_existant_repository"
-	target_directory="$MIRROR_LOCATION/GitHub/$non_existant_repository"
-	
-	export github_username  github_repository has_access target_directory
-	run bash -c 'source src/push_repo_to_gitlab.sh &&  export github_username  github_repository && clone_github_repository'
-	#source src/./push_repo_to_gitlab.sh && clone_github_repository "$GITHUB_USERNAME" "$non_existant_repository"
-	#clone_github_repository $GITHUB_USERNAME $non_existant_repository
-	assert_failure
-	assert_output "$expected_error_message"
-
-	
-	
-	# TODO: move into separate test to verify non-existant repository is not cloned.
-	#repo_was_cloned=$(verify_github_repository_is_cloned "$non_existant_repository" "$MIRROR_LOCATION/GitHub/$non_existant_repository")
-	#assert_equal "$repo_was_cloned" "NOTFOUND"
-}
-
-# 1 Clone repository and verify it is cloned
-@test "Verify whether the repository is cloned, if it is cloned." {
-	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
-	
-	clone_github_repository "$GITHUB_USERNAME" "$PUBLIC_GITHUB_TEST_REPO" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO"
-	repo_was_cloned=$(verify_github_repository_is_cloned "$PUBLIC_GITHUB_TEST_REPO" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO")
-	assert_equal "$repo_was_cloned" "FOUND"
-}
-
-
-
-
-
-
-
-
 
 
 
@@ -267,4 +221,52 @@ setup() {
 }
 
 
+# 3.a Verify invalid repository is not cloned
+@test "Verify an error is thrown, if non-existant repository cloning is attempted LATEST." {
+	non_existant_repository="NON_EXISTANT_REPOSITORY"
+	
+	# Assert the GitHub username is correct
+	assert_equal "$GITHUB_USERNAME" a-t-0
+	
+	# Verify ssh-access
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	
+	# Specify the variables as they are inside the function
+	github_username="$GITHUB_USERNAME"
+	github_repository="$non_existant_repository"
+	target_directory="$MIRROR_LOCATION/GitHub/$non_existant_repository"
+	
+	export github_username  github_repository has_access target_directory
+	run bash -c 'source src/push_repo_to_gitlab.sh &&  export github_username  github_repository && clone_github_repository'
+	assert_failure
+	assert_output "$expected_error_message"
+}
 
+# 3.b Verify not cloning a repo correctly is detected with an error.
+@test "Test whether repository download verifcation function identifies it if no repository is cloned." {
+	non_existant_repository="NON_EXISTANT_REPOSITORY"
+	
+	# Assert the GitHub username is correct
+	assert_equal "$GITHUB_USERNAME" a-t-0
+	
+	# Remove repositories
+	remove_mirror_directories
+	
+	github_repository="$non_existant_repository"
+	target_directory="$MIRROR_LOCATION/GitHub/$non_existant_repository"
+	
+	export github_repository target_directory
+	run bash -c 'source src/mirror_github_to_gitlab.sh &&  verify_github_repository_is_cloned'
+	assert_failure
+	assert_output "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
+}
+
+# 3.c Clone repository and verify it is cloned
+@test "Verify whether the repository is cloned, if it is cloned." {
+	# Verify ssh-access
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	
+	clone_github_repository "$GITHUB_USERNAME" "$PUBLIC_GITHUB_TEST_REPO" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$PUBLIC_GITHUB_TEST_REPO" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO")
+	assert_equal "$repo_was_cloned" "FOUND"
+}

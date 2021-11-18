@@ -100,8 +100,12 @@ has_access() {
 # skip
 
 verify_github_repository_is_cloned() {
-	github_repository=$1
-	target_directory=$2
+	
+	if [[ "$1" != "" ]] && [[ "$2" != "" ]]; then
+		github_repository="$1"
+		target_directory="$2"
+	fi
+	
 	found_repo=$(dir_exists "$target_directory")
 	if [ "$found_repo" == "NOTFOUND" ]; then
 		echo "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"

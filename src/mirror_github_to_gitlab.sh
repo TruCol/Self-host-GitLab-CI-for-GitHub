@@ -52,13 +52,20 @@ create_mirror_directories() {
 }
 #assert_equal "$(dir_exists "$MIRROR_LOCATION")" "FOUND" 
 
+remove_mirror_directories() {
+	$(remove_dir "$MIRROR_LOCATION")
+	$(remove_dir "$MIRROR_LOCATION/GitHub")
+	$(remove_dir "$MIRROR_LOCATION/GitLab")
+}
+
 # Activates/enables the ssh for 
 activate_ssh_account() {
 	git_username=$1
 	eval "$(ssh-agent -s)"
 	#$(eval "$(ssh-agent -s)")
 	#$("$(ssh-agent -s)")
-	$(ssh-add ~/.ssh/"$git_username")
+	#$(ssh-add ~/.ssh/"$git_username")
+	ssh-add ~/.ssh/"$git_username"
 }
 
 # Check ssh-access to GitHub repo.
@@ -74,11 +81,12 @@ check_ssh_access_to_repo() {
 		echo "HASACCESS"
 	elif [ "$found_error_in_ssh_command" == "FOUND" ]; then
 		if [ "$retry" == "YES" ]; then
-			echo "NOACCESS"
+			echo "Your ssh-account:$github_username does not have pull access to the repository:$github_repository"
+			exit 1
 			# TODO: Throw error
 			#(A public repository should grant ssh access even if no ssh credentials for that GitHub user is given.)
 		else
-			activate_ssh_account "$github_username"
+			#activate_ssh_account "$github_username"
 			check_ssh_access_to_repo "$github_username" "$github_repository" "YES"
 		fi
 	fi
@@ -96,7 +104,12 @@ verify_github_repository_is_cloned() {
 	target_directory=$2
 	found_repo=$(dir_exists "$target_directory")
 	if [ "$found_repo" == "NOTFOUND" ]; then
-		read -p "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
+		echo "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
+		exit 125
+	elif [ "$found_repo" == "FOUND" ]; then
+		echo "FOUND"
+	else
+		echo "An unknown error occured."
 		exit 125
 	fi
 }

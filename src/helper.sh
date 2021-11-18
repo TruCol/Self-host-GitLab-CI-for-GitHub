@@ -579,6 +579,13 @@ create_dir() {
 	fi
 }
 
+remove_dir() {
+	abs_dir=$1
+	if [ "$(dir_exists "$abs_dir")" == "FOUND" ]; then
+		yes | rm -r $abs_dir
+	fi
+}
+
 sudo_create_dir() {
 	abs_dir=$1
 	if [ "$(sudo_dir_exists "$abs_dir")" == "NOTFOUND" ]; then

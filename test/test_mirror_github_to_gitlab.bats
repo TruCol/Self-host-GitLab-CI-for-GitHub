@@ -8,6 +8,7 @@ load 'libs/bats-file/load'
 load 'assert_utils'
 
 source src/mirror_github_to_gitlab.sh
+source src/push_repo_to_gitlab.sh
 source src/helper.sh
 source src/hardcoded_variables.txt
 
@@ -26,6 +27,18 @@ ssh-ed25519 longcode somename@somename-somename-123
 ssh-ed25519 longcode/longcode+longcode somename@somename.somename
 END
 )
+
+# Specify expected error message:
+expected_error_message=$(cat <<-END
+Cloning into 'src/mirrors/GitHub/NON_EXISTANT_REPOSITORY'...
+ERROR: Repository not found.
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+END
+)
+	
 
 # Method that executes all tested main code before running tests.
 setup() {
@@ -46,6 +59,92 @@ setup() {
 		run bash -c "./install_gitlab.sh -s -r"
 	fi
 }
+
+
+
+
+
+
+# 1 Verify invalid repository is not cloned
+@test "Verify an error is thrown, if non-existant repository cloning is attempted LATEST." {
+	non_existant_repository="NON_EXISTANT_REPOSITORY"
+	
+	# Assert the GitHub username is correct
+	assert_equal "$GITHUB_USERNAME" a-t-0
+	
+	# Verify ssh-access
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	
+	# Specify the variables as they are inside the function
+	github_username="$GITHUB_USERNAME"
+	github_repository="$non_existant_repository"
+	target_directory="$MIRROR_LOCATION/GitHub/$non_existant_repository"
+	
+	export github_username  github_repository has_access target_directory
+	run bash -c 'source src/push_repo_to_gitlab.sh &&  export github_username  github_repository && clone_github_repository'
+	#source src/./push_repo_to_gitlab.sh && clone_github_repository "$GITHUB_USERNAME" "$non_existant_repository"
+	#clone_github_repository $GITHUB_USERNAME $non_existant_repository
+	assert_failure
+	assert_output "$expected_error_message"
+
+	
+	
+	# TODO: move into separate test to verify non-existant repository is not cloned.
+	#repo_was_cloned=$(verify_github_repository_is_cloned "$non_existant_repository" "$MIRROR_LOCATION/GitHub/$non_existant_repository")
+	#assert_equal "$repo_was_cloned" "NOTFOUND"
+}
+
+# 1 Clone repository and verify it is cloned
+@test "Verify whether the repository is cloned, if it is cloned." {
+	# Verify ssh-access
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	
+	clone_github_repository "$GITHUB_USERNAME" "$PUBLIC_GITHUB_TEST_REPO" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$PUBLIC_GITHUB_TEST_REPO" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO")
+	assert_equal "$repo_was_cloned" "FOUND"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@test "Check pull access to public repository." {
+	# TODO: ommit this hardcoded username check
+	assert_equal "$GITHUB_USERNAME" a-t-0
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	assert_equal "$has_access" "HASACCESS"
+}
+
+@test "Check error is thrown when checking pull access to non-existant repository." {
+	# TODO: ommit this hardcoded username check
+	assert_equal "$GITHUB_USERNAME" a-t-0
+	#has_access="$()"
+	non_existant_repository="NON_EXISTANT_REPOSITORY"
+	run bash -c "source src/mirror_github_to_gitlab.sh && check_ssh_access_to_repo $GITHUB_USERNAME $non_existant_repository"
+	assert_failure
+	assert_output 'Your ssh-account:'$GITHUB_USERNAME' does not have pull access to the repository:'$non_existant_repository
+}
+
+
+
+
 
 @test "Trivial test." {
 	assert_equal "True" "True"
@@ -81,41 +180,6 @@ setup() {
 	assert_equal "$(github_account_ssh_key_is_added_to_ssh_agent "some" "\${example_lines}")" "NOTFOUND"
 }
 
-### Create mirror directories
-@test "Check if mirror directories are created." {
-	create_mirror_directories
-	assert_not_equal "$MIRROR_LOCATION" ""
-	assert_file_exist "$MIRROR_LOCATION"
-	assert_file_exist "$MIRROR_LOCATION/GitHub"
-	assert_file_exist "$MIRROR_LOCATION/GitLab"
-}
-
-### Test GitHub ssh-key is added to ssh-agent
-@test "Check if ssh-account is activated." {
-	# TODO: ommit this hardcoded username check
-	assert_equal "$GITHUB_USERNAME" a-t-0
-	
-	ssh_output=$(ssh-add -L)
-	
-	
-	# Get the email address tied to the ssh-account.
-	ssh_email=$(get_ssh_email "$GITHUB_USERNAME")
-	echo "ssh_email=$ssh_email"
-	echo "ssh_output=$ssh_output"
-	
-	# Check if the ssh key is added to ssh-agent by means of username.
-	found_ssh_username="$(github_account_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME" "\${ssh_output}")"
-	
-	# Check if the ssh key is added to ssh-agent by means of email.
-	found_ssh_email="$(github_account_ssh_key_is_added_to_ssh_agent "$ssh_email" "\${ssh_output}")"
-	
-	if [ "$found_ssh_username" == "FOUND" ]; then
-		assert_equal  "$found_ssh_username" "FOUND"
-	else
-		assert_equal  "$found_ssh_email" "FOUND"
-	fi
-
-}
 
 
 ### Activate GitHub ssh account
@@ -151,3 +215,56 @@ setup() {
 	run bash -c "source src/helper.sh && verify_ssh_key_is_added_to_ssh_agent $existant_ssh_account"
 	assert_success
 }
+
+
+
+##################################################################### ORDER##############################################
+
+
+### 0. Test GitHub ssh-key is added to ssh-agent
+@test "Check if ssh-account is activated." {
+	# TODO: ommit this hardcoded username check
+	assert_equal "$GITHUB_USERNAME" a-t-0
+	
+	ssh_output=$(ssh-add -L)
+	
+	
+	# Get the email address tied to the ssh-account.
+	ssh_email=$(get_ssh_email "$GITHUB_USERNAME")
+	echo "ssh_email=$ssh_email"
+	echo "ssh_output=$ssh_output"
+	
+	# Check if the ssh key is added to ssh-agent by means of username.
+	found_ssh_username="$(github_account_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME" "\${ssh_output}")"
+	
+	# Check if the ssh key is added to ssh-agent by means of email.
+	found_ssh_email="$(github_account_ssh_key_is_added_to_ssh_agent "$ssh_email" "\${ssh_output}")"
+	
+	if [ "$found_ssh_username" == "FOUND" ]; then
+		assert_equal  "$found_ssh_username" "FOUND"
+	else
+		assert_equal  "$found_ssh_email" "FOUND"
+	fi
+}
+
+
+### 1. Remove mirror directories
+@test "Check if mirror directories are removed." {
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+}
+
+### 2. Create mirror directories
+@test "Check if mirror directories are created." {
+	create_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_exist "$MIRROR_LOCATION"
+	assert_file_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_exist "$MIRROR_LOCATION/GitLab"
+}
+
+
+

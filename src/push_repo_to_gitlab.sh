@@ -87,10 +87,19 @@ clone_repository() {
 }
 
 clone_github_repository() {
-	github_username=$1
-	github_repository=$2
-	has_access=$3
-	target_directory=$4
+	if [[ "$1" != "" ]] && [[ "$2" != "" ]] && [[ "$3" != "" ]] && [[ "$4" != "" ]]; then
+		github_username="$1"
+		github_repository="$2"
+		has_access="$3"
+		target_directory="$4"
+	fi
+	#echo  "github_username=$github_username"
+	#echo  "github_repository=$github_repository"
+	#echo  "has_access=$has_access"
+	#echo  "target_directory=$target_directory"
+	
+	# Remove target directory if it already exists.
+	remove_dir "$target_directory"
 	
 	if [ "$has_access"=="HASACCESS" ]; then
 		git clone git@github.com:"$github_username"/"$github_repository" "$target_directory"

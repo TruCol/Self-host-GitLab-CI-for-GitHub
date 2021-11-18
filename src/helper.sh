@@ -681,11 +681,9 @@ github_account_ssh_key_is_added_to_ssh_agent() {
 	while IFS= read -r line; do
 		count=$((count+1))
 		
+		# Get the username from the ssh key .pub file.
 		local username="$(get_last_space_delimted_item_in_line "$line")"
-		#echo "$line=line"
-		#echo "$count=count"
-		#echo "$username=username"
-		#echo "$ssh_account=ssh_account"
+		
 		if [ "$username" == "$ssh_account" ]; then
 			if [ "$found" == "false" ]; then
 				echo "FOUND"
@@ -694,12 +692,6 @@ github_account_ssh_key_is_added_to_ssh_agent() {
 		fi
 	done <<< "$activated_ssh_output"
 	if [ "$found" == "false" ]; then
-	
-		#in_ssh_pub_file="$(check_if_ssh_account_activated_using_email_identifier "$ssh_account" "$activated_ssh_output")"
-		#echo "in_ssh_pub_file=$in_ssh_pub_file"
-		#if [ "$in_ssh_pub_file" == "NOTFOUND" ]; then
-			#echo "NOTFOUND"
-		#fi
 		echo "NOTFOUND"
 	fi
 }
@@ -718,18 +710,16 @@ any_ssh_key_is_added_to_ssh_agent() {
 		
 		# Get the email address tied to the ssh-account.
 		ssh_email=$(get_ssh_email "$ssh_account")
-		#echo "ssh_email=$ssh_email"
-		
 		
 		if [ "$ssh_email" == "" ]; then
 			#echo "The ssh key file does not exist, so the email address of that ssh-account can not be extracted."
 			echo "NOTFOUND_FILE"
 			exit 1
 		else 
+			
 			# Check if the ssh key is added to ssh-agent by means of email.
 			found_ssh_email="$(github_account_ssh_key_is_added_to_ssh_agent "$ssh_email" "\${ssh_output}")"
-			#read -p "found_ssh_username=$found_ssh_username"
-			#read -p "found_ssh_email=$found_ssh_email"
+			
 			if [ "$found_ssh_email" == "FOUND" ]; then
 				echo "FOUND"
 			else
@@ -745,9 +735,7 @@ verify_ssh_key_is_added_to_ssh_agent() {
 	local ssh_account=$1
 	local ssh_output=$(ssh-add -L)
 	local ssh_key_in_ssh_agent=$(any_ssh_key_is_added_to_ssh_agent $ssh_account)
-	#read -p "ssh_key_in_ssh_agent=$ssh_key_in_ssh_agent"
 	if [[ "$ssh_key_in_ssh_agent" == "NOTFOUND_FILE" ]] || [[ "$ssh_key_in_ssh_agent" == "NOTFOUND_EMAIL" ]]; then
-		#echo "output=$(any_ssh_key_is_added_to_ssh_agent $ssh_account)"
 		echo 'Please ensure the ssh-account '$ssh_account' key is added to the ssh agent. You can do that with commands:'"\\n"' eval $(ssh-agent -s)'"\n"'ssh-add ~/.ssh/'$ssh_account''"\n"' Please run this script again once you are done.'
 		exit 1
 	fi
@@ -762,13 +750,9 @@ get_ssh_email() {
 	
 	# Check if file exists.
 	assert_file_exists "$key_filepath"
-	#echo "key_filepath=$key_filepath"
 	
 	# Read the ssh pub file.
 	local public_ssh_content=$(cat $key_filepath)
-	#echo "public_ssh_content=$public_ssh_content"
-	#echo "username=$username"
-	#echo "ssh_account=$ssh_account"
 	
 	# Get email from ssh pub file.
 	local email=$(get_last_space_delimted_item_in_line "$public_ssh_content")

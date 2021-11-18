@@ -47,25 +47,6 @@ setup() {
 	fi
 }
 
-@test "Assert code execution is terminated if a required ssh-key is not activated." {
-	non_existant_ssh_account="Some_random_non_existing_ssh_account_31415926531"
-	
-	run bash -c "source src/helper.sh && verify_ssh_key_is_added_to_ssh_agent $non_existant_ssh_account"
-	assert_failure
-	assert_output 'Please ensure the ssh-account '$non_existant_ssh_account' key is added to the ssh agent. You can do that with commands:'"\\n"' eval $(ssh-agent -s)'"\n"'ssh-add ~/.ssh/'$non_existant_ssh_account''"\n"' Please run this script again once you are done.'
-	#assert_output "$feedback"
-}
-
-@test "Assert code execution is proceeded if the required ssh-key is activated." {
-	# TODO: ommit this hardcoded username check
-	assert_equal "$GITHUB_USERNAME" a-t-0
-	
-	existant_ssh_account="$GITHUB_USERNAME"
-	
-	run bash -c "source src/helper.sh && verify_ssh_key_is_added_to_ssh_agent $existant_ssh_account"
-	assert_success
-}
-
 @test "Trivial test." {
 	assert_equal "True" "True"
 }
@@ -152,4 +133,21 @@ setup() {
 	assert_equal "$(github_account_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME" "$(ssh-add -L)")" "FOUND"
 }
 
+@test "Assert code execution is terminated if a required ssh-key is not activated." {
+	non_existant_ssh_account="Some_random_non_existing_ssh_account_31415926531"
+	
+	run bash -c "source src/helper.sh && verify_ssh_key_is_added_to_ssh_agent $non_existant_ssh_account"
+	assert_failure
+	assert_output 'Please ensure the ssh-account '$non_existant_ssh_account' key is added to the ssh agent. You can do that with commands:'"\\n"' eval $(ssh-agent -s)'"\n"'ssh-add ~/.ssh/'$non_existant_ssh_account''"\n"' Please run this script again once you are done.'
+	#assert_output "$feedback"
+}
 
+@test "Assert code execution is proceeded if the required ssh-key is activated." {
+	# TODO: ommit this hardcoded username check
+	assert_equal "$GITHUB_USERNAME" a-t-0
+	
+	existant_ssh_account="$GITHUB_USERNAME"
+	
+	run bash -c "source src/helper.sh && verify_ssh_key_is_added_to_ssh_agent $existant_ssh_account"
+	assert_success
+}

@@ -670,7 +670,7 @@ get_last_space_delimted_item_in_line() {
 
 # Returns FOUND if the incoming ssh account is activated,
 # returns NOTFOUND otherwise.
-ssh_account_is_activated() {
+github_account_ssh_key_is_added_to_ssh_agent() {
 	local ssh_account=$1
 	#local activated_ssh_output="$2"
 	eval activated_ssh_output="$2"
@@ -704,9 +704,44 @@ ssh_account_is_activated() {
 	fi
 }
 
-check_if_ssh_account_activated_using_email_identifier() {
+# Checks for both GitHub username as well as for the email address that is 
+# tied to that acount.
+any_ssh_key_is_added_to_ssh_agent() {
+	
+
+	# Get the email address tied to the ssh-account.
+	ssh_email=$(get_ssh_email "$GITHUB_USERNAME")
+	#echo "ssh_email=$ssh_email"
+	#echo "ssh_output=$ssh_output"
+	
+	# Check if the ssh key is added to ssh-agent by means of username.
+	found_ssh_username="$(github_account_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME" "\${ssh_output}")"
+	
+	# Check if the ssh key is added to ssh-agent by means of email.
+	found_ssh_email="$(github_account_ssh_key_is_added_to_ssh_agent "$ssh_email" "\${ssh_output}")"
+	
+	if [ "$found_ssh_username" == "FOUND" ]; then
+		assert_equal  "$found_ssh_username" "FOUND"
+	else
+		assert_equal  "$found_ssh_email" "FOUND"
+	fi
+}
+
+
+verify_ssh_key_is_added_to_ssh_agent() {
 	local ssh_account=$1
-	local activated_ssh_output="$2"
+	local ssh_output=$(ssh-add -L)
+	
+	if [ "$(github_account_ssh_key_is_added_to_ssh_agent $ssh_account "\${ssh_output}")" == "NOTFOUND" ]; then
+		echo 'Please ensure the ssh-account '$ssh_account' key is added to the ssh agent. You can do that with commands:'"\\n"' eval $(ssh-agent -s)'"\n"'ssh-add ~/.ssh/'$ssh_account''"\n"' Please run this script again once you are done.'
+		echo "$feedback"
+		exit 1
+	fi
+}
+
+# Untested function to retrieve email pertaining to ssh key
+get_ssh_email() {
+	local ssh_account=$1
 	
 	local username=$(whoami)
 	# Read the ssh pub file.
@@ -717,14 +752,8 @@ check_if_ssh_account_activated_using_email_identifier() {
 	
 	# Get email from ssh pub file.
 	local email=$(get_last_space_delimted_item_in_line "$public_ssh_content")
-	#echo "email=$email"
-	#exit
-	
-	if [ "$email" == "$ssh_account" ]; then
-		echo "NOTFOUND"
-	else
-		#echo "$email=email"
-		#echo "$ssh_account=ssh_account"
-		ssh_account_is_activated "$email" "$activated_ssh_output"
-	fi
+	echo "$email"
 }
+
+
+

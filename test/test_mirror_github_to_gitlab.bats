@@ -12,14 +12,6 @@ source src/push_repo_to_gitlab.sh
 source src/helper.sh
 source src/hardcoded_variables.txt
 
-#example_lines=$(cat <<-END
-#ssh-ed25519 some_ssh_key/something some_git_username
-#ssh-rsa some_ssh_key/something some_git_username/some_ssh_key/something some_git_username+some_ssh_key/something some_git_username/+some_ssh_key/something some_git_username some@git_username
-#ssh-rsa some_ssh_key/something some_git_username/some_ssh_key/something some_git_username+some_ssh_key/something some_git_username/+some_ssh_key/something some_git_username some@git_username
-#ssh-ed25519 something/something+something this_username_is_in_the_example
-#END
-#)
-
 example_lines=$(cat <<-END
 ssh-ed25519 longcode/longcode somename-somename-123
 ssh-rsa longcode/longcode+longcode+longcode/longcode/longcode+longcode/longcode+longcode somename@somename-somename-123
@@ -61,16 +53,18 @@ setup() {
 }
 
 
-
-
-
-
-
-
 # 5. Verify gitlab repo is created.
-@test "Test if GitLab repository is created." {
-	create_repository "$PUBLIC_GITHUB_TEST_REPO"
+@test "Get GitLab repo list." {
+	something=$(get_project_list)
+	output=$(list_repos)
+	assert_equal "somelist" "$output"
 }
+
+
+
+
+
+
 
 
 
@@ -300,3 +294,33 @@ setup() {
 	assert_equal ""${github_branches[4]}"" "no_attack_in_new_file"
 }
 
+
+# 5. Verify gitlab repo is created.
+@test "Test if GitLab repository is created." {
+	create_repository "$PUBLIC_GITHUB_TEST_REPO"
+}
+
+# 6.a Loop through the github branches
+@test "Test the branches of the example_repository are looped through correctly." {
+	
+	###################### Self contained test ###############
+	# Verify ssh-access
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	
+	clone_github_repository "$GITHUB_USERNAME" "$PUBLIC_GITHUB_TEST_REPO" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO"
+	###################### Self contained test ###############
+	
+	initialise_github_branches_array "$PUBLIC_GITHUB_TEST_REPO"
+	output=$(loop_through_github_branches)
+	
+	expected_output=$(cat <<-END
+attack_in_new_file
+attack_unit_test
+main
+no_attack_in_filecontent
+no_attack_in_new_file
+END
+)
+	
+	assert_equal "$output" "$expected_output"
+}

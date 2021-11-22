@@ -129,6 +129,11 @@ get_git_branches() {
 	arr=() # innitialise array with branches
 	
 	output=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git branch --all)
+	#read -p  "IN GET PWD=$PWD"
+	#read -p  "MIRROR_LOCATION=$MIRROR_LOCATION"
+	read -p  "company=$company"
+	read -p  "git_repository=$git_repository"
+	read -p  "output=$output"
 	
 	# Parse branches from branch list response
 	while IFS= read -r line; do
@@ -160,28 +165,6 @@ get_git_branches() {
 	done <<< "$output"
 }
 
-
-# Make a list of the branches in the GitHub repository
-####get_git_branches github_branches "GitHub" "$github_repo"      # call function to populate the array
-####declare -p github_branches
-
-
-# Check if the mirror repository exists in GitLab (Skipped)
-# If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
-####create_repository "$gitlab_repo"
-
-
-# Clone the GitLab repository from the GitLab server into the mirror directory
-####clone_repository "$github_repo" "$gitlab_username" "$gitlab_server_password" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
-
-# Get a list of GitLab repository branches
-####get_git_branches gitlab_branches "GitLab" "$github_repo"      # call function to populate the array
-#get_github_branches gitlab_branches "GitLab" "$github_repo"      # call function to populate the array
-####declare -p gitlab_branches
-
-# Get list of missing branches in GitLab
-####missing_branches_in_gitlab=(`echo ${github_branches[@]} ${gitlab_branches[@]} | tr ' ' '\n' | sort | uniq -u `)
-####echo "missing_branches_in_gitlab=${missing_branches_in_gitlab[@]}"
 
 create_new_branch() {
 	branch_name=$1
@@ -215,6 +198,81 @@ copy_files_from_github_to_gitlab_repo_branches() {
 	git_repository=$1
 	rsync -av --progress "$MIRROR_LOCATION/GitHub/$git_repository/" "$MIRROR_LOCATION/GitLab/$git_repository" --exclude .git
 }
+
+
+# Check if the branch is contained in GitHub branch array (to filter the difference containing a branch that is (still) in GitLab but not in GitHub)
+github_branch_is_in_gitlab_branches() {
+	#eval gitlab_branches=$2
+	local github_branch="$1"
+	shift
+	gitlab_branches=("$@")
+	
+	#"${branch_names_arr[i]}"
+	
+	# loop through file list and store search_result_boolean
+	#for looping_filepath in "${file_list[@]}"; do
+	#for gitlab_branch in "${gitlab_branches[@]}"; do
+	#	echo "gitlab_branch=$gitlab_branch"
+	#done
+	if [[ " ${gitlab_branches[*]} " =~ " ${github_branch} " ]]; then
+		# whatever you want to do when array contains value
+		echo "github_branch=$github_branch"
+		echo "FOUND"
+	fi
+}
+
+# 6.a  Make a list of the branches in the GitHub repository
+initialise_github_branches_array() {
+	github_repo=$1
+	get_git_branches github_branches "GitHub" "$github_repo"      # call function to populate the array
+	declare -p github_branches
+}
+
+# 6.b Loop through the GitHub mirror repository branches that are already in GitLab
+loop_through_github_branches() {
+	for github_branch in ${github_branches[@]}; do
+		echo "$github_branch"
+	done
+}
+
+# shellcheck disable=SC2120
+get_project_list(){
+    # Get a list of the repositories in your own local GitLab server (that runs the GitLab runner CI).
+	repositories=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
+	readarray -t repo_arr <  <(echo "$repositories" | jq ".[].path")
+	echo "repo_arr=${repo_arr[@]}"
+}
+
+list_repos() {
+	echo "list=${repo_arr[@]}"
+}
+
+
+# 6.d Check if the mirror repository exists in GitLab (Skipped)
+gitlab_mirror_repo_exists() {
+	echo "hi"
+}
+
+
+
+#6.d If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
+####create_repository "$gitlab_repo"
+
+
+
+
+
+# Clone the GitLab repository from the GitLab server into the mirror directory
+####clone_repository "$github_repo" "$gitlab_username" "$gitlab_server_password" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
+
+# Get a list of GitLab repository branches
+####get_git_branches gitlab_branches "GitLab" "$github_repo"      # call function to populate the array
+#get_github_branches gitlab_branches "GitLab" "$github_repo"      # call function to populate the array
+####declare -p gitlab_branches
+
+# Get list of missing branches in GitLab
+####missing_branches_in_gitlab=(`echo ${github_branches[@]} ${gitlab_branches[@]} | tr ' ' '\n' | sort | uniq -u `)
+####echo "missing_branches_in_gitlab=${missing_branches_in_gitlab[@]}"
 
 # Loop through the GitHub mirror repository branches that are already in GitLab
 ####for github_branch in ${github_branches[@]}; do

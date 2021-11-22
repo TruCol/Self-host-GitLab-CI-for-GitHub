@@ -28,6 +28,14 @@ create_and_run_ci_job() {
 	push_changes
 }
 
+# TODO: Check if personal access token is already made, if not, create it.
+# Verify this has access:
+# TODO: replace token with variable
+#curl --header "PRIVATE-TOKEN: somelongpersonalaccesscode3" "http://127.0.0.1/api/v4/personal_access_tokens"
+# If not hasaccess, run personal access token creation
+# source src/create_personal_access_token.sh && create_gitlab_personal_access_token
+# check has access again, if not, raise exception.
+
 create_repository() {
 	repo_name=$1
 	
@@ -37,6 +45,7 @@ create_repository() {
 	# Create command that creates the repository in GitLab
 	command="curl -H Content-Type:application/json http://127.0.0.1/api/v4/projects?private_token=""$personal_access_token -d ""{ \"name\": \"""$repo_name""\" }"
 	
+
 	# Create the repository in the GitLab server
 	{ # try
 		output=$(curl -H "Content-Type:application/json" http://127.0.0.1/api/v4/projects?private_token=$personal_access_token -d "{ \"name\": \"$repo_name\" }")

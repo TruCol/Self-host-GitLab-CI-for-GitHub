@@ -67,6 +67,13 @@ setup() {
 
 
 
+# 5. Verify gitlab repo is created.
+@test "Test if GitLab repository is created." {
+	create_repository "$PUBLIC_GITHUB_TEST_REPO"
+}
+
+
+
 
 
 
@@ -270,3 +277,26 @@ setup() {
 	repo_was_cloned=$(verify_github_repository_is_cloned "$PUBLIC_GITHUB_TEST_REPO" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO")
 	assert_equal "$repo_was_cloned" "FOUND"
 }
+
+
+# 4. Get the branches of the cloned repository.
+@test "Test the branches of the example_repository are cloned correctly." {
+	
+	###################### Self contained test ###############
+	# Verify ssh-access
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	
+	clone_github_repository "$GITHUB_USERNAME" "$PUBLIC_GITHUB_TEST_REPO" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO"
+	###################### Self contained test ###############
+	
+	
+	get_git_branches github_branches "GitHub" "$PUBLIC_GITHUB_TEST_REPO"      # call function to populate the array
+	declare -p github_branches
+	
+	assert_equal ""${github_branches[0]}"" "attack_in_new_file"
+	assert_equal ""${github_branches[1]}"" "attack_unit_test"
+	assert_equal ""${github_branches[2]}"" "main"
+	assert_equal ""${github_branches[3]}"" "no_attack_in_filecontent"
+	assert_equal ""${github_branches[4]}"" "no_attack_in_new_file"
+}
+

@@ -131,9 +131,9 @@ get_git_branches() {
 	output=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git branch --all)
 	#read -p  "IN GET PWD=$PWD"
 	#read -p  "MIRROR_LOCATION=$MIRROR_LOCATION"
-	read -p  "company=$company"
-	read -p  "git_repository=$git_repository"
-	read -p  "output=$output"
+	#read -p  "company=$company"
+	#read -p  "git_repository=$git_repository"
+	#read -p  "output=$output"
 	
 	# Parse branches from branch list response
 	while IFS= read -r line; do
@@ -237,28 +237,75 @@ loop_through_github_branches() {
 
 # shellcheck disable=SC2120
 get_project_list(){
+	echo "BeforeFAILURE=$1"
+	#local -n repo_arr="$1"     # use nameref for indirection
+	local -n repo_arr="$1"     # use nameref for indirection
+	echo "AFTERFAILURE=$1"
+
     # Get a list of the repositories in your own local GitLab server (that runs the GitLab runner CI).
 	repositories=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
+	#echo "repositories=$repositories"
+	
 	readarray -t repo_arr <  <(echo "$repositories" | jq ".[].path")
-	echo "repo_arr=${repo_arr[@]}"
+	#echo "repo_arr=$repo_arr"
 }
 
-list_repos() {
-	echo "list=${repo_arr[@]}"
-}
-
-
-# 6.d Check if the mirror repository exists in GitLab (Skipped)
+# 6.d Check if the mirror repository exists in GitLab
 gitlab_mirror_repo_exists() {
-	echo "hi"
+	searched_repo="$1"
+	# The repository array returned by GitLab API contains extra quotations around each repo.
+	searched_repo_with_quotations='"'"$searched_repo"'"' 
+	
+	local gitlab_repos
+    get_project_list gitlab_repos       # call function to populate the array
+    
+	if [[ " ${gitlab_repos[*]} " =~ " ${searched_repo_with_quotations} " ]]; then
+		echo "FOUND"
+	else
+		echo "NOTFOUND"
+	fi
 }
 
 
 
 #6.d If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
 ####create_repository "$gitlab_repo"
+create_repo_if_not_exists() {
+	#new_repo_name="$1"
+	new_repo_name=$1
+	
+	if [ "$(gitlab_mirror_repo_exists $new_repo_name)" == "FOUND" ]; then
+		assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "FOUND"
+	else
+		create_repository $new_repo_name
+		sleep 5
+		assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "FOUND"
+	fi
+}
+
+delete_repo_if_not_exists() {
+	new_repo_name="$1"
+	
+	if [ "$(gitlab_mirror_repo_exists "$new_repo_name")" == "NOTFOUND" ]; then
+		assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "FOUND"
+	else
+		#echo "CREATING"
+		delete_repository "$new_repo_name"
+		sleep 5
+		assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "NOTFOUND"
+	fi
+}
 
 
+# 6.e If the GitLab repository exists, clone it locally
+# TODO: verify the repository exists locally.
+# TODO: do a git pull to update the local repository.
+
+# 6.f Checkout that branch in the local GitLab mirror repository.
+
+# 6.g Checkout that branch in the local GitLab mirror repository.
+
+# 6.h 
 
 
 

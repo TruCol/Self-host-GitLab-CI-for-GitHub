@@ -53,6 +53,14 @@ setup() {
 }
 
 
+# 6.e Ensure that the function that checks if the GitLab repo exists returns NOTFOUND for non-existant repos.
+@test "Test non-existant local gitlab repo is identified as NOTFOUND." {
+	# TODO: ommit this hardcoded username check
+	non_existant_repository="NON_EXISTANT_REPOSITORY"
+	actual_output=$(gitlab_repo_exists_locally "$non_existant_repository")
+	assert_equal "$actual_output" "NOTFOUND"
+}
+
 
 ### Activate GitHub ssh account
 @test "Check if ssh-account is activated after activating it." {
@@ -68,67 +76,6 @@ setup() {
 	assert_equal "$(any_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME" "$(ssh-add -L)")" "FOUND"
 	#assert_equal "$(github_account_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME" "$(ssh-add -L)")" "FOUND"
 }
-
-
-
-
-
-
-
-# 6.d Verify gitlab repo is created.
-@test "GitLab repo is found if it exists." {
-	# TODO: verify the repository is added before testing whether it exists.
-	# TODO: remove the repository after verifying it exists
-	test_repo_name="extra-project"
-	create_repo_if_not_exists "$test_repo_name"
-	output_after_creation=$(gitlab_mirror_repo_exists "$test_repo_name")
-	assert_equal "$output_after_creation" "FOUND"
-	deletion_output=$(delete_repo_if_it_exists "$test_repo_name")
-	output_after_deletion=$(gitlab_mirror_repo_exists "$test_repo_name")
-	assert_equal "$output_after_deletion" "NOTFOUND"
-}
-
-# 6.d Verify gitlab repo is created.
-@test "GitLab repo is not found if it does not exists." {
-	# TODO: verify the repository is added before testing whether it exists.
-	# TODO: remove the repository after verifying it exists
-	something=$(get_project_list)
-	output=$(gitlab_mirror_repo_exists "non-existing-repository")
-	assert_equal "$output" "NOTFOUND"
-}
-
-# 6.e Test if GitLab repository is created if it does not exist.
-@test "GitLab repo is found if it is created." {
-	# TODO: verify the repository is added before testing whether it exists.
-	# TODO: remove the repository after verifying it exists
-	something=$(get_project_list)
-	creating_repo_output=$(create_repo_if_not_exists "non-existing-repository")
-	output=$(gitlab_mirror_repo_exists "non-existing-repository")
-	assert_equal "$output" "FOUND"
-}
-
-# 6.e Test if GitLab repository is created if it does not exist.
-@test "GitLab repo is not found if it is deleted." {
-	# TODO: verify the repository is added before testing whether it exists.
-	# TODO: remove the repository after verifying it exists
-	something=$(get_project_list)
-	output=$(delete_repo_if_it_exists "non-existing-repository")
-	output=$(gitlab_mirror_repo_exists "non-existing-repository")
-	assert_equal "$output" "NOTFOUND"
-}
-
-@test "ALLOW DUPLICATE EXECUTION." {
-	new_repo_name="extra-non-existing-project"
-	assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "NOTFOUND"
-	assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "NOTFOUND"
-}
-
-
-
-
-
-
-
 
 
 
@@ -365,3 +312,52 @@ END
 	
 	assert_equal "$output" "$expected_output"
 }
+
+# 6.d Verify gitlab repo is created.
+@test "GitLab repo is found if it exists." {
+	# TODO: verify the repository is added before testing whether it exists.
+	# TODO: remove the repository after verifying it exists
+	test_repo_name="extra-project"
+	create_repo_if_not_exists "$test_repo_name"
+	output_after_creation=$(gitlab_mirror_repo_exists "$test_repo_name")
+	assert_equal "$output_after_creation" "FOUND"
+	deletion_output=$(delete_repo_if_it_exists "$test_repo_name")
+	output_after_deletion=$(gitlab_mirror_repo_exists "$test_repo_name")
+	assert_equal "$output_after_deletion" "NOTFOUND"
+}
+
+# 6.d Verify gitlab repo is created.
+@test "GitLab repo is not found if it does not exists." {
+	# TODO: verify the repository is added before testing whether it exists.
+	# TODO: remove the repository after verifying it exists
+	something=$(get_project_list)
+	output=$(gitlab_mirror_repo_exists "non-existing-repository")
+	assert_equal "$output" "NOTFOUND"
+}
+
+# 6.e Test if GitLab repository is created if it does not exist.
+@test "GitLab repo is found if it is created." {
+	# TODO: verify the repository is added before testing whether it exists.
+	# TODO: remove the repository after verifying it exists
+	something=$(get_project_list)
+	creating_repo_output=$(create_repo_if_not_exists "non-existing-repository")
+	output=$(gitlab_mirror_repo_exists "non-existing-repository")
+	assert_equal "$output" "FOUND"
+}
+
+# 6.e Test if GitLab repository is created if it does not exist.
+@test "GitLab repo is not found if it is deleted." {
+	# TODO: verify the repository is added before testing whether it exists.
+	# TODO: remove the repository after verifying it exists
+	something=$(get_project_list)
+	output=$(delete_repo_if_it_exists "non-existing-repository")
+	output=$(gitlab_mirror_repo_exists "non-existing-repository")
+	assert_equal "$output" "NOTFOUND"
+}
+
+@test "ALLOW DUPLICATE EXECUTION." {
+	new_repo_name="extra-non-existing-project"
+	assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "NOTFOUND"
+	assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "NOTFOUND"
+}
+

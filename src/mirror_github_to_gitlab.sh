@@ -320,6 +320,14 @@ delete_repo_if_it_exists() {
 
 # 6.e If the GitLab repository exists, clone it locally
 # TODO: verify the repository exists locally.
+gitlab_repo_exists_locally(){
+	gitlab_repo="$1"
+	if test -d "$MIRROR_LOCATION/GitLab/$gitlab_repo"; then
+		echo "FOUND"
+	else
+		echo "NOTFOUND"
+	fi
+}
 # TODO: do a git pull to update the local repository.
 
 # 6.f Checkout that branch in the local GitLab mirror repository.

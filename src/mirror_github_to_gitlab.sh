@@ -328,7 +328,35 @@ gitlab_repo_exists_locally(){
 		echo "NOTFOUND"
 	fi
 }
+
 # TODO: do a git pull to update the local repository.
+get_gitlab_repo_if_not_exists() {
+	gitlab_username="$1"
+	gitlab_repo_name="$2"
+	
+	###################################TODO: echo 
+	##"$gitlab_repo_name" "$gitlab_username" "$gitlab_server_password" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
+	# and verify they have the correct values.
+	
+	# TODO: verify local gitlab mirror repo directories are created
+	create_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_exist "$MIRROR_LOCATION"
+	assert_file_exist "$MIRROR_LOCATION/GitLab"
+	
+	# TODO: verify the repository exists in GitLab, throw error otherwise.
+	
+	if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "NOTFOUND" ]; then
+		clone_repository "$gitlab_repo_name" "$gitlab_username" "$gitlab_server_password" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
+		assert_equal "$(gitlab_repo_exists_locally "$gitlab_repo_name")" "FOUND"
+	elif [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
+		echo "FOUND"
+	else
+		# TODO: do a gitlab pull to get the latest version.
+		echo "ERROR, the GitLab repository was not found locally and not cloned."
+		exit 64
+	fi
+}
 
 # 6.f Checkout that branch in the local GitLab mirror repository.
 

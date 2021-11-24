@@ -61,6 +61,15 @@ setup() {
 	assert_equal "$actual_output" "NOTFOUND"
 }
 
+# 6.e Clone GitLab repo if it does not exist locally.
+@test "Test GitLab repo is cloned locally." {
+	# TODO: ommit this hardcoded username check
+	gitlab_repo_name="sponsor_example"
+	actual_output=$(get_gitlab_repo_if_not_exists "$gitlab_repo_name")
+	assert_equal "$actual_output" "NOTFOUND"
+}
+
+
 
 ### Activate GitHub ssh account
 @test "Check if ssh-account is activated after activating it." {

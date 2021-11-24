@@ -61,11 +61,13 @@ remove_mirror_directories() {
 # Activates/enables the ssh for 
 activate_ssh_account() {
 	git_username=$1
-	eval "$(ssh-agent -s)"
+	#eval "$(ssh-agent -s)"
 	#$(eval "$(ssh-agent -s)")
 	#$("$(ssh-agent -s)")
 	#$(ssh-add ~/.ssh/"$git_username")
-	ssh-add ~/.ssh/"$git_username"
+	#ssh-add ~/.ssh/"$git_username"
+	eval "$(ssh-agent -s 3>&-)"
+    ssh-add ~/.ssh/"$git_username"
 }
 
 # Check ssh-access to GitHub repo.
@@ -128,16 +130,16 @@ get_git_branches() {
 	git_repository=$3
 	arr=() # innitialise array with branches
 	
-	output=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git branch --all)
+	theoutput=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git branch --all)
 	#read -p  "IN GET PWD=$PWD"
 	#read -p  "MIRROR_LOCATION=$MIRROR_LOCATION"
 	#read -p  "company=$company"
 	#read -p  "git_repository=$git_repository"
-	#read -p  "output=$output"
+	#read -p  "theoutput=$theoutput"
 	
 	# Parse branches from branch list response
 	while IFS= read -r line; do
-		number_of_lines=$(echo "$output" | wc -l)
+		number_of_lines=$(echo "$theoutput" | wc -l)
 		if [ "$number_of_lines" -eq 1 ]; then
 			echo "number_of_lines=$number_of_lines"
 			arr+=("${line:2}")
@@ -151,7 +153,7 @@ get_git_branches() {
 			# Filter out the HEAD branch duplicate, by filtering on a substring that indicates the duplicate.
 			if [ "${branch:0:10}" != "-> origin/" ]; then
 				
-				# Filter out git output artifacts of that do not start with a letter or number.
+				# Filter out git theoutput artifacts of that do not start with a letter or number.
 				# Assumes branch names always start with a letter or number.
 				if grep '^[-0-9a-zA-Z]*$' <<<"${branch:0:1}" ;then 
 					
@@ -162,7 +164,7 @@ get_git_branches() {
 			fi
 		fi
 	# List branches and feed them into a line by line parser
-	done <<< "$output"
+	done <<< "$theoutput"
 }
 
 
@@ -172,12 +174,12 @@ create_new_branch() {
 	git_repository=$3
 	
 	# create_repo branch
-	output=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git checkout -b $branch_name)
+	theoutput=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git checkout -b $branch_name)
 	
 	# TODO: assert the branch is created
 	
-	# echo output
-	echo "$output"
+	# echo theoutput
+	echo "$theoutput"
 }
 
 checkout_branch() {
@@ -186,12 +188,12 @@ checkout_branch() {
 	git_repository=$3
 	
 	# create_repo branch
-	output=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git checkout $branch_name)
+	theoutput=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git checkout $branch_name)
 	
 	# TODO: assert the branch is created
 	
-	# echo output
-	echo "$output"
+	# echo theoutput
+	echo "$theoutput"
 }
 
 copy_files_from_github_to_gitlab_repo_branches() {
@@ -237,17 +239,18 @@ loop_through_github_branches() {
 
 # shellcheck disable=SC2120
 get_project_list(){
-	echo "BeforeFAILURE=$1"
+	#echo "BeforeFAILURE=$1"
 	#local -n repo_arr="$1"     # use nameref for indirection
 	local -n repo_arr="$1"     # use nameref for indirection
-	echo "AFTERFAILURE=$1"
+	#echo "AFTERFAILURE=$1"
 
     # Get a list of the repositories in your own local GitLab server (that runs the GitLab runner CI).
 	repositories=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
-	#echo "repositories=$repositories"
+	echo "repositories=$repositories"
 	
+	# TODO: identify why the response of the repositories command is inconsistent.
 	readarray -t repo_arr <  <(echo "$repositories" | jq ".[].path")
-	#echo "repo_arr=$repo_arr"
+	echo "repo_arr=$repo_arr"
 }
 
 # 6.d Check if the mirror repository exists in GitLab
@@ -258,8 +261,11 @@ gitlab_mirror_repo_exists() {
 	
 	local gitlab_repos
     get_project_list gitlab_repos       # call function to populate the array
-    
-	if [[ " ${gitlab_repos[*]} " =~ " ${searched_repo_with_quotations} " ]]; then
+    echo "gitlab_repos=${gitlab_repos[*]}"
+	
+	if [[ " ${gitlab_repos[*]} " =~ " ${searched_repo} " ]]; then
+		echo "FOUND"
+	elif [[ " ${gitlab_repos[*]} " =~ " ${searched_repo_with_quotations} " ]]; then
 		echo "FOUND"
 	else
 		echo "NOTFOUND"
@@ -271,15 +277,20 @@ gitlab_mirror_repo_exists() {
 #6.d If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
 ####create_repository "$gitlab_repo"
 create_repo_if_not_exists() {
-	#new_repo_name="$1"
-	new_repo_name=$1
+	new_repo_name="$1"
 	
+	gitlab_mirror_is_found="$(gitlab_mirror_repo_exists "$new_repo_name")"
+	echo "new_repo_name=$new_repo_name"
+	echo "gitlab_mirror_is_found=$gitlab_mirror_is_found"
 	if [ "$(gitlab_mirror_repo_exists $new_repo_name)" == "FOUND" ]; then
-		assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "FOUND"
+		#assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "FOUND"
+		echo "gitlab_mirror_is_found_inside_if=$gitlab_mirror_is_found"
 	else
 		create_repository $new_repo_name
 		sleep 5
-		assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "FOUND"
+		gitlab_mirror_is_found_after_creation="$(gitlab_mirror_repo_exists "$new_repo_name")"
+		#assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "FOUND"
+		echo "gitlab_mirror_is_found_after_creation=$gitlab_mirror_is_found_after_creation"
 	fi
 }
 

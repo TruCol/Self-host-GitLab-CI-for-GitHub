@@ -678,11 +678,10 @@ get_last_space_delimted_item_in_line() {
 # Returns FOUND if the incoming ssh account is activated,
 # returns NOTFOUND otherwise.
 github_account_ssh_key_is_added_to_ssh_agent() {
-	local ssh_account=$1
-	#local activated_ssh_output="$2"
-	eval activated_ssh_output="$2"
-	#local activated_ssh_output=("$@")
+	local ssh_account="$1"
+	local activated_ssh_output=("$@")
 	found="false"
+	
 	
 	count=0
 	while IFS= read -r line; do
@@ -717,6 +716,7 @@ any_ssh_key_is_added_to_ssh_agent() {
 		
 		# Get the email address tied to the ssh-account.
 		ssh_email=$(get_ssh_email "$ssh_account")
+		#echo "ssh_email=$ssh_email"
 		
 		if [ "$ssh_email" == "" ]; then
 			#echo "The ssh key file does not exist, so the email address of that ssh-account can not be extracted."

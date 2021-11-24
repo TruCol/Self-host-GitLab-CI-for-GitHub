@@ -54,6 +54,28 @@ setup() {
 
 
 
+### Activate GitHub ssh account
+@test "Check if ssh-account is activated after activating it." {
+	# TODO: ommit this hardcoded username check
+	assert_equal "$GITHUB_USERNAME" a-t-0
+	
+	###activate_ssh_account "$GITHUB_USERNAME"
+	# Expected function output
+	#Agent pid 123
+	#Identity added: /home/name/.ssh/a-t-0 (some@email.domain)
+	
+	# Assert the ssh-key is found in the ssh agent
+	assert_equal "$(any_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME" "$(ssh-add -L)")" "FOUND"
+	#assert_equal "$(github_account_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME" "$(ssh-add -L)")" "FOUND"
+}
+
+
+
+
+
+
+
+
 
 # 6.d Verify gitlab repo is created.
 @test "GitLab repo is found if it exists." {
@@ -172,20 +194,7 @@ setup() {
 
 
 
-### Activate GitHub ssh account
-@test "Check if ssh-account is activated after activating it." {
-	skip
-	# TODO: ommit this hardcoded username check
-	assert_equal "$GITHUB_USERNAME" a-t-0
-	
-	activate_ssh_account "$GITHUB_USERNAME"
-	# Expected function output
-	#Agent pid 123
-	#Identity added: /home/name/.ssh/a-t-0 (some@email.domain)
-	
-	# Assert the ssh-key is found in the ssh agent
-	assert_equal "$(github_account_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME" "$(ssh-add -L)")" "FOUND"
-}
+
 
 @test "Assert code execution is terminated if a required ssh-key is not activated." {
 	non_existant_ssh_account="Some_random_non_existing_ssh_account_31415926531"

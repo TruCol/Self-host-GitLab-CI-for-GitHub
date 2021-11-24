@@ -60,20 +60,25 @@ create_repository() {
 
 #source src/run_ci_job.sh && delete_repository
 delete_repository() {
+	repo_name="$1"
+	repo_username="$2"
 	# load personal_access_token
 	personal_access_token=$(echo $GITLAB_PERSONAL_ACCESS_TOKEN | tr -d '\r')
 	
 	gitlab_username=$(echo $gitlab_server_account | tr -d '\r')
 	gitlab_server_password=$(echo $gitlab_server_password | tr -d '\r')
-	repo_name=$SOURCE_FOLDERNAME
+	###repo_name=$SOURCE_FOLDERNAME
+	# TODO: modify the functions that call this functions to pass the source folder name.
+	
 	
 	# TODO: check if the repo exists (unstable behaviour, sometimes empty when repository DOES exist).
-	exists=$(git ls-remote --exit-code -h "http://$gitlab_username:$gitlab_server_password@127.0.0.1/$gitlab_username/$repo_name")
+	exists=$(git ls-remote --exit-code -h "http://$gitlab_username:$gitlab_server_password@127.0.0.1/$repo_username/$repo_name")
 	echo "exists=$exists"
 	# DELETE the repository
 	if [ -z "$exists" ]; then
 		echo "Repo does not exist."
 	else
+		#output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name)
 		output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name)
 	fi
 	
@@ -81,6 +86,16 @@ delete_repository() {
 	# TODO: check if the repo exists
 	#output={"message":{"base":["The project is still being deleted. Please try again later."],"limit_reached":[]}}
 
+}
+
+delete_existing_repository() {
+	repo_name="$1"
+	repo_username="$2"
+	
+	# load personal_access_token
+	personal_access_token=$(echo $GITLAB_PERSONAL_ACCESS_TOKEN | tr -d '\r')
+	
+	output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE http://127.0.0.1/api/v4/projects/$repo_username%2F$repo_name)
 }
 
 #source src/run_ci_job.sh && clone_repository

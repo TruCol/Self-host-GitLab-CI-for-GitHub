@@ -300,16 +300,20 @@ create_repo_if_not_exists() {
 	fi
 }
 
-delete_repo_if_not_exists() {
+delete_repo_if_it_exists() {
 	new_repo_name="$1"
 	
 	if [ "$(gitlab_mirror_repo_exists "$new_repo_name")" == "NOTFOUND" ]; then
-		assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "FOUND"
-	else
-		#echo "CREATING"
-		delete_repository "$new_repo_name"
-		sleep 5
 		assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "NOTFOUND"
+	elif [ "$(gitlab_mirror_repo_exists "$new_repo_name")" == "FOUND" ]; then
+		#echo "CREATING"
+		deletion_output=$(delete_existing_repository "$new_repo_name" "root")
+		sleep 5
+		deleted_repo_is_found="$(gitlab_mirror_repo_exists "$new_repo_name")"
+		assert_equal "$deleted_repo_is_found" "NOTFOUND"
+	else
+		echo "The repository was not NOTFOUND, nor was it FOUND. "
+		exit 64
 	fi
 }
 

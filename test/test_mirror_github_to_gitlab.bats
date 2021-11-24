@@ -83,8 +83,7 @@ setup() {
 	create_repo_if_not_exists "$test_repo_name"
 	output_after_creation=$(gitlab_mirror_repo_exists "$test_repo_name")
 	assert_equal "$output_after_creation" "FOUND"
-	deletion_output=$(delete_repo_if_not_exists "$test_repo_name")
-	echo "deletion_output=$deletion_output"
+	deletion_output=$(delete_repo_if_it_exists "$test_repo_name")
 	output_after_deletion=$(gitlab_mirror_repo_exists "$test_repo_name")
 	assert_equal "$output_after_deletion" "NOTFOUND"
 }
@@ -113,7 +112,7 @@ setup() {
 	# TODO: verify the repository is added before testing whether it exists.
 	# TODO: remove the repository after verifying it exists
 	something=$(get_project_list)
-	output=$(delete_repo_if_not_exists "non-existing-repository")
+	output=$(delete_repo_if_it_exists "non-existing-repository")
 	output=$(gitlab_mirror_repo_exists "non-existing-repository")
 	assert_equal "$output" "NOTFOUND"
 }

@@ -59,7 +59,7 @@ setup() {
 	# TODO: ommit this hardcoded username check
 	assert_equal "$GITHUB_USERNAME" a-t-0
 	
-	###activate_ssh_account "$GITHUB_USERNAME"
+	activate_ssh_account "$GITHUB_USERNAME"
 	# Expected function output
 	#Agent pid 123
 	#Identity added: /home/name/.ssh/a-t-0 (some@email.domain)
@@ -75,20 +75,18 @@ setup() {
 
 
 
-
-
 # 6.d Verify gitlab repo is created.
 @test "GitLab repo is found if it exists." {
 	# TODO: verify the repository is added before testing whether it exists.
 	# TODO: remove the repository after verifying it exists
-	something=$(get_project_list)
-	#creating_repo_output=$(create_repo_if_not_exists "extra-project")
-	create_repo_if_not_exists "extra-project"
-	output=$(gitlab_mirror_repo_exists "extra_project")
-	assert_equal "$output" "FOUND"
-	output=$(delete_repo_if_not_exists "extra-project")
-	output=$(gitlab_mirror_repo_exists "extra-project")
-	assert_equal "$output" "NOTFOUND"
+	test_repo_name="extra-project"
+	create_repo_if_not_exists "$test_repo_name"
+	output_after_creation=$(gitlab_mirror_repo_exists "$test_repo_name")
+	assert_equal "$output_after_creation" "FOUND"
+	deletion_output=$(delete_repo_if_not_exists "$test_repo_name")
+	echo "deletion_output=$deletion_output"
+	output_after_deletion=$(gitlab_mirror_repo_exists "$test_repo_name")
+	assert_equal "$output_after_deletion" "NOTFOUND"
 }
 
 # 6.d Verify gitlab repo is created.

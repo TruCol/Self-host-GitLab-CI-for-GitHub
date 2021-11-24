@@ -240,17 +240,16 @@ loop_through_github_branches() {
 # shellcheck disable=SC2120
 get_project_list(){
 	#echo "BeforeFAILURE=$1"
-	#local -n repo_arr="$1"     # use nameref for indirection
 	local -n repo_arr="$1"     # use nameref for indirection
+	#local -n repo_arr=$1     # use nameref for indirection
 	#echo "AFTERFAILURE=$1"
 
     # Get a list of the repositories in your own local GitLab server (that runs the GitLab runner CI).
-	repositories=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
-	echo "repositories=$repositories"
+	repositories=$(curl --header "PRIVATE-TOKEN: $gitlab_personal_access_token" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
 	
 	# TODO: identify why the response of the repositories command is inconsistent.
 	readarray -t repo_arr <  <(echo "$repositories" | jq ".[].path")
-	echo "repo_arr=$repo_arr"
+	#echo "repo_arr=$repo_arr"
 }
 
 # 6.d Check if the mirror repository exists in GitLab
@@ -261,7 +260,7 @@ gitlab_mirror_repo_exists() {
 	
 	local gitlab_repos
     get_project_list gitlab_repos       # call function to populate the array
-    echo "gitlab_repos=${gitlab_repos[*]}"
+    #echo "gitlab_repos=${gitlab_repos[*]}"
 	
 	if [[ " ${gitlab_repos[*]} " =~ " ${searched_repo} " ]]; then
 		echo "FOUND"
@@ -278,19 +277,26 @@ gitlab_mirror_repo_exists() {
 ####create_repository "$gitlab_repo"
 create_repo_if_not_exists() {
 	new_repo_name="$1"
+	echo "gitlab_personal_access_token=$gitlab_personal_access_token"
+	
+	#command="curl --header \"PRIVATE-TOKEN: $gitlab_personal_access_token\" \"$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1\""
+	#echo "command=$command \n\n\n"
+	#repositories=$(curl --header "PRIVATE-TOKEN: $gitlab_personal_access_token" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
+	#echo "repositories_in_func=$repositories"
 	
 	gitlab_mirror_is_found="$(gitlab_mirror_repo_exists "$new_repo_name")"
-	echo "new_repo_name=$new_repo_name"
-	echo "gitlab_mirror_is_found=$gitlab_mirror_is_found"
-	if [ "$(gitlab_mirror_repo_exists $new_repo_name)" == "FOUND" ]; then
-		#assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "FOUND"
+	#echo "new_repo_name=$new_repo_name"
+	#echo "gitlab_mirror_is_found=$gitlab_mirror_is_found"
+	if [ "$(gitlab_mirror_repo_exists "$new_repo_name")" == "FOUND" ]; then
+		assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "FOUND"
 		echo "gitlab_mirror_is_found_inside_if=$gitlab_mirror_is_found"
 	else
-		create_repository $new_repo_name
+		#create_repository $new_repo_name
+		create_repository "$new_repo_name"
 		sleep 5
 		gitlab_mirror_is_found_after_creation="$(gitlab_mirror_repo_exists "$new_repo_name")"
-		#assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "FOUND"
-		echo "gitlab_mirror_is_found_after_creation=$gitlab_mirror_is_found_after_creation"
+		assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "FOUND"
+		#echo "gitlab_mirror_is_found_after_creation=$gitlab_mirror_is_found_after_creation"
 	fi
 }
 

@@ -349,6 +349,7 @@ get_gitlab_repo_if_not_exists() {
 	if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "NOTFOUND" ]; then
 		clone_repository "$gitlab_repo_name" "$gitlab_username" "$gitlab_server_password" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
 		assert_equal "$(gitlab_repo_exists_locally "$gitlab_repo_name")" "FOUND"
+		echo "FOUND"
 	elif [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
 		echo "FOUND"
 	else

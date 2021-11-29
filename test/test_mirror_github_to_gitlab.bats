@@ -64,9 +64,12 @@ setup() {
 # 6.e Clone GitLab repo if it does not exist locally.
 @test "Test GitLab repo is cloned locally." {
 	# TODO: ommit this hardcoded username check
+	gitlab_username="root" # works if the GitLab repo is public.
+	################################################# IMPORTANT#############
+	# TODO: make it work if the GitLab repo is private.
 	gitlab_repo_name="sponsor_example"
-	actual_output=$(get_gitlab_repo_if_not_exists "$gitlab_repo_name")
-	assert_equal "$actual_output" "NOTFOUND"
+	function_output=$(get_gitlab_repo_if_not_exists "$gitlab_username" "$gitlab_repo_name")
+	assert_equal "$function_output" "FOUND"
 }
 
 

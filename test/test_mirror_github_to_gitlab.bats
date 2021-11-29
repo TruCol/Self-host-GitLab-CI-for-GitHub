@@ -52,29 +52,6 @@ setup() {
 	fi
 }
 
-# Verify that the GitLab repository can be pulled.
-@test "Verify if gitlab repository can be pulled." {
-	gitlab_repo_name="sponsor_example"
-	paths=$(git_pull_gitlab_repo "$gitlab_repo_name")
-	#assert_equal --partial "$paths" "PWD=$PWD"
-	# TODO: generate list of acceptable output statements
-	# Already up to date.
-	assert_success
-}
-
-
-# Verify that the GitLab repository can be pulled.
-@test "Verify if non-existing repository pull throws error." {
-	gitlab_repo_name="non-existing-repository"
-	
-	#assert_equal --partial "$paths" "PWD=$PWD"
-	# TODO: generate list of acceptable output statements
-	# Already up to date.
-	run bash -c "source src/mirror_github_to_gitlab.sh && git_pull_gitlab_repo $gitlab_repo_name"
-	assert_failure
-	assert_output "The GitLab repository does not exist locally."
-}
-
 ### Activate GitHub ssh account
 @test "Check if ssh-account is activated after activating it." {
 	# TODO: ommit this hardcoded username check
@@ -406,4 +383,27 @@ END
 	run bash -c "source src/mirror_github_to_gitlab.sh && get_gitlab_repo_if_not_exists $gitlab_username $gitlab_repo_name"
 	assert_failure
 	assert_output --partial "ERROR, the GitLab repository was not found in the GitLab server."
+}
+
+# Verify that the GitLab repository can be pulled.
+@test "Verify if gitlab repository can be pulled." {
+	gitlab_repo_name="sponsor_example"
+	paths=$(git_pull_gitlab_repo "$gitlab_repo_name")
+	#assert_equal --partial "$paths" "PWD=$PWD"
+	# TODO: generate list of acceptable output statements
+	# Already up to date.
+	assert_success
+}
+
+
+# Verify that the GitLab repository can be pulled.
+@test "Verify if non-existing repository pull throws error." {
+	gitlab_repo_name="non-existing-repository"
+	
+	#assert_equal --partial "$paths" "PWD=$PWD"
+	# TODO: generate list of acceptable output statements
+	# Already up to date.
+	run bash -c "source src/mirror_github_to_gitlab.sh && git_pull_gitlab_repo $gitlab_repo_name"
+	assert_failure
+	assert_output "The GitLab repository does not exist locally."
 }

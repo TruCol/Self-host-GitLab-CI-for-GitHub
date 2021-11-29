@@ -396,12 +396,17 @@ git_pull_gitlab_repo() {
 	fi
 }
 
-# 6.f Checkout that branch in the local GitHub mirror repository.
+# 6.f.0 Checkout that branch in the local GitHub mirror repository.
+# 6.f.1 Verify the GitHub mirror repository contains a gitlab yaml file.
 
+# 6.g.0 Checkout that branch in the local GitLab mirror repository.
+# 6.g.1 If the branch does not exist in the GitLab repo, create it.
 
-# 6.g Checkout that branch in the local GitLab mirror repository.
+# 6.h If there are differences in files, copy the content from GitHub to GitLab (except for the .git folder).
 
-# 6.h 
+# 6.i Get commit sha from GitHub.
+
+# 6.j Commit the GitLab branch changes, with the sha from the GitHub branch.
 
 
 

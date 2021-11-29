@@ -51,6 +51,20 @@ create_mirror_directories() {
 	$(create_dir "$MIRROR_LOCATION/GitLab")
 }
 #assert_equal "$(dir_exists "$MIRROR_LOCATION")" "FOUND" 
+verify_mirror_directories_are_created() {
+	if [ "$MIRROR_LOCATION" == "" ]; then
+		echo "Mirror location is not created"
+		exit 66
+	elif test ! -d "$MIRROR_LOCATION"; then
+		echo "Mirror location is not created"
+		exit 67
+	elif test ! -d "$MIRROR_LOCATION/GitLab"; then
+		echo "Mirror location GitLab directory is not created"
+		exit 68
+	else
+		echo "FOUND"
+	fi
+}
 
 remove_mirror_directories() {
 	$(remove_dir "$MIRROR_LOCATION")
@@ -252,8 +266,8 @@ get_project_list(){
 	#echo "repo_arr=$repo_arr"
 }
 
-# 6.d Check if the mirror repository exists in GitLab
-gitlab_mirror_repo_exists() {
+# 6.d.0 Check if the mirror repository exists in GitLab
+gitlab_mirror_repo_exists_in_gitlab() {
 	searched_repo="$1"
 	# The repository array returned by GitLab API contains extra quotations around each repo.
 	searched_repo_with_quotations='"'"$searched_repo"'"' 
@@ -273,8 +287,7 @@ gitlab_mirror_repo_exists() {
 
 
 
-#6.d If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
-####create_repository "$gitlab_repo"
+#6.d.1 If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
 create_repo_if_not_exists() {
 	new_repo_name="$1"
 	echo "gitlab_personal_access_token=$gitlab_personal_access_token"
@@ -284,32 +297,33 @@ create_repo_if_not_exists() {
 	#repositories=$(curl --header "PRIVATE-TOKEN: $gitlab_personal_access_token" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
 	#echo "repositories_in_func=$repositories"
 	
-	gitlab_mirror_is_found="$(gitlab_mirror_repo_exists "$new_repo_name")"
+	gitlab_mirror_is_found="$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")"
 	#echo "new_repo_name=$new_repo_name"
 	#echo "gitlab_mirror_is_found=$gitlab_mirror_is_found"
-	if [ "$(gitlab_mirror_repo_exists "$new_repo_name")" == "FOUND" ]; then
-		assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "FOUND"
+	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" == "FOUND" ]; then
+		assert_equal "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" "FOUND"
 		echo "gitlab_mirror_is_found_inside_if=$gitlab_mirror_is_found"
 	else
 		#create_repository $new_repo_name
 		create_repository "$new_repo_name"
 		sleep 5
-		gitlab_mirror_is_found_after_creation="$(gitlab_mirror_repo_exists "$new_repo_name")"
-		assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "FOUND"
+		gitlab_mirror_is_found_after_creation="$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")"
+		assert_equal "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" "FOUND"
 		#echo "gitlab_mirror_is_found_after_creation=$gitlab_mirror_is_found_after_creation"
 	fi
 }
 
+# TODO: move to helper.sh
 delete_repo_if_it_exists() {
 	new_repo_name="$1"
 	
-	if [ "$(gitlab_mirror_repo_exists "$new_repo_name")" == "NOTFOUND" ]; then
-		assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "NOTFOUND"
-	elif [ "$(gitlab_mirror_repo_exists "$new_repo_name")" == "FOUND" ]; then
+	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" == "NOTFOUND" ]; then
+		assert_equal "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" "NOTFOUND"
+	elif [ "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" == "FOUND" ]; then
 		#echo "CREATING"
 		deletion_output=$(delete_existing_repository "$new_repo_name" "root")
 		sleep 5
-		deleted_repo_is_found="$(gitlab_mirror_repo_exists "$new_repo_name")"
+		deleted_repo_is_found="$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")"
 		assert_equal "$deleted_repo_is_found" "NOTFOUND"
 	else
 		echo "The repository was not NOTFOUND, nor was it FOUND. "
@@ -317,9 +331,7 @@ delete_repo_if_it_exists() {
 	fi
 }
 
-
-# 6.e If the GitLab repository exists, clone it locally
-# TODO: verify the repository exists locally.
+# TODO: move to helper.sh
 gitlab_repo_exists_locally(){
 	gitlab_repo="$1"
 	if test -d "$MIRROR_LOCATION/GitLab/$gitlab_repo"; then
@@ -329,7 +341,7 @@ gitlab_repo_exists_locally(){
 	fi
 }
 
-# TODO: do a git pull to update the local repository.
+# 6.e.0 If the GitLab repository exists in Gitlab, if it does not exist locally clone it, otherwise do a git pull.
 get_gitlab_repo_if_not_exists() {
 	gitlab_username="$1"
 	gitlab_repo_name="$2"
@@ -340,26 +352,44 @@ get_gitlab_repo_if_not_exists() {
 	
 	# TODO: verify local gitlab mirror repo directories are created
 	create_mirror_directories
-	assert_not_equal "$MIRROR_LOCATION" ""
-	assert_file_exist "$MIRROR_LOCATION"
-	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
+	if [ "$(verify_mirror_directories_are_created)" != "FOUND" ]; then
+		#assert_not_equal "$MIRROR_LOCATION" ""
+		#assert_file_exist "$MIRROR_LOCATION"
+		#assert_file_exist "$MIRROR_LOCATION/GitLab"
+		echo "ERROR, the GitLab repository was not found in the GitLab server."
+		exit 60
 	# TODO: verify the repository exists in GitLab, throw error otherwise.
-	
-	if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "NOTFOUND" ]; then
-		clone_repository "$gitlab_repo_name" "$gitlab_username" "$gitlab_server_password" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
-		assert_equal "$(gitlab_repo_exists_locally "$gitlab_repo_name")" "FOUND"
-		echo "FOUND"
-	elif [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
-		echo "FOUND"
+	elif [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "NOTFOUND" ]; then
+		echo "ERROR, the GitLab repository was not found in the GitLab server."
+		exit 65
 	else
-		# TODO: do a gitlab pull to get the latest version.
-		echo "ERROR, the GitLab repository was not found locally and not cloned."
-		exit 64
+		if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "NOTFOUND" ]; then
+			clone_repository "$gitlab_repo_name" "$gitlab_username" "$gitlab_server_password" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
+			assert_equal "$(gitlab_repo_exists_locally "$gitlab_repo_name")" "FOUND"
+			echo "FOUND"
+		elif [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
+			echo "FOUND"
+			# TODO: do a gitlab pull to get the latest version.
+		else
+			echo "ERROR, the GitLab repository was not found locally and not cloned."
+			exit 64
+		fi
 	fi
 }
 
-# 6.f Checkout that branch in the local GitLab mirror repository.
+# TODO: move to helper.
+git_pull_gitlab_repo() {
+	gitlab_repo_name="$1"
+	if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
+		echo "PWD=$PWD"
+		cd "$MIRROR_LOCATION/GitLab/$gitlab_repo" && git pull
+		cd ../../..
+		echo "PWD=$PWD"
+	fi
+}
+
+# 6.f Checkout that branch in the local GitHub mirror repository.
 
 # 6.g Checkout that branch in the local GitLab mirror repository.
 

@@ -52,17 +52,8 @@ setup() {
 	fi
 }
 
-
-# 6.e Ensure that the function that checks if the GitLab repo exists returns NOTFOUND for non-existant repos.
-@test "Test non-existant local gitlab repo is identified as NOTFOUND." {
-	# TODO: ommit this hardcoded username check
-	non_existant_repository="NON_EXISTANT_REPOSITORY"
-	actual_output=$(gitlab_repo_exists_locally "$non_existant_repository")
-	assert_equal "$actual_output" "NOTFOUND"
-}
-
-# 6.e Clone GitLab repo if it does not exist locally.
-@test "Test GitLab repo is cloned locally." {
+# 6.e.0.T0 Clone GitLab repo if it does not exist locally.
+@test "Test GitLab repo is cloned locally successfully." {
 	# TODO: ommit this hardcoded username check
 	gitlab_username="root" # works if the GitLab repo is public.
 	################################################# IMPORTANT#############
@@ -72,6 +63,24 @@ setup() {
 	assert_equal "$function_output" "FOUND"
 }
 
+
+# 6.e.0.T1 Clone GitLab repo if it does not exist locally.
+@test "Test GitLab repo is  not cloned if the repo does not exist in GitLab." {
+	# TODO: ommit this hardcoded username check
+	gitlab_username="root" # works if the GitLab repo is public.
+	
+	################################################# IMPORTANT#############
+	# TODO: make it work if the GitLab repo is private.
+	
+	gitlab_repo_name="non-existing-repository"
+	#function_output=$(get_gitlab_repo_if_not_exists "$gitlab_username" "$gitlab_repo_name")
+	#run bash -c "source src/mirror_github_to_gitlab.sh && $(get_gitlab_repo_if_not_exists "$gitlab_username" "$gitlab_repo_name")"
+	run bash -c "source src/mirror_github_to_gitlab.sh && get_gitlab_repo_if_not_exists $gitlab_username $gitlab_repo_name"
+	#run bash -c "source src/mirror_github_to_gitlab.sh && check_ssh_access_to_repo $GITHUB_USERNAME $non_existant_repository"
+	assert_failure
+	assert_output --partial "ERROR, the GitLab repository was not found in the GitLab server."
+	#assert_equal "$(gitlab_repo_exists_locally "$gitlab_repo_name")" "NOTFOUND"
+}
 
 
 ### Activate GitHub ssh account
@@ -331,10 +340,10 @@ END
 	# TODO: remove the repository after verifying it exists
 	test_repo_name="extra-project"
 	create_repo_if_not_exists "$test_repo_name"
-	output_after_creation=$(gitlab_mirror_repo_exists "$test_repo_name")
+	output_after_creation=$(gitlab_mirror_repo_exists_in_gitlab "$test_repo_name")
 	assert_equal "$output_after_creation" "FOUND"
 	deletion_output=$(delete_repo_if_it_exists "$test_repo_name")
-	output_after_deletion=$(gitlab_mirror_repo_exists "$test_repo_name")
+	output_after_deletion=$(gitlab_mirror_repo_exists_in_gitlab "$test_repo_name")
 	assert_equal "$output_after_deletion" "NOTFOUND"
 }
 
@@ -343,7 +352,7 @@ END
 	# TODO: verify the repository is added before testing whether it exists.
 	# TODO: remove the repository after verifying it exists
 	something=$(get_project_list)
-	output=$(gitlab_mirror_repo_exists "non-existing-repository")
+	output=$(gitlab_mirror_repo_exists_in_gitlab "non-existing-repository")
 	assert_equal "$output" "NOTFOUND"
 }
 
@@ -353,7 +362,7 @@ END
 	# TODO: remove the repository after verifying it exists
 	something=$(get_project_list)
 	creating_repo_output=$(create_repo_if_not_exists "non-existing-repository")
-	output=$(gitlab_mirror_repo_exists "non-existing-repository")
+	output=$(gitlab_mirror_repo_exists_in_gitlab "non-existing-repository")
 	assert_equal "$output" "FOUND"
 }
 
@@ -363,13 +372,21 @@ END
 	# TODO: remove the repository after verifying it exists
 	something=$(get_project_list)
 	output=$(delete_repo_if_it_exists "non-existing-repository")
-	output=$(gitlab_mirror_repo_exists "non-existing-repository")
+	output=$(gitlab_mirror_repo_exists_in_gitlab "non-existing-repository")
 	assert_equal "$output" "NOTFOUND"
 }
 
 @test "ALLOW DUPLICATE EXECUTION." {
 	new_repo_name="extra-non-existing-project"
-	assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "NOTFOUND"
-	assert_equal "$(gitlab_mirror_repo_exists "$new_repo_name")" "NOTFOUND"
+	assert_equal "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" "NOTFOUND"
+	assert_equal "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" "NOTFOUND"
+}
+
+# 6.e Ensure that the function that checks if the GitLab repo exists returns NOTFOUND for non-existant repos.
+@test "Test non-existant local gitlab repo is identified as NOTFOUND." {
+	# TODO: ommit this hardcoded username check
+	non_existant_repository="NON_EXISTANT_REPOSITORY"
+	actual_output=$(gitlab_repo_exists_locally "$non_existant_repository")
+	assert_equal "$actual_output" "NOTFOUND"
 }
 

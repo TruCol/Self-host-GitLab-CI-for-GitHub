@@ -579,6 +579,13 @@ create_dir() {
 	fi
 }
 
+remove_dir() {
+	abs_dir=$1
+	if [ "$(dir_exists "$abs_dir")" == "FOUND" ]; then
+		yes | rm -r $abs_dir
+	fi
+}
+
 sudo_create_dir() {
 	abs_dir=$1
 	if [ "$(sudo_dir_exists "$abs_dir")" == "NOTFOUND" ]; then
@@ -657,4 +664,112 @@ get_commit_of_branch() {
 			echo "${branch_commits_arr[i]}"
 		fi
 	done
+}
+
+get_last_space_delimted_item_in_line() {
+	line="$1"
+	IFS=' ' # let's make sure we split on newline chars
+	var=(${lines}) # parse the lines into a variable that is countable
+	stringarray=($line)
+	echo "${stringarray[-1]}"
+}
+
+
+# Returns FOUND if the incoming ssh account is activated,
+# returns NOTFOUND otherwise.
+github_account_ssh_key_is_added_to_ssh_agent() {
+	local ssh_account="$1"
+	local activated_ssh_output=("$@")
+	found="false"
+	
+	
+	count=0
+	while IFS= read -r line; do
+		count=$((count+1))
+		
+		# Get the username from the ssh key .pub file.
+		local username="$(get_last_space_delimted_item_in_line "$line")"
+		
+		if [ "$username" == "$ssh_account" ]; then
+			if [ "$found" == "false" ]; then
+				echo "FOUND"
+				found="true"
+			fi
+		fi
+	done <<< "$activated_ssh_output"
+	if [ "$found" == "false" ]; then
+		echo "NOTFOUND"
+	fi
+}
+
+# Checks for both GitHub username as well as for the email address that is 
+# tied to that acount.
+any_ssh_key_is_added_to_ssh_agent() {
+	local ssh_account=$1
+	local ssh_output=$(ssh-add -L)
+	
+	# Check if the ssh key is added to ssh-agent by means of username.
+	found_ssh_username="$(github_account_ssh_key_is_added_to_ssh_agent "$ssh_account" "\${ssh_output}")"
+	if [[ "$found_ssh_username" == "FOUND" ]]; then
+		echo "FOUND"
+	else
+		
+		# Get the email address tied to the ssh-account.
+		ssh_email=$(get_ssh_email "$ssh_account")
+		#echo "ssh_email=$ssh_email"
+		
+		if [ "$ssh_email" == "" ]; then
+			#echo "The ssh key file does not exist, so the email address of that ssh-account can not be extracted."
+			echo "NOTFOUND_FILE"
+			exit 1
+		else 
+			
+			# Check if the ssh key is added to ssh-agent by means of email.
+			found_ssh_email="$(github_account_ssh_key_is_added_to_ssh_agent "$ssh_email" "\${ssh_output}")"
+			
+			if [ "$found_ssh_email" == "FOUND" ]; then
+				echo "FOUND"
+			else
+				#assert_equal  "$found_ssh_email" "FOUND"
+				echo "NOTFOUND_EMAIL"
+			fi
+		fi
+	fi
+}
+
+
+verify_ssh_key_is_added_to_ssh_agent() {
+	local ssh_account=$1
+	local ssh_output=$(ssh-add -L)
+	local ssh_key_in_ssh_agent=$(any_ssh_key_is_added_to_ssh_agent $ssh_account)
+	if [[ "$ssh_key_in_ssh_agent" == "NOTFOUND_FILE" ]] || [[ "$ssh_key_in_ssh_agent" == "NOTFOUND_EMAIL" ]]; then
+		echo 'Please ensure the ssh-account '$ssh_account' key is added to the ssh agent. You can do that with commands:'"\\n"' eval $(ssh-agent -s)'"\n"'ssh-add ~/.ssh/'$ssh_account''"\n"' Please run this script again once you are done.'
+		exit 1
+	fi
+}
+
+# Untested function to retrieve email pertaining to ssh key
+get_ssh_email() {
+	local ssh_account=$1
+	
+	local username=$(whoami)
+	local key_filepath="/home/$username/.ssh/$ssh_account.pub"
+	
+	# Check if file exists.
+	assert_file_exists "$key_filepath"
+	
+	# Read the ssh pub file.
+	local public_ssh_content=$(cat $key_filepath)
+	
+	# Get email from ssh pub file.
+	local email=$(get_last_space_delimted_item_in_line "$public_ssh_content")
+	echo "$email"
+}
+
+assert_file_exists() {
+	filepath=$1
+	if [ ! -f "$filepath" ]; then
+		echo "The ssh key file: $filepath does not exist, so the email address of that ssh-account can not be extracted."
+		exit 64
+	fi
 }

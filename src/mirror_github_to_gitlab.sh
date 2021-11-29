@@ -382,14 +382,22 @@ get_gitlab_repo_if_not_exists() {
 git_pull_gitlab_repo() {
 	gitlab_repo_name="$1"
 	if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
-		echo "PWD=$PWD"
+		pwd_before="$PWD"
 		cd "$MIRROR_LOCATION/GitLab/$gitlab_repo" && git pull
 		cd ../../..
-		echo "PWD=$PWD"
+		pwd_after="$PWD"
+		if [ "$pwd_before" != "$pwd_after" ]; then
+			echo "The current path is not returned to what it originally was."
+			exit 64
+		fi
+	else 
+		echo "The GitLab repository does not exist locally."
+		exit 64
 	fi
 }
 
 # 6.f Checkout that branch in the local GitHub mirror repository.
+
 
 # 6.g Checkout that branch in the local GitLab mirror repository.
 

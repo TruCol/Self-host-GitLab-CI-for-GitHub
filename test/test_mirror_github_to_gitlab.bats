@@ -52,36 +52,28 @@ setup() {
 	fi
 }
 
-# 6.e.0.T0 Clone GitLab repo if it does not exist locally.
-@test "Test GitLab repo is cloned locally successfully." {
-	# TODO: ommit this hardcoded username check
-	gitlab_username="root" # works if the GitLab repo is public.
-	################################################# IMPORTANT#############
-	# TODO: make it work if the GitLab repo is private.
+# Verify that the GitLab repository can be pulled.
+@test "Verify if gitlab repository can be pulled." {
 	gitlab_repo_name="sponsor_example"
-	function_output=$(get_gitlab_repo_if_not_exists "$gitlab_username" "$gitlab_repo_name")
-	assert_equal "$function_output" "FOUND"
+	paths=$(git_pull_gitlab_repo "$gitlab_repo_name")
+	#assert_equal --partial "$paths" "PWD=$PWD"
+	# TODO: generate list of acceptable output statements
+	# Already up to date.
+	assert_success
 }
 
 
-# 6.e.0.T1 Clone GitLab repo if it does not exist locally.
-@test "Test GitLab repo is  not cloned if the repo does not exist in GitLab." {
-	# TODO: ommit this hardcoded username check
-	gitlab_username="root" # works if the GitLab repo is public.
-	
-	################################################# IMPORTANT#############
-	# TODO: make it work if the GitLab repo is private.
-	
+# Verify that the GitLab repository can be pulled.
+@test "Verify if non-existing repository pull throws error." {
 	gitlab_repo_name="non-existing-repository"
-	#function_output=$(get_gitlab_repo_if_not_exists "$gitlab_username" "$gitlab_repo_name")
-	#run bash -c "source src/mirror_github_to_gitlab.sh && $(get_gitlab_repo_if_not_exists "$gitlab_username" "$gitlab_repo_name")"
-	run bash -c "source src/mirror_github_to_gitlab.sh && get_gitlab_repo_if_not_exists $gitlab_username $gitlab_repo_name"
-	#run bash -c "source src/mirror_github_to_gitlab.sh && check_ssh_access_to_repo $GITHUB_USERNAME $non_existant_repository"
+	
+	#assert_equal --partial "$paths" "PWD=$PWD"
+	# TODO: generate list of acceptable output statements
+	# Already up to date.
+	run bash -c "source src/mirror_github_to_gitlab.sh && git_pull_gitlab_repo $gitlab_repo_name"
 	assert_failure
-	assert_output --partial "ERROR, the GitLab repository was not found in the GitLab server."
-	#assert_equal "$(gitlab_repo_exists_locally "$gitlab_repo_name")" "NOTFOUND"
+	assert_output "The GitLab repository does not exist locally."
 }
-
 
 ### Activate GitHub ssh account
 @test "Check if ssh-account is activated after activating it." {
@@ -390,3 +382,28 @@ END
 	assert_equal "$actual_output" "NOTFOUND"
 }
 
+# 6.e.0.T0 Clone GitLab repo if it does not exist locally.
+@test "Test GitLab repo is cloned locally successfully." {
+	# TODO: ommit this hardcoded username check
+	gitlab_username="root" # works if the GitLab repo is public.
+	################################################# IMPORTANT#############
+	# TODO: make it work if the GitLab repo is private.
+	gitlab_repo_name="sponsor_example"
+	function_output=$(get_gitlab_repo_if_not_exists "$gitlab_username" "$gitlab_repo_name")
+	assert_equal "$function_output" "FOUND"
+}
+
+
+# 6.e.0.T1 Clone GitLab repo if it does not exist locally.
+@test "Test GitLab repo is  not cloned if the repo does not exist in GitLab." {
+	# TODO: ommit this hardcoded username check
+	gitlab_username="root" # works if the GitLab repo is public.
+	
+	################################################# IMPORTANT#############
+	# TODO: make it work if the GitLab repo is private.
+	
+	gitlab_repo_name="non-existing-repository"
+	run bash -c "source src/mirror_github_to_gitlab.sh && get_gitlab_repo_if_not_exists $gitlab_username $gitlab_repo_name"
+	assert_failure
+	assert_output --partial "ERROR, the GitLab repository was not found in the GitLab server."
+}

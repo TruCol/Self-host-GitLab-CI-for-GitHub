@@ -54,13 +54,13 @@ create_mirror_directories() {
 verify_mirror_directories_are_created() {
 	if [ "$MIRROR_LOCATION" == "" ]; then
 		echo "Mirror location is not created"
-		exit 66
+		exit 1
 	elif test ! -d "$MIRROR_LOCATION"; then
 		echo "Mirror location is not created"
-		exit 67
+		exit 2
 	elif test ! -d "$MIRROR_LOCATION/GitLab"; then
 		echo "Mirror location GitLab directory is not created"
-		exit 68
+		exit 3
 	else
 		echo "FOUND"
 	fi
@@ -98,7 +98,7 @@ check_ssh_access_to_repo() {
 	elif [ "$found_error_in_ssh_command" == "FOUND" ]; then
 		if [ "$retry" == "YES" ]; then
 			echo "Your ssh-account:$github_username does not have pull access to the repository:$github_repository"
-			exit 1
+			exit 4
 			# TODO: Throw error
 			#(A public repository should grant ssh access even if no ssh credentials for that GitHub user is given.)
 		else
@@ -125,12 +125,12 @@ verify_github_repository_is_cloned() {
 	found_repo=$(dir_exists "$target_directory")
 	if [ "$found_repo" == "NOTFOUND" ]; then
 		echo "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
-		exit 125
+		exit 5
 	elif [ "$found_repo" == "FOUND" ]; then
 		echo "FOUND"
 	else
 		echo "An unknown error occured."
-		exit 125
+		exit 6
 	fi
 }
 
@@ -321,7 +321,7 @@ delete_repo_if_it_exists() {
 		assert_equal "$deleted_repo_is_found" "NOTFOUND"
 	else
 		echo "The repository was not NOTFOUND, nor was it FOUND. "
-		exit 64
+		exit 7
 	fi
 }
 
@@ -361,11 +361,11 @@ get_gitlab_repo_if_not_exists() {
 		#assert_file_exist "$MIRROR_LOCATION"
 		#assert_file_exist "$MIRROR_LOCATION/GitLab"
 		echo "ERROR, the GitLab repository was not found in the GitLab server."
-		exit 60
+		exit 8
 	# TODO: verify the repository exists in GitLab, throw error otherwise.
 	elif [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "NOTFOUND" ]; then
 		echo "ERROR, the GitLab repository was not found in the GitLab server."
-		exit 65
+		exit 9
 	else
 		if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "NOTFOUND" ]; then
 			clone_repository "$gitlab_repo_name" "$gitlab_username" "$gitlab_server_password" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
@@ -376,7 +376,7 @@ get_gitlab_repo_if_not_exists() {
 			# TODO: do a gitlab pull to get the latest version.
 		else
 			echo "ERROR, the GitLab repository was not found locally and not cloned."
-			exit 64
+			exit 10
 		fi
 	fi
 }
@@ -399,11 +399,11 @@ git_pull_gitlab_repo() {
 		# Verify the current path is the same as it was when this function started.
 		if [ "$pwd_before" != "$pwd_after" ]; then
 			echo "The current path is not returned to what it originally was."
-			exit 64
+			exit 11
 		fi
 	else 
 		echo "ERROR, the GitLab repository does not exist locally."
-		exit 64
+		exit 12
 	fi
 }
 
@@ -426,7 +426,7 @@ github_branch_exists() {
 		fi
 	else 
 		echo "ERROR, the GitHub repository does not exist locally."
-		exit 64
+		exit 13
 	fi
 }
 
@@ -447,8 +447,8 @@ checkout_branch_in_github_repo() {
 			pwd_before="$PWD"
 			
 			# Checkout the branch inside the repository.
-			cd "$MIRROR_LOCATION/$company/$git_repository" && git checkout "$github_branch_name"
-			cd ../../..
+			cd "$MIRROR_LOCATION/$company/$github_repo_name" && git checkout "$github_branch_name"
+			cd ../../../..
 			# Get the path after executing the command (to verify it is restored correctly after).
 			pwd_after="$PWD"
 	
@@ -458,15 +458,17 @@ checkout_branch_in_github_repo() {
 			# Verify the current path is the same as it was when this function started.
 			if [ "$pwd_before" != "$pwd_after" ]; then
 				echo "The current path is not returned to what it originally was."
-				exit 64
+				#echo "pwd_before=$pwd_before"
+				#echo "pwd_after=$pwd_after"
+				exit 14
 			fi
 		else 
 			echo "Error, the GitHub branch does not exist locally."
-			exit 64
+			exit 15
 		fi
 	else 
 		echo "ERROR, the GitHub repository does not exist locally."
-		exit 64
+		exit 16
 	fi
 }
 
@@ -490,8 +492,8 @@ checkout_branch_in_gitlab_repo() {
 			pwd_before="$PWD"
 			
 			# Checkout the branch inside the repository.
-			cd "$MIRROR_LOCATION/$company/$git_repository" && git checkout "$gitlab_branch_name"
-			cd ../../..
+			cd "$MIRROR_LOCATION/$company/$gitlab_repo_name" && git checkout "$gitlab_branch_name"
+			cd ../../../..
 			# Get the path after executing the command (to verify it is restored correctly after).
 			pwd_after="$PWD"
 	
@@ -501,15 +503,15 @@ checkout_branch_in_gitlab_repo() {
 			# Verify the current path is the same as it was when this function started.
 			if [ "$pwd_before" != "$pwd_after" ]; then
 				echo "The current path is not returned to what it originally was."
-				exit 64
+				exit 17
 			fi
 		else 
 			echo "Error, the gitlab branch does not exist locally."
-			exit 64
+			exit 18
 		fi
 	else 
 		echo "ERROR, the gitlab repository does not exist locally."
-		exit 64
+		exit 19
 	fi
 }
 

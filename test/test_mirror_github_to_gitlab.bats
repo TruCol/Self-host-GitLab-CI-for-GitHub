@@ -52,6 +52,40 @@ setup() {
 	fi
 }
 
+
+
+# 6.f.1 Test if the correct branch is gotten after a checkout.
+@test "Test if GitHub branch is checked out correctly." {
+	github_repo_name="sponsor_example"
+	github_branch_name="attack_in_new_file"
+	company="GitHub"
+	
+	# Checkout branch, if branch is found in local GitHub repo.
+	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name $company)"
+	assert_success
+	
+	# Verify the get_current_github_branch function returns the correct branch.
+	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name)"
+	assert_equal "$actual_result" "$github_branch_name"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ### Activate GitHub ssh account
 @test "Check if ssh-account is activated after activating it." {
 	# TODO: ommit this hardcoded username check
@@ -385,18 +419,18 @@ END
 	assert_output --partial "ERROR, the GitLab repository was not found in the GitLab server."
 }
 
-# Verify that the GitLab repository can be pulled.
+# 6.e.0.helper0 Verify that the GitLab repository can be pulled.
 @test "Verify if gitlab repository can be pulled." {
 	gitlab_repo_name="sponsor_example"
 	paths=$(git_pull_gitlab_repo "$gitlab_repo_name")
-	#assert_equal --partial "$paths" "PWD=$PWD"
+	
 	# TODO: generate list of acceptable output statements
 	# Already up to date.
 	assert_success
 }
 
 
-# Verify that the GitLab repository can be pulled.
+# 6.e.0.helper1 Verify that the GitLab repository can be pulled.
 @test "Verify if non-existing repository pull throws error." {
 	gitlab_repo_name="non-existing-repository"
 	
@@ -406,4 +440,107 @@ END
 	run bash -c "source src/mirror_github_to_gitlab.sh && git_pull_gitlab_repo $gitlab_repo_name"
 	assert_failure
 	assert_output "The GitLab repository does not exist locally."
+}
+
+# 6.e.0.helper1
+@test "Test if GitHub branch exists." {
+	github_repo_name="sponsor_example"
+	github_branch_name="attack_in_new_file"
+	
+	# Check if branch is found in local GitHub repo.
+	actual_result="$(github_branch_exists $github_repo_name $github_branch_name)"
+	last_line=$(get_last_line_of_set_of_lines "\${actual_result}")
+	assert_equal "$last_line" "FOUND"
+}
+
+# 6.e.0.helper1
+@test "Test if GitHub branch exists function fails if GitHub repo not found." {
+	github_repo_name="non-existing-repository"
+	github_branch_name="attack_in_new_file"
+	
+	# Check if branch is found in local GitHub repo.
+	run bash -c "source src/mirror_github_to_gitlab.sh && github_branch_exists $github_repo_name $github_branch_name"
+	assert_failure
+	assert_output --partial "ERROR, the GitHub repository does not exist locally."
+}
+
+# 6.e.0.helper1
+@test "Test if GitHub branch exists function returns NOTFOUND for non-existant branches." {
+	github_repo_name="sponsor_example"
+	github_branch_name="non-existing-branchname"
+	
+	# Check if branch is found in local GitHub repo.
+	actual_result="$(github_branch_exists $github_repo_name $github_branch_name)"
+	last_line=$(get_last_line_of_set_of_lines "\${actual_result}")
+	assert_equal "$last_line" "NOTFOUND"
+}
+
+
+# 6.f.0 Checkout that branch in the local GitHub mirror repository.
+@test "Test if GitHub branch is checked out if it exists." {
+	github_repo_name="sponsor_example"
+	github_branch_name="attack_in_new_file"
+	company="GitHub"
+	
+	# Check if branch is found in local GitHub repo.
+	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name $company)"
+	assert_success
+}
+
+# 6.f.0.helper1
+@test "Test if GitHub branch checkout function fails if GitHub repo not found." {
+	github_repo_name="non-existing-repository"
+	github_branch_name="attack_in_new_file"
+	company="GitHub"
+	
+	# Check if branch is found in local GitHub repo.
+	run bash -c "source src/mirror_github_to_gitlab.sh && checkout_branch_in_github_repo $github_repo_name $github_branch_name $company"
+	assert_failure
+	assert_output --partial "ERROR, the GitHub repository does not exist locally."
+}
+
+# 6.f.0.helper1
+@test "Test if GitHub branch checkout function throws an error if the branch is not found." {
+	github_repo_name="sponsor_example"
+	github_branch_name="non-existing-branchname"
+	
+	# Check if branch is found in local GitHub repo.
+	run bash -c "source src/mirror_github_to_gitlab.sh && checkout_branch_in_github_repo $github_repo_name $github_branch_name $company"
+	assert_failure
+	assert_output --partial "Error, the GitHub branch does not exist locally."
+}
+
+
+# 6.f.0 Checkout that branch in the local GitHub mirror repository.
+@test "Test if GitHub branch is checked out if it exists." {
+	github_repo_name="sponsor_example"
+	github_branch_name="attack_in_new_file"
+	company="GitHub"
+	
+	# Check if branch is found in local GitHub repo.
+	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name $company)"
+	assert_success
+}
+
+# 6.f.0.helper1
+@test "Test if GitHub branch checkout function fails if GitHub repo not found." {
+	github_repo_name="non-existing-repository"
+	github_branch_name="attack_in_new_file"
+	company="GitHub"
+	
+	# Check if branch is found in local GitHub repo.
+	run bash -c "source src/mirror_github_to_gitlab.sh && checkout_branch_in_github_repo $github_repo_name $github_branch_name $company"
+	assert_failure
+	assert_output --partial "ERROR, the GitHub repository does not exist locally."
+}
+
+# 6.f.0.helper1
+@test "Test if GitHub branch checkout function throws an error if the branch is not found." {
+	github_repo_name="sponsor_example"
+	github_branch_name="non-existing-branchname"
+	
+	# Check if branch is found in local GitHub repo.
+	run bash -c "source src/mirror_github_to_gitlab.sh && checkout_branch_in_github_repo $github_repo_name $github_branch_name $company"
+	assert_failure
+	assert_output --partial "Error, the GitHub branch does not exist locally."
 }

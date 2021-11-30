@@ -66,7 +66,7 @@ setup() {
 	assert_success
 	
 	# Verify the get_current_github_branch function returns the correct branch.
-	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name)"
+	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name $company)"
 	assert_equal "$actual_result" "$github_branch_name"
 	
 	# Checkout branch, if branch is found in local GitHub repo.
@@ -77,8 +77,7 @@ setup() {
 # 6.g.0 Test the function that checks whether the GitHub branch contains a GitLab yaml file.
 @test "Test if the function verify_github_branch_contains_gitlab_yaml returns NOTFOUND if the branch contains a GitLab yaml file." {
 	github_repo_name="sponsor_example"
-	#github_branch_name="no_attack_in_filecontent"
-	github_branch_name="main"
+	github_branch_name="no_attack_in_filecontent"
 	company="GitHub"
 	
 	# Checkout branch, if branch is found in local GitHub repo.
@@ -86,7 +85,7 @@ setup() {
 	assert_success
 	
 	# Verify the get_current_github_branch function returns the correct branch.
-	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name)"
+	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name $company)"
 	assert_equal "$actual_result" "$github_branch_name"
 	
 	# Checkout branch, if branch is found in local GitHub repo.
@@ -539,7 +538,7 @@ END
 	assert_success
 	
 	# Verify the get_current_github_branch function returns the correct branch.
-	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name)"
+	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name $company)"
 	assert_equal "$actual_result" "$github_branch_name"
 }
 
@@ -555,6 +554,6 @@ END
 	assert_success
 	
 	# Verify the get_current_github_branch function returns the correct branch.
-	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name)"
+	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name $company)"
 	assert_equal "$actual_result" "$github_branch_name"
 }

@@ -430,11 +430,35 @@ github_branch_exists() {
 	fi
 }
 
+# 6.e.0.helper TODO: move to helper
+# TODO: find way to test this function (e.g. copy sponsor repo into GitLab as example.
+gitlab_branch_exists() {
+	gitlab_repo_name="$1"
+	gitlab_branch_name="$2"
+	
+	# Check if Gitlab repository exists locally
+	if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
+	
+		# Get a list of the Gitlab branches in that repository
+		initialise_gitlab_branches_array "$gitlab_repo_name"
+		
+		# Check if the local copy of the Gitlab repository contains the branch.
+		if [[ " ${gitlab_branches[*]} " =~ " ${gitlab_branch_name} " ]]; then
+			echo "FOUND"
+		else
+			echo "NOTFOUND"
+		fi
+	else 
+		echo "ERROR, the Gitlab repository does not exist locally."
+		exit 13
+	fi
+}
+
 # 6.f.0 Checkout that branch in the local GitHub mirror repository.
 checkout_branch_in_github_repo() {
-	github_repo_name="$1"
-	github_branch_name="$2"
-	company="$3"
+	local github_repo_name="$1"
+	local github_branch_name="$2"
+	local company="$3"
 	
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
@@ -454,6 +478,8 @@ checkout_branch_in_github_repo() {
 	
 			# TODO: write test to verify the current branch in the GitHub repository is indeed checked out.
 			# e.g. using git status
+			# Verify the get_current_github_branch function returns the correct branch.
+			
 			
 			# Verify the current path is the same as it was when this function started.
 			if [ "$pwd_before" != "$pwd_after" ]; then
@@ -503,6 +529,10 @@ verify_github_branch_contains_gitlab_yaml() {
 }
 
 
+
+# assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists
+# 6.h.1 Checkout that branch in the local GitLab mirror repository if it exists.
+# 6.h.2 If the branch does not exist in the GitLab repo, create it.
 # 6.h.0 Checkout that branch in the local GitLab mirror repository. (Assuming the GitHub branch contains a gitlab yaml file)
 checkout_branch_in_gitlab_repo() {
 	gitlab_repo_name="$1"
@@ -529,13 +559,20 @@ checkout_branch_in_gitlab_repo() {
 			# e.g. using git status
 			
 			# Verify the current path is the same as it was when this function started.
-			if [ "$pwd_before" != "$pwd_after" ]; then
-				echo "The current path is not returned to what it originally was."
-				exit 17
-			fi
+			path_before_equals_path_after_command "$pwd_before" "$pwd_after"
 		else 
-			echo "Error, the gitlab branch does not exist locally."
-			exit 18
+			
+			# Get the path before executing the command (to verify it is restored correctly after).
+			pwd_before="$PWD"
+			
+			# Create the branch.
+			cd "$MIRROR_LOCATION/$company/$gitlab_repo_name" && git checkout -b "$gitlab_branch_name"
+			cd ../../../..
+			# Get the path after executing the command (to verify it is restored correctly after).
+			pwd_after="$PWD"
+			
+			# TODO: write test to verify the current branch in the gitlab repository is indeed checked out.
+			# e.g. using git status
 		fi
 	else 
 		echo "ERROR, the gitlab repository does not exist locally."
@@ -543,8 +580,8 @@ checkout_branch_in_gitlab_repo() {
 	fi
 }
 
-# 6.h.0 Checkout that branch in the local GitLab mirror repository.
-# 6.h.1 If the branch does not exist in the GitLab repo, create it.
+
+
 
 # 6.i If there are differences in files, copy the content from GitHub to GitLab (except for the .git folder).
 

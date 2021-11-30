@@ -787,9 +787,11 @@ assert_file_exists() {
 }
 
 # 6.f.1.helper
+# TODO: test
 get_current_github_branch() {
 	github_repo_name="$1"
 	github_branch_name="$2"
+	company="$3"
 	
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
@@ -820,4 +822,81 @@ get_current_github_branch() {
 		echo "ERROR, the GitHub repository does not exist locally."
 		exit 72
 	fi
+}
+
+# 6.f.1.helper
+# TODO: test
+get_current_gitlab_branch() {
+	gitlab_repo_name="$1"
+	gitlab_branch_name="$2"
+	company="$3"
+	
+	if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
+
+		# Verify the branch exists
+		branch_check_result="$(gitlab_branch_exists $gitlab_repo_name $gitlab_branch_name)"
+		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
+		if [ "$last_line_branch_check_result" == "FOUND" ]; then
+		
+			# Get the path before executing the command (to verify it is restored correctly after).
+			pwd_before="$PWD"
+			
+			# Checkout the branch inside the repository.
+			current_branch=$(cd "$MIRROR_LOCATION/$company/$gitlab_repo_name" && git rev-parse --abbrev-ref HEAD)
+			pwd_after="$PWD"
+			
+			echo "$current_branch"
+			
+			# Verify the current path is the same as it was when this function started.
+			if [ "$pwd_before" != "$pwd_after" ]; then
+				echo "The current path is not returned to what it originally was."
+				exit 70
+			fi
+		else 
+			echo "Error, the Gitlab branch does not exist locally."
+			exit 71
+		fi
+	else 
+		echo "ERROR, the Gitlab repository does not exist locally."
+		exit 72
+	fi
+}
+
+
+path_before_equals_path_after_command() {
+	pwd_before="$1"
+	pwd_after="$2"
+	
+	if [ "$pwd_before" != "$pwd_after" ]; then
+		echo "The current path is not returned to what it originally was."
+		exit 17
+	fi
+}
+
+# Verifies the current branch equals the incoming branch, throws an error otherwise.
+assert_current_github_branch() {
+	github_repo_name="$1"
+	github_branch_name="$2"
+	company="$3"
+	
+	actual_result="$(get_current_github_branch $company $github_repo_name $github_branch_name)"
+	if [ "$actual_result" != "$github_branch_name" ]; then
+		echo "The current GitHub branch does not match the expected GitHub branch:$github_branch_name"
+		exit 17
+	fi 
+	assert_equal "$actual_result" "$github_branch_name"
+}
+
+# Verifies the current branch equals the incoming branch, throws an error otherwise.
+assert_current_gitlab_branch() {
+	gitlab_repo_name="$1"
+	gitlab_branch_name="$2"
+	company="$3"
+	
+	actual_result="$(get_current_gitlab_branch $company $gitlab_repo_name $gitlab_branch_name)"
+	if [ "$actual_result" != "$gitlab_branch_name" ]; then
+		echo "The current Gitlab branch does not match the expected Gitlab branch:$gitlab_branch_name"
+		exit 17
+	fi 
+	assert_equal "$actual_result" "$gitlab_branch_name"
 }

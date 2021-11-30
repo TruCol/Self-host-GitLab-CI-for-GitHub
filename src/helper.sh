@@ -562,6 +562,16 @@ sudo_dir_exists() {
 	fi
 }
 
+file_exists() {
+	filepath=$1 
+	if test -f "$filepath"; then
+		echo "FOUND"
+	else
+		echo "NOTFOUND"
+	fi
+
+}
+
 sudo_file_exists() {
 	filepath=$1 
 	if sudo test -f "$filepath"; then

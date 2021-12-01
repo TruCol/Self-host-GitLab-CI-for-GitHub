@@ -874,29 +874,31 @@ path_before_equals_path_after_command() {
 }
 
 # Verifies the current branch equals the incoming branch, throws an error otherwise.
+################################## TODO: test function
 assert_current_github_branch() {
 	github_repo_name="$1"
 	github_branch_name="$2"
-	company="$3"
+	company="GitHub"
 	
-	actual_result="$(get_current_github_branch $company $github_repo_name $github_branch_name)"
+	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name $company)"
 	if [ "$actual_result" != "$github_branch_name" ]; then
 		echo "The current GitHub branch does not match the expected GitHub branch:$github_branch_name"
-		exit 17
+		exit 171
 	fi 
 	assert_equal "$actual_result" "$github_branch_name"
 }
 
 # Verifies the current branch equals the incoming branch, throws an error otherwise.
+################################## TODO: test function
 assert_current_gitlab_branch() {
 	gitlab_repo_name="$1"
 	gitlab_branch_name="$2"
-	company="$3"
+	company="GitLab"
 	
 	actual_result="$(get_current_gitlab_branch $company $gitlab_repo_name $gitlab_branch_name)"
 	if [ "$actual_result" != "$gitlab_branch_name" ]; then
 		echo "The current Gitlab branch does not match the expected Gitlab branch:$gitlab_branch_name"
-		exit 17
+		exit 172
 	fi 
 	assert_equal "$actual_result" "$gitlab_branch_name"
 }

@@ -476,9 +476,9 @@ checkout_branch_in_github_repo() {
 			# Get the path after executing the command (to verify it is restored correctly after).
 			pwd_after="$PWD"
 	
-			# TODO: write test to verify the current branch in the GitHub repository is indeed checked out.
-			# e.g. using git status
-			# Verify the get_current_github_branch function returns the correct branch.
+			# Test to verify the current branch in the GitHub repository is indeed checked out.
+			# TODO: check if this passes
+			assert_current_github_branch "$github_repo_name" "$github_branch_name"
 			
 			
 			# Verify the current path is the same as it was when this function started.
@@ -557,6 +557,7 @@ checkout_branch_in_gitlab_repo() {
 	
 			# TODO: write test to verify the current branch in the gitlab repository is indeed checked out.
 			# e.g. using git status
+			assert_current_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name"
 			
 			# Verify the current path is the same as it was when this function started.
 			path_before_equals_path_after_command "$pwd_before" "$pwd_after"
@@ -572,7 +573,8 @@ checkout_branch_in_gitlab_repo() {
 			pwd_after="$PWD"
 			
 			# TODO: write test to verify the current branch in the gitlab repository is indeed checked out.
-			# e.g. using git status
+			# TODO: check if this passes
+			assert_current_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name"
 		fi
 	else 
 		echo "ERROR, the gitlab repository does not exist locally."

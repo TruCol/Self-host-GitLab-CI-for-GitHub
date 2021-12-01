@@ -54,44 +54,20 @@ setup() {
 
 
 
-# 6.g.0 Test the function that checks whether the GitHub branch contains a GitLab yaml file.
-@test "Test if the function verify_github_branch_contains_gitlab_yaml returns FOUND if the branch contains a GitLab yaml file." {
-	github_repo_name="sponsor_example"
-	#github_branch_name="no_attack_in_filecontent"
-	github_branch_name="main"
-	company="GitHub"
-	
-	# Checkout branch, if branch is found in local GitHub repo.
-	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name $company)"
-	assert_success
-	
-	# Verify the get_current_github_branch function returns the correct branch.
-	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name $company)"
-	assert_equal "$actual_result" "$github_branch_name"
-	
-	# Checkout branch, if branch is found in local GitHub repo.
-	actual_result="$(verify_github_branch_contains_gitlab_yaml $github_repo_name $github_branch_name $company)"
-	assert_equal "$actual_result" "FOUND"
-}
 
-# 6.g.0 Test the function that checks whether the GitHub branch contains a GitLab yaml file.
-@test "Test if the function verify_github_branch_contains_gitlab_yaml returns NOTFOUND if the branch contains a GitLab yaml file." {
-	github_repo_name="sponsor_example"
-	github_branch_name="no_attack_in_filecontent"
-	company="GitHub"
-	
-	# Checkout branch, if branch is found in local GitHub repo.
-	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name $company)"
-	assert_success
-	
-	# Verify the get_current_github_branch function returns the correct branch.
-	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name $company)"
-	assert_equal "$actual_result" "$github_branch_name"
-	
-	# Checkout branch, if branch is found in local GitHub repo.
-	actual_result="$(verify_github_branch_contains_gitlab_yaml $github_repo_name $github_branch_name $company)"
-	assert_equal "$actual_result" "NOTFOUND"
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -453,7 +429,7 @@ END
 	# Already up to date.
 	run bash -c "source src/mirror_github_to_gitlab.sh && git_pull_gitlab_repo $gitlab_repo_name"
 	assert_failure
-	assert_output "The GitLab repository does not exist locally."
+	assert_output "ERROR, the GitLab repository does not exist locally."
 }
 
 # 6.e.0.helper1
@@ -488,6 +464,8 @@ END
 	last_line=$(get_last_line_of_set_of_lines "\${actual_result}")
 	assert_equal "$last_line" "NOTFOUND"
 }
+
+
 
 
 
@@ -556,4 +534,43 @@ END
 	# Verify the get_current_github_branch function returns the correct branch.
 	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name $company)"
 	assert_equal "$actual_result" "$github_branch_name"
+}
+
+# 6.g.0 Test the function that checks whether the GitHub branch contains a GitLab yaml file.
+@test "Test if the function verify_github_branch_contains_gitlab_yaml returns FOUND if the branch contains a GitLab yaml file." {
+	github_repo_name="sponsor_example"
+	#github_branch_name="no_attack_in_filecontent"
+	github_branch_name="main"
+	company="GitHub"
+	
+	# Checkout branch, if branch is found in local GitHub repo.
+	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name $company)"
+	assert_success
+	
+	# Verify the get_current_github_branch function returns the correct branch.
+	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name $company)"
+	assert_equal "$actual_result" "$github_branch_name"
+	
+	# Checkout branch, if branch is found in local GitHub repo.
+	actual_result="$(verify_github_branch_contains_gitlab_yaml $github_repo_name $github_branch_name $company)"
+	assert_equal "$actual_result" "FOUND"
+}
+
+# 6.g.0 Test the function that checks whether the GitHub branch contains a GitLab yaml file.
+@test "Test if the function verify_github_branch_contains_gitlab_yaml returns NOTFOUND if the branch contains a GitLab yaml file." {
+	github_repo_name="sponsor_example"
+	github_branch_name="no_attack_in_filecontent"
+	company="GitHub"
+	
+	# Checkout branch, if branch is found in local GitHub repo.
+	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name $company)"
+	assert_success
+	
+	# Verify the get_current_github_branch function returns the correct branch.
+	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name $company)"
+	assert_equal "$actual_result" "$github_branch_name"
+	
+	# Checkout branch, if branch is found in local GitHub repo.
+	actual_result="$(verify_github_branch_contains_gitlab_yaml $github_repo_name $github_branch_name $company)"
+	assert_equal "$actual_result" "NOTFOUND"
 }

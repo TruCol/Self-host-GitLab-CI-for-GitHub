@@ -895,7 +895,9 @@ assert_current_gitlab_branch() {
 	gitlab_branch_name="$2"
 	company="GitLab"
 	
-	actual_result="$(get_current_gitlab_branch $company $gitlab_repo_name $gitlab_branch_name)"
+	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
+	read -p "actual_result=$actual_result"
+	read -p "gitlab_branch_name=$gitlab_branch_name"
 	if [ "$actual_result" != "$gitlab_branch_name" ]; then
 		echo "The current Gitlab branch does not match the expected Gitlab branch:$gitlab_branch_name"
 		exit 172

@@ -137,7 +137,6 @@ verify_github_repository_is_cloned() {
 # Clone GitHub repository to folder src/mirror/GITHUB
 ####clone_github_repository "$github_username" "$github_repo" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo"
 ####verify_github_repository_is_cloned "$github_repo" "$MIRROR_LOCATION/GitHub/$github_repository"
-
 get_git_branches() {
     local -n arr=$1             # use nameref for indirection
 	company=$2
@@ -345,13 +344,19 @@ github_repo_exists_locally(){
 }
 
 # 6.e.0 If the GitLab repository exists in Gitlab, if it does not exist locally clone it, otherwise do a git pull.
-get_gitlab_repo_if_not_exists() {
+get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
 	gitlab_username="$1"
 	gitlab_repo_name="$2"
 	
-	###################################TODO: echo 
-	##"$gitlab_repo_name" "$gitlab_username" "$gitlab_server_password" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
-	# and verify they have the correct values.
+	# Remove spaces at end of username and servername.
+	gitlab_username=$(echo $gitlab_server_account | tr -d '\r')
+	gitlab_server_password=$(echo $gitlab_server_password | tr -d '\r')
+	
+	#read -p "gitlab_repo_name=$gitlab_repo_name"
+	#read -p "gitlab_username=$gitlab_username"
+	#read -p "gitlab_server_password=$gitlab_server_password"
+	#read -p "GITLAB_SERVER=$GITLAB_SERVER"
+	#read -p "MIRROR_LOCATION=$MIRROR_LOCATION"
 	
 	# TODO: verify local gitlab mirror repo directories are created
 	create_mirror_directories
@@ -530,7 +535,7 @@ verify_github_branch_contains_gitlab_yaml() {
 
 
 
-# assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists
+# assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
 # 6.h.1 Checkout that branch in the local GitLab mirror repository if it exists.
 # 6.h.2 If the branch does not exist in the GitLab repo, create it.
 # 6.h.0 Checkout that branch in the local GitLab mirror repository. (Assuming the GitHub branch contains a gitlab yaml file)

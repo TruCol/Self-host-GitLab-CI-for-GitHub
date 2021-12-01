@@ -106,6 +106,8 @@ clone_repository() {
 	gitlab_server=$4
 	target_directory=$5
 	
+	# TODO:write test to verify the gitlab username and server don't end with a spacebar character.	
+	
 	# Clone the GitLab repository into the GitLab mirror storage location.
 	output=$(cd "$target_directory" && git clone http://$gitlab_username:$gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
 }

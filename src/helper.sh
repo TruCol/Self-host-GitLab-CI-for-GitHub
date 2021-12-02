@@ -824,7 +824,26 @@ get_current_github_branch() {
 	fi
 }
 
-# 6.f.1.helper
+
+# 6.f.1.helper0
+# Verifies the current branch equals the incoming branch, throws an error otherwise.
+################################## TODO: test function
+assert_current_gitlab_branch() {
+	gitlab_repo_name="$1"
+	gitlab_branch_name="$2"
+	company="GitLab"
+	
+	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
+	#read -p "actual_result=$actual_result"
+	#read -p "gitlab_branch_name=$gitlab_branch_name"
+	if [ "$actual_result" != "$gitlab_branch_name" ]; then
+		echo "The current Gitlab branch does not match the expected Gitlab branch:$gitlab_branch_name"
+		exit 172
+	fi 
+	assert_equal "$actual_result" "$gitlab_branch_name"
+}
+
+# 6.f.1.helper1
 # TODO: test
 get_current_gitlab_branch() {
 	gitlab_repo_name="$1"
@@ -835,6 +854,7 @@ get_current_gitlab_branch() {
 
 		# Verify the branch exists
 		branch_check_result="$(gitlab_branch_exists $gitlab_repo_name $gitlab_branch_name)"
+		echo "branch_check_result=$branch_check_result"
 		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
 		if [ "$last_line_branch_check_result" == "FOUND" ]; then
 		
@@ -843,18 +863,31 @@ get_current_gitlab_branch() {
 			
 			# Checkout the branch inside the repository.
 			current_branch=$(cd "$MIRROR_LOCATION/$company/$gitlab_repo_name" && git rev-parse --abbrev-ref HEAD)
+			cd ../../../..
 			pwd_after="$PWD"
 			
+			# Verify the current path is the same as it was when this function started.
+			path_before_equals_path_after_command "$$pwd_before" "$pwd_after"
+			#if [ "$pwd_before" != "$pwd_after" ]; then
+			#	echo "The current path is not returned to what it originally was."
+			#	exit 70
+			#fi
 			echo "$current_branch"
 			
-			# Verify the current path is the same as it was when this function started.
-			if [ "$pwd_before" != "$pwd_after" ]; then
-				echo "The current path is not returned to what it originally was."
-				exit 70
+			
+		else
+			
+			# If the branch is newly created, but no commits are entered yet (=unborn branch), 
+			# then it will not be found, because the git branch -all command, will not recognize
+			# branches yet. So in this case, one can check if one is in the newly created branch
+			# by evaluating the output of git status.
+			current_branch="$(get_current_unborn_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
+			if [ "$current_branch" == "$gitlab_branch_name" ]; then
+				echo "$current_branch"
+			else
+				echo "Error, the Gitlab branch does not exist locally."
+				exit 71
 			fi
-		else 
-			echo "Error, the Gitlab branch does not exist locally."
-			exit 71
 		fi
 	else 
 		echo "ERROR, the Gitlab repository does not exist locally."
@@ -862,6 +895,54 @@ get_current_gitlab_branch() {
 	fi
 }
 
+
+# 6.f.1.helper2
+# Uses git status to get the current branch name. 
+# This is used in case a new branch is created (unborn=no commits) 
+#with checkout -b ...  to get the current GitLab branch name.
+get_current_unborn_gitlab_branch() {
+	gitlab_repo_name="$1"
+	gitlab_branch_name="$2"
+	company="$3"
+	
+	if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
+		# Get the path before executing the command (to verify it is restored correctly after).
+			pwd_before="$PWD"
+			
+			# Checkout the branch inside the repository.
+			git_status_output=$(cd "$MIRROR_LOCATION/$company/$gitlab_repo_name" && git status)
+			pwd_after="$PWD"
+			#read
+			path_before_equals_path_after_command "$pwd_before" "$pwd_after"
+			
+			#current_unborn_gitlab_branch=$(parse_git_status_to_get_gitlab_branch "$git_status_output")
+			current_unborn_gitlab_branch=$(parse_git_status_to_get_gitlab_branch "\${git_status_output}")
+			
+			echo "$current_unborn_gitlab_branch"
+	else 
+		echo "ERROR, the Gitlab repository does not exist locally."
+		exit 72
+	fi
+}
+
+# 6.f.1.helper3
+parse_git_status_to_get_gitlab_branch() {
+	eval lines=$1
+		
+	# get first line
+	line_nr=1 # lines start at index 1
+	first_line=$(get_line_by_nr_from_variable "$line_nr" "\${lines}")
+	
+	if [ "${first_line:0:10}" == "On branch " ]; then
+		# TODO: get remainder of first line
+		# TODO: check if the line contains a space or newline character at the end.
+		len=${#first_line}
+		echo "${first_line:10:${#first_line}}"
+	else
+		echo "ERROR, git status respons in the gitlab branch does not start with:On branch ."
+		exit 72
+	fi
+}
 
 path_before_equals_path_after_command() {
 	pwd_before="$1"
@@ -888,19 +969,3 @@ assert_current_github_branch() {
 	assert_equal "$actual_result" "$github_branch_name"
 }
 
-# Verifies the current branch equals the incoming branch, throws an error otherwise.
-################################## TODO: test function
-assert_current_gitlab_branch() {
-	gitlab_repo_name="$1"
-	gitlab_branch_name="$2"
-	company="GitLab"
-	
-	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
-	read -p "actual_result=$actual_result"
-	read -p "gitlab_branch_name=$gitlab_branch_name"
-	if [ "$actual_result" != "$gitlab_branch_name" ]; then
-		echo "The current Gitlab branch does not match the expected Gitlab branch:$gitlab_branch_name"
-		exit 172
-	fi 
-	assert_equal "$actual_result" "$gitlab_branch_name"
-}

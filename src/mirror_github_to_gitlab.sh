@@ -591,7 +591,15 @@ checkout_branch_in_gitlab_repo() {
 # 6.i If there are differences in files, and if the GitHub branch contains a GitLab yaml file:
 # copy the content from GitHub to GitLab (except for the .git folder).
 copy_files_from_github_to_gitlab_branch() {
-	pass
+	# If the GitHub repository exists
+	# If the GitHub branch exists
+	# If the GitHub branch contains a gitlab yaml file
+	# If the GitLab repository exists
+	# If the GitLab branch exists
+	# If there exist differences in the files or folders in the branch (excluding the .git directory)
+	# Then copy the files and folders from the GitHub branch into the GitLab branch (excluding the .git directory)
+	# Then delete the files that exist in the GitLab branch that do not exist in the GitHub branch (excluding the .git directory)
+	# Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
 }
 
 # 6.j Get commit sha from GitHub.

@@ -455,7 +455,7 @@ gitlab_branch_exists() {
 		fi
 	else 
 		echo "ERROR, the Gitlab repository does not exist locally."
-		exit 13
+		exit 14
 	fi
 }
 
@@ -491,15 +491,15 @@ checkout_branch_in_github_repo() {
 				echo "The current path is not returned to what it originally was."
 				#echo "pwd_before=$pwd_before"
 				#echo "pwd_after=$pwd_after"
-				exit 14
+				exit 15
 			fi
 		else 
 			echo "Error, the GitHub branch does not exist locally."
-			exit 15
+			exit 16
 		fi
 	else 
 		echo "ERROR, the GitHub repository does not exist locally."
-		exit 16
+		exit 17
 	fi
 }
 
@@ -525,11 +525,11 @@ verify_github_branch_contains_gitlab_yaml() {
 			fi
 		else 
 			echo "Error, the GitHub branch does not exist locally."
-			exit 15
+			exit 18
 		fi
 	else 
 		echo "ERROR, the GitHub repository does not exist locally."
-		exit 16
+		exit 19
 	fi
 }
 
@@ -583,7 +583,7 @@ checkout_branch_in_gitlab_repo() {
 		fi
 	else 
 		echo "ERROR, the gitlab repository does not exist locally."
-		exit 19
+		exit 20
 	fi
 }
 
@@ -591,15 +591,63 @@ checkout_branch_in_gitlab_repo() {
 # 6.i If there are differences in files, and if the GitHub branch contains a GitLab yaml file:
 # copy the content from GitHub to GitLab (except for the .git folder).
 copy_files_from_github_to_gitlab_branch() {
+	github_repo_name="$1"
+	github_branch_name="$2"
+	gitlab_repo_name="$3"
+	gitlab_branch_name="$4"
+	
 	# If the GitHub repository exists
-	# If the GitHub branch exists
-	# If the GitHub branch contains a gitlab yaml file
-	# If the GitLab repository exists
-	# If the GitLab branch exists
-	# If there exist differences in the files or folders in the branch (excluding the .git directory)
-	# Then copy the files and folders from the GitHub branch into the GitLab branch (excluding the .git directory)
-	# Then delete the files that exist in the GitLab branch that do not exist in the GitHub branch (excluding the .git directory)
-	# Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
+	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
+
+		# If the GitHub branch exists
+		github_branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
+		last_line_github_branch_check_result=$(get_last_line_of_set_of_lines "\${github_branch_check_result}")
+		if [ "$last_line_branch_check_result" == "FOUND" ]; then
+		
+			# If the GitHub branch contains a gitlab yaml file
+			filepath="$MIRROR_LOCATION/$company/$github_repo_name/.gitlab-ci.yml"
+			if [ "$(file_exists $filepath)" == "FOUND" ]; then
+				
+				# If the GitLab repository exists
+				if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
+					# If the GitLab branch exists
+					# Verify the branch exists
+					gitlab_branch_check_result="$(gitlab_branch_exists $gitlab_repo_name $gitlab_branch_name)"
+					last_line_github_branch_check_result=$(get_last_line_of_set_of_lines "\${gitlab_branch_check_result}")
+					if [ "$last_line_github_branch_check_result" == "FOUND" ]; then
+					
+					
+						# If there exist differences in the files or folders in the branch (excluding the .git directory)
+						echo "CheckingDifference"
+						
+						# Then copy the files and folders from the GitHub branch into the GitLab branch (excluding the .git directory)
+						# Then delete the files that exist in the GitLab branch that do not exist in the GitHub branch (excluding the .git directory)
+						# Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
+						
+					else
+						echo "Error, the GitLab branch does not exist locally."
+						exit 21
+					fi
+				else
+					echo "ERROR, the GitLab repository does not exist locally."
+					exit 22
+				fi
+			else
+				echo "Error, the GitHub branch does contain a yaml file."
+				exit 23
+			fi
+		else 
+			echo "Error, the GitHub branch does not exist locally."
+			exit 24
+		fi
+	else 
+		echo "ERROR, the GitHub repository does not exist locally."
+		exit 25
+	fi
+	
+	
+	
+	
 }
 
 # 6.j Get commit sha from GitHub.

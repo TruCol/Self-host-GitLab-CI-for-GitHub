@@ -62,7 +62,35 @@ setup() {
 }
 
 
-
+# 6.i
+# assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
+# TODO: ensure assumption is replaced with actual call to function.
+@test "Test whether the files are copied from GitHub branch to GitLab branch if there is a difference." {
+	github_repo_name="sponsor_example"
+	github_branch_name="no_attack_in_filecontent"
+	gitlab_repo_name="sponsor_example"
+	gitlab_branch_name="no_attack_in_filecontent"
+	company="GitLab"
+	
+	# Assumes the (sponsor_example) repository already exists inside the GitLab
+	# server, which usually is not the case.
+	# TODO: Check whether the repository exists in the GitLab server
+	# TODO: If the repository does not exist in the GitLab server, upload it.
+	# Clone the GitLab repository from the GitLab server
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	
+	# Checkout branch, if branch is found in local Gitlab repo.
+	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
+	assert_success
+	
+	# Verify the get_current_gitlab_branch function returns the correct branch.
+	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
+	assert_equal "$actual_result" "$gitlab_branch_name"
+	
+	#
+	result="$(copy_files_from_github_to_gitlab_branch $github_repo_name $github_branch_name $gitlab_repo_name $gitlab_branch_name)"
+	assert_equal "$result" "$CheckingDifference"
+}
 
 
 

@@ -339,7 +339,7 @@ docker_image_exists() {
 		echo "NO"
 	else
 		echo "ERROR, the docker image was not not found, nor found."
-		exit 1
+		exit 26
 	fi
 }
 
@@ -733,7 +733,7 @@ any_ssh_key_is_added_to_ssh_agent() {
 		if [ "$ssh_email" == "" ]; then
 			#echo "The ssh key file does not exist, so the email address of that ssh-account can not be extracted."
 			echo "NOTFOUND_FILE"
-			exit 1
+			exit 27
 		else 
 			
 			# Check if the ssh key is added to ssh-agent by means of email.
@@ -756,7 +756,7 @@ verify_ssh_key_is_added_to_ssh_agent() {
 	local ssh_key_in_ssh_agent=$(any_ssh_key_is_added_to_ssh_agent $ssh_account)
 	if [[ "$ssh_key_in_ssh_agent" == "NOTFOUND_FILE" ]] || [[ "$ssh_key_in_ssh_agent" == "NOTFOUND_EMAIL" ]]; then
 		echo 'Please ensure the ssh-account '$ssh_account' key is added to the ssh agent. You can do that with commands:'"\\n"' eval $(ssh-agent -s)'"\n"'ssh-add ~/.ssh/'$ssh_account''"\n"' Please run this script again once you are done.'
-		exit 1
+		exit 28
 	fi
 }
 
@@ -782,7 +782,7 @@ assert_file_exists() {
 	filepath=$1
 	if [ ! -f "$filepath" ]; then
 		echo "The ssh key file: $filepath does not exist, so the email address of that ssh-account can not be extracted."
-		exit 64
+		exit 29
 	fi
 }
 
@@ -790,7 +790,7 @@ assert_file_exists() {
 # TODO: test
 get_current_github_branch() {
 	github_repo_name="$1"
-	github_branch_name="$2"
+	github_branch_name="$exit"
 	company="$3"
 	
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
@@ -812,15 +812,15 @@ get_current_github_branch() {
 			# Verify the current path is the same as it was when this function started.
 			if [ "$pwd_before" != "$pwd_after" ]; then
 				echo "The current path is not returned to what it originally was."
-				exit 70
+				exit 30
 			fi
 		else 
 			echo "Error, the GitHub branch does not exist locally."
-			exit 71
+			exit 31
 		fi
 	else 
 		echo "ERROR, the GitHub repository does not exist locally."
-		exit 72
+		exit 32
 	fi
 }
 

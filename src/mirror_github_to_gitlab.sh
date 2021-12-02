@@ -588,9 +588,11 @@ checkout_branch_in_gitlab_repo() {
 }
 
 
-
-
-# 6.i If there are differences in files, copy the content from GitHub to GitLab (except for the .git folder).
+# 6.i If there are differences in files, and if the GitHub branch contains a GitLab yaml file:
+# copy the content from GitHub to GitLab (except for the .git folder).
+copy_files_from_github_to_gitlab_branch() {
+	pass
+}
 
 # 6.j Get commit sha from GitHub.
 

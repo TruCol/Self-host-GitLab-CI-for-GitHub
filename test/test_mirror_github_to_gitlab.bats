@@ -64,189 +64,6 @@ setup() {
 
 
 
-# 6.f.1.
-# assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
-# TODO: ensure assumption is replaced with actual call to function.
-@test "Test the checkout_branch_in_gitlab_repo function checks out the correct GitLab branch." {
-	gitlab_repo_name="sponsor_example"
-	gitlab_branch_name="no_attack_in_filecontent"
-	company="GitLab"
-	
-	# Assumes the (sponsor_example) repository already exists inside the GitLab
-	# server, which usually is not the case.
-	# TODO: Check whether the repository exists in the GitLab server
-	# TODO: If the repository does not exist in the GitLab server, upload it.
-	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
-	
-	# Checkout branch, if branch is found in local Gitlab repo.
-	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
-	assert_success
-	
-	# Verify the get_current_gitlab_branch function returns the correct branch.
-	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
-	assert_equal "$actual_result" "$gitlab_branch_name"
-}
-
-
-
-
-
-
-
-# 6.f.1.helper3
-# assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
-# TODO: ensure assumption is replaced with actual call to function.
-@test "Test if the git status command is parsed correctly to return the right unborn GitLab branch." {
-	gitlab_repo_name="sponsor_example"
-	gitlab_branch_name="no_attack_in_filecontent"
-	company="GitLab"
-	
-	# Assumes the (sponsor_example) repository already exists inside the GitLab
-	# server, which usually is not the case.
-	# TODO: Check whether the repository exists in the GitLab server
-	# TODO: If the repository does not exist in the GitLab server, upload it.
-	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
-	
-	# Checkout branch, if branch is found in local Gitlab repo.
-	# TODO: re-enable
-	#actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
-	#assert_success
-	
-	# Verify git status command returns the correct branch
-	actual_result="$(parse_git_status_to_get_gitlab_branch "\${example_git_status_output}")"
-	#actual_result="$(parse_git_status_to_get_gitlab_branch $example_git_status_output)"
-	assert_equal "$actual_result" "$gitlab_branch_name"
-}
-
-
-# 6.f.1.helper2
-# gitlab branch correctly.
-# assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
-# TODO: ensure assumption is replaced with actual call to function.
-@test "Test if the get_current_unborn_gitlab_branch function returns the current unborn gitlab branch correctly." {
-	gitlab_repo_name="sponsor_example"
-	gitlab_branch_name="no_attack_in_filecontent"
-	company="GitLab"
-	
-	# Assumes the (sponsor_example) repository already exists inside the GitLab
-	# server, which usually is not the case.
-	# TODO: Check whether the repository exists in the GitLab server
-	# TODO: If the repository does not exist in the GitLab server, upload it.
-	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
-	
-	# Checkout branch, if branch is found in local Gitlab repo.
-	# TODO: re-enable
-	#actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
-	#assert_success
-	
-	# Verify git status command returns the correct branch
-	actual_result="$(parse_git_status_to_get_gitlab_branch "\${example_git_status_output}")"
-	#actual_result="$(parse_git_status_to_get_gitlab_branch $example_git_status_output)"
-	assert_equal "$actual_result" "$gitlab_branch_name"
-	
-	# Verify the unborn branch is returned correctly.
-	actual_result="$(get_current_unborn_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
-	assert_equal "$actual_result" "$gitlab_branch_name"
-}
-
-
-# 6.f.1.helper1
-# assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
-# TODO: ensure assumption is replaced with actual call to function.
-@test "Test the get_current_gitlab_branch function returns the correct GitLab branch." {
-	gitlab_repo_name="sponsor_example"
-	gitlab_branch_name="no_attack_in_filecontent"
-	company="GitLab"
-	
-	# Assumes the (sponsor_example) repository already exists inside the GitLab
-	# server, which usually is not the case.
-	# TODO: Check whether the repository exists in the GitLab server
-	# TODO: If the repository does not exist in the GitLab server, upload it.
-	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
-	
-	# Checkout branch, if branch is found in local Gitlab repo.
-	###actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
-	###assert_success
-	
-	# Verify the get_current_gitlab_branch function returns the correct branch.
-	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
-	assert_equal "$actual_result" "$gitlab_branch_name"
-}
-
-
-# 6.f.1.helper0 success
-# assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
-# TODO: ensure assumption is replaced with actual call to function.
-@test "Test the assert_current_gitlab_branch function correctly identifies the correct branch." {
-	gitlab_repo_name="sponsor_example"
-	gitlab_branch_name="no_attack_in_filecontent"
-	company="GitLab"
-	
-	# Assumes the (sponsor_example) repository already exists inside the GitLab
-	# server, which usually is not the case.
-	# TODO: Check whether the repository exists in the GitLab server
-	# TODO: If the repository does not exist in the GitLab server, upload it.
-	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
-	
-	# Checkout branch, if branch is found in local Gitlab repo.
-	###actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
-	###assert_success
-	
-	# Verify the get_current_gitlab_branch function returns the correct branch.
-	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
-	assert_equal "$actual_result" "$gitlab_branch_name"
-	
-	
-	# Verify the get_current_gitlab_branch function returns the correct branch.
-	#run bash -c "source src/helper.sh source src/mirror_github_to_gitlab.sh && assert_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company"
-	run bash -c "source src/mirror_github_to_gitlab.sh && assert_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company"
-	assert_success
-}
-
-
-# 6.f.1.helper0 failure
-@test "Test the assert_current_gitlab_branch function throws error on the non-existing branch." {
-	gitlab_repo_name="sponsor_example"
-	gitlab_branch_name="no_attack_in_filecontent"
-	company="GitLab"
-	
-	# Assumes the (sponsor_example) repository already exists inside the GitLab
-	# server, which usually is not the case.
-	# TODO: Check whether the repository exists in the GitLab server
-	# TODO: If the repository does not exist in the GitLab server, upload it.
-	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
-	
-	# Checkout branch, if branch is found in local Gitlab repo.
-	###actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
-	###assert_success
-	
-	# Verify the get_current_gitlab_branch function returns the correct branch.
-	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
-	assert_equal "$actual_result" "$gitlab_branch_name"
-	
-	
-	
-	# Verify the get_current_gitlab_branch function returns the correct branch.
-	non_existing_branchname="non-existing-branchname"
-	#run bash -c "source src/helper.sh && assert_current_gitlab_branch $gitlab_repo_name $non_existing_branchname $company"
-	run bash -c "source src/mirror_github_to_gitlab.sh && assert_current_gitlab_branch $gitlab_repo_name $non_existing_branchname $company"
-	
-	assert_failure
-	assert_output "The current Gitlab branch does not match the expected Gitlab branch:$non_existing_branchname"
-}
-
-
-
-
-
-
-
 
 
 
@@ -755,4 +572,175 @@ END
 	# Checkout branch, if branch is found in local GitHub repo.
 	actual_result="$(verify_github_branch_contains_gitlab_yaml $github_repo_name $github_branch_name $company)"
 	assert_equal "$actual_result" "NOTFOUND"
+}
+
+
+# 6.f.1.helper3
+# assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
+# TODO: ensure assumption is replaced with actual call to function.
+@test "Test if the git status command is parsed correctly to return the right unborn GitLab branch." {
+	gitlab_repo_name="sponsor_example"
+	gitlab_branch_name="no_attack_in_filecontent"
+	company="GitLab"
+	
+	# Assumes the (sponsor_example) repository already exists inside the GitLab
+	# server, which usually is not the case.
+	# TODO: Check whether the repository exists in the GitLab server
+	# TODO: If the repository does not exist in the GitLab server, upload it.
+	# Clone the GitLab repository from the GitLab server
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	
+	# Checkout branch, if branch is found in local Gitlab repo.
+	# TODO: re-enable
+	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
+	assert_success
+	
+	# Verify git status command returns the correct branch
+	actual_result="$(parse_git_status_to_get_gitlab_branch "\${example_git_status_output}")"
+	#actual_result="$(parse_git_status_to_get_gitlab_branch $example_git_status_output)"
+	assert_equal "$actual_result" "$gitlab_branch_name"
+}
+
+
+# 6.f.1.helper2
+# gitlab branch correctly.
+# assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
+# TODO: ensure assumption is replaced with actual call to function.
+@test "Test if the get_current_unborn_gitlab_branch function returns the current unborn gitlab branch correctly." {
+	gitlab_repo_name="sponsor_example"
+	gitlab_branch_name="no_attack_in_filecontent"
+	company="GitLab"
+	
+	# Assumes the (sponsor_example) repository already exists inside the GitLab
+	# server, which usually is not the case.
+	# TODO: Check whether the repository exists in the GitLab server
+	# TODO: If the repository does not exist in the GitLab server, upload it.
+	# Clone the GitLab repository from the GitLab server
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	
+	# Checkout branch, if branch is found in local Gitlab repo.
+	# TODO: re-enable
+	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
+	assert_success
+	
+	# Verify git status command returns the correct branch
+	actual_result="$(parse_git_status_to_get_gitlab_branch "\${example_git_status_output}")"
+	assert_equal "$actual_result" "$gitlab_branch_name"
+	
+	# Verify the unborn branch is returned correctly.
+	actual_result="$(get_current_unborn_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
+	assert_equal "$actual_result" "$gitlab_branch_name"
+}
+
+
+# 6.f.1.helper1
+# assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
+# TODO: ensure assumption is replaced with actual call to function.
+@test "Test the get_current_gitlab_branch function returns the correct GitLab branch." {
+	gitlab_repo_name="sponsor_example"
+	gitlab_branch_name="no_attack_in_filecontent"
+	company="GitLab"
+	
+	# Assumes the (sponsor_example) repository already exists inside the GitLab
+	# server, which usually is not the case.
+	# TODO: Check whether the repository exists in the GitLab server
+	# TODO: If the repository does not exist in the GitLab server, upload it.
+	# Clone the GitLab repository from the GitLab server
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	
+	# Checkout branch, if branch is found in local Gitlab repo.
+	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
+	assert_success
+	
+	# Verify the get_current_gitlab_branch function returns the correct branch.
+	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
+	assert_equal "$actual_result" "$gitlab_branch_name"
+}
+
+
+# 6.f.1.helper0 success
+# assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
+# TODO: ensure assumption is replaced with actual call to function.
+@test "Test the assert_current_gitlab_branch function correctly identifies the correct branch." {
+	gitlab_repo_name="sponsor_example"
+	gitlab_branch_name="no_attack_in_filecontent"
+	company="GitLab"
+	
+	# Assumes the (sponsor_example) repository already exists inside the GitLab
+	# server, which usually is not the case.
+	# TODO: Check whether the repository exists in the GitLab server
+	# TODO: If the repository does not exist in the GitLab server, upload it.
+	# Clone the GitLab repository from the GitLab server
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	
+	# Checkout branch, if branch is found in local Gitlab repo.
+	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
+	assert_success
+	
+	# Verify the get_current_gitlab_branch function returns the correct branch.
+	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
+	assert_equal "$actual_result" "$gitlab_branch_name"
+	
+	
+	# Verify the get_current_gitlab_branch function returns the correct branch.
+	#run bash -c "source src/helper.sh source src/mirror_github_to_gitlab.sh && assert_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company"
+	run bash -c "source src/mirror_github_to_gitlab.sh && assert_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company"
+	assert_success
+}
+
+
+# 6.f.1.helper0 failure
+@test "Test the assert_current_gitlab_branch function throws error on the non-existing branch." {
+	gitlab_repo_name="sponsor_example"
+	gitlab_branch_name="no_attack_in_filecontent"
+	company="GitLab"
+	
+	# Assumes the (sponsor_example) repository already exists inside the GitLab
+	# server, which usually is not the case.
+	# TODO: Check whether the repository exists in the GitLab server
+	# TODO: If the repository does not exist in the GitLab server, upload it.
+	# Clone the GitLab repository from the GitLab server
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	
+	# Checkout branch, if branch is found in local Gitlab repo.
+	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
+	assert_success
+	
+	# Verify the get_current_gitlab_branch function returns the correct branch.
+	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
+	assert_equal "$actual_result" "$gitlab_branch_name"
+	
+	
+	
+	# Verify the get_current_gitlab_branch function returns the correct branch.
+	non_existing_branchname="non-existing-branchname"
+	#run bash -c "source src/helper.sh && assert_current_gitlab_branch $gitlab_repo_name $non_existing_branchname $company"
+	run bash -c "source src/mirror_github_to_gitlab.sh && assert_current_gitlab_branch $gitlab_repo_name $non_existing_branchname $company"
+	
+	assert_failure
+	assert_output "The current Gitlab branch does not match the expected Gitlab branch:$non_existing_branchname"
+}
+
+# 6.f.1.
+# assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
+# TODO: ensure assumption is replaced with actual call to function.
+@test "Test the checkout_branch_in_gitlab_repo function checks out the correct GitLab branch." {
+	gitlab_repo_name="sponsor_example"
+	gitlab_branch_name="no_attack_in_filecontent"
+	company="GitLab"
+	
+	# Assumes the (sponsor_example) repository already exists inside the GitLab
+	# server, which usually is not the case.
+	# TODO: Check whether the repository exists in the GitLab server
+	# TODO: If the repository does not exist in the GitLab server, upload it.
+	# Clone the GitLab repository from the GitLab server
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	
+	# Checkout branch, if branch is found in local Gitlab repo.
+	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
+	assert_success
+	
+	# Verify the get_current_gitlab_branch function returns the correct branch.
+	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
+	assert_equal "$actual_result" "$gitlab_branch_name"
 }

@@ -120,10 +120,6 @@ setup() {
 }
 
 
-
-
-
-
 # 6.f.1.helper1 Test the get_current_gitlab_branch function returns the correct GitLab branch.
 # assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
 # TODO: ensure assumption is replaced with actual call to function.

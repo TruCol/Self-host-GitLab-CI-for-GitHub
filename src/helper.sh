@@ -854,7 +854,7 @@ get_current_gitlab_branch() {
 
 		# Verify the branch exists
 		branch_check_result="$(gitlab_branch_exists $gitlab_repo_name $gitlab_branch_name)"
-		echo "branch_check_result=$branch_check_result"
+		#echo "branch_check_result=$branch_check_result"
 		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
 		if [ "$last_line_branch_check_result" == "FOUND" ]; then
 		
@@ -868,13 +868,8 @@ get_current_gitlab_branch() {
 			
 			# Verify the current path is the same as it was when this function started.
 			path_before_equals_path_after_command "$$pwd_before" "$pwd_after"
-			#if [ "$pwd_before" != "$pwd_after" ]; then
-			#	echo "The current path is not returned to what it originally was."
-			#	exit 70
-			#fi
+			
 			echo "$current_branch"
-			
-			
 		else
 			
 			# If the branch is newly created, but no commits are entered yet (=unborn branch), 

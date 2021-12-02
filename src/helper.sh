@@ -839,8 +839,7 @@ assert_current_gitlab_branch() {
 	if [ "$actual_result" != "$gitlab_branch_name" ]; then
 		echo "The current Gitlab branch does not match the expected Gitlab branch:$gitlab_branch_name"
 		exit 172
-	fi 
-	assert_equal "$actual_result" "$gitlab_branch_name"
+	fi
 }
 
 # 6.f.1.helper1

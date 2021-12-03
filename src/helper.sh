@@ -966,10 +966,89 @@ assert_current_github_branch() {
 
 
 # 6.i.0
+#source src/helper.sh && copy_github_files_and_folders_to_gitlab "src/mirrors/GitHub/sponsor_example" "src/mirrors/GitLab/sponsor_example"
 copy_github_files_and_folders_to_gitlab() {
 	github_dir="$1"
 	gitlab_dir="$2"
-	for d in *; do
-		echo $d
+	
+	if [ "$gitlab_dir" == "" ]; then
+		echo "Error, the GitLab directory is not specified."
+		exit 18
+	fi
+	
+	# Delete all GitLab files and folders except for ., .., .git.
+	delete_all_gitlab_files "$gitlab_dir/.*"
+	delete_all_gitlab_files "$gitlab_dir/*" 
+	delete_all_gitlab_folders "$gitlab_dir/.*" 
+	delete_all_gitlab_folders "$gitlab_dir/*"
+	
+	# Copy all GitHub folders to GitLab
+	copy_all_gitlab_files "$github_dir/.*" "$gitlab_dir"
+	copy_all_gitlab_files "$github_dir/*" "$gitlab_dir"
+	
+	# Copy all GitHub files to GitLab.
+	copy_all_gitlab_folders "$github_dir/.*" "$gitlab_dir"
+	copy_all_gitlab_folders "$github_dir/*" "$gitlab_dir"
+	
+}
+
+delete_all_gitlab_files() {
+	source_dir="$1"
+	
+	for f in $source_dir
+	do
+	if [ -f "$f" ]; then
+		echo "File DELETE $f"
+		rm "$f"
+	fi
 	done
 }
+
+delete_all_gitlab_folders() {
+	source_dir="$1"
+	
+	for f in $source_dir
+	do
+	if [ -d "$f" ]; then
+		if [[ "${f: -2}" != "/." && "${f: -3}" != "/.." && "${f: -5}" != "/.git" ]]; then
+			echo "Dir Delete $f"
+			rm -r "$f"
+		else
+			echo "Dir EXCLUDE FROM DELETE $f"
+		fi
+	fi
+	done
+}
+
+
+copy_all_gitlab_files() {
+	source_dir="$1"
+	target_dir="$2"
+	
+	for f in $source_dir
+	do
+	if [ -f "$f" ]; then
+		echo "File Copy $f"
+		cp -r "$f" "$target_dir"
+	fi
+	done
+}
+
+copy_all_gitlab_folders() {
+	source_dir="$1"
+	target_dir="$2"
+	
+	for f in $source_dir
+	do
+	if [ -d "$f" ]; then
+		if [[ "${f: -2}" != "/." && "${f: -3}" != "/.." && "${f: -5}" != "/.git" ]]; then
+			echo "Dir Copy $f to $target_dir"
+			cp -r "$f" "$target_dir"
+			#cp "$f" "$target_dir"
+		else
+			echo "Dir EXCLUDE FROM COPY $f"
+		fi
+	fi
+	done
+}
+#check_md5_sum

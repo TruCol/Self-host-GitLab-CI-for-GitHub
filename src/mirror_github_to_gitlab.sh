@@ -451,6 +451,8 @@ gitlab_branch_exists() {
 		if [[ " ${gitlab_branches[*]} " =~ " ${gitlab_branch_name} " ]]; then
 			echo "FOUND"
 		else
+		
+			# TODO: do git status evaluation
 			echo "NOTFOUND"
 		fi
 	else 
@@ -549,7 +551,10 @@ checkout_branch_in_gitlab_repo() {
 		# Verify the branch exists
 		branch_check_result="$(gitlab_branch_exists $gitlab_repo_name $gitlab_branch_name)"
 		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
+		found_branch_name="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name "GitLab")"
+		
 		if [ "$last_line_branch_check_result" == "FOUND" ]; then
+		assert_current_gitlab_branch
 		
 			# Get the path before executing the command (to verify it is restored correctly after).
 			pwd_before="$PWD"
@@ -617,11 +622,8 @@ copy_files_from_github_to_gitlab_branch() {
 				# If the GitLab repository exists
 				if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
 					# If the GitLab branch exists
-					# Verify the branch exists
-					gitlab_branch_check_result="$(gitlab_branch_exists $gitlab_repo_name $gitlab_branch_name)"
-					last_line_github_branch_check_result=$(get_last_line_of_set_of_lines "\${gitlab_branch_check_result}")
-					if [ "$last_line_github_branch_check_result" == "FOUND" ]; then
-					
+					found_branch_name="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name "GitLab")"
+					if [ "$found_branch_name" == "$gitlab_branch_name" ]; then
 					
 						# If there exist differences in the files or folders in the branch (excluding the .git directory)
 						echo "CheckingDifference"

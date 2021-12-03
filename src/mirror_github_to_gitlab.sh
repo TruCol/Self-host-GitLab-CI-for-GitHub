@@ -611,7 +611,7 @@ copy_files_from_github_to_gitlab_branch() {
 		if [ "$last_line_github_branch_check_result" == "FOUND" ]; then
 		
 			# If the GitHub branch contains a gitlab yaml file
-			filepath="$MIRROR_LOCATION/$company/$github_repo_name/.gitlab-ci.yml"
+			filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
 			if [ "$(file_exists $filepath)" == "FOUND" ]; then
 				
 				# If the GitLab repository exists

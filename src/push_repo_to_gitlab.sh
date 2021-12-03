@@ -99,6 +99,7 @@ delete_existing_repository() {
 }
 
 #source src/run_ci_job.sh && clone_repository
+# TODO: rename to clone_gitlab_repository_from _local_server
 clone_repository() {
 	repo_name=$1
 	gitlab_username=$2

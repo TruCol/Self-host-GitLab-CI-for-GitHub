@@ -72,6 +72,28 @@ setup() {
 	gitlab_branch_name="main"
 	company="GitLab"
 	
+	# TODO: Delete GitHub repo at start of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Create mmirror directories
+	create_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_exist "$MIRROR_LOCATION"
+	assert_file_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_exist "$MIRROR_LOCATION/GitLab"
+	
+	# TODO: Clone GitHub repo at start of test.
+	# Verify ssh-access
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	
+	clone_github_repository "$GITHUB_USERNAME" "$PUBLIC_GITHUB_TEST_REPO" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$PUBLIC_GITHUB_TEST_REPO" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO")
+	assert_equal "$repo_was_cloned" "FOUND"
+	
 	# checkout GitHub branch
 	# Checkout branch, if branch is found in local GitHub repo.
 	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name "GitHub")"
@@ -371,7 +393,7 @@ END
 	create_repo_if_not_exists "$test_repo_name"
 	output_after_creation=$(gitlab_mirror_repo_exists_in_gitlab "$test_repo_name")
 	assert_equal "$output_after_creation" "FOUND"
-	deletion_output=$(delete_repo_if_it_exists "$test_repo_name")
+	deletion_output=$(delete_gitlab_repo_if_it_exists "$test_repo_name")
 	output_after_deletion=$(gitlab_mirror_repo_exists_in_gitlab "$test_repo_name")
 	assert_equal "$output_after_deletion" "NOTFOUND"
 }
@@ -400,7 +422,7 @@ END
 	# TODO: verify the repository is added before testing whether it exists.
 	# TODO: remove the repository after verifying it exists
 	something=$(get_project_list)
-	output=$(delete_repo_if_it_exists "non-existing-repository")
+	output=$(delete_gitlab_repo_if_it_exists "non-existing-repository")
 	output=$(gitlab_mirror_repo_exists_in_gitlab "non-existing-repository")
 	assert_equal "$output" "NOTFOUND"
 }

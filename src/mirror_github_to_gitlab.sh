@@ -307,7 +307,7 @@ create_repo_if_not_exists() {
 }
 
 # TODO: move to helper.sh
-delete_repo_if_it_exists() {
+delete_gitlab_repo_if_it_exists() {
 	new_repo_name="$1"
 	
 	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" == "NOTFOUND" ]; then

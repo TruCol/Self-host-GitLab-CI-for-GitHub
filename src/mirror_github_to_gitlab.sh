@@ -44,12 +44,15 @@ if [ "$verbose" == "TRUE" ]; then
 	echo "gitlab_repo=$gitlab_repo"
 fi
 
+# Structure:dir_edit
 # Ensure mirrors directory is created.
 create_mirror_directories() {
 	$(create_dir "$MIRROR_LOCATION")
 	$(create_dir "$MIRROR_LOCATION/GitHub")
 	$(create_dir "$MIRROR_LOCATION/GitLab")
 }
+
+# Structure:dir_edit
 #assert_equal "$(dir_exists "$MIRROR_LOCATION")" "FOUND" 
 verify_mirror_directories_are_created() {
 	if [ "$MIRROR_LOCATION" == "" ]; then
@@ -66,12 +69,14 @@ verify_mirror_directories_are_created() {
 	fi
 }
 
+# Structure:dir_edit
 remove_mirror_directories() {
 	$(remove_dir "$MIRROR_LOCATION")
 	$(remove_dir "$MIRROR_LOCATION/GitHub")
 	$(remove_dir "$MIRROR_LOCATION/GitLab")
 }
 
+# Structure:ssh
 # Activates/enables the ssh for 
 activate_ssh_account() {
 	git_username=$1
@@ -84,6 +89,7 @@ activate_ssh_account() {
     ssh-add ~/.ssh/"$git_username"
 }
 
+# Structure:ssh
 # Check ssh-access to GitHub repo.
 check_ssh_access_to_repo() {
 	github_username=$1
@@ -108,13 +114,14 @@ check_ssh_access_to_repo() {
 	fi
 }
 
+# Structure:ssh
 has_access() {
 	echo $(check_ssh_access_to_repo "$github_username" "$github_repo")
 }
 
+# Structure:Github_status
 # check if repo is private
 # skip
-
 verify_github_repository_is_cloned() {
 	
 	if [[ "$1" != "" ]] && [[ "$2" != "" ]]; then
@@ -134,6 +141,8 @@ verify_github_repository_is_cloned() {
 	fi
 }
 
+# Structure:Github_status (?or?)
+# Structure:git_neutral
 # Clone GitHub repository to folder src/mirror/GITHUB
 ####clone_github_repository "$github_username" "$github_repo" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo"
 ####verify_github_repository_is_cloned "$github_repo" "$MIRROR_LOCATION/GitHub/$github_repository"
@@ -180,7 +189,7 @@ get_git_branches() {
 	done <<< "$theoutput"
 }
 
-
+# Structure:git_neutral
 create_new_branch() {
 	branch_name=$1
 	company=$2
@@ -195,13 +204,13 @@ create_new_branch() {
 	echo "$theoutput"
 }
 
-
+# Structure:dir_edit
 copy_files_from_github_to_gitlab_repo_branches() {
 	git_repository=$1
 	rsync -av --progress "$MIRROR_LOCATION/GitHub/$git_repository/" "$MIRROR_LOCATION/GitLab/$git_repository" --exclude .git
 }
 
-
+# Structure:git_neutral
 # Check if the branch is contained in GitHub branch array (to filter the difference containing a branch that is (still) in GitLab but not in GitHub)
 github_branch_is_in_gitlab_branches() {
 	#eval gitlab_branches=$2
@@ -223,6 +232,7 @@ github_branch_is_in_gitlab_branches() {
 	fi
 }
 
+# Structure:github_status
 # 6.a  Make a list of the branches in the GitHub repository
 initialise_github_branches_array() {
 	github_repo=$1
@@ -230,6 +240,7 @@ initialise_github_branches_array() {
 	declare -p github_branches
 }
 
+# Structure:gitlab_status
 # 6.a  Make a list of the branches in the gitlab repository
 initialise_gitlab_branches_array() {
 	gitlab_repo=$1
@@ -237,6 +248,7 @@ initialise_gitlab_branches_array() {
 	declare -p gitlab_branches
 }
 
+# Structure:github_status
 # 6.b Loop through the GitHub mirror repository branches that are already in GitLab
 loop_through_github_branches() {
 	for github_branch in ${github_branches[@]}; do
@@ -244,6 +256,7 @@ loop_through_github_branches() {
 	done
 }
 
+# Structure:gitlab_status
 # shellcheck disable=SC2120
 get_project_list(){
 	#echo "BeforeFAILURE=$1"
@@ -279,7 +292,7 @@ gitlab_mirror_repo_exists_in_gitlab() {
 }
 
 
-
+# Structure:gitlab_status
 #6.d.1 If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
 create_repo_if_not_exists() {
 	new_repo_name="$1"
@@ -306,6 +319,7 @@ create_repo_if_not_exists() {
 	fi
 }
 
+# Structure:gitlab_modify
 # TODO: move to helper.sh
 delete_gitlab_repo_if_it_exists() {
 	new_repo_name="$1"
@@ -324,6 +338,7 @@ delete_gitlab_repo_if_it_exists() {
 	fi
 }
 
+# Structure:gitlab_modify
 # TODO: move to helper.sh
 gitlab_repo_exists_locally(){
 	gitlab_repo="$1"
@@ -334,6 +349,7 @@ gitlab_repo_exists_locally(){
 	fi
 }
 
+# Structure:gitlab_status
 github_repo_exists_locally(){
 	github_repo="$1"
 	if test -d "$MIRROR_LOCATION/GitHub/$github_repo"; then
@@ -343,6 +359,7 @@ github_repo_exists_locally(){
 	fi
 }
 
+# Structure:gitlab_modify
 # 6.e.0 If the GitLab repository exists in Gitlab, if it does not exist locally clone it, otherwise do a git pull.
 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
 	gitlab_username="$1"
@@ -362,9 +379,6 @@ get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
 	create_mirror_directories
 	
 	if [ "$(verify_mirror_directories_are_created)" != "FOUND" ]; then
-		#assert_not_equal "$MIRROR_LOCATION" ""
-		#assert_file_exist "$MIRROR_LOCATION"
-		#assert_file_exist "$MIRROR_LOCATION/GitLab"
 		echo "ERROR, the GitLab repository was not found in the GitLab server."
 		exit 8
 	# TODO: verify the repository exists in GitLab, throw error otherwise.
@@ -386,6 +400,7 @@ get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
 	fi
 }
 
+# Structure:gitlab_modify
 # TODO: move to helper.
 git_pull_gitlab_repo() {
 	gitlab_repo_name="$1"
@@ -412,6 +427,7 @@ git_pull_gitlab_repo() {
 	fi
 }
 
+# Structure:github_modify
 # 6.e.0.helper TODO: move to helper
 github_branch_exists() {
 	github_repo_name="$1"
@@ -435,16 +451,17 @@ github_branch_exists() {
 	fi
 }
 
+# Structure:gitlab_status
 # 6.e.0.helper TODO: move to helper
 # TODO: find way to test this function (e.g. copy sponsor repo into GitLab as example.
 gitlab_branch_exists() {
 	gitlab_repo_name="$1"
 	gitlab_branch_name="$2"
 	
-	# Check if Gitlab repository exists locally
+	# Check if Gitlab repository exists locally.
 	if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
 	
-		# Get a list of the Gitlab branches in that repository
+		# Get a list of the Gitlab branches in that repository.
 		initialise_gitlab_branches_array "$gitlab_repo_name"
 		
 		# Check if the local copy of the Gitlab repository contains the branch.
@@ -452,7 +469,7 @@ gitlab_branch_exists() {
 			echo "FOUND"
 		else
 		
-			# TODO: do git status evaluation
+			# TODO: Do git status evaluation.
 			echo "NOTFOUND"
 		fi
 	else 
@@ -461,6 +478,7 @@ gitlab_branch_exists() {
 	fi
 }
 
+# Structure:gitlab_modify
 # 6.f.0 Checkout that branch in the local GitHub mirror repository.
 checkout_branch_in_github_repo() {
 	local github_repo_name="$1"
@@ -496,7 +514,7 @@ checkout_branch_in_github_repo() {
 				exit 15
 			fi
 		else 
-			echo "Error, the GitHub branch does not exist locally."
+			echo "ERROR, the GitHub branch does not exist locally."
 			exit 16
 		fi
 	else 
@@ -505,6 +523,7 @@ checkout_branch_in_github_repo() {
 	fi
 }
 
+# Structure:gitlab_status
 # 6.g.0 Verify the GitHub mirror repository branch contains a gitlab yaml file.
 verify_github_branch_contains_gitlab_yaml() {
 	github_repo_name="$1"
@@ -513,12 +532,12 @@ verify_github_branch_contains_gitlab_yaml() {
 	
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
-		# Verify the branch exists
+		# Verify the branch exists.
 		branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
 		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
 		if [ "$last_line_branch_check_result" == "FOUND" ]; then
 		
-			# Test if GitHub branch contains GitLab yaml file.
+			# Test if GitHub branch contains a GitLab yaml file.
 			filepath="$MIRROR_LOCATION/$company/$github_repo_name/.gitlab-ci.yml"
 			if [ "$(file_exists $filepath)" == "FOUND" ]; then
 				echo "FOUND"
@@ -526,7 +545,7 @@ verify_github_branch_contains_gitlab_yaml() {
 				echo "NOTFOUND"
 			fi
 		else 
-			echo "Error, the GitHub branch does not exist locally."
+			echo "ERROR, the GitHub branch does not exist locally."
 			exit 18
 		fi
 	else 
@@ -536,7 +555,7 @@ verify_github_branch_contains_gitlab_yaml() {
 }
 
 
-
+# Structure:gitlab_modify
 # assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
 # 6.h.1 Checkout that branch in the local GitLab mirror repository if it exists.
 # 6.h.2 If the branch does not exist in the GitLab repo, create it.
@@ -548,13 +567,11 @@ checkout_branch_in_gitlab_repo() {
 	
 	if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
 
-		# Verify the branch exists
+		# Verify the desired branch exists.
 		branch_check_result="$(gitlab_branch_exists $gitlab_repo_name $gitlab_branch_name)"
 		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
 		found_branch_name="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name "GitLab")"
-		
 		if [ "$last_line_branch_check_result" == "FOUND" ]; then
-		assert_current_gitlab_branch
 		
 			# Get the path before executing the command (to verify it is restored correctly after).
 			pwd_before="$PWD"
@@ -562,17 +579,15 @@ checkout_branch_in_gitlab_repo() {
 			# Checkout the branch inside the repository.
 			cd "$MIRROR_LOCATION/$company/$gitlab_repo_name" && git checkout "$gitlab_branch_name"
 			cd ../../../..
+			
 			# Get the path after executing the command (to verify it is restored correctly after).
 			pwd_after="$PWD"
 	
-			# TODO: write test to verify the current branch in the gitlab repository is indeed checked out.
+			# Verify the current branch in the gitlab repository is indeed checked out.
 			# e.g. using git status
 			assert_current_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name"
 			
-			# Verify the current path is the same as it was when this function started.
-			path_before_equals_path_after_command "$pwd_before" "$pwd_after"
 		else 
-			
 			# Get the path before executing the command (to verify it is restored correctly after).
 			pwd_before="$PWD"
 			
@@ -582,10 +597,13 @@ checkout_branch_in_gitlab_repo() {
 			# Get the path after executing the command (to verify it is restored correctly after).
 			pwd_after="$PWD"
 			
-			# TODO: write test to verify the current branch in the gitlab repository is indeed checked out.
-			# TODO: check if this passes
+			# Verify the current branch in the gitlab repository is indeed checked out.
+			# TODO: Check if this passes.
 			assert_current_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name"
 		fi
+		
+		# Verify the current path is the same as it was when this function started.
+		path_before_equals_path_after_command "$pwd_before" "$pwd_after"
 	else 
 		echo "ERROR, the gitlab repository does not exist locally."
 		exit 20
@@ -593,6 +611,7 @@ checkout_branch_in_gitlab_repo() {
 }
 
 
+# Structure:git_neutral
 # 6.i If there are differences in files, and if the GitHub branch contains a GitLab yaml file:
 # copy the content from GitHub to GitLab (except for the .git folder).
 copy_files_from_github_to_gitlab_branch() {
@@ -600,18 +619,12 @@ copy_files_from_github_to_gitlab_branch() {
 	github_branch_name="$2"
 	gitlab_repo_name="$3"
 	gitlab_branch_name="$4"
-	#read -p "github_repo_name=$github_repo_name"
-	#read -p "github_branch_name=$github_branch_name"
-	#read -p "gitlab_repo_name=$gitlab_repo_name"
-	#read -p "gitlab_branch_name=$gitlab_branch_name"
-	
 	
 	# If the GitHub repository exists
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
 		# If the GitHub branch exists
 		github_branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
-		#read -p "github_branch_check_result=$github_branch_check_result"
 		last_line_github_branch_check_result=$(get_last_line_of_set_of_lines "\${github_branch_check_result}")
 		if [ "$last_line_github_branch_check_result" == "FOUND" ]; then
 		
@@ -621,6 +634,7 @@ copy_files_from_github_to_gitlab_branch() {
 				
 				# If the GitLab repository exists
 				if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
+					
 					# If the GitLab branch exists
 					found_branch_name="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name "GitLab")"
 					if [ "$found_branch_name" == "$gitlab_branch_name" ]; then
@@ -629,11 +643,13 @@ copy_files_from_github_to_gitlab_branch() {
 						echo "CheckingDifference"
 						
 						# Then copy the files and folders from the GitHub branch into the GitLab branch (excluding the .git directory)
+						
 						# Then delete the files that exist in the GitLab branch that do not exist in the GitHub branch (excluding the .git directory)
+						
 						# Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
 						
 					else
-						echo "Error, the GitLab branch does not exist locally."
+						echo "ERROR, the GitLab branch does not exist locally."
 						exit 21
 					fi
 				else
@@ -641,12 +657,11 @@ copy_files_from_github_to_gitlab_branch() {
 					exit 22
 				fi
 			else
-				echo "Error, the GitHub branch does contain a yaml file."
+				echo "ERROR, the GitHub branch does contain a yaml file."
 				exit 23
 			fi
 		else 
-			
-			echo "Error, the GitHub branch does not exist locally."
+			echo "ERROR, the GitHub branch does not exist locally."
 			exit 24
 		fi
 	else 
@@ -656,9 +671,10 @@ copy_files_from_github_to_gitlab_branch() {
 }
 
 
-
+# Structure:github_status
 # 6.j Get commit sha from GitHub.
 
+# Structure:gitlab_modify
 # 6.k Commit the GitLab branch changes, with the sha from the GitHub branch.
 
 
@@ -695,7 +711,7 @@ copy_files_from_github_to_gitlab_branch() {
 ####			
 ####			# Get the latest GitLab mirror repository branch commit.
 ####			# TODO SERVER
-####			gitlab_commit_name=$(get_commit_of_branch "$github_branch" "$gitlab_repo" "$gitlab_username" "$gitlab_personal_access_token")
+####			gitlab_commit_name=$(get_commit_sha_of_branch "$github_branch" "$gitlab_repo" "$gitlab_username" "$gitlab_personal_access_token")
 ####			echo "gitlab_commit_name=$gitlab_commit_name"
 ####			
 ####			# Checkout that branch in the local GitLab mirror repository.

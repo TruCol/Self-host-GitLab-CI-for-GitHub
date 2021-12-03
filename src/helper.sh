@@ -2,7 +2,8 @@
 source src/hardcoded_variables.txt
 source src/creds.txt
 
-# Determine architecture of the machine on which this service is ran.
+# Structure:Configuration
+# Returns the architecture of the machine on which this service is ran.
 # Source: https://askubuntu.com/questions/189640/how-to-find-architecture-of-my-pc-and-ubuntu
 get_architecture() {
 	architecture=$(uname -m)
@@ -19,6 +20,7 @@ get_architecture() {
 	echo $architecture
 }
 
+# Structure:Verification
 # Checks whether the md5 checkum of the file specified with the incoming filepath
 # matches that of an expected md5 filepath that is incoming.
 # echo's "EQUAL" if the the expected md5sum equals the measured md5sum
@@ -42,7 +44,7 @@ check_md5_sum() {
 	fi
 }
 
-
+# Structure:Verification
 # Computes the md5sum of the GitLab installation file that is being downloaded
 # with respect to the expected md5sum of that file. (For safety).
 # 
@@ -56,7 +58,7 @@ get_expected_md5sum_of_gitlab_runner_installer_for_architecture() {
 	fi
 }
 
-
+# Structure:Configuration
 # Returns the GitLab installation package name that matches the architecture of the device 
 # on which it is installed. Not every package/GitLab source repository works on each computer/architecture.
 # Currently working GitLab installation packages have only been found for the amd64 architecture and 
@@ -70,7 +72,7 @@ get_gitlab_package() {
 	fi
 }
 
-
+# Structure:html
 # Downloads the source code of an incoming website into a file.
 # TODO: ensure/verify curl is installed before calling this method.
 downoad_website_source() {
@@ -80,7 +82,7 @@ downoad_website_source() {
 	output=$(curl "$site" > "$output_path")
 }
 
-
+# Structure:Parsing
 get_last_n_lines_without_spaces() {
 	number=$1
 	REL_FILEPATH=$2
@@ -92,6 +94,7 @@ get_last_n_lines_without_spaces() {
 	echo $last_number_of_lines
 }
 
+# Structure:Parsing
 # allows a string with spaces, hence allows a line
 file_contains_string() {
 	STRING=$1
@@ -104,6 +107,7 @@ file_contains_string() {
 	fi
 }
 
+# Structure:Parsing
 lines_contain_string() {
 	STRING=$1
 	eval lines=$2
@@ -114,7 +118,7 @@ lines_contain_string() {
 	fi
 }
 
-
+# Structure:Parsing
 get_line_nr() {
 	eval STRING="$1"
 	REL_FILEPATH=$2
@@ -122,6 +126,7 @@ get_line_nr() {
 	echo $line_nr
 }
 
+# Structure:Parsing
 get_line_by_nr() {
 	number=$1
 	REL_FILEPATH=$2
@@ -131,6 +136,7 @@ get_line_by_nr() {
 	echo $the_line
 }
 
+# Structure:Parsing
 get_line_by_nr_from_variable() {
 	number=$1
 	eval lines=$2
@@ -144,6 +150,7 @@ get_line_by_nr_from_variable() {
 	done <<< "$lines"
 }
 
+# Structure:Parsing
 get_first_line_containing_substring() {
 	# Returns the first line in a file that contains a substring, silent otherwise.
 	eval REL_FILEPATH="$1"
@@ -169,7 +176,7 @@ get_first_line_containing_substring() {
 	fi
 }
 
-
+# Structure:Parsing
 get_lhs_of_line_till_character() {
 	line=$1
 	character=$2
@@ -183,6 +190,7 @@ get_lhs_of_line_till_character() {
 	echo $lhs
 }
 
+# Structure:Parsing
 get_rhs_of_line_till_character() {
 	# TODO: include space right after character, e.g. return " with" instead of "width" on ": with".
 	line=$1
@@ -192,7 +200,7 @@ get_rhs_of_line_till_character() {
 	echo $rhs
 }
 
-
+# Structure:gitlab_docker
 get_docker_container_id_of_gitlab_server() {
 	# echo's the Docker container id if it is found, silent otherwise.
 	space=" "
@@ -221,12 +229,13 @@ get_docker_container_id_of_gitlab_server() {
 	
 	echo $container_id
 }
-
+# Structure:gitlab_docker
 get_docker_image_identifier() {
 	docker_image_name=$1
 	echo $(get_lhs_of_line_till_character "$docker_image_name" "/")
 }
 
+# Structure:Configuration
 visudo_contains() {
 	line=$1
 	#echo "line=$line"
@@ -237,14 +246,14 @@ visudo_contains() {
 	echo $actual_result
 }
 
-
+# Structure:gitlab_status
 # gitlab runner status:
 check_gitlab_runner_status() {
 	status=$(sudo gitlab-runner status)
 	echo "$status"
 }
 
-# gitlab server status:
+# Structure:gitlab_status
 #sudo docker exec -i 79751949c099 bash -c "gitlab-rails status"
 #sudo docker exec -i 79751949c099 bash -c "gitlab-ctl status"
 check_gitlab_server_status() {
@@ -256,6 +265,7 @@ check_gitlab_server_status() {
 	echo "$status"
 }
 
+# Structure:gitlab_status
 gitlab_server_is_running() {
 	actual_result=$(check_gitlab_server_status)
 	if
@@ -281,6 +291,7 @@ gitlab_server_is_running() {
 	fi
 }
 
+# Structure:gitlab_status
 # Echo's "RUNNING" if the GitLab runner service is running, "NOTRUNNING" otherwise.
 gitlab_runner_is_running() {
 	actual_result=$(check_gitlab_runner_status)
@@ -292,6 +303,7 @@ gitlab_runner_is_running() {
 	fi
 }
 
+# Structure:gitlab_status
 # reconfigure:
 #sudo docker exec -i 4544ce711468 bash -c "gitlab-ctl reconfigure"
 
@@ -314,11 +326,13 @@ check_for_n_seconds_if_gitlab_server_is_running() {
 	fi
 }
 
+# Structure:Parsing
 get_nr_of_lines_in_var() {
 	eval lines=$1
 	echo "$lines" | wc -l
 }
 
+# Structure:Parsing
 get_last_line_of_set_of_lines() {
 	eval lines=$1
 	set -f # disable glob (wildcard) expansion
@@ -329,6 +343,7 @@ get_last_line_of_set_of_lines() {
 	echo "$last_line"
 }
 
+# Structure:gitlab_docker
 docker_image_exists() {
 	image_name=$1
 	docker_image_identifier=$(get_docker_image_identifier "$gitlab_package")
@@ -343,7 +358,7 @@ docker_image_exists() {
 	fi
 }
 
-
+# Structure:gitlab_docker
 # Returns FOUND if the container is running, returns NOTFOUND if it is not running
 container_is_running() {
 	# Get Docker container id
@@ -366,6 +381,7 @@ container_is_running() {
 	fi
 }
 
+# Structure:status
 # Returns "FOUND" if the service is found, NOTFOUND otherwise
 # TODO: write test for case when apache2 is actually running.
 apache2_is_running() {
@@ -373,7 +389,7 @@ apache2_is_running() {
 	echo $(lines_contain_string "unrecognized service" "\${status}")
 }
 
-
+# Structure:status
 # Returns "FOUND" if the service is found, NOTFOUND otherwise
 # TODO: write test for case when nginx is actually running.
 nginx_is_running() {
@@ -382,10 +398,29 @@ nginx_is_running() {
 	echo $(lines_contain_string "unrecognized service" "\${status}")
 }
 
+# Structure:status
+# stop ngix service
+stop_apache_service() {
+	
+	if [ "$(apache2_is_running)" == "FOUND" ]; then
+		output=$(sudo service apache2 stop)
+		echo "$output"
+	fi
+}
+
+# Structure:status
+#source src/helper.sh && stop_nginx_service
+stop_nginx_service() {
+	services_list=$(systemctl list-units --type=service)
+	if [  "$(lines_contain_string "nginx" "\${services_list}")" == "FOUND" ]; then
+		output=$(sudo service nginx stop)
+		echo "$output"
+	fi
+
+}
 
 
-
-
+# Structure:gitlab_docker
 ####### STOP START SERVICES
 # Install docker:
 install_docker() {
@@ -399,17 +434,20 @@ install_docker() {
 	echo "$output"
 }
 
+# Structure:gitlab_docker
 install_docker_compose() {
 	output=$(yes | sudo apt install docker-compose)
 	echo "$output"
 }
 
+# Structure:gitlab_docker
 # Stop docker
 stop_docker() {
 	output=$(sudo systemctl stop docker)
 	echo "$output"
 }
 
+# Structure:gitlab_docker
 # start docker
 start_docker() {
 	output=$(sudo systemctl start docker)
@@ -417,6 +455,7 @@ start_docker() {
 	echo "$output"
 }
 
+# Structure:gitlab_docker
 # Delete all existing gitlab containers
 # 0. First clear all relevant containres using their NAMES:
 list_all_docker_containers() {
@@ -424,6 +463,7 @@ list_all_docker_containers() {
 	echo "$output"
 }
 
+# Structure:gitlab_docker
 stop_gitlab_package_docker() {
 	# Get Docker container id
 	docker_container_id=$(get_docker_container_id_of_gitlab_server)
@@ -434,6 +474,7 @@ stop_gitlab_package_docker() {
 	fi
 }
 
+# Structure:gitlab_docker
 remove_gitlab_package_docker() {
 	
 	# Get Docker container id
@@ -450,6 +491,7 @@ remove_gitlab_package_docker() {
 	fi
 }
 
+# Structure:gitlab_docker
 # Remove all containers
 remove_gitlab_docker_containers() {
 	# Get Docker container id
@@ -464,31 +506,8 @@ remove_gitlab_docker_containers() {
 }
 
 
-# stop ngix service
-stop_apache_service() {
-	
-	if [ "$(apache2_is_running)" == "FOUND" ]; then
-		output=$(sudo service apache2 stop)
-		echo "$output"
-	fi
-}
 
-#source src/helper.sh && stop_nginx_service
-stop_nginx_service() {
-	services_list=$(systemctl list-units --type=service)
-	if [  "$(lines_contain_string "nginx" "\${services_list}")" == "FOUND" ]; then
-		output=$(sudo service nginx stop)
-		echo "$output"
-	fi
-
-}
-
-# TODO: verify if it can be ommitted
-#stop_nginx() {
-#	output=$(sudo nginx -s stop)
-#	echo "$output"
-#}
-
+# Structure:gitlab_status
 # Echo's "NO" if the GitLab Runner is not installed, "YES" otherwise.
 #+ TODO: Write test for this function in "modular-test_runner.bats".
 #+ TODO: Verify the YES command is returned correctly when the GitLab runner is installed.
@@ -505,6 +524,7 @@ gitlab_runner_service_is_installed() {
 	fi
 }
 
+# Structure:gitlab_status
 #source src/helper.sh && get_build_status
 get_build_status() {
 	# load personal_access_token, gitlab username, repository name
@@ -548,11 +568,13 @@ get_build_status() {
 	fi
 }
 
+# Structure:dir_edit
 dir_exists() {
 	dir=$1 
 	[ -d "$dir" ] && echo "FOUND" || echo "NOTFOUND"
 }
 
+# Structure:dir_edit
 sudo_dir_exists() {
 	dir=$1 
 	if sudo test -d "$dir"; then
@@ -562,6 +584,7 @@ sudo_dir_exists() {
 	fi
 }
 
+# Structure:file_edit
 file_exists() {
 	filepath=$1 
 	if test -f "$filepath"; then
@@ -572,6 +595,7 @@ file_exists() {
 
 }
 
+# # Structure:file_edit
 sudo_file_exists() {
 	filepath=$1 
 	if sudo test -f "$filepath"; then
@@ -582,6 +606,7 @@ sudo_file_exists() {
 
 }
 
+# Structure:dir_edit
 create_dir() {
 	abs_dir=$1
 	if [ "$(dir_exists "$abs_dir")" == "NOTFOUND" ]; then
@@ -589,6 +614,7 @@ create_dir() {
 	fi
 }
 
+# Structure:dir_edit
 remove_dir() {
 	abs_dir=$1
 	if [ "$(dir_exists "$abs_dir")" == "FOUND" ]; then
@@ -596,6 +622,7 @@ remove_dir() {
 	fi
 }
 
+# Structure:dir_edit
 sudo_create_dir() {
 	abs_dir=$1
 	if [ "$(sudo_dir_exists "$abs_dir")" == "NOTFOUND" ]; then
@@ -603,6 +630,7 @@ sudo_create_dir() {
 	fi
 }
 
+# Structure:dir_edit
 docker_sudo_create_dir(){
 	abs_dir=$1
 	docker_container_id=$2
@@ -617,6 +645,7 @@ docker_sudo_create_dir(){
 	fi
 }
 
+# Structure:dir_edit
 make_user_owner_of_dir() {
 	user=$1
 	dir=$2
@@ -624,6 +653,7 @@ make_user_owner_of_dir() {
 	sudo chown -R $user: $dir
 }
 
+# Structure:dir_edit
 is_owner_of_dir() {
 	owner=$1
 	dir=$2
@@ -632,6 +662,7 @@ is_owner_of_dir() {
 	echo "$actual_result"
 }
 
+# Structure:Parsing
 get_array() {
 	json=$1
 	identifier=$2
@@ -648,8 +679,9 @@ get_array() {
 	echo  "${commit_array[@]}"
 }
 
+# Structure:Gitlab_status
 # TODO: remove above 20 lines with this fucntion
-get_commit_of_branch() {
+get_commit_sha_of_branch() {
 	desired_branch=$1
 	repository_name=$2
 	gitlab_username=$3
@@ -670,14 +702,20 @@ get_commit_of_branch() {
 	
 		# Only export the desired branch build status
 		if [  "${branch_names_arr[i]}" == '"'"$desired_branch"'"' ]; then
-			
+			####### TODO: test this function!
+			found=true
 			# TODO: include boolean, and check at end that throws error if branch is not found.
 			# Get the GitLab build statusses and export them to the GitHub build status website.
 			echo "${branch_commits_arr[i]}"
 		fi
 	done
+	if [ "$found" != "true" ]; then
+		echo "ERROR, the expected branch was not found."
+		exit 261
+	fi
 }
 
+# Structure:Parsing
 get_last_space_delimted_item_in_line() {
 	line="$1"
 	IFS=' ' # let's make sure we split on newline chars
@@ -686,7 +724,8 @@ get_last_space_delimted_item_in_line() {
 	echo "${stringarray[-1]}"
 }
 
-
+# Structure:Github_status
+# Structure:ssh
 # Returns FOUND if the incoming ssh account is activated,
 # returns NOTFOUND otherwise.
 github_account_ssh_key_is_added_to_ssh_agent() {
@@ -714,6 +753,7 @@ github_account_ssh_key_is_added_to_ssh_agent() {
 	fi
 }
 
+# Structure:ssh
 # Checks for both GitHub username as well as for the email address that is 
 # tied to that acount.
 any_ssh_key_is_added_to_ssh_agent() {
@@ -749,7 +789,7 @@ any_ssh_key_is_added_to_ssh_agent() {
 	fi
 }
 
-
+# Structure:ssh
 verify_ssh_key_is_added_to_ssh_agent() {
 	local ssh_account=$1
 	local ssh_output=$(ssh-add -L)
@@ -760,6 +800,7 @@ verify_ssh_key_is_added_to_ssh_agent() {
 	fi
 }
 
+# Structure:ssh
 # Untested function to retrieve email pertaining to ssh key
 get_ssh_email() {
 	local ssh_account=$1
@@ -778,6 +819,7 @@ get_ssh_email() {
 	echo "$email"
 }
 
+# Structure:dir_edit
 assert_file_exists() {
 	filepath=$1
 	if [ ! -f "$filepath" ]; then
@@ -786,6 +828,7 @@ assert_file_exists() {
 	fi
 }
 
+# Structure:github_status
 # 6.f.1.helper
 # TODO: test
 get_current_github_branch() {
@@ -825,6 +868,7 @@ get_current_github_branch() {
 }
 
 
+# Structure:gitlab_status
 # 6.f.1.helper0
 # Verifies the current branch equals the incoming branch, throws an error otherwise.
 ################################## TODO: test function
@@ -842,6 +886,7 @@ assert_current_gitlab_branch() {
 	fi
 }
 
+# Structure:gitlab_status
 # 6.f.1.helper1
 # TODO: test
 get_current_gitlab_branch() {
@@ -889,9 +934,9 @@ get_current_gitlab_branch() {
 	fi
 }
 
-
+# Structure:gitlab_status
 # 6.f.1.helper2
-# Uses git status to get the current branch name. 
+# Uses git status to get 1the current branch name. 
 # This is used in case a new branch is created (unborn=no commits) 
 #with checkout -b ...  to get the current GitLab branch name.
 get_current_unborn_gitlab_branch() {
@@ -919,6 +964,7 @@ get_current_unborn_gitlab_branch() {
 	fi
 }
 
+# Structure:gitlab_status
 # 6.f.1.helper3
 parse_git_status_to_get_gitlab_branch() {
 	eval lines=$1
@@ -938,6 +984,9 @@ parse_git_status_to_get_gitlab_branch() {
 	fi
 }
 
+# Structure:dir_edit
+# Checks whether the path before and after a command that 
+# contains: "cd", is the same.
 path_before_equals_path_after_command() {
 	pwd_before="$1"
 	pwd_after="$2"
@@ -948,6 +997,7 @@ path_before_equals_path_after_command() {
 	fi
 }
 
+# Structure:gitlab_status
 # Verifies the current branch equals the incoming branch, throws an error otherwise.
 ################################## TODO: test function
 assert_current_github_branch() {
@@ -963,8 +1013,7 @@ assert_current_github_branch() {
 	assert_equal "$actual_result" "$github_branch_name"
 }
 
-
-
+# Structure:gitlab_status
 # 6.i.0
 #source src/helper.sh && copy_github_files_and_folders_to_gitlab "src/mirrors/GitHub/sponsor_example" "src/mirrors/GitLab/sponsor_example"
 copy_github_files_and_folders_to_gitlab() {
@@ -992,6 +1041,7 @@ copy_github_files_and_folders_to_gitlab() {
 	
 }
 
+# Structure:gitlab_status
 delete_all_gitlab_files() {
 	source_dir="$1"
 	
@@ -1004,6 +1054,7 @@ delete_all_gitlab_files() {
 	done
 }
 
+# Structure:gitlab_status
 delete_all_gitlab_folders() {
 	source_dir="$1"
 	
@@ -1020,7 +1071,7 @@ delete_all_gitlab_folders() {
 	done
 }
 
-
+# Structure:gitlab_status
 copy_all_gitlab_files() {
 	source_dir="$1"
 	target_dir="$2"
@@ -1034,6 +1085,7 @@ copy_all_gitlab_files() {
 	done
 }
 
+# Structure:gitlab_status
 copy_all_gitlab_folders() {
 	source_dir="$1"
 	target_dir="$2"

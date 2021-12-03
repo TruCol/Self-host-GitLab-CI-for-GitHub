@@ -559,7 +559,7 @@ END
 	# Check if branch is found in local GitHub repo.
 	run bash -c "source src/mirror_github_to_gitlab.sh && checkout_branch_in_github_repo $github_repo_name $github_branch_name $company"
 	assert_failure
-	assert_output --partial "Error, the GitHub branch does not exist locally."
+	assert_output --partial "ERROR, the GitHub branch does not exist locally."
 }
 
 

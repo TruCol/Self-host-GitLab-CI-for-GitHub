@@ -28,6 +28,7 @@ create_and_run_ci_job() {
 	push_changes
 }
 
+# Structure:gitlab_modify
 # TODO: Check if personal access token is already made, if not, create it.
 # Verify this has access:
 # TODO: replace token with variable
@@ -35,7 +36,6 @@ create_and_run_ci_job() {
 # If not hasaccess, run personal access token creation
 # source src/create_personal_access_token.sh && create_gitlab_personal_access_token
 # check has access again, if not, raise exception.
-
 create_repository() {
 	repo_name=$1
 	
@@ -58,6 +58,7 @@ create_repository() {
 	}
 }
 
+# Structure:gitlab_modify
 #source src/run_ci_job.sh && delete_repository
 delete_repository() {
 	repo_name="$1"
@@ -88,6 +89,7 @@ delete_repository() {
 
 }
 
+# Structure:gitlab_modify
 delete_existing_repository() {
 	repo_name="$1"
 	repo_username="$2"
@@ -98,6 +100,7 @@ delete_existing_repository() {
 	output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE http://127.0.0.1/api/v4/projects/$repo_username%2F$repo_name)
 }
 
+# Structure:gitlab_modify
 #source src/run_ci_job.sh && clone_repository
 # TODO: rename to clone_gitlab_repository_from _local_server
 clone_repository() {
@@ -113,6 +116,7 @@ clone_repository() {
 	output=$(cd "$target_directory" && git clone http://$gitlab_username:$gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
 }
 
+# Structure:github_modify
 clone_github_repository() {
 	if [[ "$1" != "" ]] && [[ "$2" != "" ]] && [[ "$3" != "" ]] && [[ "$4" != "" ]]; then
 		github_username="$1"
@@ -138,6 +142,7 @@ clone_github_repository() {
 	fi
 }
 
+# Structure:github_modify
 push_to_github_repository() {
 	github_username=$1
 	has_access=$2
@@ -155,6 +160,8 @@ push_to_github_repository() {
 	fi
 }
 
+# Structure:github_modify
+# TODO: make neutral
 commit_changes() {
 	target_directory=$1
 	#echo "$commit_changes"
@@ -164,6 +171,7 @@ commit_changes() {
 	output=$(cd "$target_directory" && git commit -m "Uploaded files to trigger GitLab runner.")
 }
 
+# Structure:gitlab_modify
 push_changes() {
 	repo_name=$1
 	gitlab_username=$2
@@ -174,6 +182,7 @@ push_changes() {
 	output=$(cd "$target_directory" && git push http://$gitlab_username:$gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
 }
 
+# Structure:gitlab_modify
 # source src/run_ci_job.sh && export_repo
 # Write function that exportis the test-repository to a separate external folder.
 delete_target_folder() {
@@ -184,9 +193,9 @@ delete_target_folder() {
 	fi
 	# create target folder
 	# copy source folder to target
-	
 }
 
+# Structure:git_neutral
 export_repo() {
 	# check if target folder already exists
 	
@@ -195,9 +204,4 @@ export_repo() {
 	cp -r "$SOURCE_FOLDERPATH" ../
 	# create target folder
 	# copy source folder to target
-	
 }
-
-
-
-

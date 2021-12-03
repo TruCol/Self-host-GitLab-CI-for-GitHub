@@ -595,14 +595,20 @@ copy_files_from_github_to_gitlab_branch() {
 	github_branch_name="$2"
 	gitlab_repo_name="$3"
 	gitlab_branch_name="$4"
+	#read -p "github_repo_name=$github_repo_name"
+	#read -p "github_branch_name=$github_branch_name"
+	#read -p "gitlab_repo_name=$gitlab_repo_name"
+	#read -p "gitlab_branch_name=$gitlab_branch_name"
+	
 	
 	# If the GitHub repository exists
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
 		# If the GitHub branch exists
 		github_branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
+		#read -p "github_branch_check_result=$github_branch_check_result"
 		last_line_github_branch_check_result=$(get_last_line_of_set_of_lines "\${github_branch_check_result}")
-		if [ "$last_line_branch_check_result" == "FOUND" ]; then
+		if [ "$last_line_github_branch_check_result" == "FOUND" ]; then
 		
 			# If the GitHub branch contains a gitlab yaml file
 			filepath="$MIRROR_LOCATION/$company/$github_repo_name/.gitlab-ci.yml"
@@ -637,6 +643,7 @@ copy_files_from_github_to_gitlab_branch() {
 				exit 23
 			fi
 		else 
+			
 			echo "Error, the GitHub branch does not exist locally."
 			exit 24
 		fi
@@ -644,11 +651,9 @@ copy_files_from_github_to_gitlab_branch() {
 		echo "ERROR, the GitHub repository does not exist locally."
 		exit 25
 	fi
-	
-	
-	
-	
 }
+
+
 
 # 6.j Get commit sha from GitHub.
 

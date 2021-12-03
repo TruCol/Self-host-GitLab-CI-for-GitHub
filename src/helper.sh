@@ -790,7 +790,7 @@ assert_file_exists() {
 # TODO: test
 get_current_github_branch() {
 	github_repo_name="$1"
-	github_branch_name="$exit"
+	github_branch_name="$2"
 	company="$3"
 	
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
@@ -963,3 +963,13 @@ assert_current_github_branch() {
 	assert_equal "$actual_result" "$github_branch_name"
 }
 
+
+
+# 6.i.0
+copy_github_files_and_folders_to_gitlab() {
+	github_dir="$1"
+	gitlab_dir="$2"
+	for d in *; do
+		echo $d
+	done
+}

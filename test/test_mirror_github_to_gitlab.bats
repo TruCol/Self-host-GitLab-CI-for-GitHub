@@ -67,10 +67,19 @@ setup() {
 # TODO: ensure assumption is replaced with actual call to function.
 @test "Test whether the files are copied from GitHub branch to GitLab branch if there is a difference." {
 	github_repo_name="sponsor_example"
-	github_branch_name="no_attack_in_filecontent"
+	github_branch_name="main"
 	gitlab_repo_name="sponsor_example"
-	gitlab_branch_name="no_attack_in_filecontent"
+	gitlab_branch_name="main"
 	company="GitLab"
+	
+	# checkout GitHub branch
+	# Checkout branch, if branch is found in local GitHub repo.
+	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name "GitHub")"
+	assert_success
+	
+	# Verify the get_current_github_branch function returns the correct branch.
+	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name "GitHub")"
+	assert_equal "$actual_result" "$github_branch_name"
 	
 	# Assumes the (sponsor_example) repository already exists inside the GitLab
 	# server, which usually is not the case.

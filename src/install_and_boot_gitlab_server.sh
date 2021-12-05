@@ -9,7 +9,7 @@
 		# Install GitLab
 		# Run command to host GitLab server
 
-source src/helper.sh
+#source src/helper.sh
 source src/hardcoded_variables.txt
 source src/creds.txt
 
@@ -21,7 +21,7 @@ install_and_run_gitlab_server() {
 	# its verified md5sum into hardcoded_variables.txt (possibly adding an if statement 
 	# to get_architecture().)
 	
-	if [ $(gitlab_server_is_running $gitlab_package) == "NOTRUNNING" ]; then
+	if [ "$(gitlab_server_is_running "$gitlab_package")" == "NOTRUNNING" ]; then
 		install_docker
 		create_log_folder
 		create_gitlab_folder
@@ -30,14 +30,14 @@ install_and_run_gitlab_server() {
 		stop_docker
 		start_docker
 		list_all_docker_containers
-		stop_gitlab_package_docker $gitlab_package
-		remove_gitlab_package_docker $gitlab_package
+		stop_gitlab_package_docker "$gitlab_package"
+		remove_gitlab_package_docker "$gitlab_package"
 		remove_gitlab_docker_containers
 		stop_apache_service
 		stop_nginx_service
 		#stop_nginx
 		run_gitlab_docker
-		verify_gitlab_server_status $SERVER_STARTUP_TIME_LIMIT
+		verify_gitlab_server_status "$SERVER_STARTUP_TIME_LIMIT"
 	fi
 }
 
@@ -50,7 +50,7 @@ verify_gitlab_server_status() {
 	running="false"
 	end=$(("$SECONDS" + "$duration"))
 	while [ $SECONDS -lt $end ]; do
-		if [ $(gitlab_server_is_running | tail -1) == "RUNNING" ]; then
+		if [ "$(gitlab_server_is_running | tail -1)" == "RUNNING" ]; then
 			running="true"
 			echo "RUNNING"; break;
 		fi
@@ -110,7 +110,7 @@ run_gitlab_docker() {
 	  --volume $GITLAB_HOME/logs:/var/log/gitlab \
 	  --volume $GITLAB_HOME/data:/var/opt/gitlab \
 	  -e GITLAB_ROOT_EMAIL=$GITLAB_ROOT_EMAIL -e GITLAB_ROOT_PASSWORD="yoursecretpassword" -e EXTERNAL_URL="http://127.0.0.1" \
-	  $gitlab_package)
+	  "$gitlab_package")
 	  #read -p "Ran command." >&2
 	  echo "$output"
 	  #-e GITLAB_ROOT_EMAIL="some_email@protonmail.com" -e GITLAB_ROOT_PASSWORD="$gitlab_server_password" -e EXTERNAL_URL="http://127.0.0.1" \

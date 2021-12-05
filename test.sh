@@ -31,11 +31,17 @@
 ###./test/libs/bats/bin/bats test/example_post-receive.bats
 
 # Test mirroring GitHub to GitLab
-#./test/libs/bats/bin/bats test/test_mirror_github_to_gitlab.bats
-#./test/libs/bats/bin/bats test/test_helper_dir_edit.bats
-#./test/libs/bats/bin/bats test/test_helper_github_modify.bats
-#./test/libs/bats/bin/bats test/test_helper_github_status.bats
+# Works
+./test/libs/bats/bin/bats test/test_helper_dir_edit.bats
+#1Skip,8Fail/12
+./test/libs/bats/bin/bats test/test_helper_github_modify.bats
+#1Skip,1Fail/7
+./test/libs/bats/bin/bats test/test_helper_github_status.bats
+# Works
 ./test/libs/bats/bin/bats test/test_helper_gitlab_modify.bats
-#./test/libs/bats/bin/bats test/test_helper_gitlab_status.bats
-#./test/libs/bats/bin/bats test/test_helper_git_neutral.bats
-#./test/libs/bats/bin/bats test/test_helper_ssh.bats
+# Works
+./test/libs/bats/bin/bats test/test_helper_gitlab_status.bats
+# Works
+./test/libs/bats/bin/bats test/test_helper_git_neutral.bats
+# Semi-works
+./test/libs/bats/bin/bats test/test_helper_ssh.bats

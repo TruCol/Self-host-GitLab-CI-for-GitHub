@@ -4,6 +4,7 @@
 # Source: https://docs.gitlab.com/runner/install/linux-manually.html
 
 
+source src/helper.sh
 source src/hardcoded_variables.txt
 source src/get_gitlab_server_runner_token.sh
 

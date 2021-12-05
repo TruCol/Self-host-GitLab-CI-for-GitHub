@@ -2,17 +2,17 @@
 # run with:
 #./mirror_github_to_gitlab.sh "a-t-0" "testrepo" "filler_github"
 
-source src/helper_dir_edit.sh
-source src/helper_github_modify.sh
-source src/helper_github_status.sh
-source src/helper_gitlab_modify.sh
-#source src/helper_gitlab_status.sh
-source src/helper_git_neutral.sh
-source src/helper_ssh.sh
-source src/hardcoded_variables.txt
-source src/creds.txt
-source src/get_gitlab_server_runner_token.sh
-source src/push_repo_to_gitlab.sh
+####source src/helper_dir_edit.sh
+#####source src/helper_github_modify.sh
+####source src/helper_github_status.sh
+####source src/helper_gitlab_modify.sh
+#####source src/helper_gitlab_status.sh
+####source src/helper_git_neutral.sh
+####source src/helper_ssh.sh
+###source src/hardcoded_variables.txt
+###source src/creds.txt
+###source src/get_gitlab_server_runner_token.sh
+###source src/push_repo_to_gitlab.sh
 
 # Hardcoded data:
 
@@ -134,17 +134,6 @@ create_repo_if_not_exists() {
 		sleep 5
 		assert_equal "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" "FOUND"
 		#echo "gitlab_mirror_is_found_after_creation=$gitlab_mirror_is_found_after_creation"
-	fi
-}
-
-
-# Structure:gitlab_status
-github_repo_exists_locally(){
-	github_repo="$1"
-	if test -d "$MIRROR_LOCATION/GitHub/$github_repo"; then
-		echo "FOUND"
-	else
-		echo "NOTFOUND"
 	fi
 }
 

@@ -7,39 +7,12 @@ load 'libs/bats-file/load'
 # https://github.com/bats-core/bats-assert#usage
 load 'assert_utils'
 
-source src/mirror_github_to_gitlab.sh
-source src/push_repo_to_gitlab.sh
-source src/helper.sh
 source src/hardcoded_variables.txt
 
-example_lines=$(cat <<-END
-ssh-ed25519 longcode/longcode somename-somename-123
-ssh-rsa longcode/longcode+longcode+longcode/longcode/longcode+longcode/longcode+longcode somename@somename-somename-123
-ssh-ed25519 longcode somename@somename-somename-123
-ssh-ed25519 longcode/longcode+longcode somename@somename.somename
-END
-)
+source src/helper.sh
+source src/helper_dir_edit.sh
 
-# Specify expected error message:
-expected_error_message=$(cat <<-END
-Cloning into 'src/mirrors/GitHub/NON_EXISTANT_REPOSITORY'...
-ERROR: Repository not found.
-fatal: Could not read from remote repository.
 
-Please make sure you have the correct access rights
-and the repository exists.
-END
-)
-	
-
-example_git_status_output=$(cat <<-END
-On branch no_attack_in_filecontent
-
-No commits yet
-
-nothing to commit (create/copy files and use "git add" to track)
-END
-)
 
 # Method that executes all tested main code before running tests.
 setup() {

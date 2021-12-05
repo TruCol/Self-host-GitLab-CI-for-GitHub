@@ -86,7 +86,7 @@ setup() {
 	target_directory="$MIRROR_LOCATION/GitHub/$non_existant_repository"
 	
 	export github_username  github_repository has_access target_directory
-	run bash -c 'source src/push_repo_to_gitlab.sh &&  export github_username  github_repository && clone_github_repository'
+	run bash -c 'source src/import.sh src/push_repo_to_gitlab.sh &&  export github_username  github_repository && clone_github_repository'
 	assert_failure
 	assert_output "$expected_error_message"
 }
@@ -105,7 +105,7 @@ setup() {
 	target_directory="$MIRROR_LOCATION/GitHub/$non_existant_repository"
 	
 	export github_repository target_directory
-	run bash -c 'source src/mirror_github_to_gitlab.sh &&  verify_github_repository_is_cloned'
+	run bash -c 'source src/import.sh src/mirror_github_to_gitlab.sh &&  verify_github_repository_is_cloned'
 	assert_failure
 	assert_output "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
 }

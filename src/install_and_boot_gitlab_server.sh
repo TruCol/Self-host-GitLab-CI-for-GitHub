@@ -9,7 +9,7 @@
 		# Install GitLab
 		# Run command to host GitLab server
 
-#source src/helper.sh
+source src/helper.sh
 source src/hardcoded_variables.txt
 source src/creds.txt
 

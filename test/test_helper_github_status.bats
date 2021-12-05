@@ -7,10 +7,7 @@ load 'libs/bats-file/load'
 # https://github.com/bats-core/bats-assert#usage
 load 'assert_utils'
 
-#source src/mirror_github_to_gitlab.sh
-#source src/push_repo_to_gitlab.sh
-#source src/helper.sh
-#source src/hardcoded_variables.txt
+
 source src/import.sh
 
 example_lines=$(cat <<-END

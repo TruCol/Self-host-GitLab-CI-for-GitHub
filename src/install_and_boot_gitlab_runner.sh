@@ -3,6 +3,7 @@
 # Source: https://docs.gitlab.com/runner/install/
 # Source: https://docs.gitlab.com/runner/install/linux-manually.html
 
+
 source src/helper.sh
 source src/hardcoded_variables.txt
 source src/get_gitlab_server_runner_token.sh
@@ -17,15 +18,15 @@ install_and_run_gitlab_runner() {
 	# to get_architecture().)
 	
 	# Install GitLab Runner regardless of whether the runner service is already running or not.
-		get_runner_package $arch
-		install_package $arch
+		get_runner_package "$arch"
+		install_package "$arch"
 		register_gitlab_runner
 		create_gitlab_ci_user
 		install_gitlab_runner_service
 		start_gitlab_runner_service
 		run_gitlab_runner_service
 		
-	if [ $(gitlab_runner_is_running $arch) == "NOTRUNNING" ]; then
+	if [ "$(gitlab_runner_is_running "$arch")" == "NOTRUNNING" ]; then
 		echo "The gitlab runner is not yet running"
 	else
 		echo "The gitlab runner is already running"
@@ -40,38 +41,40 @@ get_runner_package() {
 	arch=$1
 	
 	# Get the hardcoded/expected checksum and verify if the file already is downloaded.
-	expected_checksum=$(get_expected_md5sum_of_gitlab_runner_installer_for_architecture $arch)
+	expected_checksum=$(get_expected_md5sum_of_gitlab_runner_installer_for_architecture "$arch")
 	
 	# Download GitLab runner installer package if it is not yet found
-	if [ $(check_md5_sum "$expected_checksum" "gitlab-runner_${arch}.deb") != "EQUAL" ]; then
+	if [ "$(check_md5_sum "$expected_checksum" "gitlab-runner_${arch}.deb")" != "EQUAL" ]; then
 		# install curl
 		install_curl=$(yes | sudo apt install curl)
+		# TODO: write test to verifiy output install curl command.
 		
 		left="https://gitlab-runner-downloads.s3.amazonaws.com/latest/deb/gitlab-runner_"
 		right=".deb"
 		url="$left$arch$right"
 		
-		curl_command=$(curl -LJO "$url")
+		# Curl the gitlab runner installation file.
+		curl -LJO "$url"
 		
 		# Optional: if x86_64 curl from:
 		#https://archlinux.org/packages/community/x86_64/gitlab-runner/download
 	fi
 	
 	# Verify the downloaded package is retrieved
-	if [ $(check_md5_sum "$expected_checksum" "gitlab-runner_${arch}.deb") != "EQUAL" ]; then
+	if [ "$(check_md5_sum "$expected_checksum" "gitlab-runner_${arch}.deb")" != "EQUAL" ]; then
 		echo "ERROR, the md5 checksum of the downloaded GitLab installer package does not match the expected md5 checksum, perhaps the download was interrupted."
 		exit 1
 	fi
 	
 	# make it executable
-	$(sudo chmod +x "gitlab-runner_${arch}.deb")
+	sudo chmod +x "gitlab-runner_${arch}.deb"
 }
 
 
 # Install GitLab runner (=not install GitLab runner as a service)
 install_package() {
 	arch=$1
-	filename="gitlab-runner_"$arch".deb"
+	filename="gitlab-runner_$arch.deb"
 	echo "filename=$filename"
 	install=$(sudo dpkg -i "$filename")
 	#install=$(dpkg -i "$filename")
@@ -92,10 +95,10 @@ register_gitlab_runner() {
 	gitlab_url="http://127.0.0.1"
 	description=trucolrunner
 	executor=shell
-	dockerimage="ruby:2.6"
+	#dockerimage="ruby:2.6"
 	
 	# Get Gitlab Server runner registration token.
-	output=$(get_gitlab_server_runner_tokenV1)
+	get_gitlab_server_runner_tokenV1
 	
 	# runner_token=$(get_last_line_of_set_of_lines "\${output}") # python code output is given after last echo in shell, so read it from file instead of from output
 	runner_token=$(cat $RUNNER_REGISTRATION_TOKEN_FILEPATH)
@@ -111,12 +114,12 @@ register_gitlab_runner() {
 	#--executor docker \
 	#--docker-image ruby:2.6)
 	
-	register=$(sudo gitlab-runner register \
+	sudo gitlab-runner register \
 	--non-interactive \
 	--url "$gitlab_url" \
 	--description $description \
 	--registration-token "$runner_token" \
-	--executor $executor)
+	--executor $executor
 }
 
 
@@ -147,16 +150,15 @@ create_gitlab_ci_user() {
 install_gitlab_runner_service() {
 	
 	# only install service if it is not found yet:
+	# shellcheck disable=SC2034
 	user_list=$(awk -F: '{ print $1}' /etc/passwd)
-	#read -p  "RUNNER_USERNAME=$RUNNER_USERNAME"
-	#read -p  "user_list=$user_list"
 	if [  "$(lines_contain_string "$RUNNER_USERNAME" "\${user_list}")" == "NOTFOUND" ]; then
 		if [  "$(gitlab_runner_service_is_installed)" == "NO" ]; then
 			#sudo gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab_runner
-			$(sudo gitlab-runner install --user=$RUNNER_USERNAME --working-directory=/home/$RUNNER_USERNAME)
+			sudo gitlab-runner install --user=$RUNNER_USERNAME --working-directory=/home/$RUNNER_USERNAME
 		fi
 	fi
-	$(sudo usermod -a -G sudo $RUNNER_USERNAME)
+	sudo usermod -a -G sudo $RUNNER_USERNAME
 	# TODO: determine why this folder should be removed after installing the service (instead of before).
 	#$(sudo rm -r /home/$RUNNER_USERNAME/.*)
 	

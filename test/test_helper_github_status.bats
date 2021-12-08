@@ -28,6 +28,17 @@ Please make sure you have the correct access rights
 and the repository exists.
 END
 )
+
+# Specify expected error message:
+expected_error_message_with_ssh=$(cat <<-END
+Cloning into 'src/mirrors/GitHub/NON_EXISTANT_REPOSITORY'...
+fatal: remote error: 
+  src/push_repo_to_gitlab.sh/NON_EXISTANT_REPOSITORY is not a valid repository name
+  Visit https://support.github.com/ for help
+END
+)
+
+
 	
 
 example_git_status_output=$(cat <<-END
@@ -86,7 +97,8 @@ setup() {
 	export github_username  github_repository has_access target_directory
 	run bash -c 'source src/import.sh src/push_repo_to_gitlab.sh &&  export github_username  github_repository && clone_github_repository'
 	assert_failure
-	assert_output "$expected_error_message"
+	#assert_output "$expected_error_message"
+	assert_output "$expected_error_message_with_ssh"
 }
 
 # 3.b Verify not cloning a repo correctly is detected with an error.

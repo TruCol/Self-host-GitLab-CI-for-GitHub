@@ -38,7 +38,7 @@
 ##1Skip,8Fail/12
 #./test/libs/bats/bin/bats test/test_helper_github_modify.bats
 ## Works
-#./test/libs/bats/bin/bats test/test_helper_gitlab_modify.bats
+./test/libs/bats/bin/bats test/test_helper_gitlab_modify.bats
 ## Works
 #./test/libs/bats/bin/bats test/test_helper_gitlab_status.bats
 ## Works

@@ -124,25 +124,26 @@ copy_files_from_github_to_gitlab_branch() {
 						copy_github_files_and_folders_to_gitlab "$MIRROR_LOCATION/GitHub/$github_repo_name" "$MIRROR_LOCATION/GitLab/$github_repo_name"
 						
 						# Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
-						comparison_result="$(two_folders_are_identical_excluding_subdir test/sha256_tests/original test/sha256_tests/different_dot_dir_content ".git")"
+						comparison_result="$(two_folders_are_identical_excluding_subdir $MIRROR_LOCATION/GitHub/$github_repo_name $MIRROR_LOCATION/GitLab/$github_repo_name .git)"
+						
 						if [ "$comparison_result" == "IDENTICAL" ]; then
 							echo "IDENTICAL"
 						else
 							echo "ERROR, the content in the GitHub branch is not exactly copied into the GitLab branch, even when excluding the .git directory."
-							exit 21
+							exit 11
 						fi
 						
 					else
 						echo "ERROR, the GitLab branch does not exist locally."
-						exit 21
+						exit 12
 					fi
 				else
 					echo "ERROR, the GitLab repository does not exist locally."
-					exit 22
+					exit 13
 				fi
 			else
 				echo "ERROR, the GitHub branch does contain a yaml file."
-				exit 23
+				exit 14
 			fi
 		else 
 			echo "ERROR, the GitHub branch does not exist locally."

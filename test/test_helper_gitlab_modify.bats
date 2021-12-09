@@ -125,5 +125,6 @@ setup() {
 	
 	#
 	result="$(copy_files_from_github_to_gitlab_branch $github_repo_name $github_branch_name $gitlab_repo_name $gitlab_branch_name)"
-	assert_equal "$result" "CheckingDifference"
+	last_line_result=$(get_last_line_of_set_of_lines "\${result}")
+	assert_equal "$last_line_result" "IDENTICAL"
 }

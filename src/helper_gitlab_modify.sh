@@ -140,7 +140,7 @@ git_pull_gitlab_repo() {
 		# Verify the current path is the same as it was when this function started.
 		if [ "$pwd_before" != "$pwd_after" ]; then
 			echo "The current path is not returned to what it originally was."
-			exit 11
+			exit 111
 		fi
 	else 
 		echo "ERROR, the GitLab repository does not exist locally."

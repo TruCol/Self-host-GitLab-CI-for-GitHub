@@ -365,3 +365,81 @@ delete_target_folder() {
 #TODO:
 # Structure:gitlab_modify
 # 6.k Commit the GitLab branch changes, with the sha from the GitHub branch.
+commit_changes_to_gitlab() {
+	github_repo_name="$1"
+	github_branch_name="$2"
+	gitlab_repo_name="$3"
+	gitlab_branch_name="$4"
+	company="$5"
+
+	# Verify the GitHub repo was downloaded.
+	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
+		
+
+		# Verify the GitHub branch exists
+		branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
+		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
+		if [ "$last_line_branch_check_result" == "FOUND" ]; then
+		
+			# Verify the GitHub branch was checked out.
+			assert_current_github_branch "$github_repo_name" "$github_branch_name"
+	
+			# Verify the GitLab repo was downloaded.
+			if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_branch_name")" == "FOUND" ]; then
+				assert_equal "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" "FOUND"
+				
+			
+			
+				# Verify the branch exists
+				branch_check_result="$(gitlab_branch_exists $gitlab_repo_name $gitlab_branch_name)"
+				#echo "branch_check_result=$branch_check_result"
+				last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
+				if [ "$last_line_branch_check_result" == "FOUND" ]; then
+					echo "hi"
+					# Verify the GitHub branch was checked out.
+					assert_current_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name"
+					
+					# Verify the files were correctly copied from GitHub branch to GitLab branch.
+					
+					# Commit the changes to GitLab.
+					
+					# Verify the changes were committed to GitLab correctly.
+					
+					# Verify the current path is the same as it was when this function started.
+				else
+					echo "ERROR, the GitHub branch does not exist locally."
+					exit 1
+				fi
+			else
+				echo "ERROR, the GitLab repository does not exist locally."
+				exit 2
+			fi
+		else 
+			echo "ERROR, the GitHub branch does not exist locally."
+			exit 3
+		fi
+	else
+		echo "ERROR, the GitHub repository does not exist locally."
+		exit 4
+	fi
+}
+
+#TODO:
+# Structure:gitlab_modify
+# 6.k Commit the GitLab branch changes, with the sha from the GitHub branch.
+push_changes_to_gitlab() {
+	# Verify the GitLab repo was downloaded.
+	# Verify the GitLab branch was checked out.
+	
+	# Verify the GitLab repo was downloaded.
+	# Verify the GitLab branch was checked out.
+	
+	# Verify the files were correctly copied from GitHub branch to GitLab branch.
+	
+	# Verify the changes were committed to GitLab correctly.
+	
+	# Push the changes to GitLab.
+	
+	# Verify the changes were pushed to GitLab correctly.
+	echo "hi"
+}

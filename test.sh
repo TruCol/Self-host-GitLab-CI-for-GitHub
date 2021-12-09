@@ -34,7 +34,7 @@
 ## Works
 #./test/libs/bats/bin/bats test/test_helper_dir_edit.bats
 ## Works
-./test/libs/bats/bin/bats test/test_helper_github_status.bats
+#./test/libs/bats/bin/bats test/test_helper_github_status.bats
 ##1Skip,8Fail/12
 #./test/libs/bats/bin/bats test/test_helper_github_modify.bats
 ## Works
@@ -45,3 +45,4 @@
 #./test/libs/bats/bin/bats test/test_helper_git_neutral.bats
 ## Semi-works
 #./test/libs/bats/bin/bats test/test_helper_ssh.bats
+./test/libs/bats/bin/bats test/test_sha256_checksum.bats

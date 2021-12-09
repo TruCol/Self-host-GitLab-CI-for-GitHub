@@ -940,33 +940,7 @@ assert_current_github_branch() {
 	assert_equal "$actual_result" "$github_branch_name"
 }
 
-# Structure:gitlab_status
-# 6.i.0
-#source src/helper.sh && copy_github_files_and_folders_to_gitlab "src/mirrors/GitHub/sponsor_example" "src/mirrors/GitLab/sponsor_example"
-copy_github_files_and_folders_to_gitlab() {
-	github_dir="$1"
-	gitlab_dir="$2"
-	
-	if [ "$gitlab_dir" == "" ]; then
-		echo "Error, the GitLab directory is not specified."
-		exit 18
-	fi
-	
-	# Delete all GitLab files and folders except for ., .., .git.
-	delete_all_gitlab_files "$gitlab_dir/.*"
-	delete_all_gitlab_files "$gitlab_dir/*" 
-	delete_all_gitlab_folders "$gitlab_dir/.*" 
-	delete_all_gitlab_folders "$gitlab_dir/*"
-	
-	# Copy all GitHub folders to GitLab
-	copy_all_gitlab_files "$github_dir/.*" "$gitlab_dir"
-	copy_all_gitlab_files "$github_dir/*" "$gitlab_dir"
-	
-	# Copy all GitHub files to GitLab.
-	copy_all_gitlab_folders "$github_dir/.*" "$gitlab_dir"
-	copy_all_gitlab_folders "$github_dir/*" "$gitlab_dir"
-	
-}
+
 
 # Structure:gitlab_status
 delete_all_gitlab_files() {

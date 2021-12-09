@@ -120,10 +120,17 @@ copy_files_from_github_to_gitlab_branch() {
 						echo "CheckingDifference"
 						
 						# Then copy the files and folders from the GitHub branch into the GitLab branch (excluding the .git directory)
-						
-						# Then delete the files that exist in the GitLab branch that do not exist in the GitHub branch (excluding the .git directory)
+						# That also deletes the files that exist in the GitLab branch that do not exist in the GitHub branch (excluding the .git directory)
+						copy_github_files_and_folders_to_gitlab "$MIRROR_LOCATION/GitHub/$github_repo_name" "$MIRROR_LOCATION/GitLab/$github_repo_name"
 						
 						# Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
+						comparison_result="$(two_folders_are_identical_excluding_subdir test/sha256_tests/original test/sha256_tests/different_dot_dir_content ".git")"
+						if [ "$comparison_result" == "IDENTICAL" ]; then
+							echo "IDENTICAL"
+						else
+							echo "ERROR, the content in the GitHub branch is not exactly copied into the GitLab branch, even when excluding the .git directory."
+							exit 21
+						fi
 						
 					else
 						echo "ERROR, the GitLab branch does not exist locally."
@@ -147,6 +154,34 @@ copy_files_from_github_to_gitlab_branch() {
 	fi
 }
 
+
+# Structure:gitlab_status
+# 6.i.0
+#source src/helper_git_neutral.sh && copy_github_files_and_folders_to_gitlab "src/mirrors/GitHub/sponsor_example" "src/mirrors/GitLab/sponsor_example"
+copy_github_files_and_folders_to_gitlab() {
+	github_dir="$1"
+	gitlab_dir="$2"
+	
+	if [ "$gitlab_dir" == "" ]; then
+		echo "Error, the GitLab directory is not specified."
+		exit 18
+	fi
+	
+	# Delete all GitLab files and folders except for ., .., .git.
+	delete_all_gitlab_files "$gitlab_dir/.*"
+	delete_all_gitlab_files "$gitlab_dir/*" 
+	delete_all_gitlab_folders "$gitlab_dir/.*" 
+	delete_all_gitlab_folders "$gitlab_dir/*"
+	
+	# Copy all GitHub folders to GitLab
+	copy_all_gitlab_files "$github_dir/.*" "$gitlab_dir"
+	copy_all_gitlab_files "$github_dir/*" "$gitlab_dir"
+	
+	# Copy all GitHub files to GitLab.
+	copy_all_gitlab_folders "$github_dir/.*" "$gitlab_dir"
+	copy_all_gitlab_folders "$github_dir/*" "$gitlab_dir"
+	
+}
 
 # Structure:git_neutral
 export_repo() {

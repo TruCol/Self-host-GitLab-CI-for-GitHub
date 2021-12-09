@@ -679,41 +679,7 @@ get_array() {
 	echo  "${commit_array[@]}"
 }
 
-# Structure:Gitlab_status
-# TODO: remove above 20 lines with this fucntion
-get_commit_sha_of_branch() {
-	desired_branch=$1
-	repository_name=$2
-	gitlab_username=$3
-	personal_access_token=$4
-	
-	# Get the branches of the GitLab CI resositories, and their latest commit.
-	# TODO: switch server name
-	branches=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repository_name/repository/branches")
-	
-	# Get two parallel arrays of branches and their latest commits
-	readarray -t branch_names_arr <  <(echo "$branches" | jq ".[].name")
-	readarray -t branch_commits_arr <  <(echo "$branches" | jq ".[].commit.id")
-	#echo "branch_names_arr=${branch_names_arr[@]}"
-	#echo "branch_commits_arr=${branch_commits_arr[@]}"
 
-	# Loop through branches using a mutual index i.
-	for i in "${!branch_names_arr[@]}"; do
-	
-		# Only export the desired branch build status
-		if [  "${branch_names_arr[i]}" == '"'"$desired_branch"'"' ]; then
-			####### TODO: test this function!
-			found=true
-			# TODO: include boolean, and check at end that throws error if branch is not found.
-			# Get the GitLab build statusses and export them to the GitHub build status website.
-			echo "${branch_commits_arr[i]}"
-		fi
-	done
-	if [ "$found" != "true" ]; then
-		echo "ERROR, the expected branch was not found."
-		exit 261
-	fi
-}
 
 # Structure:Parsing
 get_last_space_delimted_item_in_line() {
@@ -825,45 +791,6 @@ assert_file_exists() {
 	if [ ! -f "$filepath" ]; then
 		echo "The ssh key file: $filepath does not exist, so the email address of that ssh-account can not be extracted."
 		exit 29
-	fi
-}
-
-# Structure:github_status
-# 6.f.1.helper
-# TODO: test
-get_current_github_branch() {
-	github_repo_name="$1"
-	github_branch_name="$2"
-	company="$3"
-	
-	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
-
-		# Verify the branch exists
-		branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
-		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
-		if [ "$last_line_branch_check_result" == "FOUND" ]; then
-		
-			# Get the path before executing the command (to verify it is restored correctly after).
-			pwd_before="$PWD"
-			
-			# Checkout the branch inside the repository.
-			current_branch=$(cd "$MIRROR_LOCATION/$company/$github_repo_name" && git rev-parse --abbrev-ref HEAD)
-			pwd_after="$PWD"
-			
-			echo "$current_branch"
-			
-			# Verify the current path is the same as it was when this function started.
-			if [ "$pwd_before" != "$pwd_after" ]; then
-				echo "The current path is not returned to what it originally was."
-				exit 30
-			fi
-		else 
-			echo "Error, the GitHub branch does not exist locally."
-			exit 31
-		fi
-	else 
-		echo "ERROR, the GitHub repository does not exist locally."
-		exit 32
 	fi
 }
 

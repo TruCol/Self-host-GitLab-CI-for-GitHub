@@ -15,3 +15,4 @@ source src/push_repo_to_gitlab.sh
 
 
 source src/helper.sh
+source src/sha256_computing.sh

@@ -73,12 +73,12 @@ verify_github_repository_is_cloned() {
 	found_repo=$(dir_exists "$target_directory")
 	if [ "$found_repo" == "NOTFOUND" ]; then
 		echo "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
-		exit 5
+		exit 11
 	elif [ "$found_repo" == "FOUND" ]; then
 		echo "FOUND"
 	else
 		echo "An unknown error occured."
-		exit 6
+		exit 12
 	fi
 }
 
@@ -167,7 +167,7 @@ get_commit_sha_of_branch() {
 	done
 	if [ "$found" != "true" ]; then
 		echo "ERROR, the expected branch was not found."
-		exit 261
+		exit 13
 	fi
 }
 
@@ -199,15 +199,15 @@ get_current_github_branch() {
 			# Verify the current path is the same as it was when this function started.
 			if [ "$pwd_before" != "$pwd_after" ]; then
 				echo "The current path is not returned to what it originally was."
-				exit 30
+				exit 14
 			fi
 		else 
 			echo "Error, the GitHub branch does not exist locally."
-			exit 31
+			exit 15
 		fi
 	else 
 		echo "ERROR, the GitHub repository does not exist locally."
-		exit 32
+		exit 16
 	fi
 }
 
@@ -238,14 +238,14 @@ get_current_github_branch_commit() {
 			# Verify the current path is the same as it was when this function started.
 			if [ "$pwd_before" != "$pwd_after" ]; then
 				echo "The current path is not returned to what it originally was."
-				exit 30
+				exit 17
 			fi
 		else 
 			echo "Error, the GitHub branch does not exist locally."
-			exit 31
+			exit 18
 		fi
 	else 
 		echo "ERROR, the GitHub repository does not exist locally."
-		exit 32
+		exit 19
 	fi
 }

@@ -238,7 +238,7 @@ get_current_github_branch_commit() {
 			# Verify the current path is the same as it was when this function started.
 			if [ "$pwd_before" != "$pwd_after" ]; then
 				echo "The current path is not returned to what it originally was."
-				exit 17
+				exit 171
 			fi
 		else 
 			echo "Error, the GitHub branch does not exist locally."

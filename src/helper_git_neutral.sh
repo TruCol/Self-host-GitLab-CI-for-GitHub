@@ -117,7 +117,6 @@ copy_files_from_github_to_gitlab_branch() {
 					if [ "$found_branch_name" == "$gitlab_branch_name" ]; then
 					
 						# If there exist differences in the files or folders in the branch (excluding the .git directory)
-						echo "CheckingDifference"
 						
 						# Then copy the files and folders from the GitHub branch into the GitLab branch (excluding the .git directory)
 						# That also deletes the files that exist in the GitLab branch that do not exist in the GitHub branch (excluding the .git directory)

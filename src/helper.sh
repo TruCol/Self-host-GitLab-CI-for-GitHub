@@ -1,6 +1,6 @@
 #!/bin/bash
-source src/hardcoded_variables.txt
-source src/creds.txt
+#source src/hardcoded_variables.txt
+#source src/creds.txt
 
 # Structure:Configuration
 # Returns the architecture of the machine on which this service is ran.
@@ -160,9 +160,7 @@ get_first_line_containing_substring() {
 	if [ "$(file_contains_string "$identification_str" "$REL_FILEPATH")" == "FOUND" ]; then
 		line_nr=$(get_line_nr "\${identification_str}" $REL_FILEPATH)
 		if [ "$line_nr" != "" ]; then
-			#read -p "ABOVE and line_nr=$line_nr"
 			line=$(get_line_by_nr $line_nr $REL_FILEPATH)
-			#read -p "BELOW"
 			echo "$line"
 		else
 			#read -p "ERROR, did find the string in the file but did not find the line number, identification str =\${identification_str} And filecontent=$(cat $REL_FILEPATH)"
@@ -257,9 +255,7 @@ check_gitlab_runner_status() {
 #sudo docker exec -i 79751949c099 bash -c "gitlab-rails status"
 #sudo docker exec -i 79751949c099 bash -c "gitlab-ctl status"
 check_gitlab_server_status() {
-	##read -p "CONFIRM ABOVE check"
 	container_id=$(get_docker_container_id_of_gitlab_server)
-	#read -p "CONFIRM BELOW check and container_id=$container_id"
 	#echo "container_id=$container_id"
 	status=$(sudo docker exec -i "$container_id" bash -c "gitlab-ctl status")
 	echo "$status"
@@ -635,7 +631,6 @@ docker_sudo_create_dir(){
 	abs_dir=$1
 	docker_container_id=$2
 	dir_exists=$(sudo docker exec -i "$docker_container_id" bash -c "if test -d $abs_dir; then echo 'FOUND'; fi ")
-	#read -p "dir_exists=$dir_exists" >&2
 	echo "dir_exists=$dir_exists"
 	echo "docker_container_id=$docker_container_id"
 	echo "abs_dir=$abs_dir"
@@ -805,8 +800,6 @@ assert_current_gitlab_branch() {
 	company="GitLab"
 	
 	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
-	#read -p "actual_result=$actual_result"
-	#read -p "gitlab_branch_name=$gitlab_branch_name"
 	if [ "$actual_result" != "$gitlab_branch_name" ]; then
 		echo "The current Gitlab branch does not match the expected Gitlab branch:$gitlab_branch_name"
 		exit 172
@@ -828,18 +821,14 @@ get_current_gitlab_branch() {
 		#echo "branch_check_result=$branch_check_result"
 		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
 		if [ "$last_line_branch_check_result" == "FOUND" ]; then
-		
 			# Get the path before executing the command (to verify it is restored correctly after).
 			pwd_before="$PWD"
 			
 			# Checkout the branch inside the repository.
 			current_branch=$(cd "$MIRROR_LOCATION/$company/$gitlab_repo_name" && git rev-parse --abbrev-ref HEAD)
-			cd ../../../..
 			pwd_after="$PWD"
-			
 			# Verify the current path is the same as it was when this function started.
-			path_before_equals_path_after_command "$$pwd_before" "$pwd_after"
-			
+			path_before_equals_path_after_command "$pwd_before" "$pwd_after"
 			echo "$current_branch"
 		else
 			
@@ -855,7 +844,7 @@ get_current_gitlab_branch() {
 				exit 71
 			fi
 		fi
-	else 
+	else
 		echo "ERROR, the Gitlab repository does not exist locally."
 		exit 72
 	fi
@@ -878,7 +867,6 @@ get_current_unborn_gitlab_branch() {
 			# Checkout the branch inside the repository.
 			git_status_output=$(cd "$MIRROR_LOCATION/$company/$gitlab_repo_name" && git status)
 			pwd_after="$PWD"
-			#read
 			path_before_equals_path_after_command "$pwd_before" "$pwd_after"
 			
 			#current_unborn_gitlab_branch=$(parse_git_status_to_get_gitlab_branch "$git_status_output")
@@ -919,8 +907,7 @@ path_before_equals_path_after_command() {
 	pwd_after="$2"
 	
 	if [ "$pwd_before" != "$pwd_after" ]; then
-		echo "The current path is not returned to what it originally was."
-		exit 17
+		exit 179
 	fi
 }
 

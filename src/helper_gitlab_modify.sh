@@ -516,9 +516,9 @@ push_changes_to_gitlab() {
 							#git log
 							
 							# Commit the changes to GitLab.
-							###cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git push --set-upstream origin "$gitlab_branch_name"
+							cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git push --set-upstream origin "$gitlab_branch_name"
 							#cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git push --set-upstream origin main
-							###cd ../../../..
+							cd ../../../..
 							
 							# Get the path after executing the command (to verify it is restored correctly after).
 							pwd_after="$PWD"

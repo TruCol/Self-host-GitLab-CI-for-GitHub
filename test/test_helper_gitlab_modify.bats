@@ -71,7 +71,6 @@ setup() {
 # assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
 # TODO: ensure assumption is replaced with actual call to function.
 @test "Test whether the files are copied from GitHub branch to GitLab branch if there is a difference." {
-	skip
 	github_repo_name="sponsor_example"
 	github_branch_name="main"
 	gitlab_repo_name="sponsor_example"
@@ -135,12 +134,20 @@ setup() {
 # assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
 # TODO: ensure assumption is replaced with actual call to function.
 @test "Test whether the files are copied and committed correctly from GitHub branch to GitLab branch if there is a file-difference." {
-	skip
 	github_repo_name="sponsor_example"
 	github_branch_name="main"
 	gitlab_repo_name="sponsor_example"
 	gitlab_branch_name="main"
 	company="GitLab"
+	
+	# Delete GitLab repo from server
+	# TODO: root change to credentials username
+	delete_repository "$gitlab_repo_name" "root"
+	# TODO: verify the repo is deleted.
+	
+	# Create GitLab repo in server
+	create_repository "$gitlab_repo_name"
+	# TODO: verify the repo is created.
 	
 	# TODO: Delete GitHub repo at start of test.
 	remove_mirror_directories
@@ -212,6 +219,15 @@ setup() {
 	gitlab_repo_name="sponsor_example"
 	gitlab_branch_name="main"
 	company="GitLab"
+	
+	# Delete GitLab repo from server
+	# TODO: root change to credentials username
+	delete_repository "$gitlab_repo_name" "root"
+	# TODO: verify the repo is deleted.
+	
+	# Create GitLab repo in server
+	create_repository "$gitlab_repo_name"
+	# TODO: verify the repo is created.
 	
 	# TODO: Delete GitHub repo at start of test.
 	remove_mirror_directories

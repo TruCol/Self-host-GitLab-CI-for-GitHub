@@ -158,7 +158,7 @@ git_pull_gitlab_repo() {
 # source src/create_personal_access_token.sh && create_gitlab_personal_access_token
 # check has access again, if not, raise exception.
 create_repository() {
-	repo_name=$1
+	repo_name="$1"
 	
 	# load personal_access_token (from hardcoded data)
 	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
@@ -179,6 +179,24 @@ create_repository() {
 	}
 }
 
+create_empty_repository_v0() {
+	echo "helloWorld"
+	
+	# Check if GitLab server is running
+	
+	# Check if repository already exists in GitLab server.
+	
+		# If it already exists, delete the repository
+		
+		# Verify the repository is deleted.
+		# Throw an error if it is not deleted.
+	
+	# Create repository.
+	
+	# Verify the repository is created. 
+	# Throw an error if it is not deleted.
+}
+
 # Structure:gitlab_modify
 #source src/run_ci_job.sh && delete_repository
 delete_repository() {
@@ -195,7 +213,7 @@ delete_repository() {
 	
 	# TODO: check if the repo exists (unstable behaviour, sometimes empty when repository DOES exist).
 	exists=$(git ls-remote --exit-code -h "http://$gitlab_username:$gitlab_server_password@127.0.0.1/$repo_username/$repo_name")
-	echo "exists=$exists"
+	
 	# DELETE the repository
 	if [ -z "$exists" ]; then
 		echo "Repo does not exist."

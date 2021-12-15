@@ -157,6 +157,7 @@ git_pull_gitlab_repo() {
 # If not hasaccess, run personal access token creation
 # source src/create_personal_access_token.sh && create_gitlab_personal_access_token
 # check has access again, if not, raise exception.
+# TODO: DELETE and replace with: create_empty_repository_v0
 create_repository() {
 	repo_name="$1"
 	
@@ -179,26 +180,79 @@ create_repository() {
 	}
 }
 
-create_empty_repository_v0() {
-	echo "helloWorld"
+# Structure:gitlab_status
+#6.d.1 If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
+# TODO: DELETE and replace with: create_empty_repository_v0
+create_repo_if_not_exists() {
+	new_repo_name="$1"
+	echo "gitlab_personal_access_token=$gitlab_personal_access_token"
 	
-	# Check if GitLab server is running
+	#command="curl --header \"PRIVATE-TOKEN: $gitlab_personal_access_token\" \"$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1\""
+	#echo "command=$command \n\n\n"
+	#repositories=$(curl --header "PRIVATE-TOKEN: $gitlab_personal_access_token" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
+	#echo "repositories_in_func=$repositories"
+	
+	gitlab_mirror_is_found="$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")"
+	#echo "new_repo_name=$new_repo_name"
+	#echo "gitlab_mirror_is_found=$gitlab_mirror_is_found"
+	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" == "FOUND" ]; then
+		assert_equal "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" "FOUND"
+		echo "gitlab_mirror_is_found_inside_if=$gitlab_mirror_is_found"
+	else
+		#create_repository $new_repo_name
+		create_repository "$new_repo_name"
+		sleep 5
+		assert_equal "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" "FOUND"
+		#echo "gitlab_mirror_is_found_after_creation=$gitlab_mirror_is_found_after_creation"
+	fi
+}
+
+# source src/import.sh src/helper_gitlab_modify.sh && create_empty_repository_v0 "sponsor_example" "root"
+##run bash -c "source src/import.sh src/helper_gitlab_modify.sh && create_empty_repository_v0 sponsor_example root"
+create_empty_repository_v0() {
+	gitlab_repo_name="$1"
+	gitlab_username="$2"
+	 
+	 # load personal_access_token (from hardcoded data)
+    personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
+	
+	# TODO: Check if GitLab server is running
 	
 	# Check if repository already exists in GitLab server.
+	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
 	
 		# If it already exists, delete the repository
+		#delete_repository "$gitlab_repo_name" "$gitlab_username"
+		delete_existing_repository "$gitlab_repo_name" "$gitlab_username"
+		sleep 30
 		
 		# Verify the repository is deleted.
-		# Throw an error if it is not deleted.
+		if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
+			# Throw an error if it is not deleted.
+			echo "The GitLab repository was supposed to be deleted, yet it still exists."
+			#exit 177
+		fi
+	fi
 	
 	# Create repository.
+	curl -H "Content-Type:application/json" "$GITLAB_SERVER_HTTP_URL/api/v4/projects?private_token=$personal_access_token" -d "{ \"name\": \"$gitlab_repo_name\" }"
+	#output=$(curl -H "Content-Type:application/json" http://127.0.0.1/api/v4/projects?private_token="$personal_access_token" -d "{ \"name\": \"$repo_name\" }")
+	#echo "output=$output"
+	sleep 30
 	
-	# Verify the repository is created. 
-	# Throw an error if it is not deleted.
+	
+	# Verify the repository is created.
+	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" != "FOUND" ]; then
+		# Throw an error if it is not created succesfully.
+		echo "The GitLab repository was supposed to be created, yet it does not yet exists."
+		#exit 178
+	fi
+	
 }
 
 # Structure:gitlab_modify
 #source src/run_ci_job.sh && delete_repository
+# TODO: DELETE AND REPLACE WITH: delete_existing_repository
 delete_repository() {
 	repo_name="$1"
 	repo_username="$2"
@@ -230,6 +284,7 @@ delete_repository() {
 }
 
 # Structure:gitlab_modify
+#source src/import.sh src/helper_gitlab_modify.sh && delete_existing_repository "sponsor_example" "root"
 delete_existing_repository() {
 	repo_name="$1"
 	repo_username="$2"
@@ -237,7 +292,9 @@ delete_existing_repository() {
 	# load personal_access_token
 	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 	
-	output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE http://127.0.0.1/api/v4/projects/"$repo_username"%2F"$repo_name")
+	#output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE http://127.0.0.1/api/v4/projects/"$repo_username"%2F"$repo_name")
+	#curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE http://127.0.0.1/api/v4/projects/"$repo_username"%2F"$repo_name"
+	curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE "$GITLAB_SERVER_HTTP_URL"/api/v4/projects/"$repo_username"%2F"$repo_name"
 }
 
 # Structure:gitlab_modify

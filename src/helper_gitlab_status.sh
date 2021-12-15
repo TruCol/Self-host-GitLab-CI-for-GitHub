@@ -111,31 +111,7 @@ gitlab_mirror_repo_exists_in_gitlab() {
 }
 
 
-# Structure:gitlab_status
-#6.d.1 If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
-create_repo_if_not_exists() {
-	new_repo_name="$1"
-	echo "gitlab_personal_access_token=$gitlab_personal_access_token"
-	
-	#command="curl --header \"PRIVATE-TOKEN: $gitlab_personal_access_token\" \"$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1\""
-	#echo "command=$command \n\n\n"
-	#repositories=$(curl --header "PRIVATE-TOKEN: $gitlab_personal_access_token" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
-	#echo "repositories_in_func=$repositories"
-	
-	gitlab_mirror_is_found="$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")"
-	#echo "new_repo_name=$new_repo_name"
-	#echo "gitlab_mirror_is_found=$gitlab_mirror_is_found"
-	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" == "FOUND" ]; then
-		assert_equal "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" "FOUND"
-		echo "gitlab_mirror_is_found_inside_if=$gitlab_mirror_is_found"
-	else
-		#create_repository $new_repo_name
-		create_repository "$new_repo_name"
-		sleep 5
-		assert_equal "$(gitlab_mirror_repo_exists_in_gitlab "$new_repo_name")" "FOUND"
-		#echo "gitlab_mirror_is_found_after_creation=$gitlab_mirror_is_found_after_creation"
-	fi
-}
+
 
 # Structure:gitlab_status
 # 6.e.0.helper TODO: move to helper

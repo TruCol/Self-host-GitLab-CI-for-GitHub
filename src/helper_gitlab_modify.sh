@@ -149,37 +149,6 @@ git_pull_gitlab_repo() {
 }
 
 
-# Structure:gitlab_modify
-# TODO: Check if personal access token is already made, if not, create it.
-# Verify this has access:
-# TODO: replace token with variable
-#curl --header "PRIVATE-TOKEN: somelongpersonalaccesscode3" "http://127.0.0.1/api/v4/personal_access_tokens"
-# If not hasaccess, run personal access token creation
-# source src/create_personal_access_token.sh && create_gitlab_personal_access_token
-# check has access again, if not, raise exception.
-# TODO: DELETE and replace with: create_empty_repository_v0
-create_repository() {
-	repo_name="$1"
-	
-	# load personal_access_token (from hardcoded data)
-	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
-	
-	# Create command that creates the repository in GitLab
-	#command="curl -H Content-Type:application/json http://127.0.0.1/api/v4/projects?private_token=""$personal_access_token -d ""{ \"name\": \"""$repo_name""\" }"
-	
-
-	# Create the repository in the GitLab server
-	{ # try
-		output=$(curl -H "Content-Type:application/json" http://127.0.0.1/api/v4/projects?private_token="$personal_access_token" -d "{ \"name\": \"$repo_name\" }")
-		echo "output=$output"
-		# TODO: save your output
-		true
-	} || { # catch
-		# TODO: save log for exception
-		true
-	}
-}
-
 # Structure:gitlab_status
 #6.d.1 If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
 # source src/import.sh src/helper_gitlab_modify.sh && create_empty_repository_v0 "sponsor_example" "root"

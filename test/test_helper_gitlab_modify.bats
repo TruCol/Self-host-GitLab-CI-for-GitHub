@@ -183,14 +183,22 @@ setup() {
 	gitlab_branch_name="main"
 	company="GitLab"
 	
+	# Get GitLab default username.
+	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	assert_equal "$gitlab_username" "root"
+	
 	# Delete GitLab repo from server
 	# TODO: root change to credentials username
 	delete_repository "$gitlab_repo_name" "root"
 	# TODO: verify the repo is deleted.
 	
+	
 	# Create GitLab repo in server
-	create_repository "$gitlab_repo_name"
-	# TODO: verify the repo is created.
+	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
+	
+	# Verify the repo is created.
+	output_after_creation=$(gitlab_mirror_repo_exists_in_gitlab "$test_repo_name")
+	assert_equal "$output_after_creation" "FOUND"
 	
 	# TODO: Delete GitHub repo at start of test.
 	remove_mirror_directories
@@ -263,14 +271,21 @@ setup() {
 	gitlab_branch_name="main"
 	company="GitLab"
 	
+	# Get GitLab default username.
+	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	assert_equal "$gitlab_username" "root"
+	
 	# Delete GitLab repo from server
 	# TODO: root change to credentials username
 	delete_repository "$gitlab_repo_name" "root"
 	# TODO: verify the repo is deleted.
 	
 	# Create GitLab repo in server
-	create_repository "$gitlab_repo_name"
-	# TODO: verify the repo is created.
+	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
+	
+	# Verify the repo is created.
+	output_after_creation=$(gitlab_mirror_repo_exists_in_gitlab "$test_repo_name")
+	assert_equal "$output_after_creation" "FOUND"
 	
 	# TODO: Delete GitHub repo at start of test.
 	remove_mirror_directories

@@ -69,7 +69,16 @@ setup() {
 
 # 5. Verify gitlab repo is created.
 @test "Test if GitLab repository is created." {
-	create_repository "$PUBLIC_GITHUB_TEST_REPO"
+	
+	# Get GitLab default username.
+	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	assert_equal "$gitlab_username" "root"
+
+	create_empty_repository_v0 "$PUBLIC_GITHUB_TEST_REPO" "$gitlab_username"
+	
+	# Verify the repo is created.
+	output_after_creation=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+	assert_equal "$output_after_creation" "FOUND"
 }
 
 # 6.d Verify gitlab repo is created.

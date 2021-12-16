@@ -166,7 +166,6 @@ create_empty_repository_v0() {
 	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
 	
 		# If it already exists, delete the repository
-		#delete_repository "$gitlab_repo_name" "$gitlab_username"
 		delete_existing_repository "$gitlab_repo_name" "$gitlab_username"
 		sleep 30
 		
@@ -180,8 +179,6 @@ create_empty_repository_v0() {
 	
 	# Create repository.
 	curl -H "Content-Type:application/json" "$GITLAB_SERVER_HTTP_URL/api/v4/projects?private_token=$personal_access_token" -d "{ \"name\": \"$gitlab_repo_name\" }"
-	#output=$(curl -H "Content-Type:application/json" http://127.0.0.1/api/v4/projects?private_token="$personal_access_token" -d "{ \"name\": \"$repo_name\" }")
-	#echo "output=$output"
 	sleep 30
 	
 	
@@ -189,9 +186,55 @@ create_empty_repository_v0() {
 	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" != "FOUND" ]; then
 		# Throw an error if it is not created succesfully.
 		echo "The GitLab repository was supposed to be created, yet it does not yet exists."
-		#exit 178
+		exit 178
 	fi
 	
+}
+
+create_gitlab_repository_if_not_exists() {
+	gitlab_repo_name="$1"
+	gitlab_username="$2"
+	
+	# Check if repository already exists in GitLab server.
+	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "NOTFOUND" ]; then
+		create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
+	elif [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
+		echo ""
+	else
+		echo "ERROR, the GitLab repository: $gitlab_repo_name is not found, nor is it determined that it does not exist."
+		exit 179
+	fi
+	
+	# Verify the repository exists.
+	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" != "FOUND" ]; then
+		# Throw an error if it is not created succesfully.
+		echo "The GitLab repository was supposed to be created, yet it does not yet exists."
+		exit 180
+	fi
+}
+
+delete_gitlab_repository_if_it_exists() {
+	gitlab_repo_name="$1"
+	gitlab_username="$2"
+	
+	# Check if repository already exists in GitLab server.
+	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "NOTFOUND" ]; then
+		echo ""
+	elif [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
+		# If it exists, delete the repository.
+		delete_existing_repository "$gitlab_repo_name" "$gitlab_username"
+		sleep 30
+	else
+		echo "ERROR, the GitLab repository: $gitlab_repo_name is not found, nor is it determined that it does not exist."
+		exit 181
+	fi
+	
+	# Verify the repository does not exists.
+	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" != "NOTFOUND" ]; then
+		# Throw an error if it is not created succesfully.
+		echo "The GitLab repository was supposed to be created, yet it does not yet exists."
+		exit 182
+	fi
 }
 
 # Structure:gitlab_modify

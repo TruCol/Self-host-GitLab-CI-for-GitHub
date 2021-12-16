@@ -23,9 +23,6 @@ create_and_run_ci_job() {
 	# be pushed/created in the GitLab server).
 	# TODO: re-enable
 	create_gitlab_personal_access_token
-	# TODO: https://github.com/TruCol/setup_your_own_GitLab_CI/issues/6
-	#delete_repository
-	#sleep 60
 	create_empty_repository_v0 "$PUBLIC_GITHUB_TEST_REPO" "$gitlab_username"
 	
 	# TODO: allow specification of which repository

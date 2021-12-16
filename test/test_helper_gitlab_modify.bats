@@ -58,8 +58,68 @@ setup() {
 	fi
 }
 
-# TODO verify consistent usage of gitlab_repo_name and PUBLIC_GITHUB_TEST_REPO
 
+# 6.i
+# TODO: fix error.
+@test "Test whether the files are copied from GitHub branch to GitLab branch if there is a difference." {
+	github_repo_name="sponsor_example"
+	github_branch_name="main"
+	gitlab_repo_name="sponsor_example"
+	gitlab_branch_name="main"
+	company="GitLab"
+	
+	# Delete GitHub repo at start of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Create mmirror directories
+	create_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_exist "$MIRROR_LOCATION"
+	assert_file_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_exist "$MIRROR_LOCATION/GitLab"
+	
+	
+	# Verify ssh-access
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	
+	# Clone GitHub repo at start of test.
+	clone_github_repository "$GITHUB_USERNAME" "$gitlab_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$gitlab_repo_name"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$gitlab_repo_name" "$MIRROR_LOCATION/GitHub/$gitlab_repo_name")
+	assert_equal "$repo_was_cloned" "FOUND"
+	
+	# Checkout GitHub branch, if branch is found in local GitHub repo.
+	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name "GitHub")"
+	assert_success
+	
+	# Verify the get_current_github_branch function returns the correct branch.
+	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name "GitHub")"
+	assert_equal "$actual_result" "$github_branch_name"
+	
+	# Create the empty GitLab repository (deletes any existing GitLab repos with same name).
+	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
+	
+	# Clone the GitLab repository from the GitLab server
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	
+	# Checkout branch, if branch is found in local Gitlab repo.
+	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
+	assert_success
+	
+	# Verify the get_current_gitlab_branch function returns the correct branch.
+	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
+	assert_equal "$actual_result" "$gitlab_branch_name"
+	
+	#
+	result="$(copy_files_from_github_to_gitlab_branch $github_repo_name $github_branch_name $gitlab_repo_name $gitlab_branch_name)"
+	last_line_result=$(get_last_line_of_set_of_lines "\${result}")
+	assert_equal "$last_line_result" "IDENTICAL"
+}
+
+# TODO verify consistent usage of gitlab_repo_name and PUBLIC_GITHUB_TEST_REPO
 @test "Test whether an empty repository is created, regardless of whether it already existed or not." {
 	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
@@ -225,68 +285,7 @@ setup() {
 	some_function
 }
 
-# 6.i
-# assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
-# TODO: ensure assumption is replaced with actual call to function.
-@test "Test whether the files are copied from GitHub branch to GitLab branch if there is a difference." {
-	github_repo_name="sponsor_example"
-	github_branch_name="main"
-	gitlab_repo_name="sponsor_example"
-	gitlab_branch_name="main"
-	company="GitLab"
-	
-	# Delete GitHub repo at start of test.
-	remove_mirror_directories
-	assert_not_equal "$MIRROR_LOCATION" ""
-	assert_file_not_exist "$MIRROR_LOCATION"
-	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
-	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
-	
-	# Create mmirror directories
-	create_mirror_directories
-	assert_not_equal "$MIRROR_LOCATION" ""
-	assert_file_exist "$MIRROR_LOCATION"
-	assert_file_exist "$MIRROR_LOCATION/GitHub"
-	assert_file_exist "$MIRROR_LOCATION/GitLab"
-	
-	
-	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
-	
-	# Clone GitHub repo at start of test.
-	clone_github_repository "$GITHUB_USERNAME" "$gitlab_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$gitlab_repo_name"
-	repo_was_cloned=$(verify_github_repository_is_cloned "$gitlab_repo_name" "$MIRROR_LOCATION/GitHub/$gitlab_repo_name")
-	assert_equal "$repo_was_cloned" "FOUND"
-	
-	# checkout GitHub branch
-	# Checkout branch, if branch is found in local GitHub repo.
-	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name "GitHub")"
-	assert_success
-	
-	# Verify the get_current_github_branch function returns the correct branch.
-	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name "GitHub")"
-	assert_equal "$actual_result" "$github_branch_name"
-	
-	# Assumes the (sponsor_example) repository already exists inside the GitLab
-	# server, which usually is not the case.
-	# TODO: Check whether the repository exists in the GitLab server
-	# TODO: If the repository does not exist in the GitLab server, upload it.
-	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
-	
-	# Checkout branch, if branch is found in local Gitlab repo.
-	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
-	assert_success
-	
-	# Verify the get_current_gitlab_branch function returns the correct branch.
-	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
-	assert_equal "$actual_result" "$gitlab_branch_name"
-	
-	#
-	result="$(copy_files_from_github_to_gitlab_branch $github_repo_name $github_branch_name $gitlab_repo_name $gitlab_branch_name)"
-	last_line_result=$(get_last_line_of_set_of_lines "\${result}")
-	assert_equal "$last_line_result" "IDENTICAL"
-}
+
 
 
 # 6.k Commit the GitLab branch changes, with the sha from the GitHub branch.
@@ -319,7 +318,7 @@ setup() {
 	output_after_creation=$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")
 	assert_equal "$output_after_creation" "FOUND"
 	
-	# TODO: Delete GitHub repo at start of test.
+	# Delete GitHub repo at start of test.
 	remove_mirror_directories
 	assert_not_equal "$MIRROR_LOCATION" ""
 	assert_file_not_exist "$MIRROR_LOCATION"
@@ -333,10 +332,11 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitHub"
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
-	# TODO: Clone GitHub repo at start of test.
+	
 	# Verify ssh-access
 	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
 	
+	# Clone GitHub repo at start of test.
 	clone_github_repository "$GITHUB_USERNAME" "$PUBLIC_GITHUB_TEST_REPO" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO"
 	repo_was_cloned=$(verify_github_repository_is_cloned "$PUBLIC_GITHUB_TEST_REPO" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO")
 	assert_equal "$repo_was_cloned" "FOUND"
@@ -350,10 +350,9 @@ setup() {
 	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name "GitHub")"
 	assert_equal "$actual_result" "$github_branch_name"
 	
-	# Assumes the (sponsor_example) repository already exists inside the GitLab
-	# server, which usually is not the case.
-	# TODO: Check whether the repository exists in the GitLab server
-	# TODO: If the repository does not exist in the GitLab server, upload it.
+	# Create the empty GitLab repository (deletes any existing GitLab repos with same name).
+	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
+	
 	# Clone the GitLab repository from the GitLab server
 	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
 	
@@ -381,8 +380,6 @@ setup() {
 
 
 # 6.k  Push the committed GitLab branch changes, with the sha from the GitHub branch as the commit message.
-# assumes you cloned the gitlab bcranch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
-# TODO: ensure assumption is replaced with actual call to function.
 @test "Test whether the files are copied, committed and pushed correctly from GitHub branch to GitLab branch if there is a file-difference." {
 	github_repo_name="sponsor_example"
 	github_branch_name="main"

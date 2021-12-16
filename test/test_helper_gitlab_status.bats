@@ -76,8 +76,12 @@ setup() {
 @test "GitLab repo is found if it exists." {
 	# TODO: verify the repository is added before testing whether it exists.
 	# TODO: remove the repository after verifying it exists
+	
+	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	assert_equal "$gitlab_username" "root"
+	
 	test_repo_name="extra-project"
-	create_repo_if_not_exists "$test_repo_name"
+	create_empty_repository_v0 "$test_repo_name" "$gitlab_username"
 	output_after_creation=$(gitlab_mirror_repo_exists_in_gitlab "$test_repo_name")
 	assert_equal "$output_after_creation" "FOUND"
 	deletion_output=$(delete_gitlab_repo_if_it_exists "$test_repo_name")
@@ -99,7 +103,14 @@ setup() {
 	# TODO: verify the repository is added before testing whether it exists.
 	# TODO: remove the repository after verifying it exists
 	something=$(get_project_list)
-	creating_repo_output=$(create_repo_if_not_exists "non-existing-repository")
+	
+	# TODO: verify the repository is added before testing whether it exists.
+	# TODO: remove the repository after verifying it exists
+	
+	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	assert_equal "$gitlab_username" "root"
+	
+	create_empty_repository_v0 "non-existing-repository" "$gitlab_username" 
 	output=$(gitlab_mirror_repo_exists_in_gitlab "non-existing-repository")
 	assert_equal "$output" "FOUND"
 }

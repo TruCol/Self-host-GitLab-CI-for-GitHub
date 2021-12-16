@@ -13,6 +13,10 @@ source src/create_personal_access_token.sh
 
 #source src/run_ci_job.sh && receipe
 create_and_run_ci_job() {
+	# Get GitLab default username.
+	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	assert_equal "$gitlab_username" "root"
+
 	delete_target_folder
 	# Create personal GitLab access token (it is hardcoded in this repo, but needs to
 	# be pushed/created in the GitLab server).
@@ -21,7 +25,7 @@ create_and_run_ci_job() {
 	# TODO: https://github.com/TruCol/setup_your_own_GitLab_CI/issues/6
 	#delete_repository
 	#sleep 60
-	create_repository
+	create_empty_repository_v0 "$PUBLIC_GITHUB_TEST_REPO" "$gitlab_username"
 	clone_repository
 	export_repo
 	commit_changes

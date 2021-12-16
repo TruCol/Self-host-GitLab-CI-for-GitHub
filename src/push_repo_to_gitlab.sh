@@ -23,7 +23,7 @@ create_and_run_ci_job() {
 	# TODO: re-enable
 	create_gitlab_personal_access_token
 	# TODO: https://github.com/TruCol/setup_your_own_GitLab_CI/issues/6
-	#delete_repository
+	#delete_gitlab_repository_if_it_exists "$PUBLIC_GITHUB_TEST_REPO" "$gitlab_username"
 	#sleep 60
 	create_empty_repository_v0 "$PUBLIC_GITHUB_TEST_REPO" "$gitlab_username"
 	clone_repository

@@ -76,33 +76,6 @@ export_repo() {
 	
 }
 
-
-#source src/run_ci_job.sh && delete_repository
-# TODO: remove and use its duplicate in push_repo_to_gitlab.sh
-delete_repository() {
-	# load personal_access_token
-	personal_access_token=$(echo $GITLAB_PERSONAL_ACCESS_TOKEN | tr -d '\r')
-	
-	gitlab_username=$(echo $gitlab_server_account | tr -d '\r')
-	gitlab_server_password=$(echo $gitlab_server_password | tr -d '\r')
-	repo_name=$SOURCE_FOLDERNAME
-	
-	# TODO: check if the repo exists (unstable behaviour, sometimes empty when repository DOES exist).
-	exists=$(git ls-remote --exit-code -h "http://$gitlab_username:$gitlab_server_password@127.0.0.1/$gitlab_username/$repo_name")
-	echo "exists=$exists"
-	# DELETE the repository
-	if [ -z "$exists" ]; then
-		echo "Repo does not exist."
-	else
-		output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name)
-	fi
-	
-	# TODO: loop untill repository is deleted (otherwise the following error is thrown:
-	# TODO: check if the repo exists
-	#output={"message":{"base":["The project is still being deleted. Please try again later."],"limit_reached":[]}}
-
-}
-
 #source src/run_ci_job.sh && clone_repository
 # TODO: remove and use its duplicate in push_repo_to_gitlab.sh
 clone_repository() {

@@ -71,7 +71,7 @@ setup() {
 	assert_equal "$gitlab_repo_exists" "FOUND"
 }
 
-@test "Test whether an empty repository is created, if it did not exist in advance." {
+@test "Test whether an empty repository is created with create_empty_repository_v0, if it did not exist in advance." {
 	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
@@ -82,7 +82,6 @@ setup() {
 	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
 	
 		# If it already exists, delete the repository
-		#delete_repository "$gitlab_repo_name" "$gitlab_username"
 		delete_existing_repository "$gitlab_repo_name" "$gitlab_username"
 		sleep 60
 		
@@ -102,7 +101,7 @@ setup() {
 	assert_equal "$gitlab_repo_exists" "FOUND"
 }
 
-@test "Test whether an empty repository is created, if it did not exist in advance." {
+@test "Test whether an empty repository is created with create_gitlab_repository_if_not_exists, if it did not exist in advance." {
 	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
@@ -113,7 +112,6 @@ setup() {
 	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
 	
 		# If it already exists, delete the repository
-		#delete_repository "$gitlab_repo_name" "$gitlab_username"
 		delete_existing_repository "$gitlab_repo_name" "$gitlab_username"
 		sleep 60
 		
@@ -175,7 +173,6 @@ setup() {
 	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
 	
 		# If it already exists, delete the repository
-		#delete_repository "$gitlab_repo_name" "$gitlab_username"
 		delete_gitlab_repository_if_it_exists "$gitlab_repo_name" "$gitlab_username"
 		sleep 60
 		
@@ -305,9 +302,11 @@ setup() {
 	assert_equal "$gitlab_username" "root"
 	
 	# Delete GitLab repo from server
-	# TODO: root change to credentials username
-	delete_repository "$gitlab_repo_name" "root"
-	# TODO: verify the repo is deleted.
+	delete_gitlab_repository_if_it_exists "$gitlab_repo_name" "$gitlab_username"
+	
+	# Verify the repository is deleted.
+	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+	assert_equal "$gitlab_repo_exists" "NOTFOUND"
 	
 	
 	# Create GitLab repo in server
@@ -393,9 +392,11 @@ setup() {
 	assert_equal "$gitlab_username" "root"
 	
 	# Delete GitLab repo from server
-	# TODO: root change to credentials username
-	delete_repository "$gitlab_repo_name" "root"
-	# TODO: verify the repo is deleted.
+	delete_gitlab_repository_if_it_exists "$gitlab_repo_name" "$gitlab_username"
+	
+	# Verify the repository is deleted.
+	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+	assert_equal "$gitlab_repo_exists" "NOTFOUND"
 	
 	# Create GitLab repo in server
 	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"

@@ -133,10 +133,13 @@ get_git_branches() {
 get_git_branches github_branches "GitHub" "$github_repo"      # call function to populate the array
 declare -p github_branches
 
+# Get GitLab default username.
+gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+assert_equal "$gitlab_username" "root"
 
 # Check if the mirror repository exists in GitLab (Skipped)
 # If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
-create_repository "$gitlab_repo"
+create_empty_repository_v0 "$gitlab_repo" "$gitlab_username"
 
 
 # Clone the GitLab repository from the GitLab server into the mirror directory

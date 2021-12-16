@@ -76,10 +76,47 @@ setup() {
 	github_repo_name="sponsor_example"
 	github_branch_name="attack_in_new_file"
 	
+	# Delete GitHub repo at start of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Create mmirror directories
+	create_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_exist "$MIRROR_LOCATION"
+	assert_file_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Verify ssh-access
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$github_repo_name")"
+	
+	# Clone GitHub repo at start of test.
+	clone_github_repository "$GITHUB_USERNAME" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
+	assert_equal "$repo_was_cloned" "FOUND"
+	
+	# Checkout GitHub branch, if branch is found in local GitHub repo.
+	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name "GitHub")"
+	assert_success
+	
+	# Verify the get_current_github_branch function returns the correct branch.
+	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name "GitHub")"
+	assert_equal "$actual_result" "$github_branch_name"
+	
 	# Check if branch is found in local GitHub repo.
 	actual_result="$(github_branch_exists $github_repo_name $github_branch_name)"
 	last_line=$(get_last_line_of_set_of_lines "\${actual_result}")
 	assert_equal "$last_line" "FOUND"
+	
+	# Delete GitHub repo at end of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
 }
 
 # 6.e.0.helper1
@@ -87,8 +124,14 @@ setup() {
 	github_repo_name="non-existing-repository"
 	github_branch_name="attack_in_new_file"
 	
+	# Delete GitHub repo at start of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+
 	# Check if branch is found in local GitHub repo.
-	# TODO: include import.sh file
 	run bash -c "source src/import.sh src/helper_github_modify.sh && github_branch_exists $github_repo_name $github_branch_name"
 	assert_failure
 	assert_output --partial "ERROR, the GitHub repository does not exist locally."
@@ -99,10 +142,39 @@ setup() {
 	github_repo_name="sponsor_example"
 	github_branch_name="non-existing-branchname"
 	
+	# Delete GitHub repo at start of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Create mmirror directories
+	create_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_exist "$MIRROR_LOCATION"
+	assert_file_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Verify ssh-access
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$github_repo_name")"
+	
+	# Clone GitHub repo at start of test.
+	clone_github_repository "$GITHUB_USERNAME" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
+	assert_equal "$repo_was_cloned" "FOUND"
+	
 	# Check if branch is found in local GitHub repo.
 	actual_result="$(github_branch_exists $github_repo_name $github_branch_name)"
 	last_line=$(get_last_line_of_set_of_lines "\${actual_result}")
 	assert_equal "$last_line" "NOTFOUND"
+	
+	# Delete GitHub repo at end of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
 }
 
 
@@ -116,9 +188,38 @@ setup() {
 	github_branch_name="attack_in_new_file"
 	company="GitHub"
 	
+	# Delete GitHub repo at start of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Create mmirror directories
+	create_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_exist "$MIRROR_LOCATION"
+	assert_file_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Verify ssh-access
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$github_repo_name")"
+	
+	# Clone GitHub repo at start of test.
+	clone_github_repository "$GITHUB_USERNAME" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
+	assert_equal "$repo_was_cloned" "FOUND"
+	
 	# Check if branch is found in local GitHub repo.
 	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name $company)"
 	assert_success
+	
+	# Delete GitHub repo at end of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
 }
 
 # 6.f.0.helper1
@@ -127,10 +228,24 @@ setup() {
 	github_branch_name="attack_in_new_file"
 	company="GitHub"
 	
+	# Delete GitHub repo at start of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+		
 	# Check if branch is found in local GitHub repo.
 	run bash -c "source src/import.sh src/helper_gitlab_modify.sh src/import.sh && checkout_branch_in_github_repo $github_repo_name $github_branch_name $company"
 	assert_failure
 	assert_output --partial "ERROR, the GitHub repository does not exist locally."
+	
+	# Delete GitHub repo at end of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
 }
 
 # 6.f.0.helper1
@@ -138,10 +253,39 @@ setup() {
 	github_repo_name="sponsor_example"
 	github_branch_name="non-existing-branchname"
 	
+	# Delete GitHub repo at start of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Create mmirror directories
+	create_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_exist "$MIRROR_LOCATION"
+	assert_file_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Verify ssh-access
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$github_repo_name")"
+	
+	# Clone GitHub repo at start of test.
+	clone_github_repository "$GITHUB_USERNAME" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
+	assert_equal "$repo_was_cloned" "FOUND"
+	
 	# Check if branch is found in local GitHub repo.
 	run bash -c "source src/import.sh src/helper_gitlab_modify.sh && checkout_branch_in_github_repo $github_repo_name $github_branch_name $company"
 	assert_failure
 	assert_output --partial "ERROR, the GitHub branch does not exist locally."
+	
+	# Delete GitHub repo at end of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
 }
 
 
@@ -151,6 +295,36 @@ setup() {
 	github_branch_name="attack_in_new_file"
 	company="GitHub"
 	
+	# Delete GitHub repo at start of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Create mmirror directories
+	create_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_exist "$MIRROR_LOCATION"
+	assert_file_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Verify ssh-access
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$github_repo_name")"
+	
+	# Clone GitHub repo at start of test.
+	clone_github_repository "$GITHUB_USERNAME" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
+	assert_equal "$repo_was_cloned" "FOUND"
+	
+	# Checkout GitHub branch, if branch is found in local GitHub repo.
+	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name "GitHub")"
+	assert_success
+	
+	# Verify the get_current_github_branch function returns the correct branch.
+	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name "GitHub")"
+	assert_equal "$actual_result" "$github_branch_name"
+	
 	# Checkout branch, if branch is found in local GitHub repo.
 	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name $company)"
 	assert_success
@@ -158,6 +332,13 @@ setup() {
 	# Verify the get_current_github_branch function returns the correct branch.
 	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name $company)"
 	assert_equal "$actual_result" "$github_branch_name"
+	
+	# Delete GitHub repo at end of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
 }
 
 
@@ -167,6 +348,36 @@ setup() {
 	github_branch_name="no_attack_in_filecontent"
 	company="GitHub"
 	
+	# Delete GitHub repo at start of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Create mmirror directories
+	create_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_exist "$MIRROR_LOCATION"
+	assert_file_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Verify ssh-access
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$github_repo_name")"
+	
+	# Clone GitHub repo at start of test.
+	clone_github_repository "$GITHUB_USERNAME" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
+	assert_equal "$repo_was_cloned" "FOUND"
+	
+	# Checkout GitHub branch, if branch is found in local GitHub repo.
+	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name "GitHub")"
+	assert_success
+	
+	# Verify the get_current_github_branch function returns the correct branch.
+	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name "GitHub")"
+	assert_equal "$actual_result" "$github_branch_name"
+	
 	# Checkout branch, if branch is found in local GitHub repo.
 	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name $company)"
 	assert_success
@@ -174,6 +385,13 @@ setup() {
 	# Verify the get_current_github_branch function returns the correct branch.
 	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name $company)"
 	assert_equal "$actual_result" "$github_branch_name"
+	
+	# Delete GitHub repo at end of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
 }
 
 # 6.g.0 Test the function that checks whether the GitHub branch contains a GitLab yaml file.
@@ -182,6 +400,36 @@ setup() {
 	#github_branch_name="no_attack_in_filecontent"
 	github_branch_name="main"
 	company="GitHub"
+	
+	# Delete GitHub repo at start of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Create mmirror directories
+	create_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_exist "$MIRROR_LOCATION"
+	assert_file_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Verify ssh-access
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$github_repo_name")"
+	
+	# Clone GitHub repo at start of test.
+	clone_github_repository "$GITHUB_USERNAME" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
+	assert_equal "$repo_was_cloned" "FOUND"
+	
+	# Checkout GitHub branch, if branch is found in local GitHub repo.
+	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name "GitHub")"
+	assert_success
+	
+	# Verify the get_current_github_branch function returns the correct branch.
+	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name "GitHub")"
+	assert_equal "$actual_result" "$github_branch_name"
 	
 	# Checkout branch, if branch is found in local GitHub repo.
 	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name $company)"
@@ -194,6 +442,13 @@ setup() {
 	# Checkout branch, if branch is found in local GitHub repo.
 	actual_result="$(verify_github_branch_contains_gitlab_yaml $github_repo_name $github_branch_name $company)"
 	assert_equal "$actual_result" "FOUND"
+	
+	# Delete GitHub repo at end of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
 }
 
 # 6.g.0 Test the function that checks whether the GitHub branch contains a GitLab yaml file.
@@ -201,6 +456,36 @@ setup() {
 	github_repo_name="sponsor_example"
 	github_branch_name="no_attack_in_filecontent"
 	company="GitHub"
+	
+	# Delete GitHub repo at start of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Create mmirror directories
+	create_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_exist "$MIRROR_LOCATION"
+	assert_file_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_exist "$MIRROR_LOCATION/GitLab"
+	
+	# Verify ssh-access
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$github_repo_name")"
+	
+	# Clone GitHub repo at start of test.
+	clone_github_repository "$GITHUB_USERNAME" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
+	assert_equal "$repo_was_cloned" "FOUND"
+	
+	# Checkout GitHub branch, if branch is found in local GitHub repo.
+	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name "GitHub")"
+	assert_success
+	
+	# Verify the get_current_github_branch function returns the correct branch.
+	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name "GitHub")"
+	assert_equal "$actual_result" "$github_branch_name"
 	
 	# Checkout branch, if branch is found in local GitHub repo.
 	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name $company)"
@@ -213,4 +498,11 @@ setup() {
 	# Checkout branch, if branch is found in local GitHub repo.
 	actual_result="$(verify_github_branch_contains_gitlab_yaml $github_repo_name $github_branch_name $company)"
 	assert_equal "$actual_result" "NOTFOUND"
+	
+	# Delete GitHub repo at end of test.
+	remove_mirror_directories
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
 }

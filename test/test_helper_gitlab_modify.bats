@@ -58,6 +58,7 @@ setup() {
 	fi
 }
 
+
 @test "Test whether an empty repository is created, regardless of whether it already existed or not." {
 	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
@@ -135,6 +136,87 @@ setup() {
 # TODO: Write test that pushes a file to a repo, then runs:
 #create_gitlab_repository_if_not_exists and verifies that afterwards
 # the repository still contains the file (meaning no new empty repo is created).
+
+@test "Test whether a repository is deleted if it exists." {
+	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	assert_equal "$gitlab_username" "root"
+	
+	# Check if the GitLab repository exists.
+	gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO"
+	
+	# If the repository exists, delete it.
+	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "NOTFOUND" ]; then
+	
+		# Create the empty GitLab repository.
+		create_gitlab_repository_if_not_exists "$PUBLIC_GITHUB_TEST_REPO" "$gitlab_username"
+	
+		# Verify the repository is created.
+		gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+		assert_equal "$gitlab_repo_exists" "FOUND"
+	fi
+	
+	# If it already exists, delete the repository
+	delete_gitlab_repository_if_it_exists "$gitlab_repo_name" "$gitlab_username"
+	sleep 60
+	
+	# Verify the repository is deleted.
+	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+	assert_equal "$gitlab_repo_exists" "NOTFOUND"
+}
+
+@test "Test whether deleting a repository that does not exist does not yield an error with delete_gitlab_repository_if_it_exists." {
+	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	assert_equal "$gitlab_username" "root"
+	
+	# Check if the GitLab repository exists.
+	gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO"
+	
+	# If the repository exists, delete it.
+	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
+	
+		# If it already exists, delete the repository
+		#delete_repository "$gitlab_repo_name" "$gitlab_username"
+		delete_gitlab_repository_if_it_exists "$gitlab_repo_name" "$gitlab_username"
+		sleep 60
+		
+		# Verify the repository is deleted.
+		gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+		assert_equal "$gitlab_repo_exists" "NOTFOUND"
+	fi
+	
+	# If it already exists, delete the repository
+	delete_gitlab_repository_if_it_exists "$gitlab_repo_name" "$gitlab_username"
+	sleep 60
+	
+	# Verify the repository is deleted.
+	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+	assert_equal "$gitlab_repo_exists" "NOTFOUND"
+}
+
+@test "Test whether deleting a repository that does not exist throws an error." {
+	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	assert_equal "$gitlab_username" "root"
+	
+	# Check if the GitLab repository exists.
+	gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO"
+	
+	# If the repository exists, delete it.
+	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
+	
+		# If it already exists, delete the repository
+		delete_gitlab_repository_if_it_exists "$gitlab_repo_name" "$gitlab_username"
+		sleep 60
+		
+		# Verify the repository is deleted.
+		gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+		assert_equal "$gitlab_repo_exists" "NOTFOUND"
+	fi
+	
+	# If it already exists, delete the repository
+	run bash -c "source src/import.sh src/helper_gitlab_modify.sh && delete_existing_repository sponsor_example root"
+	assert_failure
+	assert_output --partial "ERROR, you tried to delete a GitLab repository that does not exist."
+}
 
 @test "Trivial test." {
 	assert_equal "True" "True"

@@ -237,38 +237,6 @@ delete_gitlab_repository_if_it_exists() {
 	fi
 }
 
-# Structure:gitlab_modify
-#source src/run_ci_job.sh && delete_repository
-# TODO: DELETE AND REPLACE WITH: delete_existing_repository
-delete_repository() {
-	repo_name="$1"
-	repo_username="$2"
-	# load personal_access_token
-	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
-	
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
-	gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')
-	###repo_name=$SOURCE_FOLDERNAME
-	# TODO: modify the functions that call this functions to pass the source folder name.
-	
-	
-	# TODO: check if the repo exists (unstable behaviour, sometimes empty when repository DOES exist).
-	exists=$(git ls-remote --exit-code -h "http://$gitlab_username:$gitlab_server_password@127.0.0.1/$repo_username/$repo_name")
-	
-	# DELETE the repository
-	if [ -z "$exists" ]; then
-		echo "Repo does not exist."
-	else
-		#output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name)
-		###output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name)
-		output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE http://127.0.0.1/api/v4/projects/"$gitlab_username"%2F"$repo_name")
-	fi
-	
-	# TODO: loop untill repository is deleted (otherwise the following error is thrown:
-	# TODO: check if the repo exists
-	#output={"message":{"base":["The project is still being deleted. Please try again later."],"limit_reached":[]}}
-
-}
 
 # Structure:gitlab_modify
 #source src/import.sh src/helper_gitlab_modify.sh && delete_existing_repository "sponsor_example" "root"
@@ -279,9 +247,13 @@ delete_existing_repository() {
 	# load personal_access_token
 	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 	
-	#output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE http://127.0.0.1/api/v4/projects/"$repo_username"%2F"$repo_name")
-	#curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE http://127.0.0.1/api/v4/projects/"$repo_username"%2F"$repo_name"
-	curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE "$GITLAB_SERVER_HTTP_URL"/api/v4/projects/"$repo_username"%2F"$repo_name"
+	#curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE "$GITLAB_SERVER_HTTP_URL"/api/v4/projects/"$repo_username"%2F"$repo_name"
+	output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE "$GITLAB_SERVER_HTTP_URL"/api/v4/projects/"$repo_username"%2F"$repo_name")
+	
+	if [  "$(lines_contain_string '{"message":"404 Project Not Found"}' "\${output}")" == "FOUND" ]; then
+		echo "ERROR, you tried to delete a GitLab repository that does not exist."
+		exit 183
+	fi
 }
 
 # Structure:gitlab_modify

@@ -13,6 +13,7 @@ source src/create_personal_access_token.sh
 
 #source src/run_ci_job.sh && receipe
 create_and_run_ci_job() {
+	github_repo_name="$1"
 
 	# Get GitLab default username.
 	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
@@ -21,7 +22,6 @@ create_and_run_ci_job() {
 	delete_target_folder
 	# Create personal GitLab access token (it is hardcoded in this repo, but needs to
 	# be pushed/created in the GitLab server).
-	# TODO: re-enable
 	create_gitlab_personal_access_token
 	create_empty_repository_v0 "$PUBLIC_GITHUB_TEST_REPO" "$gitlab_username"
 	

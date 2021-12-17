@@ -146,6 +146,13 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 	github_branch_name="$3"
 	github_commit_sha="$4"
 	
+	# Assume identical repository and branch names:
+	gitlab_repo_name="$github_repo_name"
+	gitlab_branch_name="$github_branch_name"
+	
+	# Get GitLab username.
+	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	
 	# Verify the get_current_github_branch function returns the correct branch.
 	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name "GitHub")"
 	assert_equal "$actual_result" "$github_branch_name"
@@ -155,15 +162,44 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 	assert_equal "$actual_result" "FOUND"
 	
 	# 5.1 Create the empty GitLab repo.
-	# 5.2 Clone the empty Gitlab repo git
+	# Create the empty GitLab repository (deletes any existing GitLab repos with same name).
+	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
+	
+	# 5.2 Clone the empty Gitlab repo from the GitLab server
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	
 	# 5.3 Check if the GitLab branch exists, if not, create it.
 	# 5.4 Check out the GitLab branch
-	# 5.5 Verify whether the GitLab branch already contains this
-	# GitHub commit sha in its commit messages.
-	# 5.6 Verify whether the build status of this repository, branch, commit is not yet
-	# known.
+	# Checkout branch, if branch is found in local Gitlab repo.
+	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name "GitLab")"
+	assert_success
+	
+	# Verify the get_current_gitlab_branch function returns the correct branch.
+	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
+	assert_equal "$actual_result" "$gitlab_branch_name"
+	
+	# 5.5 TODO: Check whether the GitLab branch already contains this
+	# GitHub commit sha in its commit messages. (skip branch if yes)
+	# 5.6 TODO: Verify whether the build status of this repository, branch, commit is not yet
+	# known. (skip branch if yes)
+	
 	# 5.7 Copy the files from the GitHub branch into the GitLab branch.
+	result="$(copy_files_from_github_to_gitlab_branch $github_repo_name $github_branch_name $gitlab_repo_name $gitlab_branch_name)"
+	last_line_result=$(get_last_line_of_set_of_lines "\${result}")
+	assert_equal "$last_line_result" "IDENTICAL"
+	
+	
+	# 5.8 Commit the changes to GitLab.
+	assert_not_equal "" "$github_commit_sha"
+	commit_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
+	# TODO: verify the changes are committed correctly
+	
 	# 5.8. Push the results to GitLab, with the commit message of the GitHub commit sha.
+	# Perform the Push function.
+	push_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
+	# TODO: verify the changes are pushed correctly
+}
+
 	# 5.9 (Sub-optimal) Wait until the GitLab CI is done with the branch. (Set a timeout limit of 20 minutes).
 	# 6. Get the GitLab CI build status for that GitLab commit.
 	# 7. Clone the Build status repository.
@@ -172,7 +208,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 	# 10. Include the build status and link to the GitHub commit in the repository.
 	# 11. Push the changes to the GitHub build status repository.
 	# 12. Verify the changes are pushed to the GitHub build status repository.
-}
+
 
 	#### Checkout GitHub branch, if branch is found in local GitHub repo.
 	###actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name "GitHub")"

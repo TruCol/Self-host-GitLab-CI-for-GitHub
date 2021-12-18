@@ -200,7 +200,60 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 	# TODO: verify the changes are pushed correctly
 }
 
-	# 5.9 (Sub-optimal) Wait until the GitLab CI is done with the branch. (Set a timeout limit of 20 minutes).
+	# 5.9 Verify the CI is running for this commit.
+get_gitlab_ci_build_status() {
+	github_repo_name="$1"
+	github_branch_name="$2"
+	gitlab_commit_sha="$3"
+	count="$4"
+	
+	# specify timeout counter
+	if [[ "$count" == "" ]]; then
+		count=0
+	fi
+
+	# Assume identical repository and branch names:
+	gitlab_repo_name="$github_repo_name"
+	gitlab_branch_name="$github_branch_name"
+	
+	# Get GitLab username.
+	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+
+	
+	
+	# curl --header "PRIVATE-TOKEN: <your_access_token>" "http://127.0.0.1/api/v4/projects/1/pipelines"
+	pipelines=$(curl --header "PRIVATE-TOKEN: $gitlab_personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$gitlab_repo_name/pipelines")
+	#echo "pipelines=$pipelines"
+	
+	# get build status from pipelines
+	job=$(echo $pipelines | jq -r 'map(select(.sha == "'"$gitlab_commit_sha"'"))')
+	#echo "job=$job"
+	status=$(echo "$(echo $job | jq ".[].status")" | tr -d '"')	
+	
+	
+	#while [[ "$status" == "" ] || [ "$status" == "pending" ] || [ "$status" == "paused" ]]
+	while [[ "$status" == "" || "$status" == "pending" || "$status" == "paused" ]]; do
+		sleep 10
+		if [[ "$i" -gt 4 ]]; then
+			echo "Waiting on the GitLab CI build status took too long. Raising error. The last known status was:$status"
+			exit 111
+		fi
+		else
+			new_status=$(get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha" "$count")
+		fi
+	done
+	# If the right status was found without entering the while loop, the new_status will be void.
+	# That implies the status still needs to be echo'd. If the new_status was found in the recursive
+	# call, then it has already been echoed, hence no more echo would be needed if new_status is not "".
+	if [[ "$new_status" == "" ]]; then
+		echo "$status"
+	fi
+	
+	# TODO: verify the job status is within acceptable values, e.g. succes, failed, pauzed etc. Throw error otherwise.
+}
+
+
+	# 5.10 (Sub-optimal) Wait until the GitLab CI is done with the branch. (Set a timeout limit of 20 minutes).
 	# 6. Get the GitLab CI build status for that GitLab commit.
 	# 7. Clone the Build status repository.
 	# 8. Verify the Build status repository is cloned.

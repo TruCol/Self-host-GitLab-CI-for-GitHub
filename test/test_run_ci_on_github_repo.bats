@@ -42,7 +42,7 @@ setup() {
 
 
 @test "Test verifies GitHub repository is cloned." {
-	
+	skip
 	github_username="a-t-0"
 	github_repo_name="sponsor_example"
 	
@@ -54,7 +54,7 @@ setup() {
 }
 
 @test "Test running the function that loops over the GitHub branches." {
-	
+	skip
 	github_username="a-t-0"
 	github_repo_name="sponsor_example"
 	
@@ -64,3 +64,35 @@ setup() {
 	assert_equal "$repo_was_cloned" "FOUND"
 
 }
+
+
+@test "Test get GitLab commit function." {
+	skip
+}
+
+# TODO: make this run after the loop over github branches.
+@test "Test get GitLab commit build status function." {
+	github_username="a-t-0"
+	github_repo_name="sponsor_example"
+	github_branch_name="main"
+	
+	# Get GitLab username.
+	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	
+	# Get GitLab personal access token from hardcoded file.
+	gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
+	
+	# Get last commit of GitLab repo.
+	gitlab_commit_sha=$(get_commit_sha_of_branch "$github_branch_name" "$github_repo_name" "$gitlab_username" "$gitlab_personal_access_token")
+	gitlab_commit_sha=$(echo "$gitlab_commit_sha" | tr -d '"') # removes double quotes at start and end.
+	echo "gitlab_commit_sha=$gitlab_commit_sha"
+	
+	assert_equal "1f9cccbef76720f8be88b6b9c7104ca06c0a280a" "$gitlab_commit_sha"
+	
+	# Get build status
+	gitlab_ci_build_status=$(get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")
+	echo "gitlab_ci_build_status=$gitlab_ci_build_status"
+	#assert_equal "success" "$gitlab_ci_build_status"
+	assert_equal "failed" "$gitlab_ci_build_status"
+}
+

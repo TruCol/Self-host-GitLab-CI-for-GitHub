@@ -1,6 +1,7 @@
 #!/bin/bash
 source src/hardcoded_variables.txt
-source src/creds.txt
+#source src/creds.txt
+source ../personal_creds.txt
 
 source src/helper_dir_edit.sh
 source src/helper_github_modify.sh

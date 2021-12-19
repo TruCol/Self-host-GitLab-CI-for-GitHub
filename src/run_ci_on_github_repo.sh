@@ -256,6 +256,11 @@ get_gitlab_ci_build_status() {
 	fi
 	
 	# TODO: verify the job status is within acceptable values, e.g. succes, failed, pauzed etc. Throw error otherwise.
+	# Allowed values:
+	###failure
+	###success
+	###error
+	###pending
 }
 
 # 7. Once the build status is found, use github personal access token to
@@ -275,20 +280,35 @@ set_build_status_of_github_commit() {
 	elif [[ "$github_personal_access_code" == "" ]]; then
 		echo "ERROR, the github personal access token is empty, whereas it shouldn't be."
 		exit 113
+	elif [[ "$commit_build_status" == "" ]]; then
+		echo "ERROR, the GitLab build status is empty, whereas it shouldn't be."
+		exit 114
+	elif [[ "$gitlab_website_url" == "" ]]; then
+		echo "ERROR, the GitLab server website url is empty, whereas it shouldn't be."
+		exit 115
 	fi
 	
+	echo "gitlab_website_url=$gitlab_website_url"
+	echo "commit_build_status=$commit_build_status"
+	
+	# Create message in JSON format
+	JSON_FMT='{"state":"%s","description":"%s","target_url":"%s"}\n'
+	json_string=$(printf "$JSON_FMT" "$commit_build_status" "$commit_build_status" "$gitlab_website_url")
+	echo "json_string=$json_string"
+	
 	# Set the build status
-	setting_output=$(curl -H "Authorization: token $github_personal_access_code" --request POST --data '{"state": "$commit_build_status", "description": "$commit_build_status", "target_url": "$gitlab_website_url"}' https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha)
+	setting_output=$(curl -H "Authorization: token $github_personal_access_code" --request POST --data "$json_string" https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha)
 	
 	# Check if output is valid
 	echo "setting_output=$setting_output"
 	if [ "$(lines_contain_string '"message": "Bad credentials"' "\${setting_output}")" == "FOUND" ]; then
 		# TODO: specify which checkboxes in the `repository` checkbox are required.
-		echo "ERROR, the github personal access token is not valid. Please make a new one. See https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token and ensure you tick:"
-		exit 114
-	elif [ "$(lines_contain_string '"documentation_url": "https://docs.github.com/rest"' "\${setting_output}")" == "FOUND" ]; then
-		echo "ERROR: $setting_output"
+		echo "ERROR, the github personal access token is not valid. Please make a new one. See https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token and ensure you tick. $setting_output"
 		exit 115
+	elif [ "$(lines_contain_string '"documentation_url": "https://docs.github.com/rest' "\${setting_output}")" == "FOUND" ]; then
+		echo "ERROR: $setting_output"
+		read -p "ERROR: $setting_output"
+		#exit 116
 	fi
 	
 	# Verify the build status is set correctly

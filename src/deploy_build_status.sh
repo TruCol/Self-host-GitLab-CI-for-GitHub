@@ -2,7 +2,7 @@
 
 source src/helper.sh
 source src/hardcoded_variables.txt
-source src/creds.txt
+#source src/creds.txt
 source src/create_personal_access_token.sh
 
 # 0. Check if deployment ssh-key is generated

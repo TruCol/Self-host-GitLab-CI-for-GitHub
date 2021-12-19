@@ -112,6 +112,10 @@ setup() {
 	# Get GitLab personal access token from hardcoded file.
 	gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 	
+	# Get GitLab server url from credentials file.
+	gitlab_website_url=$(echo "$gitlab_website_url" | tr -d '\r')
+	
+	
 	# Get last commit of GitLab repo.
 	gitlab_commit_sha=$(get_commit_sha_of_branch "$github_branch_name" "$github_repo_name" "$gitlab_username" "$gitlab_personal_access_token")
 	gitlab_commit_sha=$(echo "$gitlab_commit_sha" | tr -d '"') # removes double quotes at start and end.
@@ -122,6 +126,8 @@ setup() {
 	# Get build status
 	gitlab_ci_build_status=$(get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")
 	echo "gitlab_ci_build_status=$gitlab_ci_build_status"
+	echo "github_personal_access_code=$github_personal_access_code"
+	echo "gitlab_website_url=$gitlab_website_url"
 	#assert_equal "success" "$gitlab_ci_build_status"
 	assert_equal "failed" "$gitlab_ci_build_status"
 	

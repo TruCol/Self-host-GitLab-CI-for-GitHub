@@ -1,7 +1,7 @@
 #!/bin/bash
 # Source: https://github.com/MxNxPx/gitlab-cicd-demo/blob/aee86e45f5bc603a5055f0cd391cd6b184f1d6c3/get-runner-reg.sh
 source src/hardcoded_variables.txt
-source src/creds.txt
+#source src/creds.txt
 source src/helper.sh
 
 get_gitlab_server_runner_tokenV1() {

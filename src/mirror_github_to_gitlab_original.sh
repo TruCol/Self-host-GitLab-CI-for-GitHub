@@ -4,7 +4,7 @@
 
 source src/helper.sh
 source src/hardcoded_variables.txt
-source src/creds.txt
+#source src/creds.txt
 source src/get_gitlab_server_runner_token.sh
 source src/push_repo_to_gitlab.sh
 

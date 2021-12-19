@@ -7,7 +7,7 @@
 
 
 source src/hardcoded_variables.txt
-source src/creds.txt
+#source src/creds.txt
 source src/helper.sh
 source src/push_repo_to_gitlab.sh
 

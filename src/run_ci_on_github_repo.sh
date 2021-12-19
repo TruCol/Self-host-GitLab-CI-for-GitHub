@@ -10,10 +10,12 @@ github_username=$1
 # Get GitHub repository name.
 github_repo=$2
 
-# OPTIONAL: get GitHub personal access token or verify ssh access to support private repositories.
-github_personal_access_code=$3
 
-verbose=$4
+
+verbose=$3
+
+# get GitHub personal access token or verify ssh access to support private repositories.
+github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 
 # Get GitLab username.
 gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
@@ -200,7 +202,9 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 	# TODO: verify the changes are pushed correctly
 }
 
-	# 5.9 Verify the CI is running for this commit.
+# TODO: 5.9 Verify the CI is running for this commit.
+
+# 6. Get the GitLab CI build status for that GitLab commit.
 get_gitlab_ci_build_status() {
 	github_repo_name="$1"
 	github_branch_name="$2"
@@ -233,12 +237,14 @@ get_gitlab_ci_build_status() {
 	
 	#while [[ "$status" == "" ] || [ "$status" == "pending" ] || [ "$status" == "paused" ]]
 	while [[ "$status" == "" || "$status" == "pending" || "$status" == "paused" ]]; do
+		
+		# 5.10 (Sub-optimal) Wait until the GitLab CI is done with the branch. (Set a timeout limit of 8x10 seconds).
 		sleep 10
-		if [[ "$i" -gt 4 ]]; then
+		if [[ "$i" -gt 8 ]]; then
 			echo "Waiting on the GitLab CI build status took too long. Raising error. The last known status was:$status"
 			exit 111
-		fi
 		else
+			# Perform recursive call to this function to retry getting build status.
 			new_status=$(get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha" "$count")
 		fi
 	done
@@ -252,26 +258,48 @@ get_gitlab_ci_build_status() {
 	# TODO: verify the job status is within acceptable values, e.g. succes, failed, pauzed etc. Throw error otherwise.
 }
 
+# 7. Once the build status is found, use github personal access token to
+# set the build status in the GitHub commit.
+set_build_status_of_github_commit() {
+	github_username="$1"
+	github_repo_name="$2"
+	github_commit_sha="$3"
+	github_personal_access_code="$4"
+	gitlab_website_url="$5"
+	commit_build_status="$6"
+	
+	# Check if arguments are valid.
+	if [[ "$github_commit_sha" == "" ]]; then
+		echo "ERROR, the github commit sha is empty, whereas it shouldn't be."
+		exit 112
+	elif [[ "$github_personal_access_code" == "" ]]; then
+		echo "ERROR, the github personal access token is empty, whereas it shouldn't be."
+		exit 113
+	fi
+	
+	# Set the build status
+	setting_output=$(curl -H "Authorization: token $github_personal_access_code" --request POST --data '{"state": "$commit_build_status", "description": "$commit_build_status", "target_url": "$gitlab_website_url"}' https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha)
+	
+	# Check if output is valid
+	echo "setting_output=$setting_output"
+	if [ "$(lines_contain_string '"message": "Bad credentials"' "\${setting_output}")" == "FOUND" ]; then
+		# TODO: specify which checkboxes in the `repository` checkbox are required.
+		echo "ERROR, the github personal access token is not valid. Please make a new one. See https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token and ensure you tick:"
+		exit 114
+	elif [ "$(lines_contain_string '"documentation_url": "https://docs.github.com/rest"' "\${setting_output}")" == "FOUND" ]; then
+		echo "ERROR: $setting_output"
+		exit 115
+	fi
+	
+	# Verify the build status is set correctly
+	getting_output=$(GET https://api.github.com/repos/$github_username/$github_repo_name/commits/$github_commit_sha/statuses)
+	echo "getting_output=$getting_output"
+}
 
-	# 5.10 (Sub-optimal) Wait until the GitLab CI is done with the branch. (Set a timeout limit of 20 minutes).
-	# 6. Get the GitLab CI build status for that GitLab commit.
-	# 7. Clone the Build status repository.
-	# 8. Verify the Build status repository is cloned.
-	# 9. Copy the GitLab CI Build status icon to the build status repository.
-	# 10. Include the build status and link to the GitHub commit in the repository.
-	# 11. Push the changes to the GitHub build status repository.
-	# 12. Verify the changes are pushed to the GitHub build status repository.
-
-
-	#### Checkout GitHub branch, if branch is found in local GitHub repo.
-	###actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name "GitHub")"
-	###assert_success
-	###
-	#### Verify the get_current_github_branch function returns the correct branch.
-	###actual_result="$(get_current_github_branch $github_repo_name $github_branch_name "GitHub")"
-	###assert_equal "$actual_result" "$github_branch_name"
-	###
-	#### Check if branch is found in local GitHub repo.
-	###actual_result="$(github_branch_exists $github_repo_name $github_branch_name)"
-	###last_line=$(get_last_line_of_set_of_lines "\${actual_result}")
-	###assert_equal "$last_line" "FOUND"
+	
+	# 8. Clone the GitHub build statusses repository.
+	# 9. Verify the Build status repository is cloned.
+	# 10. Copy the GitLab CI Build status icon to the build status repository.
+	# 11. Include the build status and link to the GitHub commit in the repository.
+	# 12. Push the changes to the GitHub build status repository.
+	# 13. Verify the changes are pushed to the GitHub build status repository.

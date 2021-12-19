@@ -4,3 +4,4 @@ gitlab_server_password=yoursecretpassword
 GITLAB_ROOT_EMAIL=root@someemailprovider.com
 GITLAB_PERSONAL_ACCESS_TOKEN=somelongpersonalaccesscode3
 GITHUB_PERSONAL_ACCESS_TOKEN=somegithubtoken
+gitlab_website_url="http://127.0.0.1"

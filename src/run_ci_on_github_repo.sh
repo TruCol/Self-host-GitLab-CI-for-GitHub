@@ -155,8 +155,14 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	gitlab_repo_name="$github_repo_name"
 	gitlab_branch_name="$github_branch_name"
 	
+	# get GitHub personal access token or verify ssh access to support private repositories.
+	github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
+	
 	# Get GitLab username.
 	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	
+	# Get GitLab server url from credentials file.
+	gitlab_website_url=$(echo "$gitlab_website_url" | tr -d '\r')
 	
 	# Verify the get_current_github_branch function returns the correct branch.
 	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name "GitHub")"
@@ -215,12 +221,17 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	# 6. Get the GitLab CI build status for that GitLab commit.
 	build_status="$(manage_get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")"
 	echo "build_status=$build_status"
-	last_line_build_status=$(get_last_line_of_set_of_lines "\${build_status}")
-	echo "last_line_build_status=$last_line_build_status"
+	last_line_gitlab_ci_build_status=$(get_last_line_of_set_of_lines "\${build_status}")
+	echo "last_line_gitlab_ci_build_status=$last_line_gitlab_ci_build_status"
 	
 	
-	# TODO: run this function.
-	#set_build_status_of_github_commit
+	
+	# 7. Once the build status is found, use github personal access token to
+	# set the build status in the GitHub commit.
+	output=$(set_build_status_of_github_commit "$github_username" "$github_repo_name" "$github_commit_sha" "$github_personal_access_code" "$gitlab_website_url" "$last_line_gitlab_ci_build_status")
+	echo "output=$output"
+	
+	
 	
 	# TODO: delete this function
 	#get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha"

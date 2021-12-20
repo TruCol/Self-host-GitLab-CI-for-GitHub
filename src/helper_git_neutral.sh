@@ -208,3 +208,15 @@ create_new_branch() {
 	# echo theoutput
 	echo "$theoutput"
 }
+
+git_has_changes() {
+	target_directory="$1"
+	cd "$target_directory"
+	if [[ `git status --porcelain` ]]; then
+		# Changes
+		echo "FOUND"
+	else
+		# No changes
+		echo "NOTFOUND"
+	fi
+}

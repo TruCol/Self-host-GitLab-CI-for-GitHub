@@ -249,3 +249,35 @@ get_current_github_branch_commit() {
 		exit 19
 	fi
 }
+
+is_desirable_github_build_status() {
+	status="$1"
+	if [[ "$status" == "failure" ]]; then
+		echo "FOUND"
+	elif [[ "$status" == "success" ]]; then
+		echo "FOUND"
+	elif [[ "$status" == "error" ]]; then
+		echo "FOUND"
+	elif [[ "$status" == "unknown" ]]; then
+		echo "FOUND"
+	elif [[ "$status" == "pending" ]]; then
+		echo "FOUND"
+	else 
+		echo "NOTFOUND"
+	fi
+}
+
+is_desirable_github_build_status_excluding_pending() {
+	status="$1"
+	if [[ "$status" == "failure" ]]; then
+		echo "FOUND"
+	elif [[ "$status" == "success" ]]; then
+		echo "FOUND"
+	elif [[ "$status" == "error" ]]; then
+		echo "FOUND"
+	elif [[ "$status" == "unknown" ]]; then
+		echo "FOUND"
+	else 
+		echo "NOTFOUND"
+	fi
+}

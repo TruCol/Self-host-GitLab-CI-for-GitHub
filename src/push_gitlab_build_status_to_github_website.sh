@@ -70,6 +70,9 @@ get_and_export_build_status_to_github_build_status_website_repo() {
 	elif [  "$status" == "unknown" ]; then
 		cp "src/svgs/unknown.svg" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch_name""/build_status.svg"
 	fi
+	
+    # Assert the build status is exported correctly.
+	
 }
 
 # Export the GitLab build status of each *TODO: relevant* GitLab runner CI repository

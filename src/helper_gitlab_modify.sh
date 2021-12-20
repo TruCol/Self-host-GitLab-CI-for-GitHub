@@ -441,9 +441,12 @@ commit_changes_to_gitlab() {
 							# Get the path before executing the command (to verify it is restored correctly after).
 							pwd_before="$PWD"
 							
-							# Commit the changes to GitLab.
-							cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit -m \"$github_commit_sha\"
-							cd ../../../..
+							if [[ "$(git_has_changes "$MIRROR_LOCATION/GitLab/$github_repo_name")" == "FOUND" ]]; then
+							
+								# Commit the changes to GitLab.
+								cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit -m \"$github_commit_sha\"
+								cd ../../../..
+							fi
 							
 							# Get the path after executing the command (to verify it is restored correctly after).
 							pwd_after="$PWD"

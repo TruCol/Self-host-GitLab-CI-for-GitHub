@@ -431,13 +431,6 @@ setup() {
 	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name "GitHub")"
 	assert_equal "$actual_result" "$github_branch_name"
 	
-	# Checkout branch, if branch is found in local GitHub repo.
-	actual_result="$(checkout_branch_in_github_repo $github_repo_name $github_branch_name $company)"
-	assert_success
-	
-	# Verify the get_current_github_branch function returns the correct branch.
-	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name $company)"
-	assert_equal "$actual_result" "$github_branch_name"
 	
 	# Checkout branch, if branch is found in local GitHub repo.
 	actual_result="$(verify_github_branch_contains_gitlab_yaml $github_repo_name $github_branch_name $company)"

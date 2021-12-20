@@ -7,7 +7,7 @@
 
 
 source src/hardcoded_variables.txt
-source src/creds.txt
+#source src/creds.txt
 source src/helper.sh
 yes | sudo apt install jq
 yes | sudo apt install xclip

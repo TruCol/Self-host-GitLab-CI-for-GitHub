@@ -2,7 +2,7 @@
 
 source src/helper.sh
 source src/hardcoded_variables.txt
-source src/creds.txt
+#source src/creds.txt
 source src/create_personal_access_token.sh
 
 # Source: https://docs.gitlab.com/ee/administration/server_hooks.html#:~:text=executed%20as%20appropriate.-,Create%20a%20global%20server%20hook%20for%20all%20repositories,-To%20create%20a

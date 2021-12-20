@@ -3,7 +3,7 @@
 #./mirror_github_to_gitlab.sh "a-t-0" "testrepo" "filler_github"
 
 source src/hardcoded_variables.txt
-source src/creds.txt
+#source src/creds.txt
 
 # Hardcoded data:
 

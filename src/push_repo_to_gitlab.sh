@@ -2,7 +2,7 @@
 
 source src/helper.sh
 source src/hardcoded_variables.txt
-source src/creds.txt
+#source src/creds.txt
 source src/create_personal_access_token.sh
 
 # TODO: change 127.0.0.1 with gitlab server address variable

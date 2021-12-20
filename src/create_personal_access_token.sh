@@ -1,7 +1,7 @@
 #!/bin/bash
 # Source: https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#programmatically-creating-a-personal-access-token
 source src/hardcoded_variables.txt
-source src/creds.txt
+#source src/creds.txt
 source src/helper.sh
 
 gitlab_host=$GITLAB_SERVER_HTTP_URL

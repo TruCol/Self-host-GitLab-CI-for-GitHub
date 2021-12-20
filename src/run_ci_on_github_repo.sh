@@ -229,6 +229,9 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	echo "output=$output"
 	
 	
+	copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$last_line_gitlab_ci_build_status"
+	
+	push_commit_build_status_in_github_status_repo_to_github "$github_username"
 	
 	# TODO: delete this function
 	#get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha"
@@ -307,73 +310,6 @@ parse_gitlab_ci_status_to_github_build_status() {
 	fi
 }
 
-# TODO: delete this function
-# 6. Get the GitLab CI build status for that GitLab commit.
-get_gitlab_ci_build_status() {
-	github_repo_name="$1"
-	github_branch_name="$2"
-	gitlab_commit_sha="$3"
-	count="$4"
-	
-	# specify timeout counter
-	if [[ "$count" == "" ]]; then
-		count=0
-	fi
-
-	# Assume identical repository and branch names:
-	gitlab_repo_name="$github_repo_name"
-	gitlab_branch_name="$github_branch_name"
-	
-	# Get GitLab username.
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
-
-	
-	
-	# curl --header "PRIVATE-TOKEN: <your_access_token>" "http://127.0.0.1/api/v4/projects/1/pipelines"
-	pipelines=$(curl --header "PRIVATE-TOKEN: $gitlab_personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$gitlab_repo_name/pipelines")
-	#echo "gitlab_personal_access_token=$gitlab_personal_access_token"
-	#echo "pipelines=$pipelines"
-	
-	# get build status from pipelines
-	job=$(echo $pipelines | jq -r 'map(select(.sha == "'"$gitlab_commit_sha"'"))')
-	#echo "job=$job"
-	status=$(echo "$(echo $job | jq ".[].status")" | tr -d '"')	
-	
-	
-	#while [[ "$status" == "" ] || [ "$status" == "pending" ] || [ "$status" == "paused" ]]
-	while [[ "$status" == "" || "$status" == "pending" || "$status" == "paused" || "$status" == "active" || "$status" == "running" ]]; do
-		
-		#echo "WAITING FOR STATUS,IT IS:$status"
-		# 5.10 (Sub-optimal) Wait until the GitLab CI is done with the branch. (Set a timeout limit of 8x10 seconds).
-		sleep 10
-		count=$((count+1))
-		if [[ "$count" -gt 8 ]]; then
-			echo "Waiting on the GitLab CI build status took too long. Raising error. The last known status was:$status"
-			#exit 111
-		else
-			# Perform recursive call to this function to retry getting build status.
-			new_status=$(get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha" "$count")
-			#echo "new_status=$new_status"
-		fi
-	done
-	# If the right status was found without entering the while loop, the new_status will be void.
-	# That implies the status still needs to be echo'd. If the new_status was found in the recursive
-	# call, then it has already been echoed, hence no more echo would be needed if new_status is not "".
-	if [[ "$new_status" == "" ]]; then
-		if [[ "$status" == "failed" ]]; then
-			echo "failure"
-		elif [[ "$status" == "success" ]]; then
-			echo "success"
-		elif [[ "$status" == "error" ]]; then
-			echo "error"
-		elif [[ "$status" == "unknown" ]]; then
-			echo "unknown"
-		else
-			echo "ERROR, an invalid state is found:$status"
-			exit 112
-		fi
-	fi
-}
 
 # 7. Once the build status is found, use github personal access token to
 # set the build status in the GitHub commit.
@@ -472,7 +408,7 @@ copy_commit_build_status_to_github_status_repo() {
 		exit 121
 	elif [  "$status" == "success" ]; then
 		cp "src/svgs/passed.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/build_status.svg"
-	elif [  "$status" == "failed" ]; then
+	elif [  "$status" == "failure" ]; then
 		cp "src/svgs/failed.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/build_status.svg"
 	elif [  "$status" == "error" ]; then
 		cp "src/svgs/error.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/build_status.svg"

@@ -93,7 +93,7 @@ setup() {
 	gitlab_ci_build_status=$(get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")
 	echo "gitlab_ci_build_status=$gitlab_ci_build_status"
 	#assert_equal "success" "$gitlab_ci_build_status"
-	assert_equal "failed" "$gitlab_ci_build_status"
+	assert_equal "failure" "$gitlab_ci_build_status"
 }
 
 # TODO: make this run after the loop over github branches.
@@ -119,19 +119,19 @@ setup() {
 	# Get last commit of GitLab repo.
 	gitlab_commit_sha=$(get_commit_sha_of_branch "$github_branch_name" "$github_repo_name" "$gitlab_username" "$gitlab_personal_access_token")
 	gitlab_commit_sha=$(echo "$gitlab_commit_sha" | tr -d '"') # removes double quotes at start and end.
-	echo "gitlab_commit_sha=$gitlab_commit_sha"
+	#echo "gitlab_commit_sha=$gitlab_commit_sha"
 	
 	assert_equal "1f9cccbef76720f8be88b6b9c7104ca06c0a280a" "$gitlab_commit_sha"
 	
 	# Get build status
 	gitlab_ci_build_status=$(get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")
-	echo "gitlab_ci_build_status=$gitlab_ci_build_status"
-	echo "github_personal_access_code=$github_personal_access_code"
-	echo "gitlab_website_url=$gitlab_website_url"
+	#echo "gitlab_ci_build_status=$gitlab_ci_build_status"
+	#echo "github_personal_access_code=$github_personal_access_code"
+	#echo "gitlab_website_url=$gitlab_website_url"
 	#assert_equal "success" "$gitlab_ci_build_status"
-	assert_equal "failed" "$gitlab_ci_build_status"
+	assert_equal "failure" "$gitlab_ci_build_status"
 	
 	output=$(set_build_status_of_github_commit "$github_username" "$github_repo_name" "$github_commit_sha" "$github_personal_access_code" "$gitlab_website_url" "$gitlab_ci_build_status")
-	echo "output=$output"
+	#echo "output=$output"
 	assert_equal "something" "$output"
 }

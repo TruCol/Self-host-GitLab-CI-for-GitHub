@@ -252,7 +252,16 @@ get_gitlab_ci_build_status() {
 	# That implies the status still needs to be echo'd. If the new_status was found in the recursive
 	# call, then it has already been echoed, hence no more echo would be needed if new_status is not "".
 	if [[ "$new_status" == "" ]]; then
-		echo "$status"
+		if [[ "$status" == "failed" ]]; then
+			echo "failure"
+		elif [[ "$status" == "success" ]]; then
+			echo "success"
+		elif [[ "$status" == "error" ]]; then
+			echo "error"
+		else
+			echo "ERROR, an invalid state is found:$status"
+			exit 112
+		fi
 	fi
 	
 	# TODO: verify the job status is within acceptable values, e.g. succes, failed, pauzed etc. Throw error otherwise.
@@ -288,19 +297,19 @@ set_build_status_of_github_commit() {
 		exit 115
 	fi
 	
-	echo "gitlab_website_url=$gitlab_website_url"
-	echo "commit_build_status=$commit_build_status"
+	#echo "gitlab_website_url=$gitlab_website_url"
+	#echo "commit_build_status=$commit_build_status"
 	
 	# Create message in JSON format
 	JSON_FMT='{"state":"%s","description":"%s","target_url":"%s"}\n'
 	json_string=$(printf "$JSON_FMT" "$commit_build_status" "$commit_build_status" "$gitlab_website_url")
-	echo "json_string=$json_string"
+	#echo "json_string=$json_string"
 	
 	# Set the build status
 	setting_output=$(curl -H "Authorization: token $github_personal_access_code" --request POST --data "$json_string" https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha)
 	
 	# Check if output is valid
-	echo "setting_output=$setting_output"
+	#echo "setting_output=$setting_output"
 	if [ "$(lines_contain_string '"message": "Bad credentials"' "\${setting_output}")" == "FOUND" ]; then
 		# TODO: specify which checkboxes in the `repository` checkbox are required.
 		echo "ERROR, the github personal access token is not valid. Please make a new one. See https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token and ensure you tick. $setting_output"
@@ -308,12 +317,20 @@ set_build_status_of_github_commit() {
 	elif [ "$(lines_contain_string '"documentation_url": "https://docs.github.com/rest' "\${setting_output}")" == "FOUND" ]; then
 		echo "ERROR: $setting_output"
 		read -p "ERROR: $setting_output"
-		#exit 116
+		exit 116
 	fi
 	
 	# Verify the build status is set correctly
 	getting_output=$(GET https://api.github.com/repos/$github_username/$github_repo_name/commits/$github_commit_sha/statuses)
-	echo "getting_output=$getting_output"
+	expected_url="\"url\":\"https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha\","
+	expected_state="\"state\":\"$commit_build_status\","
+	if [ "$(lines_contain_string "$expected_url" "\${getting_output}")" == "NOTFOUND" ]; then
+		echo "Error, the status of the repo did not contain:$expected_url \n because the getting output was: $getting_output"
+		exit 117
+	elif [ "$(lines_contain_string "$expected_state" "\${getting_output}")" == "NOTFOUND" ]; then
+		echo "Error, the status of the repo did not contain:$expected_state"
+		exit 118
+	fi
 }
 
 	

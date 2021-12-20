@@ -41,8 +41,7 @@ if [ "$verbose" == "TRUE" ]; then
 fi
 
 # run with:
-# source src/import.sh src/run_ci_on_github_repo.sh && create_and_run_ci_job "a-t-0" "sponsor_example"
-#source src/run_ci_job.sh && receipe
+# source src/import.sh src/run_ci_on_github_repo.sh && download_github_repo_on_which_to_run_ci "a-t-0" "sponsor_example"
 download_github_repo_on_which_to_run_ci() {
 	github_username="$1"
 	github_repo_name="$2"
@@ -75,8 +74,6 @@ download_github_repo_on_which_to_run_ci() {
 	# 2. Verify the GitHub repo is cloned.
 	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	assert_equal "$repo_was_cloned" "FOUND"
-	
-	
 	
 }
 

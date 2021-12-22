@@ -770,7 +770,7 @@ get_ssh_email() {
 	local key_filepath="/home/$username/.ssh/$ssh_account.pub"
 	
 	# Check if file exists.
-	assert_file_exists "$key_filepath"
+	manual_assert_file_exists "$key_filepath"
 	
 	# Read the ssh pub file.
 	local public_ssh_content=$(cat $key_filepath)
@@ -779,16 +779,6 @@ get_ssh_email() {
 	local email=$(get_last_space_delimted_item_in_line "$public_ssh_content")
 	echo "$email"
 }
-
-# Structure:dir_edit
-assert_file_exists() {
-	filepath=$1
-	if [ ! -f "$filepath" ]; then
-		echo "The ssh key file: $filepath does not exist, so the email address of that ssh-account can not be extracted."
-		exit 29
-	fi
-}
-
 
 # Structure:gitlab_status
 # 6.f.1.helper0

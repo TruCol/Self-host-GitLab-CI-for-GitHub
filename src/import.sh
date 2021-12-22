@@ -18,3 +18,7 @@ source src/run_ci_on_github_repo.sh
 
 source src/helper.sh
 source src/sha256_computing.sh
+
+
+# Load assert abilities into code:
+source src/helper_asserts.sh

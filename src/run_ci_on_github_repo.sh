@@ -120,7 +120,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 		
 		# Check if branch is found in local GitHub repo.
 		actual_result="$(checkout_branch_in_github_repo $github_repo_name ${github_branches[i]} "GitHub")"
-		assert_success
+		# TODO: write some test to verify this.
 		
 		# Get SHA of commit of local GitHub branch.
 		commit=$(get_current_github_branch_commit $github_repo_name ${github_branches[i]} "GitHub")

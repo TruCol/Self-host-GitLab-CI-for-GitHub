@@ -1,4 +1,7 @@
 #!/bin/bash
+# A file that contains functions to make modifications to Gitlab
+# repositories.
+
 # run with:
 #./mirror_github_to_gitlab.sh "a-t-0" "testrepo" "filler_github"
 
@@ -50,7 +53,7 @@ if [ "$verbose" == "TRUE" ]; then
 	echo "gitlab_repo=$gitlab_repo"
 fi
 
-# Structure:gitlab_modify
+# Deletes the repositorie if it doesn't exist in the Gitlab server.
 # TODO: move to helper.sh
 delete_gitlab_repo_if_it_exists() {
 	new_repo_name="$1"

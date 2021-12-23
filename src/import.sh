@@ -12,7 +12,7 @@ source src/helper_git_neutral.sh
 source src/helper_ssh.sh
 
 source src/get_gitlab_server_runner_token.sh
-source src/push_repo_to_gitlab.sh
+#source src/push_repo_to_gitlab.sh
 source src/run_ci_on_github_repo.sh
 
 

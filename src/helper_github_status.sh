@@ -22,10 +22,7 @@ github_username=$1
 # Get GitHub repository name.
 github_repo=$2
 
-# OPTIONAL: get GitHub personal access token or verify ssh access to support private repositories.
-github_personal_access_code=$3
-
-verbose=$4
+verbose=$3
 
 # Get GitLab username.
 gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
@@ -312,4 +309,38 @@ verify_github_branch_contains_gitlab_yaml() {
 		echo "ERROR, the GitHub repository does not exist locally."
 		exit 19
 	fi
+}
+
+
+# source src/import.sh src/helper_github_status.sh && get_org_repos "hiveminds"
+# source src/import.sh src/helper_github_status.sh && get_org_repos "a-t-0"
+get_org_repos() {
+	local -n arr=$1 # use nameref for indirection
+	local github_organisation_or_username="$2"
+	
+	arr=() # innitialise array with branches
+	
+	# get GitHub personal access token or verify ssh access to support private repositories.
+	github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
+	
+	theoutput=$(curl -H "Authorization: token $github_personal_access_code" "Accept: application/vnd.github.v3+json" https://api.github.com/users/${github_organisation_or_username}/repos?per_page=100 | jq -r '.[] | .name')
+	
+	# Parse branches from branch list response
+	while IFS= read -r line; do
+		
+		# Append the branch name to the array of branches
+		arr+=("$line")
+		
+	# List repositories and feed them into a line by line parser
+	done <<< "$theoutput"
+}
+
+
+# source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "hiveminds"
+# source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "a-t-0"
+# Make a list of the repositories in the GitHub repository.
+initialise_github_repositories_array() {
+	local github_organisation_or_username="$1"
+	get_org_repos github_repositories "$github_organisation_or_username" # call function to populate the array
+	declare -p github_repositories
 }

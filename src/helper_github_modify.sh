@@ -135,19 +135,24 @@ commit_changes() {
 	# TODO: verify no more files are changed, using Git status command.
 }
 
-# Structure:gitlab_modify
-# TODO: move to helper.
+# Assumes repository exists, does a git pull in it to get the latest data.
+# TODO: write test for method.
 git_pull_github_repo() {
-	github_repo_name="$1"
-	# TODO: create github_repo_exists_locally
-	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
+	local github_repo_name="$1"
+	
+	
+	# Determine whether the Build status repository is cloned.
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
+	
+	# Ensure the GitLab build status repository is cloned.
+	if [ "$repo_was_cloned" == "FOUND" ]; then
 		
 		# Get the path before executing the command (to verify it is restored correctly after).
 		pwd_before="$PWD"
 		
 		# Do a git pull inside the gitlab repository.
 		cd "$MIRROR_LOCATION/GitHub/$github_repo_name" && git pull
-		cd ../../..
+		cd ../../../..
 		
 		# Get the path after executing the command (to verify it is restored correctly after).
 		pwd_after="$PWD"

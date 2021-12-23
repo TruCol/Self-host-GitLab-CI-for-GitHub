@@ -376,9 +376,9 @@ copy_commit_build_status_to_github_status_repo() {
 	
 	# Verify the mirror location exists
 	manual_assert_not_equal "$MIRROR_LOCATION" ""
-	manual_assert_file_exist "$MIRROR_LOCATION"
-	manual_assert_file_exist "$MIRROR_LOCATION/GitHub"
-	manual_assert_file_exist "$MIRROR_LOCATION/GitLab"
+	manual_assert_file_exists "$MIRROR_LOCATION"
+	manual_assert_file_exists "$MIRROR_LOCATION/GitHub"
+	manual_assert_file_exists "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
 	has_access="$(check_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE")"

@@ -40,6 +40,22 @@ if [ "$verbose" == "TRUE" ]; then
 	echo "gitlab_repo=$gitlab_repo"
 fi
 
+
+# run with:
+# source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo "a-t-0" "sponsor_example"
+run_ci_on_github_repo() {
+	github_username="$1"
+	github_repo_name="$2"
+	
+	# TODO: write test to verify whether the build status can be pushed to a branch. (access wise).
+	# TODO: Store log file output if a repo (and/or branch) have been skipped.
+	# TODO: In that log file, inlcude: time, which user, which repo, which branch, why.
+	
+	download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
+	copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name"
+}
+
+
 # run with:
 # source src/import.sh src/run_ci_on_github_repo.sh && download_github_repo_on_which_to_run_ci "a-t-0" "sponsor_example"
 download_github_repo_on_which_to_run_ci() {
@@ -51,18 +67,18 @@ download_github_repo_on_which_to_run_ci() {
 	# 1. Clone the GitHub repo.
 	# Delete GitHub repo at start of test.
 	remove_mirror_directories
-	###assert_not_equal "$MIRROR_LOCATION" ""
-	###assert_file_not_exist "$MIRROR_LOCATION"
-	###assert_file_not_exist "$MIRROR_LOCATION/GitHub"
-	###assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+	manual_assert_not_equal "$MIRROR_LOCATION" ""
+	manual_assert_dir_not_exists "$MIRROR_LOCATION"
+	manual_assert_dir_not_exists "$MIRROR_LOCATION/GitHub"
+	manual_assert_dir_not_exists "$MIRROR_LOCATION/GitLab"
 	
 	# Create mmirror directories
 	create_mirror_directories
 	# TODO: replace asserts with functions
-	###assert_not_equal "$MIRROR_LOCATION" ""
-	###assert_file_exist "$MIRROR_LOCATION"
-	###assert_file_exist "$MIRROR_LOCATION/GitHub"
-	###assert_file_exist "$MIRROR_LOCATION/GitLab"
+	manual_assert_not_equal "$MIRROR_LOCATION" ""
+	manual_assert_dir_exists "$MIRROR_LOCATION"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
 	has_access="$(check_ssh_access_to_repo "$github_username" "$github_repo_name")"
@@ -73,7 +89,7 @@ download_github_repo_on_which_to_run_ci() {
 	
 	# 2. Verify the GitHub repo is cloned.
 	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
-	assert_equal "$repo_was_cloned" "FOUND"
+	manual_assert_equal "$repo_was_cloned" "FOUND"
 	
 }
 
@@ -86,17 +102,17 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 	
 	# 2. Verify the GitHub repo is cloned.
 	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
-	assert_equal "$repo_was_cloned" "FOUND"
+	manual_assert_equal "$repo_was_cloned" "FOUND"
 
 	# 3. Get the GitHub branches
 	get_git_branches github_branches "GitHub" "$github_repo_name"      # call function to populate the array
 	declare -p github_branches
 	
-	#assert_equal ""${github_branches[0]}"" "attack_in_new_file"
-	#assert_equal ""${github_branches[1]}"" "attack_unit_test"
-	#assert_equal ""${github_branches[2]}"" "main"
-	#assert_equal ""${github_branches[3]}"" "no_attack_in_filecontent"
-	#assert_equal ""${github_branches[4]}"" "no_attack_in_new_file"
+	#manual_assert_equal ""${github_branches[0]}"" "attack_in_new_file"
+	#manual_assert_equal ""${github_branches[1]}"" "attack_unit_test"
+	#manual_assert_equal ""${github_branches[2]}"" "main"
+	#manual_assert_equal ""${github_branches[3]}"" "no_attack_in_filecontent"
+	#manual_assert_equal ""${github_branches[4]}"" "no_attack_in_new_file"
 	
 	# 4. Loop over the GitHub branches by checking each branch out.
 	for i in "${!github_branches[@]}"; do
@@ -104,30 +120,10 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 		
 		# Check if branch is found in local GitHub repo.
 		actual_result="$(checkout_branch_in_github_repo $github_repo_name ${github_branches[i]} "GitHub")"
-		assert_success
+		# TODO: write some test to verify this.
 		
 		# Get SHA of commit of local GitHub branch.
 		commit=$(get_current_github_branch_commit $github_repo_name ${github_branches[i]} "GitHub")
-	
-		# For each branch, assert the correct commit is returned.
-		if [ $i -eq 0 ]; then
-			assert_equal ""${github_branches[$i]}"" "attack_in_new_file"
-			assert_equal ""$commit"" "00c16a620847faae3a6b7b1dcc5d4d458f2c7986"
-		elif [ $i -eq 1 ]; then
-			assert_equal ""${github_branches[$i]}"" "attack_unit_test"
-			assert_equal ""$commit"" "2bd88d1551a835b12c31d8a392f2ee0bf0977c65"
-		elif [ $i -eq 2 ]; then
-			assert_equal ""${github_branches[$i]}"" "main"
-			assert_equal ""$commit"" "85ad4b39fe9c9af893b4d7b35a76a595a8e680d5"
-		elif [ $i -eq 3 ]; then
-			assert_equal ""${github_branches[$i]}"" "no_attack_in_filecontent"
-			assert_equal ""$commit"" "4d78ba9b04d26cfb95296c0cee0a7cc6a3897d44"
-		elif [ $i -eq 4 ]; then
-			assert_equal ""${github_branches[$i]}"" "no_attack_in_new_file"
-			assert_equal ""$commit"" "d8e518b97cc1a528f49a01081890931403361561"
-		else
-			assert_equal "" "Another branch was found that was not expected."
-		fi
 		
 		# 5. If the branch contains a gitlab yaml file then
 		# TODO: change to return a list of branches that contain GitLab 
@@ -163,11 +159,11 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	
 	# Verify the get_current_github_branch function returns the correct branch.
 	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name "GitHub")"
-	assert_equal "$actual_result" "$github_branch_name"
+	manual_assert_equal "$actual_result" "$github_branch_name"
 	
 	# Checkout branch, if branch is found in local GitHub repo.
 	actual_result="$(verify_github_branch_contains_gitlab_yaml $github_repo_name $github_branch_name "GitHub")"
-	assert_equal "$actual_result" "FOUND"
+	manual_assert_equal "$actual_result" "FOUND"
 	
 	# 5.1 Create the empty GitLab repo.
 	# Create the empty GitLab repository (deletes any existing GitLab repos with same name).
@@ -184,7 +180,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	
 	# Verify the get_current_gitlab_branch function returns the correct branch.
 	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
-	assert_equal "$actual_result" "$gitlab_branch_name"
+	manual_assert_equal "$actual_result" "$gitlab_branch_name"
 	
 	# 5.5 TODO: Check whether the GitLab branch already contains this
 	# GitHub commit sha in its commit messages. (skip branch if yes)
@@ -194,11 +190,11 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	# 5.7 Copy the files from the GitHub branch into the GitLab branch.
 	result="$(copy_files_from_github_to_gitlab_branch $github_repo_name $github_branch_name $gitlab_repo_name $gitlab_branch_name)"
 	last_line_result=$(get_last_line_of_set_of_lines "\${result}")
-	assert_equal "$last_line_result" "IDENTICAL"
+	manual_assert_equal "$last_line_result" "IDENTICAL"
 	
 	
 	# 5.8 Commit the changes to GitLab.
-	assert_not_equal "" "$github_commit_sha"
+	manual_assert_not_equal "" "$github_commit_sha"
 	commit_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
 	# TODO: verify the changes are committed correctly
 	
@@ -379,10 +375,10 @@ copy_commit_build_status_to_github_status_repo() {
 	status="$5"
 	
 	# Verify the mirror location exists
-	assert_not_equal "$MIRROR_LOCATION" ""
-	assert_file_exist "$MIRROR_LOCATION"
-	assert_file_exist "$MIRROR_LOCATION/GitHub"
-	assert_file_exist "$MIRROR_LOCATION/GitLab"
+	manual_assert_not_equal "$MIRROR_LOCATION" ""
+	manual_assert_file_exist "$MIRROR_LOCATION"
+	manual_assert_file_exist "$MIRROR_LOCATION/GitHub"
+	manual_assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
 	has_access="$(check_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE")"
@@ -392,7 +388,7 @@ copy_commit_build_status_to_github_status_repo() {
 	
 	# 9. Verify the Build status repository is cloned.
 	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE")
-	assert_equal "$repo_was_cloned" "FOUND"
+	manual_assert_equal "$repo_was_cloned" "FOUND"
 	
 	# 10. Copy the GitLab CI Build status icon to the build status repository.
 	# Create a folder of the repository on which a CI has been ran, inside the GitHub build status website repository, if it does not exist yet
@@ -417,16 +413,16 @@ copy_commit_build_status_to_github_status_repo() {
 	fi
 	
 	# Assert svg file is created correctly
-	assert_equal $(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/build_status.svg") "FOUND"
+	manual_assert_equal $(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/build_status.svg") "FOUND"
 	
 	# Explicitly store build status per commit per branch per repo.
-	echo "$status" > "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt"
+	echo "$status" > "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/h"$github_branch_name""/$github_commit_sha.txt"
 	
-	# Assert GitHub commit build status txt file is created correctly
-	assert_equal $(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "FOUND"
+	# manual_assert GitHub commit build status txt file is created correctly
+	manual_assert_equal $(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "FOUND"
 	
-	# Assert GitHub commit build status txt file contains the right data.
-	assert_equal $(cat "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "$status"
+	# manual_assert GitHub commit build status txt file contains the right data.
+	manual_assert_equal $(cat "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "$status"
 }
 
 push_commit_build_status_in_github_status_repo_to_github() {
@@ -434,7 +430,7 @@ push_commit_build_status_in_github_status_repo_to_github() {
 	
 	# Verify the Build status repository is cloned.
 	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE")
-	assert_equal "$repo_was_cloned" "FOUND"
+	manual_assert_equal "$repo_was_cloned" "FOUND"
 	
 	# 12. Verify there have been changes made. Only push if changes are added."
 	if [[ "$(git_has_changes "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE")" == "FOUND" ]]; then

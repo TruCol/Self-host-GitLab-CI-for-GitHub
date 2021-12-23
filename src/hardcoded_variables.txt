@@ -32,7 +32,7 @@ SOURCE_FOLDERPATH=src/$SOURCE_FOLDERNAME
 
 # Specify GitHub website settings.
 GITHUB_USERNAME=a-t-0
-GITHUB_STATUS_WEBSITE=website-build-statuses
+GITHUB_STATUS_WEBSITE=gitlab-ci-build-statuses
 PUBLIC_GITHUB_TEST_REPO=sponsor_example
 
 # Specify Mirror folder

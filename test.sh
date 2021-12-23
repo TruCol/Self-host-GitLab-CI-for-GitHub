@@ -50,3 +50,4 @@
 
 # New test
 ./test/libs/bats/bin/bats test/test_run_ci_on_github_repo.bats
+./test/libs/bats/bin/bats test/test_helper_asserts.bats

@@ -36,7 +36,7 @@ check_md5_sum() {
 	md5sum_head=${md5sum:0:32}
 	
 	# Assert the measured md5 checksum equals the hardcoded md5 checksum of the expected file.
-	#assert_equal "$md5_of_social_package_head" "$TWRP_MD5"
+	#manual_assert_equal "$md5_of_social_package_head" "$TWRP_MD5"
 	if [ "$md5sum_head" == "$expected_md5" ]; then
 		echo "EQUAL"
 	else
@@ -743,7 +743,7 @@ any_ssh_key_is_added_to_ssh_agent() {
 			if [ "$found_ssh_email" == "FOUND" ]; then
 				echo "FOUND"
 			else
-				#assert_equal  "$found_ssh_email" "FOUND"
+				#manual_assert_equal  "$found_ssh_email" "FOUND"
 				echo "NOTFOUND_EMAIL"
 			fi
 		fi
@@ -770,7 +770,7 @@ get_ssh_email() {
 	local key_filepath="/home/$username/.ssh/$ssh_account.pub"
 	
 	# Check if file exists.
-	assert_file_exists "$key_filepath"
+	manual_assert_file_exists "$key_filepath"
 	
 	# Read the ssh pub file.
 	local public_ssh_content=$(cat $key_filepath)
@@ -779,16 +779,6 @@ get_ssh_email() {
 	local email=$(get_last_space_delimted_item_in_line "$public_ssh_content")
 	echo "$email"
 }
-
-# Structure:dir_edit
-assert_file_exists() {
-	filepath=$1
-	if [ ! -f "$filepath" ]; then
-		echo "The ssh key file: $filepath does not exist, so the email address of that ssh-account can not be extracted."
-		exit 29
-	fi
-}
-
 
 # Structure:gitlab_status
 # 6.f.1.helper0
@@ -924,7 +914,7 @@ assert_current_github_branch() {
 		echo "The current GitHub branch does not match the expected GitHub branch:$github_branch_name"
 		exit 171
 	fi 
-	assert_equal "$actual_result" "$github_branch_name"
+	manual_assert_equal "$actual_result" "$github_branch_name"
 }
 
 

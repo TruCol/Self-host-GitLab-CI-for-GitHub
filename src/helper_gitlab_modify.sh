@@ -131,7 +131,7 @@ git_pull_gitlab_repo() {
 		pwd_before="$PWD"
 		
 		# Do a git pull inside the gitlab repository.
-		cd "$MIRROR_LOCATION/GitLab/$gitlab_repo" && git pull
+		cd "$MIRROR_LOCATION/GitLab/$gitlab_repo_name" && git pull
 		cd ../../..
 		
 		# Get the path after executing the command (to verify it is restored correctly after).

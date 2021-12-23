@@ -134,3 +134,31 @@ commit_changes() {
 	commit_output=$(cd "$target_directory" && git commit -m "Uploaded files to trigger GitLab runner.")
 	# TODO: verify no more files are changed, using Git status command.
 }
+
+# Structure:gitlab_modify
+# TODO: move to helper.
+git_pull_github_repo() {
+	github_repo_name="$1"
+	# TODO: create github_repo_exists_locally
+	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
+		
+		# Get the path before executing the command (to verify it is restored correctly after).
+		pwd_before="$PWD"
+		
+		# Do a git pull inside the gitlab repository.
+		cd "$MIRROR_LOCATION/GitHub/$github_repo_name" && git pull
+		cd ../../..
+		
+		# Get the path after executing the command (to verify it is restored correctly after).
+		pwd_after="$PWD"
+		
+		# Verify the current path is the same as it was when this function started.
+		if [ "$pwd_before" != "$pwd_after" ]; then
+			echo "The current path is not returned to what it originally was."
+			exit 111
+		fi
+	else 
+		echo "ERROR, the GitHub repository does not exist locally."
+		exit 12
+	fi
+}

@@ -416,7 +416,7 @@ copy_commit_build_status_to_github_status_repo() {
 	manual_assert_equal $(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/build_status.svg") "FOUND"
 	
 	# Explicitly store build status per commit per branch per repo.
-	echo "$status" > "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/h"$github_branch_name""/$github_commit_sha.txt"
+	echo "$status" > "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt"
 	
 	# manual_assert GitHub commit build status txt file is created correctly
 	manual_assert_equal $(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "FOUND"

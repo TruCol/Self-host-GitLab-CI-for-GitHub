@@ -3,6 +3,7 @@ source src/hardcoded_variables.txt
 #source src/creds.txt
 source ../personal_creds.txt
 
+source src/helper_ci_management.sh
 source src/helper_dir_edit.sh
 source src/helper_github_modify.sh
 source src/helper_github_status.sh
@@ -12,7 +13,6 @@ source src/helper_git_neutral.sh
 source src/helper_ssh.sh
 
 source src/get_gitlab_server_runner_token.sh
-#source src/push_repo_to_gitlab.sh
 source src/run_ci_on_github_repo.sh
 
 

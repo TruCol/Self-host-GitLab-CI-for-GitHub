@@ -65,7 +65,7 @@ fi
 #   Name of the GitLab repository.
 # Returns:
 #  0 if funciton was evaluated succesfull.
-#  7 if the repoaitory was not found. 
+#  7 if the repository was not found. 
 # Outputs:
 #  None.
 # TODO(a-t-0): change root with Global variable.
@@ -94,7 +94,7 @@ delete_gitlab_repo_if_it_exists() {
 # Local variables:
 #  gitlab_repo_name
 # Globals:
-#  $MIRROR_LOCATION
+#  MIRROR_LOCATION
 # Arguments:
 #  The GitLab repository name.
 # Returns:
@@ -121,10 +121,10 @@ gitlab_repo_exists_locally(){
 #  gitlab_repo_name
 #  gitlab_server_password
 # Globals:
-#  $MIRROR_LOCATION
-#  $GITLAB_SERVER
-#  $gitlab_server_account
-#  $gitlab_server_password
+#  MIRROR_LOCATION
+#  GITLAB_SERVER
+#  gitlab_server_account
+#  gitlab_server_password
 # Arguments:
 #  The GitLab username.
 #  The GitLab repository name.
@@ -132,7 +132,7 @@ gitlab_repo_exists_locally(){
 #  0 if function was evaluated succesfull.
 #  8 if mirror directory was not found locally.
 #  9 if GitLab repository was not found in the GitLab server.
-#  10 if GitLab repoaitory was not found locally and not cloned to the mirror location. 
+#  10 if GitLab repository was not found locally and not cloned to the mirror location. 
 # Outputs:
 #  FOUND if the GitLab repository exist in the GitLab server or locally in the
 #  mirror location. 
@@ -177,21 +177,40 @@ get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
   fi
 }
 
-# Structure:gitlab_modify
-# TODO: move to helper.
+
+#######################################
+# Performs a git pull inside the GitLab repository if the GitLab repository exists locally.
+# Local variables:
+#  gitlab_repo_name
+#  pwd_before
+#  pwd_àfter
+# Globals:
+#  MIRROR_LOCATION
+# Arguments:
+#   Name of the GitLab repository.
+# Returns:
+#  0 if funciton was evaluated succesfull.
+#  111 if the current path has't returned to what it origally was. 
+#  12 if the GitLab repository was not found locally. 
+# Outputs:
+#  FOUND if the GitLab repository exist locally.
+# TODO(a-t-0): move to helper.
+#######################################
 git_pull_gitlab_repo() {
   gitlab_repo_name="$1"
   if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
     
     # Get the path before executing the command (to verify it is restored correctly after).
-    pwd_before="$PWD"
+    local pwd_before
+	pwd_before="$PWD"
     
     # Do a git pull inside the gitlab repository.
     cd "$MIRROR_LOCATION/GitLab/$gitlab_repo_name" && git pull
     cd ../../..
     
     # Get the path after executing the command (to verify it is restored correctly after).
-    pwd_after="$PWD"
+    local pwd_after
+	pwd_after="$PWD"
     
     # Verify the current path is the same as it was when this function started.
     if [ "$pwd_before" != "$pwd_after" ]; then

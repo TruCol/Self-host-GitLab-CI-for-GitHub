@@ -149,8 +149,7 @@ get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
   local gitlab_repo_name="$2"
   
   # Remove spaces at end of username and servername.
-  gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
-  gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')
+  local gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')
   
   # TODO(a-t-0): verify local gitlab mirror repo directories are created
   create_mirror_directories

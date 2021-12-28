@@ -1,5 +1,5 @@
 #!/bin/bash
-# A file that contains functions to make modifications to Gitlab
+# A file that contains functions to make modifications to GitLab
 # repositories.
 
 # run with:
@@ -55,14 +55,14 @@ if [ "$verbose" == "TRUE" ]; then
 fi
 
 #######################################
-# Deletes the repository if it doesn't exist in the Gitlab server.
+# Deletes the repository if it doesn't exist in the GitLab server.
 # Local variables:
 #  deleted_repo_is_found
 #  gitlab_repo_name
 # Globals:
 #  None.
 # Arguments:
-#   Name of the Gitlab repository.
+#   Name of the GitLab repository.
 # Returns:
 #  0 if funciton was evaluated succesfull.
 #  7 if the repoaitory was not found. 
@@ -90,13 +90,13 @@ delete_gitlab_repo_if_it_exists() {
 
 
 #######################################
-# Determines if the Gitlab repository exists locally.
+# Determines if the GitLab repository exists locally.
 # Local variables:
 #  gitlab_repo_name
 # Globals:
 #  $MIRROR_LOCATION
 # Arguments:
-#  The Gitlab repository name.
+#  The GitLab repository name.
 # Returns:
 #  0 if funciton was evaluated succesfull.
 # Outputs:
@@ -114,7 +114,7 @@ gitlab_repo_exists_locally(){
 
 
 #######################################
-# Determines whether the Gitlab repository name exists in the GitLab server or 
+# Determines whether the GitLab repository name exists in the GitLab server or 
 # locally. If it is not found locally, a clone of the GitLab repository is made.
 # Local variables:
 #  gitlab_username
@@ -126,11 +126,11 @@ gitlab_repo_exists_locally(){
 #  $gitlab_server_account
 #  $gitlab_server_password
 # Arguments:
-#  The Gitlab username.
-#  The Gitlab repository name.
+#  The GitLab username.
+#  The GitLab repository name.
 # Returns:
-#  0 if funciton was evaluated succesfull.
-#  8 if GitLab repository was not found locally.
+#  0 if function was evaluated succesfull.
+#  8 if mirror directory was not found locally.
 #  9 if GitLab repository was not found in the GitLab server.
 #  10 if GitLab repoaitory was not found locally and not cloned to the mirror location. 
 # Outputs:
@@ -138,7 +138,7 @@ gitlab_repo_exists_locally(){
 #  mirror location. 
 #  NOTFOUND if the GitLab repository doesn't exist in the GitLab server or 
 #  locally.
-# TODO(a-t-0): verify local gitlab mirror repo directories are created.
+# TODO(a-t-0): verify local GitLab mirror repo directories are created.
 # TODO(a-t-0): verify the repository exists in GitLab, throw error otherwise.
 # TODO(a-t-0): do a gitlab pull to get the latest version.
 # TODO(a-t-0): Capitalize $gitlab_server_account in all files.

@@ -25,7 +25,8 @@ github_username=$1
 # Get GitHub repository name.
 github_repo=$2
 
-# OPTIONAL: get GitHub personal access token or verify ssh access to support private repositories.
+# OPTIONAL: get GitHub personal access token or verify ssh access to support 
+# private repositories.
 github_personal_access_code=$3
 
 verbose=$4
@@ -53,6 +54,7 @@ if [ "$verbose" == "TRUE" ]; then
   echo "gitlab_personal_access_token=$gitlab_personal_access_token"
   echo "gitlab_repo=$gitlab_repo"
 fi
+
 
 #######################################
 # Deletes the repository if it doesn't exist in the GitLab server.
@@ -132,7 +134,8 @@ gitlab_repo_exists_locally(){
 #  0 if function was evaluated succesfull.
 #  8 if mirror directory was not found locally.
 #  9 if GitLab repository was not found in the GitLab server.
-#  10 if GitLab repository was not found locally and not cloned to the mirror location. 
+#  10 if GitLab repository was not found locally and not cloned to the mirror 
+#  location. 
 # Outputs:
 #  FOUND if the GitLab repository exist in the GitLab server or locally in the
 #  mirror location. 
@@ -149,7 +152,8 @@ get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
   local gitlab_repo_name="$2"
   
   # Remove spaces at end of username and servername.
-  local gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')
+  local gitlab_server_password
+  gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')
   
   # TODO(a-t-0): verify local gitlab mirror repo directories are created
   create_mirror_directories
@@ -179,7 +183,8 @@ get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
 
 
 #######################################
-# Performs a git pull inside the GitLab repository if the GitLab repository exists locally.
+# Performs a git pull inside the GitLab repository if the GitLab repository 
+# exists locally.
 # Local variables:
 #  gitlab_repo_name
 #  pwd_before
@@ -194,13 +199,13 @@ get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
 #  12 if the GitLab repository was not found locally. 
 # Outputs:
 #  FOUND if the GitLab repository exist locally.
-# TODO(a-t-0): move to helper.
 #######################################
 git_pull_gitlab_repo() {
   gitlab_repo_name="$1"
   if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
     
-    # Get the path before executing the command (to verify it is restored correctly after).
+    # Get the path before executing the command (to verify it is restored 
+	# correctly after).
     local pwd_before
 	pwd_before="$PWD"
     
@@ -208,7 +213,8 @@ git_pull_gitlab_repo() {
     cd "$MIRROR_LOCATION/GitLab/$gitlab_repo_name" && git pull
     cd ../../..
     
-    # Get the path after executing the command (to verify it is restored correctly after).
+    # Get the path after executing the command (to verify it is restored 
+	# correctly after).
     local pwd_after
 	pwd_after="$PWD"
     
@@ -228,14 +234,37 @@ git_pull_gitlab_repo() {
 #6.d.1 If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
 # source src/import.sh src/helper_gitlab_modify.sh && create_empty_repository_v0 "sponsor_example" "root"
 ##run bash -c "source src/import.sh src/helper_gitlab_modify.sh && create_empty_repository_v0 sponsor_example root"
+#######################################
+# Checks for a repository in the GitLab server and deletes it if it exists.
+# Afterwards, a new empty repository is created.
+# Local variables:
+#  gitlab_repo_name
+#  gitlab_username
+# Globals:
+#  GITLAB_PERSONAL_ACCESS_TOKEN
+#  MIRROR_LOCATION
+#  GITLAB_SERVER_HTTP_URL
+# Arguments:
+#   Name of the GitLab repository.
+#   The GitLab username.
+# Returns:
+#  0 if funciton was evaluated succesfull.
+#  177 if the repository was supposed to be deleted but still exist.  
+#  178 if the repository was supposed to be created but doesn't exist.   
+# Outputs:
+#  None.
+# TODO(a-t-0): Check if GitLab server is running.
+# TODO(a-t-0): Capitalize $personal_access_token in all files.
+# TODO(a-t-0): Localize $GITLAB_PERSONAL_ACCESS_TOKEN as an argument.
+#######################################
 create_empty_repository_v0() {
-  gitlab_repo_name="$1"
-  gitlab_username="$2"
+  local gitlab_repo_name="$1"
+  local gitlab_username="$2"
    
    # load personal_access_token (from hardcoded data)
     personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
   
-  # TODO: Check if GitLab server is running
+  # TODO(a-t-0): Check if GitLab server is running.
   
   # Check if repository already exists in GitLab server.
   if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
@@ -256,7 +285,6 @@ create_empty_repository_v0() {
   curl -H "Content-Type:application/json" "$GITLAB_SERVER_HTTP_URL/api/v4/projects?private_token=$personal_access_token" -d "{ \"name\": \"$gitlab_repo_name\" }"
   sleep 30
   
-  
   # Verify the repository is created.
   if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" != "FOUND" ]; then
     # Throw an error if it is not created succesfully.
@@ -266,9 +294,30 @@ create_empty_repository_v0() {
   
 }
 
+
+#######################################
+# Checks if repository exists in the GitLab server and creates a new empty 
+# repository 
+# if that is not the case.
+# Local variables:
+#  gitlab_repo_name
+#  gitlab_username
+# Globals:
+#  None.
+# Arguments:
+#  Name of the GitLab repository.
+#  The GitLab username.
+# Returns:
+#  0 if funciton was evaluated succesfull.
+#  179 if the GitLab repository name was not found and has not been determined
+#  if it exist.  
+#  180 if the repository was supposed to be created but doesn't exist.   
+# Outputs:
+#  None.
+#######################################
 create_gitlab_repository_if_not_exists() {
-  gitlab_repo_name="$1"
-  gitlab_username="$2"
+  local gitlab_repo_name="$1"
+  local gitlab_username="$2"
   
   # Check if repository already exists in GitLab server.
   if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "NOTFOUND" ]; then
@@ -276,21 +325,43 @@ create_gitlab_repository_if_not_exists() {
   elif [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
     echo ""
   else
-    echo "ERROR, the GitLab repository: $gitlab_repo_name is not found, nor is it determined that it does not exist."
+    echo "ERROR, the GitLab repository: $gitlab_repo_name is not found, nor is
+	it determined that it does not exist."
     exit 179
   fi
   
   # Verify the repository exists.
   if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" != "FOUND" ]; then
     # Throw an error if it is not created succesfully.
-    echo "The GitLab repository was supposed to be created, yet it does not yet exists."
+    echo "The GitLab repository was supposed to be created, yet it does not yet 
+	exists."
     exit 180
   fi
 }
 
+
+#######################################
+# Checks if repository exists in the GitLab server and deletes the GitLab 
+# repository if it exists.
+# Local variables:
+#  gitlab_repo_name
+#  gitlab_username
+# Globals:
+#  None.
+# Arguments:
+#  Name of the GitLab repository.
+#  The GitLab username.
+# Returns:
+#  0 if funciton was evaluated succesfull.
+#  181 if the GitLab repository name was not found and has not been determined
+#  if it exist.  
+#  182 if the repository was supposed to be created but doesn't exist.   
+# Outputs:
+#  None.
+#######################################
 delete_gitlab_repository_if_it_exists() {
-  gitlab_repo_name="$1"
-  gitlab_username="$2"
+  local gitlab_repo_name="$1"
+  local gitlab_username="$2"
   
   # Check if repository already exists in GitLab server.
   if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "NOTFOUND" ]; then
@@ -313,16 +384,39 @@ delete_gitlab_repository_if_it_exists() {
 }
 
 
-# Structure:gitlab_modify
-#source src/import.sh src/helper_gitlab_modify.sh && delete_existing_repository "sponsor_example" "root"
+#######################################
+# Checks if repository exists in the GitLab server and creates a new empty repository 
+# if that is not the case.
+# How to run: 
+#  source src/import.sh src/helper_gitlab_modify.sh && delete_existing_repository "sponsor_example" "root" 
+# Local variables:
+#  gitlab_repo_name
+#  gitlab_username
+#  personal_access_token
+# Globals:
+#  GITLAB_PERSONAL_ACCESS_TOKEN
+#  GITLAB_SERVER_HTTP_URL
+# Arguments:
+#  Name of the GitLab repository.
+#  The GitLab username.
+# Returns:
+#  0 if funciton was evaluated succesfull.
+#  183 if an attempt was made to delete a GitLab repository that did not exist.   
+# Outputs:
+#  None.
+#######################################
 delete_existing_repository() {
-  repo_name="$1"
-  repo_username="$2"
+  local repo_name="$1"
+  local repo_username="$2"
   
   # load personal_access_token
+  local personal_access_token
   personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
   
-  #curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE "$GITLAB_SERVER_HTTP_URL"/api/v4/projects/"$repo_username"%2F"$repo_name"
+  # curl -H 'Content-Type: application/json' -H "Private-Token: 
+  # $personal_access_token" -X DELETE "$GITLAB_SERVER_HTTP_URL"/api/v4/projects
+  # /"$repo_username"%2F"$repo_name"
+  local output
   output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE "$GITLAB_SERVER_HTTP_URL"/api/v4/projects/"$repo_username"%2F"$repo_name")
   
   if [  "$(lines_contain_string '{"message":"404 Project Not Found"}' "\${output}")" == "FOUND" ]; then
@@ -331,15 +425,16 @@ delete_existing_repository() {
   fi
 }
 
+
 # Structure:gitlab_modify
 #source src/run_ci_job.sh && clone_repository
 # TODO: rename to clone_gitlab_repository_from _local_server
 clone_repository() {
-  repo_name=$1
-  gitlab_username=$2
-  gitlab_server_password=$3
-  gitlab_server=$4
-  target_directory=$5
+  local repo_name=$1
+  local gitlab_username=$2
+  local gitlab_server_password=$3
+  local gitlab_server=$4
+  local target_directory=$5
   
   # TODO:write test to verify the gitlab username and server don't end with a spacebar character.  
   
@@ -398,9 +493,9 @@ checkout_branch_in_github_repo() {
 # 6.h.2 If the branch does not exist in the GitLab repo, create it.
 # 6.h.0 Checkout that branch in the local GitLab mirror repository. (Assuming the GitHub branch contains a gitlab yaml file)
 checkout_branch_in_gitlab_repo() {
-  gitlab_repo_name="$1"
-  gitlab_branch_name="$2"
-  company="$3"
+  local gitlab_repo_name="$1"
+  local gitlab_branch_name="$2"
+  local company="$3"
   
   if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
 
@@ -411,13 +506,15 @@ checkout_branch_in_gitlab_repo() {
     if [ "$last_line_branch_check_result" == "FOUND" ]; then
     
       # Get the path before executing the command (to verify it is restored correctly after).
-      pwd_before="$PWD"
+      local pwd_before
+	  pwd_before="$PWD"
       
       # Checkout the branch inside the repository.
       cd "$MIRROR_LOCATION/$company/$gitlab_repo_name" && git checkout "$gitlab_branch_name"
       cd ../../../..
       
       # Get the path after executing the command (to verify it is restored correctly after).
+      local pwd_after
       pwd_after="$PWD"
   
       # Verify the current branch in the gitlab repository is indeed checked out.
@@ -449,11 +546,11 @@ checkout_branch_in_gitlab_repo() {
 
 # Structure:gitlab_modify
 push_changes() {
-  repo_name=$1
-  gitlab_username=$2
-  gitlab_server_password=$3
-  gitlab_server=$4
-  target_directory=$5
+  local repo_name=$1
+  local gitlab_username=$2
+  local gitlab_server_password=$3
+  local gitlab_server=$4
+  local target_directory=$5
   
   output=$(cd "$target_directory" && git push http://$gitlab_username:$gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
 }
@@ -475,22 +572,25 @@ delete_target_folder() {
 # Structure:gitlab_modify
 # 6.k Commit the GitLab branch changes, with the sha from the GitHub branch.
 commit_changes_to_gitlab() {
-  github_repo_name="$1"
-  github_branch_name="$2"
-  github_commit_sha="$3"
-  gitlab_repo_name="$4"
-  gitlab_branch_name="$5"
+  local github_repo_name="$1"
+  local github_branch_name="$2"
+  local github_commit_sha="$3"
+  local gitlab_repo_name="$4"
+  local gitlab_branch_name="$5"
   
   # If the GitHub repository exists
   if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
     # If the GitHub branch exists
-    github_branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
-    last_line_github_branch_check_result=$(get_last_line_of_set_of_lines "\${github_branch_check_result}")
+    local github_branch_check_result
+	github_branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
+    local last_line_branch_check_result
+	last_line_github_branch_check_result=$(get_last_line_of_set_of_lines "\${github_branch_check_result}")
     if [ "$last_line_github_branch_check_result" == "FOUND" ]; then
     
       # If the GitHub branch contains a gitlab yaml file
-      filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
+      local filepath
+	  filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
       if [ "$(file_exists $filepath)" == "FOUND" ]; then
         
         # If the GitLab repository exists
@@ -563,9 +663,41 @@ commit_changes_to_gitlab() {
 
 
 
-#TODO:
-# Structure:gitlab_modify
-# 6.l Push the GitLab branch changes.
+#######################################
+# Checks if repository exists in the GitLab server and creates a new empty repository 
+# if that is not the case.
+# Local variables:
+#  github_repo_name
+#  github_branch_name
+#  github_commit_sha
+#  gitlab_repo_name
+#  gitlab_branch_name
+#  github_branch_check_result
+#  last_line_github_branch_check_result
+#  comparison_result
+#  found_branch_name
+# Globals:
+#  MIRROR_LOCATION
+#  GITLAB_PERSONAL_ACCESS_TOKEN
+#  GITLAB_SERVER_HTTP_URL
+# Arguments:
+#  The GitHub repository name.
+#  The GitHub branch name.
+#  The GitHub commit.
+#  The name of the GitLab branch.
+#  Name of the GitLab repository.
+# Returns:
+#  0 if funciton was evaluated succesfull.
+#  11 if the content in the GitHub branch was not exactly copied into the 
+#  GitLab branch, even when excluding the .git directory.   
+#  12 if the GitLab branch didn't exist locally.
+#  13 if the GitLab repository didn't exist locally.
+#  14 if the GitHub branch didn't contain a yaml file.
+#  24 if the GitHub branch didn't exist locally.
+#  25 if the GitHub repository didn't exist locally.
+# Outputs:
+#  None.
+#######################################
 push_changes_to_gitlab() {
   # Verify the GitLab repo was downloaded.
   # Verify the GitLab branch was checked out.
@@ -580,22 +712,25 @@ push_changes_to_gitlab() {
   # Push the changes to GitLab.
   
   # Verify the changes were pushed to GitLab correctly.
-  github_repo_name="$1"
-  github_branch_name="$2"
-  github_commit_sha="$3"
-  gitlab_repo_name="$4"
-  gitlab_branch_name="$5"
+  local github_repo_name="$1"
+  local github_branch_name="$2"
+  local github_commit_sha="$3"
+  local gitlab_repo_name="$4"
+  local gitlab_branch_name="$5"
   
   # If the GitHub repository exists
   if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
     # If the GitHub branch exists
-    github_branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
-    last_line_github_branch_check_result=$(get_last_line_of_set_of_lines "\${github_branch_check_result}")
+    local github_branch_check_result
+	github_branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
+    local last_line_github_branch_check_result
+	last_line_github_branch_check_result=$(get_last_line_of_set_of_lines "\${github_branch_check_result}")
     if [ "$last_line_github_branch_check_result" == "FOUND" ]; then
     
       # If the GitHub branch contains a gitlab yaml file
-      filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
+      local filepath
+	  filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
       if [ "$(file_exists $filepath)" == "FOUND" ]; then
         
         # If the GitLab repository exists
@@ -603,7 +738,8 @@ push_changes_to_gitlab() {
           
           # If the GitLab branch exists
           
-          found_branch_name=$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name "GitLab")
+          local found_branch_name
+		  found_branch_name=$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name "GitLab")
           if [ "$found_branch_name" == "$gitlab_branch_name" ]; then
           
             # If there exist differences in the files or folders in the branch (excluding the .git directory)
@@ -613,14 +749,16 @@ push_changes_to_gitlab() {
             copy_github_files_and_folders_to_gitlab "$MIRROR_LOCATION/GitHub/$github_repo_name" "$MIRROR_LOCATION/GitLab/$github_repo_name"
             
             # Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
-            comparison_result="$(two_folders_are_identical_excluding_subdir $MIRROR_LOCATION/GitHub/$github_repo_name $MIRROR_LOCATION/GitLab/$github_repo_name .git)"
+            local comparison_result
+			comparison_result="$(two_folders_are_identical_excluding_subdir $MIRROR_LOCATION/GitHub/$github_repo_name $MIRROR_LOCATION/GitLab/$github_repo_name .git)"
             
             # Verify the files were correctly copied from GitHub branch to GitLab branch.
             if [ "$comparison_result" == "IDENTICAL" ]; then
               #echo "IDENTICAL"
               
               # Get the path before executing the command (to verify it is restored correctly after).
-              pwd_before="$PWD"
+              local pwd_before
+			  pwd_before="$PWD"
               
               # TODO: Verify the changes were committed to GitLab correctly. (There are no remaining files to be added)
               #git status
@@ -629,17 +767,21 @@ push_changes_to_gitlab() {
               
               # Commit the changes to GitLab.
               cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git push --set-upstream origin "$gitlab_branch_name"
-              #cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git push --set-upstream origin main
+              # cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git push
+			  # --set-upstream origin main
               cd ../../../..
               
-              # Get the path after executing the command (to verify it is restored correctly after).
-              pwd_after="$PWD"
+              # Get the path after executing the command (to verify it is 
+			  # restored correctly after).
+              local pwd_after
+			  pwd_after="$PWD"
               
               # Verify the current path is the same as it was when this function started.
               path_before_equals_path_after_command "$pwd_before" "$pwd_after"
               
             else
-              echo "ERROR, the content in the GitHub branch is not exactly copied into the GitLab branch, even when excluding the .git directory."
+              echo "ERROR, the content in the GitHub branch is not exactly 
+			  copied into the GitLab branch, even when excluding the .git directory."
               exit 11
             fi
             

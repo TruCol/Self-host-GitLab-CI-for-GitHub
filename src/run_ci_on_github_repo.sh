@@ -131,7 +131,20 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 		# of diving a method deeper.
 		branch_contains_yaml="$(verify_github_branch_contains_gitlab_yaml $github_repo_name "${github_branches[i]}" "GitHub")"
 		if [[ "$branch_contains_yaml" == "FOUND" ]]; then
-			copy_github_branch_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "${github_branches[i]}" "$commit"
+		
+			# TODO: check if github commit already has CI build status
+			# TODO: allow overriding this check to enforce the CI to run again on this commit.
+			already_has_build_status_result="$(github_commit_already_has_gitlab_ci_build_status_result "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha")"
+			# Get last line of that check, because the git pull command also produces output.
+			last_line_already_has_build_status_result=$(get_last_line_of_set_of_lines "\${already_has_build_status_result}")
+			
+			if [[ "$last_line_already_has_build_status_result" == "NOTFOUND" ]]; then
+				if [[ "$branch_contains_yaml" == "FOUND" ]]; then
+					copy_github_branch_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "${github_branches[i]}" "$commit"
+				fi
+			else
+				echo "Already has a build status:$github_repo_name / $github_branch_name / $github_commit_sha"
+			fi
 		fi
 	done
 	

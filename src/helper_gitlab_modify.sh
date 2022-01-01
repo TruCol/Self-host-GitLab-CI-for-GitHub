@@ -237,6 +237,8 @@ git_pull_gitlab_repo() {
 #######################################
 # Checks for a repository in the GitLab server and deletes it if it exists.
 # Afterwards, a new empty repository is created.
+# How to run:
+#  source src/import.sh src/helper_gitlab_modify.sh && create_empty_repository_v0 "sponsor_example" "root"
 # Local variables:
 #  gitlab_repo_name
 #  gitlab_username
@@ -297,7 +299,7 @@ create_empty_repository_v0() {
 
 #######################################
 # Checks if repository exists in the GitLab server and creates a new empty 
-# repository.
+# repository if it does not yet exist.
 # Local variables:
 #  gitlab_repo_name
 #  gitlab_username
@@ -384,8 +386,8 @@ delete_gitlab_repository_if_it_exists() {
 
 
 #######################################
-# Checks if repository exists in the GitLab server and creates a new empty repository
-# if that is not the case.
+# Checks if repository exists in the GitLab server and deletes it. Otherwise an  
+# error is shown.
 # How to run:
 #  source src/import.sh src/helper_gitlab_modify.sh && delete_existing_repository 
 #  "sponsor_example" "root"
@@ -681,10 +683,13 @@ commit_changes_to_gitlab() {
 }
 
 
-
 #######################################
-# Checks if repository exists in the GitLab server and creates a new empty repository
-# if that is not the case.
+# Checks if a GitHub repository and branch exists. If the repository contains 
+# a GitLab  yaml file, the code checks if a GitLab repository and branch exist.
+# Then files and folders are copied from GitHub to GitLab. Afterwards, the files 
+# and folders are verified if they are identical. At the end the changes are 
+# pushed  to Gitlab and verified.Errors are thrown if one of the steps cannot 
+# be completed.
 # Local variables:
 #  github_repo_name
 #  github_branch_name

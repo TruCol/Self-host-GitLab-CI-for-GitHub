@@ -31,22 +31,22 @@
 ###./test/libs/bats/bin/bats test/example_post-receive.bats
 
 # Test mirroring GitHub to GitLab
-## Works
-#./test/libs/bats/bin/bats test/test_helper_dir_edit.bats
-## Works
-#./test/libs/bats/bin/bats test/test_helper_github_status.bats
-## Works
-#./test/libs/bats/bin/bats test/test_helper_github_modify.bats
-## Works
-#./test/libs/bats/bin/bats test/test_helper_gitlab_modify.bats
-## Works
-#./test/libs/bats/bin/bats test/test_helper_gitlab_status.bats
-## Works
-#./test/libs/bats/bin/bats test/test_helper_git_neutral.bats
-### Semi-works
-##./test/libs/bats/bin/bats test/test_helper_ssh.bats
-## Works
-#./test/libs/bats/bin/bats test/test_sha256_checksum.bats
+# Works
+./test/libs/bats/bin/bats test/test_helper_dir_edit.bats
+# Works
+./test/libs/bats/bin/bats test/test_helper_github_status.bats
+# Works
+./test/libs/bats/bin/bats test/test_helper_github_modify.bats
+# Works
+./test/libs/bats/bin/bats test/test_helper_gitlab_modify.bats
+# Works
+./test/libs/bats/bin/bats test/test_helper_gitlab_status.bats
+# Works
+./test/libs/bats/bin/bats test/test_helper_git_neutral.bats
+## Semi-works
+#./test/libs/bats/bin/bats test/test_helper_ssh.bats
+# Works
+./test/libs/bats/bin/bats test/test_sha256_checksum.bats
 
 # New test
 ./test/libs/bats/bin/bats test/test_run_ci_on_github_repo.bats

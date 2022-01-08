@@ -15,8 +15,11 @@ echo_hello_input() {
 }
 
 read_three_args() {
+	# shellcheck disable=SC2034
 	arg1=$1
+	# shellcheck disable=SC2034
 	arg2=$2
+	# shellcheck disable=SC2034
 	arg3=$3
 	arg4=$4
 	echo "arg4=$arg4"
@@ -94,11 +97,11 @@ first_line="HiddenServiceDir $HIDDENSERVICEDIR_SSH$HIDDENSERVICENAME_SSH/"
 second_line_option_I="HiddenServicePort 22"
 second_line_option_II="HiddenServicePort 22 127.0.0.1:22"
 # Note option 2 is used (in the old environment).
-$(append_lines_if_not_found "$first_line" "$second_line_option_II" "$TOR_CONFIG_LOCATION")
+append_lines_if_not_found "$first_line" "$second_line_option_II" "$TOR_CONFIG_LOCATION"
 
 # append ssh service to /etc/ssh/sshd_config
 last_two_lines=$(sudo tail -n 2 /etc/ssh/sshd_config)
-second_last_line=$(echo $last_two_lines | sudo head -n 1)
+second_last_line=$(echo "$last_two_lines" | sudo head -n 1)
 last_line=$(sudo tail -n 1 /etc/ssh/sshd_config)
 if [ "$second_last_line" != "Port 22" ]; then
 	if [ "$last_line" != "Port 23" ]; then
@@ -110,7 +113,7 @@ fi
 
 first_line="Port 22"
 second_line="Port 23"
-$(append_lines_if_not_found "$first_line" "$second_line" "$SSH_CONFIG_LOCATION")
+append_lines_if_not_found "$first_line" "$second_line" "$SSH_CONFIG_LOCATION"
 service sshd restart
 
 

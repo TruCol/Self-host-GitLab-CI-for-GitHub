@@ -15,7 +15,7 @@ uninstall_gitlab_runner() {
 	# to get_architecture().)
 	
 	#get_runner_package $arch
-	uninstall_package $arch
+	uninstall_package "$arch"
 	deregister_gitlab_runner
 	remove_gitlab_ci_user
 	uninstall_gitlab_runner_service
@@ -42,11 +42,16 @@ uninstall_package() {
 # Register GitLab Runner
 deregister_gitlab_runner() {
 	
+	# shellcheck disable=SC2034
 	url="http://localhost"
+	# shellcheck disable=SC2034
 	description=trucolrunner
+	# shellcheck disable=SC2034
 	executor=shell
+	# shellcheck disable=SC2034
 	dockerimage="ruby:2.6"
 	
+	# shellcheck disable=SC2034
 	register=$(sudo gitlab-runner unregister --all-runners)
 }
 
@@ -56,7 +61,8 @@ remove_gitlab_ci_user() {
 	
 	# get list of users
 	user_list=$(awk -F: '{ print $1}' /etc/passwd)
-	if [  "$(lines_contain_string "$RUNNER_USERNAME" "\${user_list}")" == "FOUND" ]; then
+	if [  "$(lines_contain_string "$RUNNER_USERNAME" "\"${user_list}")" == "FOUND" ]; then
+		# shellcheck disable=SC2034
 		output=$(sudo userdel -r -f "$RUNNER_USERNAME")
 	fi
 }

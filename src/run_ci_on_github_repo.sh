@@ -18,12 +18,14 @@ verbose=$3
 github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 
 # Get GitLab username.
+# shellcheck disable=SC2154
 gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
 
 # Get GitLab user password.
 gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')
 
 # Get GitLab personal access token from hardcoded file.
+# shellcheck disable=SC2153
 gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 
 # Specify GitLab mirror repository name.
@@ -106,6 +108,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 
 	# 3. Get the GitHub branches
 	get_git_branches github_branches "GitHub" "$github_repo_name"      # call function to populate the array
+	# shellcheck disable=SC2154
 	declare -p github_branches
 	
 	#manual_assert_equal ""${github_branches[0]}"" "attack_in_new_file"
@@ -119,24 +122,24 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 		echo "${github_branches[i]}"
 		
 		# Check if branch is found in local GitHub repo.
-		actual_result="$(checkout_branch_in_github_repo $github_repo_name ${github_branches[i]} "GitHub")"
+		actual_result="$(checkout_branch_in_github_repo "$github_repo_name" "${github_branches[i]}" "GitHub")"
 		# TODO: write some test to verify this.
 		
 		# Get SHA of commit of local GitHub branch.
-		commit=$(get_current_github_branch_commit $github_repo_name ${github_branches[i]} "GitHub")
+		commit=$(get_current_github_branch_commit "$github_repo_name" "${github_branches[i]}" "GitHub")
 		
 		# 5. If the branch contains a gitlab yaml file then
 		# TODO: change to return a list of branches that contain GitLab 
 		# yaml files, such that this function can get tested, instead 
 		# of diving a method deeper.
-		branch_contains_yaml="$(verify_github_branch_contains_gitlab_yaml $github_repo_name "${github_branches[i]}" "GitHub")"
+		branch_contains_yaml="$(verify_github_branch_contains_gitlab_yaml "$github_repo_name" "${github_branches[i]}" "GitHub")"
 		if [[ "$branch_contains_yaml" == "FOUND" ]]; then
 		
 			# TODO: check if github commit already has CI build status
 			# TODO: allow overriding this check to enforce the CI to run again on this commit.
 			already_has_build_status_result="$(github_commit_already_has_gitlab_ci_build_status_result "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha")"
 			# Get last line of that check, because the git pull command also produces output.
-			last_line_already_has_build_status_result=$(get_last_line_of_set_of_lines "\${already_has_build_status_result}")
+			last_line_already_has_build_status_result=$(get_last_line_of_set_of_lines "\"${already_has_build_status_result}")
 			
 			if [[ "$last_line_already_has_build_status_result" == "NOTFOUND" ]]; then
 				if [[ "$branch_contains_yaml" == "FOUND" ]]; then
@@ -171,11 +174,11 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	gitlab_website_url=$(echo "$gitlab_website_url" | tr -d '\r')
 	
 	# Verify the get_current_github_branch function returns the correct branch.
-	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name "GitHub")"
+	actual_result="$(get_current_github_branch "$github_repo_name" "$github_branch_name" "GitHub")"
 	manual_assert_equal "$actual_result" "$github_branch_name"
 	
 	# Checkout branch, if branch is found in local GitHub repo.
-	actual_result="$(verify_github_branch_contains_gitlab_yaml $github_repo_name $github_branch_name "GitHub")"
+	actual_result="$(verify_github_branch_contains_gitlab_yaml "$github_repo_name" "$github_branch_name" "GitHub")"
 	manual_assert_equal "$actual_result" "FOUND"
 	
 	# 5.1 Create the empty GitLab repo.
@@ -188,11 +191,12 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	# 5.3 Check if the GitLab branch exists, if not, create it.
 	# 5.4 Check out the GitLab branch
 	# Checkout branch, if branch is found in local Gitlab repo.
-	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name "GitLab")"
+	actual_result="$(checkout_branch_in_gitlab_repo "$gitlab_repo_name" "$gitlab_branch_name" "GitLab")"
 	assert_success
 	
 	# Verify the get_current_gitlab_branch function returns the correct branch.
-	actual_result="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
+	# shellcheck disable=SC2154
+	actual_result="$(get_current_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name" "$company")"
 	manual_assert_equal "$actual_result" "$gitlab_branch_name"
 	
 	# 5.5 TODO: Check whether the GitLab branch already contains this
@@ -201,8 +205,8 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	# known. (skip branch if yes)
 	
 	# 5.7 Copy the files from the GitHub branch into the GitLab branch.
-	result="$(copy_files_from_github_to_gitlab_branch $github_repo_name $github_branch_name $gitlab_repo_name $gitlab_branch_name)"
-	last_line_result=$(get_last_line_of_set_of_lines "\${result}")
+	result="$(copy_files_from_github_to_gitlab_branch "$github_repo_name" "$github_branch_name" "$gitlab_repo_name" "$gitlab_branch_name")"
+	last_line_result=$(get_last_line_of_set_of_lines "\"${result}")
 	manual_assert_equal "$last_line_result" "IDENTICAL"
 	
 	
@@ -290,9 +294,9 @@ rebuild_get_gitlab_ci_build_status() {
 	#echo "pipelines=$pipelines"
 	
 	# get build status from pipelines
-	job=$(echo $pipelines | jq -r 'map(select(.sha == "'"$gitlab_commit_sha"'"))')
+	job=$(echo "$pipelines" | jq -r 'map(select(.sha == "'"$gitlab_commit_sha"'"))')
 	#echo "job=$job"
-	gitlab_ci_status=$(echo "$(echo $job | jq ".[].status")" | tr -d '"')
+	gitlab_ci_status=$(cmd "$(echo "$job" | jq ".[].status")" | tr -d '"')
 	#echo "gitlab_ci_status=$gitlab_ci_status"
 	parsed_github_status="$(parse_gitlab_ci_status_to_github_build_status "$gitlab_ci_status")"
 	echo "$parsed_github_status"
@@ -350,11 +354,12 @@ set_build_status_of_github_commit() {
 	
 	# Create message in JSON format
 	JSON_FMT='{"state":"%s","description":"%s","target_url":"%s"}\n'
+	# shellcheck disable=SC2059
 	json_string=$(printf "$JSON_FMT" "$commit_build_status" "$commit_build_status" "$gitlab_website_url")
 	#echo "json_string=$json_string"
 	
 	# Set the build status
-	setting_output=$(curl -H "Authorization: token $github_personal_access_code" --request POST --data "$json_string" https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha)
+	setting_output=$(curl -H "Authorization: token $github_personal_access_code" --request POST --data "$json_string" https://api.github.com/repos/"$github_username"/"$github_repo_name"/statuses/"$github_commit_sha")
 	
 	# Check if output is valid
 	#echo "setting_output=$setting_output"
@@ -368,11 +373,12 @@ set_build_status_of_github_commit() {
 	fi
 	
 	# Verify the build status is set correctly
-	getting_output=$(GET https://api.github.com/repos/$github_username/$github_repo_name/commits/$github_commit_sha/statuses)
+	getting_output=$(GET https://api.github.com/repos/"$github_username"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
 	expected_url="\"url\":\"https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha\","
 	expected_state="\"state\":\"$commit_build_status\","
 	if [ "$(lines_contain_string "$expected_url" "\${getting_output}")" == "NOTFOUND" ]; then
-		echo "Error, the status of the repo did not contain:$expected_url \n because the getting output was: $getting_output"
+		# shellcheck disable=SC2059
+		printf "Error, the status of the repo did not contain:$expected_url \n because the getting output was: $getting_output"
 		exit 119
 	elif [ "$(lines_contain_string "$expected_state" "\${getting_output}")" == "NOTFOUND" ]; then
 		echo "Error, the status of the repo did not contain:$expected_state"
@@ -407,7 +413,7 @@ copy_commit_build_status_to_github_status_repo() {
 	# Create a folder of the repository on which a CI has been ran, inside the GitHub build status website repository, if it does not exist yet
 	# Also add a folder for the branch(es) of that GitLab CI repository, in that respective folder.
 	
-	mkdir -p "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name"
+	mkdir -p "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name"
 	
 	
 	# TODO: 11. Include the build status and link to the GitHub commit in the repository in the SVG file.
@@ -416,26 +422,26 @@ copy_commit_build_status_to_github_status_repo() {
 		echo "ERROR, a pending or running build status should not reach this method."
 		exit 121
 	elif [  "$status" == "success" ]; then
-		cp "src/svgs/passed.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/build_status.svg"
+		cp "src/svgs/passed.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name""/build_status.svg"
 	elif [  "$status" == "failure" ]; then
-		cp "src/svgs/failed.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/build_status.svg"
+		cp "src/svgs/failed.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name""/build_status.svg"
 	elif [  "$status" == "error" ]; then
-		cp "src/svgs/error.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/build_status.svg"
+		cp "src/svgs/error.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name""/build_status.svg"
 	elif [  "$status" == "unknown" ]; then
-		cp "src/svgs/unknown.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/build_status.svg"
+		cp "src/svgs/unknown.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name""/build_status.svg"
 	fi
 	
 	# Assert svg file is created correctly
-	manual_assert_equal $(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/build_status.svg") "FOUND"
+	manual_assert_equal "$(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name""/build_status.svg")" "FOUND"
 	
 	# Explicitly store build status per commit per branch per repo.
-	echo "$status" > "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt"
+	echo "$status" > "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name""/$github_commit_sha.txt"
 	
 	# manual_assert GitHub commit build status txt file is created correctly
-	manual_assert_equal $(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "FOUND"
+	manual_assert_equal "$(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name""/$github_commit_sha.txt")" "FOUND"
 	
 	# manual_assert GitHub commit build status txt file contains the right data.
-	manual_assert_equal $(cat "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "$status"
+	manual_assert_equal "$(cat "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name""/$github_commit_sha.txt")" "$status"
 }
 
 push_commit_build_status_in_github_status_repo_to_github() {

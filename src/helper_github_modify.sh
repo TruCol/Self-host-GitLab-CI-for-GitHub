@@ -27,12 +27,14 @@ github_personal_access_code=$3
 verbose=$4
 
 # Get GitLab username.
+# shellcheck disable=SC2154
 gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
 
 # Get GitLab user password.
 gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')
 
 # Get GitLab personal access token from hardcoded file.
+# shellcheck disable=SC2153
 gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 
 # Specify GitLab mirror repository name.
@@ -65,6 +67,7 @@ github_branch_exists() {
 		# Check if the local copy of the GitHub repository contains the branch.
 		# TODO: verify if it still works after the spaces around the dollar signs are removed.
 		# shellcheck disable=SC2076
+		# shellcheck disable=SC2154
 		if [[ " ${github_branches[*]} " =~ " ${github_branch_name} " ]]; then
 			echo "FOUND"
 		else
@@ -110,6 +113,7 @@ push_to_github_repository() {
 	
 	if [[ "$has_access" == "HASACCESS" ]]; then
 		#git push git@github.com:"$github_username"/"$github_repository"
+		# shellcheck disable=SC2034
 		output=$(cd "$target_directory" && git push)
 	else
 		#$(cd "$target_directory" && git push https://github.com/"$github_username"/"$github_repository".git)
@@ -127,10 +131,12 @@ commit_changes() {
 	#echo "$commit_changes"
 	#add_star_output=$(cd "$target_directory" && git add *)
 	#add_dot_star=$(cd "$target_directory" && git add .*)
+	# shellcheck disable=SC2034
 	add_output=$(cd "$target_directory" && git add -A)
 	# TODO: include git status command to verify no files were not added/deleted.
 	
 	# TODO: write path before and after and verify it is correct.
+	# shellcheck disable=SC2034
 	commit_output=$(cd "$target_directory" && git commit -m "Uploaded files to trigger GitLab runner.")
 	# TODO: verify no more files are changed, using Git status command.
 }

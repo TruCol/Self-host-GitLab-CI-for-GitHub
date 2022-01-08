@@ -11,10 +11,10 @@ get_architecture() {
 	
 	# Parse architecture to what is available for GitLab Runner
 	# Source: https://stackoverflow.com/questions/65450286/how-to-install-gitlab-runner-to-centos-fedora
-	if [ "$architecture"=="x86_64" ]; then
+	if [ "$architecture" == "x86_64" ]; then
 		architecture=amd64
 	else
-		read -p "ERROR, did not yet find GitLab installation package and GitLab runner installation package for this architecture:$architecture"
+		read -rp "ERROR, did not yet find GitLab installation package and GitLab runner installation package for this architecture:$architecture"
 	fi
 	
 	echo $architecture
@@ -51,9 +51,10 @@ check_md5_sum() {
 get_expected_md5sum_of_gitlab_runner_installer_for_architecture() {
 	arch=$1
 	if [ "$arch" == "amd64" ]; then
+		# shellcheck disable=SC2154
 		echo $x86_64_runner_checksum
 	else
-		read -p "ERROR, this architecture:$arch is not yet supported by this repository, meaning we did not yet find a GitLab runner package for this architecture. So there is no md5sum available for verification of the md5 checksum of such a downloaded package."
+		read -rp "ERROR, this architecture:$arch is not yet supported by this repository, meaning we did not yet find a GitLab runner package for this architecture. So there is no md5sum available for verification of the md5 checksum of such a downloaded package."
 		#exit 1
 	fi
 }
@@ -91,7 +92,7 @@ get_last_n_lines_without_spaces() {
 	last_number_of_lines=$(sudo tail -n "$number" "$REL_FILEPATH")
 	
 	# Output true or false to pass the equality test result to parent function
-	echo $last_number_of_lines
+	echo "$last_number_of_lines"
 }
 
 # Structure:Parsing
@@ -100,7 +101,7 @@ file_contains_string() {
 	STRING=$1
 	REL_FILEPATH=$2
 	
-	if [[ ! -z $(grep "$STRING" "$REL_FILEPATH") ]]; then 
+	if grep -q "$STRING" "$REL_FILEPATH" ; then
 		echo "FOUND"; 
 	else
 		echo "NOTFOUND";
@@ -110,8 +111,9 @@ file_contains_string() {
 # Structure:Parsing
 lines_contain_string() {
 	STRING=$1
-	eval lines=$2
-	if [[ $lines =~ "$STRING" ]]; then
+	eval lines="$2"
+	# shellcheck disable=SC2154
+	if [[ $lines =~ $STRING ]]; then
 		echo "FOUND"; 
 	else
 		echo "NOTFOUND";
@@ -122,8 +124,8 @@ lines_contain_string() {
 get_line_nr() {
 	eval STRING="$1"
 	REL_FILEPATH=$2
-	line_nr=$(awk "/$STRING/{ print NR; exit }" $REL_FILEPATH)
-	echo $line_nr
+	line_nr=$(awk "/$STRING/{ print NR; exit }" "$REL_FILEPATH")
+	echo "$line_nr"
 }
 
 # Structure:Parsing
@@ -132,14 +134,14 @@ get_line_by_nr() {
 	REL_FILEPATH=$2
 	#read -p "number=$number"
 	#read -p "REL_FILEPATH=$REL_FILEPATH"
-	the_line=$(sed "${number}q;d" $REL_FILEPATH)
-	echo $the_line
+	the_line=$(sed "${number}q;d" "$REL_FILEPATH")
+	echo "$the_line"
 }
 
 # Structure:Parsing
 get_line_by_nr_from_variable() {
 	number=$1
-	eval lines=$2
+	eval lines="$2"
 	
 	count=0
 	while IFS= read -r line; do
@@ -158,9 +160,9 @@ get_first_line_containing_substring() {
 	
 	# Get line containing <code id="registration_token">
 	if [ "$(file_contains_string "$identification_str" "$REL_FILEPATH")" == "FOUND" ]; then
-		line_nr=$(get_line_nr "\${identification_str}" $REL_FILEPATH)
+		line_nr=$(get_line_nr "\${identification_str}" "$REL_FILEPATH")
 		if [ "$line_nr" != "" ]; then
-			line=$(get_line_by_nr $line_nr $REL_FILEPATH)
+			line=$(get_line_by_nr "$line_nr" "$REL_FILEPATH")
 			echo "$line"
 		else
 			#read -p "ERROR, did find the string in the file but did not find the line number, identification str =\${identification_str} And filecontent=$(cat $REL_FILEPATH)"
@@ -185,7 +187,7 @@ get_lhs_of_line_till_character() {
 	#read -p "character=$character"
 
 	lhs=$(cut -d "$character" -f1 <<< "$line")
-	echo $lhs
+	echo "$lhs"
 }
 
 # Structure:Parsing
@@ -195,7 +197,7 @@ get_rhs_of_line_till_character() {
 	character=$2
 	
 	rhs=$(cut -d "$character" -f2- <<< "$line")
-	echo $rhs
+	echo "$rhs"
 }
 
 # Structure:gitlab_docker
@@ -210,7 +212,7 @@ get_docker_container_id_of_gitlab_server() {
 	identification_str=$(get_rhs_of_line_till_character "$gitlab_package" "/")
 	
 	# write output to file
-	output=$(sudo docker ps -a > $log_filepath)
+	output=$(sudo docker ps -a | sudo tee "$log_filepath")
 	# Get line with "gitlab/gitlab-ce:latest" (package name depending on architecture).
 	line=$(get_first_line_containing_substring "$log_filepath" "\${identification_str}")
 	#echo "line=$line"
@@ -225,12 +227,12 @@ get_docker_container_id_of_gitlab_server() {
 	    rm "$log_filepath"
 	fi
 	
-	echo $container_id
+	echo "$container_id"
 }
 # Structure:gitlab_docker
 get_docker_image_identifier() {
 	docker_image_name=$1
-	echo $(get_lhs_of_line_till_character "$docker_image_name" "/")
+	echo "$(get_lhs_of_line_till_character "$docker_image_name" "/")"
 }
 
 # Structure:Configuration
@@ -240,8 +242,8 @@ visudo_contains() {
 	visudo_content=$(sudo cat /etc/sudoers)
 	#echo $visudo_content
 	
-	actual_result=$(lines_contain_string "$line" "\${visudo_content}")
-	echo $actual_result
+	actual_result=$(lines_contain_string "$line" "\"${visudo_content}")
+	echo "$actual_result"
 }
 
 # Structure:gitlab_status
@@ -311,7 +313,7 @@ check_for_n_seconds_if_gitlab_server_is_running() {
 	running="false"
 	end=$(("$SECONDS" + "$duration"))
 	while [ $SECONDS -lt $end ]; do
-		if [ $(gitlab_server_is_running | tail -1) == "RUNNING" ]; then
+		if [ "$(gitlab_server_is_running | tail -1)" == "RUNNING" ]; then
 			running="true"
 			echo "RUNNING"; break;
 		fi
@@ -324,16 +326,16 @@ check_for_n_seconds_if_gitlab_server_is_running() {
 
 # Structure:Parsing
 get_nr_of_lines_in_var() {
-	eval lines=$1
+	eval lines="$1"
 	echo "$lines" | wc -l
 }
 
 # Structure:Parsing
 get_last_line_of_set_of_lines() {
-	eval lines=$1
+	eval lines="$1"
 	set -f # disable glob (wildcard) expansion
 	IFS=$'\n' # let's make sure we split on newline chars
-	var=(${lines}) # parse the lines into a variable that is countable
+	var=("${lines}") # parse the lines into a variable that is countable
 	nr_of_lines=${#var[@]}
 	last_line=$(get_line_by_nr_from_variable "$nr_of_lines" "\${lines}")
 	echo "$last_line"
@@ -341,12 +343,13 @@ get_last_line_of_set_of_lines() {
 
 # Structure:gitlab_docker
 docker_image_exists() {
+	# shellcheck disable=SC2034
 	image_name=$1
 	docker_image_identifier=$(get_docker_image_identifier "$gitlab_package")
 	
-	if [ "$(sudo docker ps -q -f name=$docker_image_identifier)" ]; then
+	if [ "$(sudo docker ps -q -f name="$docker_image_identifier")" ]; then
 		echo "YES"
-	elif [ ! "$(sudo docker ps -q -f name=$docker_image_identifier)" ]; then
+	elif [ ! "$(sudo docker ps -q -f name="$docker_image_identifier")" ]; then
 		echo "NO"
 	else
 		echo "ERROR, the docker image was not not found, nor found."
@@ -364,14 +367,14 @@ container_is_running() {
 	docker_image_name=$(get_gitlab_package)
 	
 	# check if the Docker container exists
-	container_exists=$(docker_image_exists $docker_image_name)
+	container_exists=$(docker_image_exists "$docker_image_name")
 	
 	if [ "$container_exists" == "NO" ]; then
 		echo "NOTFOUND"
 	elif [ "$container_exists" == "YES" ]; then
 		# Check if the container is running
 		running_containers_output=$(sudo docker ps --filter status=running)
-		echo $(lines_contain_string "$docker_container_id" "\${running_containers_output}")
+		cmd "$(lines_contain_string "$docker_container_id" "\"${running_containers_output}")"
 	else
 		echo "NOTFOUND"
 	fi
@@ -382,7 +385,7 @@ container_is_running() {
 # TODO: write test for case when apache2 is actually running.
 apache2_is_running() {
 	status=$(sudo service apache2 --status-all)
-	echo $(lines_contain_string "unrecognized service" "\${status}")
+	cmd "$(lines_contain_string "unrecognized service" "\${status}")"
 }
 
 # Structure:status
@@ -391,7 +394,7 @@ apache2_is_running() {
 nginx_is_running() {
 
 	status=$(sudo service nginx --status-all)
-	echo $(lines_contain_string "unrecognized service" "\${status}")
+	cmd "$(lines_contain_string "unrecognized service" "\${status}")"
 }
 
 # Structure:status
@@ -408,7 +411,7 @@ stop_apache_service() {
 #source src/helper.sh && stop_nginx_service
 stop_nginx_service() {
 	services_list=$(systemctl list-units --type=service)
-	if [  "$(lines_contain_string "nginx" "\${services_list}")" == "FOUND" ]; then
+	if [  "$(lines_contain_string "nginx" "\"${services_list}")" == "FOUND" ]; then
 		output=$(sudo service nginx stop)
 		echo "$output"
 	fi
@@ -466,6 +469,7 @@ stop_gitlab_package_docker() {
 	# Remove container if it is running
 	if [ -n "$docker_container_id" ]; then		
 		# Stop Gitlab Docker container
+		# shellcheck disable=SC2034
 		stopped=$(sudo docker stop "$docker_container_id")
 	fi
 }
@@ -483,7 +487,8 @@ remove_gitlab_package_docker() {
 		stop_gitlab_package_docker
 		
 		# Remove_gitlab_package_docker "$docker_container_id"
-		removed=$(sudo docker rm $docker_container_id)
+		# shellcheck disable=SC2034
+		removed=$(sudo docker rm "$docker_container_id")
 	fi
 }
 
@@ -496,7 +501,7 @@ remove_gitlab_docker_containers() {
 	# Remove container if it is running
 	if [ -n "$docker_container_id" ]; then
 	
-		output=$(sudo docker rm -f $docker_container_id)
+		output=$(sudo docker rm -f "$docker_container_id")
 		echo "$output"
 	fi
 }
@@ -509,14 +514,14 @@ remove_gitlab_docker_containers() {
 #+ TODO: Verify the YES command is returned correctly when the GitLab runner is installed.
 gitlab_runner_service_is_installed() {
 	gitlab_runner_service_status=$( { sudo gitlab-runner status; } 2>&1 )
-	if [  "$(lines_contain_string "gitlab-runner: the service is not installed" "\${gitlab_runner_service_status}")" == "FOUND" ]; then
+	if [  "$(lines_contain_string "gitlab-runner: the service is not installed" "\"${gitlab_runner_service_status}")" == "FOUND" ]; then
 		echo "NO"
-	elif [  "$(lines_contain_string "gitlab-runner: service in failed state" "\${gitlab_runner_service_status}")" == "FOUND" ]; then
+	elif [  "$(lines_contain_string "gitlab-runner: service in failed state" "\"${gitlab_runner_service_status}")" == "FOUND" ]; then
 		echo "FAILED_STATE"
-	elif [  "$(lines_contain_string "gitlab-runner: service is installed" "\${gitlab_runner_service_status}")" == "FOUND" ]; then
+	elif [  "$(lines_contain_string "gitlab-runner: service is installed" "\"${gitlab_runner_service_status}")" == "FOUND" ]; then
 		echo "YES"
 	else
-		echo "ERROR, the \n sudo gitlab-runner status\n was not as expected. Please run that command to see what its output is."
+		printf "ERROR, the \n sudo gitlab-runner status\n was not as expected. Please run that command to see what its output is."
 	fi
 }
 
@@ -524,8 +529,9 @@ gitlab_runner_service_is_installed() {
 #source src/helper.sh && get_build_status
 get_build_status() {
 	# load personal_access_token, gitlab username, repository name
-	personal_access_token=$(echo $GITLAB_PERSONAL_ACCESS_TOKEN | tr -d '\r')
-	gitlab_username=$(echo $gitlab_server_account | tr -d '\r')
+	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
+	# shellcheck disable=SC2154
+	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
 	repo_name=$SOURCE_FOLDERNAME
 	
 	sleep 30
@@ -560,7 +566,7 @@ get_build_status() {
 	else
 		expected_substring='"status":"success"'
 		actual_result=$(lines_contain_string "$expected_substring" "\${output}")
-		echo $actual_result
+		echo "$actual_result"
 	fi
 }
 
@@ -606,7 +612,7 @@ sudo_file_exists() {
 create_dir() {
 	abs_dir=$1
 	if [ "$(dir_exists "$abs_dir")" == "NOTFOUND" ]; then
-		mkdir $abs_dir
+		mkdir "$abs_dir"
 	fi
 }
 
@@ -614,7 +620,7 @@ create_dir() {
 remove_dir() {
 	abs_dir=$1
 	if [ "$(dir_exists "$abs_dir")" == "FOUND" ]; then
-		yes | rm -r $abs_dir
+		rm -rf "$abs_dir"
 	fi
 }
 
@@ -622,7 +628,7 @@ remove_dir() {
 sudo_create_dir() {
 	abs_dir=$1
 	if [ "$(sudo_dir_exists "$abs_dir")" == "NOTFOUND" ]; then
-		sudo mkdir $abs_dir
+		sudo mkdir "$abs_dir"
 	fi
 }
 
@@ -636,7 +642,7 @@ docker_sudo_create_dir(){
 	echo "abs_dir=$abs_dir"
 	if [ "$dir_exists" != "FOUND" ]; then
 		echo "Creating dir"
-		$(sudo docker exec -i "$docker_container_id" bash -c "mkdir $abs_dir")
+		sudo docker exec -i "$docker_container_id" bash -c "mkdir $abs_dir"
 	fi
 }
 
@@ -645,7 +651,7 @@ make_user_owner_of_dir() {
 	user=$1
 	dir=$2
 	#sudo chown -R gitlab-runner: $path_to_gitlab_hook_dir
-	sudo chown -R $user: $dir
+	sudo chown -R "$user": "$dir"
 }
 
 # Structure:dir_edit
@@ -661,6 +667,7 @@ is_owner_of_dir() {
 get_array() {
 	json=$1
 	identifier=$2
+	# shellcheck disable=SC2034
 	nr_of_elements=$(echo "$json" | jq 'length')
 	
 	readarray -t commit_array <  <(echo "$json" | jq ".[].$identifier")
@@ -680,8 +687,8 @@ get_array() {
 get_last_space_delimted_item_in_line() {
 	line="$1"
 	IFS=' ' # let's make sure we split on newline chars
-	var=(${lines}) # parse the lines into a variable that is countable
-	stringarray=($line)
+	var=("${lines}") # parse the lines into a variable that is countable
+	stringarray=("$line")
 	echo "${stringarray[-1]}"
 }
 
@@ -700,7 +707,8 @@ github_account_ssh_key_is_added_to_ssh_agent() {
 		count=$((count+1))
 		
 		# Get the username from the ssh key .pub file.
-		local username="$(get_last_space_delimted_item_in_line "$line")"
+		local username
+		username="$(get_last_space_delimted_item_in_line "$line")"
 		
 		if [ "$username" == "$ssh_account" ]; then
 			if [ "$found" == "false" ]; then
@@ -708,7 +716,8 @@ github_account_ssh_key_is_added_to_ssh_agent() {
 				found="true"
 			fi
 		fi
-	done <<< "$activated_ssh_output"
+
+	done <<< "${activated_ssh_output[@]}"
 	if [ "$found" == "false" ]; then
 		echo "NOTFOUND"
 	fi
@@ -719,10 +728,11 @@ github_account_ssh_key_is_added_to_ssh_agent() {
 # tied to that acount.
 any_ssh_key_is_added_to_ssh_agent() {
 	local ssh_account=$1
-	local ssh_output=$(ssh-add -L)
+	local ssh_output
+	ssh_output=$(ssh-add -L)
 	
 	# Check if the ssh key is added to ssh-agent by means of username.
-	found_ssh_username="$(github_account_ssh_key_is_added_to_ssh_agent "$ssh_account" "\${ssh_output}")"
+	found_ssh_username="$(github_account_ssh_key_is_added_to_ssh_agent "$ssh_account" "\"${ssh_output}")"
 	if [[ "$found_ssh_username" == "FOUND" ]]; then
 		echo "FOUND"
 	else
@@ -738,7 +748,7 @@ any_ssh_key_is_added_to_ssh_agent() {
 		else 
 			
 			# Check if the ssh key is added to ssh-agent by means of email.
-			found_ssh_email="$(github_account_ssh_key_is_added_to_ssh_agent "$ssh_email" "\${ssh_output}")"
+			found_ssh_email="$(github_account_ssh_key_is_added_to_ssh_agent "$ssh_email" "\"${ssh_output}")"
 			
 			if [ "$found_ssh_email" == "FOUND" ]; then
 				echo "FOUND"
@@ -753,10 +763,12 @@ any_ssh_key_is_added_to_ssh_agent() {
 # Structure:ssh
 verify_ssh_key_is_added_to_ssh_agent() {
 	local ssh_account=$1
-	local ssh_output=$(ssh-add -L)
-	local ssh_key_in_ssh_agent=$(any_ssh_key_is_added_to_ssh_agent $ssh_account)
+	local ssh_output
+	ssh_output=$(ssh-add -L)
+	local ssh_key_in_ssh_agent
+	ssh_key_in_ssh_agent=$(any_ssh_key_is_added_to_ssh_agent "$ssh_account")
 	if [[ "$ssh_key_in_ssh_agent" == "NOTFOUND_FILE" ]] || [[ "$ssh_key_in_ssh_agent" == "NOTFOUND_EMAIL" ]]; then
-		echo 'Please ensure the ssh-account '$ssh_account' key is added to the ssh agent. You can do that with commands:'"\\n"' eval $(ssh-agent -s)'"\n"'ssh-add ~/.ssh/'$ssh_account''"\n"' Please run this script again once you are done.'
+		printf 'Please ensure the ssh-account '%ssh_account' key is added to the ssh agent. You can do that with commands:'"\\n"" eval $(ssh-agent -s)""\n"'ssh-add ~/.ssh/'$ssh_account''"\n"' Please run this script again once you are done.'
 		exit 28
 	fi
 }
@@ -766,17 +778,20 @@ verify_ssh_key_is_added_to_ssh_agent() {
 get_ssh_email() {
 	local ssh_account=$1
 	
-	local username=$(whoami)
+	local username
+	username=$(whoami)
 	local key_filepath="/home/$username/.ssh/$ssh_account.pub"
 	
 	# Check if file exists.
 	manual_assert_file_exists "$key_filepath"
 	
 	# Read the ssh pub file.
-	local public_ssh_content=$(cat $key_filepath)
+	local public_ssh_content
+	public_ssh_content=$(cat "$key_filepath")
 	
 	# Get email from ssh pub file.
-	local email=$(get_last_space_delimted_item_in_line "$public_ssh_content")
+	local email
+	email=$(get_last_space_delimted_item_in_line "$public_ssh_content")
 	echo "$email"
 }
 
@@ -807,9 +822,9 @@ get_current_gitlab_branch() {
 	if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
 
 		# Verify the branch exists
-		branch_check_result="$(gitlab_branch_exists $gitlab_repo_name $gitlab_branch_name)"
+		branch_check_result="$(gitlab_branch_exists "$gitlab_repo_name" "$gitlab_branch_name")"
 		#echo "branch_check_result=$branch_check_result"
-		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
+		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\"${branch_check_result}")
 		if [ "$last_line_branch_check_result" == "FOUND" ]; then
 			# Get the path before executing the command (to verify it is restored correctly after).
 			pwd_before="$PWD"
@@ -826,7 +841,7 @@ get_current_gitlab_branch() {
 			# then it will not be found, because the git branch -all command, will not recognize
 			# branches yet. So in this case, one can check if one is in the newly created branch
 			# by evaluating the output of git status.
-			current_branch="$(get_current_unborn_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company)"
+			current_branch="$(get_current_unborn_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name" "$company")"
 			if [ "$current_branch" == "$gitlab_branch_name" ]; then
 				echo "$current_branch"
 			else
@@ -860,7 +875,7 @@ get_current_unborn_gitlab_branch() {
 			path_before_equals_path_after_command "$pwd_before" "$pwd_after"
 			
 			#current_unborn_gitlab_branch=$(parse_git_status_to_get_gitlab_branch "$git_status_output")
-			current_unborn_gitlab_branch=$(parse_git_status_to_get_gitlab_branch "\${git_status_output}")
+			current_unborn_gitlab_branch=$(parse_git_status_to_get_gitlab_branch "\"${git_status_output}")
 			
 			echo "$current_unborn_gitlab_branch"
 	else 
@@ -872,7 +887,7 @@ get_current_unborn_gitlab_branch() {
 # Structure:gitlab_status
 # 6.f.1.helper3
 parse_git_status_to_get_gitlab_branch() {
-	eval lines=$1
+	eval lines="$1"
 		
 	# get first line
 	line_nr=1 # lines start at index 1
@@ -881,6 +896,7 @@ parse_git_status_to_get_gitlab_branch() {
 	if [ "${first_line:0:10}" == "On branch " ]; then
 		# TODO: get remainder of first line
 		# TODO: check if the line contains a space or newline character at the end.
+		# shellcheck disable=SC2034
 		len=${#first_line}
 		echo "${first_line:10:${#first_line}}"
 	else
@@ -909,7 +925,7 @@ assert_current_github_branch() {
 	github_branch_name="$2"
 	company="GitHub"
 	
-	actual_result="$(get_current_github_branch $github_repo_name $github_branch_name $company)"
+	actual_result="$(get_current_github_branch "$github_repo_name" "$github_branch_name" $company)"
 	if [ "$actual_result" != "$github_branch_name" ]; then
 		echo "The current GitHub branch does not match the expected GitHub branch:$github_branch_name"
 		exit 171

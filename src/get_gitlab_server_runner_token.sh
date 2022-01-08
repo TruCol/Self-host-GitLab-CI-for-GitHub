@@ -6,7 +6,9 @@ source src/helper.sh
 
 get_gitlab_server_runner_tokenV1() {
 	GITURL="$GITLAB_SERVER_HTTP_URL"
+	# shellcheck disable=SC2154
 	GITUSER="$gitlab_server_account"
+	# shellcheck disable=SC2154
 	GITROOTPWD="$gitlab_server_password"
 	#echo "GITUSER=$GITUSER"
 	#echo "GITROOTPWD=$GITROOTPWD"
@@ -17,7 +19,7 @@ get_gitlab_server_runner_tokenV1() {
 	
 	# grep the auth token for the user login for
 	#   not sure whether another token on the page will work, too - there are 3 of them
-	csrf_token=$(echo $body_header | perl -ne 'print "$1\n" if /new_user.*?authenticity_token"[[:blank:]]value="(.+?)"/' | sed -n 1p)
+	csrf_token=$(echo "$body_header" | perl -ne 'print "$1\n" if /new_user.*?authenticity_token"[[:blank:]]value="(.+?)"/' | sed -n 1p)
 	#echo "csrf_token=$csrf_token"
 	
 	# 2. send login credentials with curl, using cookies and token from previous request
@@ -30,9 +32,9 @@ get_gitlab_server_runner_tokenV1() {
 	
 	if [ "$body_header" == "" ]; then
 		get_registration_token_with_python
-		reg_token=$(cat $RUNNER_REGISTRATION_TOKEN_FILEPATH)
+		reg_token=$(cat "$RUNNER_REGISTRATION_TOKEN_FILEPATH")
 	else
-		reg_token=$(cat "$LOG_LOCATION"gitlab-header.txt | perl -ne 'print "$1\n" if /code id="registration_token">(.+?)</' | sed -n 1p)
+		reg_token=$(cmd < "$LOG_LOCATION"gitlab-header.txt | perl -ne 'print "$1\n" if /code id="registration_token">(.+?)</' | sed -n 1p)
 		echo "$reg_token" > "$RUNNER_REGISTRATION_TOKEN_FILEPATH"
 	fi
 	if [ "$reg_token" == "" ]; then
@@ -53,7 +55,7 @@ get_gitlab_server_runner_tokenV0() {
 	
 	# grep the auth token for the user login for
 	#   not sure whether another token on the page will work, too - there are 3 of them
-	csrf_token=$(echo $body_header | perl -ne 'print "$1\n" if /new_user.*?authenticity_token"[[:blank:]]value="(.+?)"/' | sed -n 1p)
+	csrf_token=$(echo "$body_header" | perl -ne 'print "$1\n" if /new_user.*?authenticity_token"[[:blank:]]value="(.+?)"/' | sed -n 1p)
 	
 	# 2. send login credentials with curl, using cookies and token from previous request
 	curl -sS -k -b gitlab-cookies.txt -c gitlab-cookies.txt "${GITURL}/users/sign_in" \
@@ -62,8 +64,8 @@ get_gitlab_server_runner_tokenV0() {
 	
 	# 3. send curl GET request to gitlab runners page to get registration token
 	body_header=$(curl -sS -k -H 'user-agent: curl' -b gitlab-cookies.txt "${GITURL}/admin/runners" -o gitlab-header.txt)
-	reg_token=$(cat gitlab-header.txt | perl -ne 'print "$1\n" if /code id="registration_token">(.+?)</' | sed -n 1p)
-	echo $reg_token
+	reg_token=$(cmd < gitlab-header.txt | perl -ne 'print "$1\n" if /code id="registration_token">(.+?)</' | sed -n 1p)
+	echo "$reg_token"
 	# TODO: restore the functionality of this method!
 	#echo "sPgAnNea3WxvTRsZN5hB"
 }
@@ -76,13 +78,14 @@ get_registration_token_with_python() {
 	fi
 	
 	# Check if the repository exists
-	$(download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON")
+	download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
 	
 	
 	# TODO: turn batch_copy_issues into variable
-	conda_environments=$(conda env list) 
+	# shellcheck disable=SC2034
+	conda_environments=$(conda env list)
 	
-	if [ $(lines_contain_string "$CONDA_ENVIRONMENT_NAME" "\${conda_environments}") == "FOUND" ]; then
+	if [ "$(lines_contain_string "$CONDA_ENVIRONMENT_NAME" "\${conda_environments}")" == "FOUND" ]; then
 		#cd get-gitlab-runner-registration-token && conda activate batch_copy_issues && python -m code.project1.src
 		#cd get-gitlab-runner-registration-token && conda activate "batch_copy_issues" && python -m code.project1.src
 		#cd get-gitlab-runner-registration-token && conda activate base && conda activate batch_copy_issues && python -m code.project1.src

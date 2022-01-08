@@ -25,12 +25,14 @@ github_repo=$2
 verbose=$3
 
 # Get GitLab username.
+# shellcheck disable=SC2154
 gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
 
 # Get GitLab user password.
 gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')
 
 # Get GitLab personal access token from hardcoded file.
+# shellcheck disable=SC2153
 gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 
 # Specify GitLab mirror repository name.
@@ -69,7 +71,8 @@ verify_github_repository_is_cloned() {
 	
 	found_repo=$(dir_exists "$target_directory")
 	if [ "$found_repo" == "NOTFOUND" ]; then
-		echo "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
+		# shellcheck disable=SC2059
+		printf "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
 		exit 11
 	elif [ "$found_repo" == "FOUND" ]; then
 		echo "FOUND"
@@ -180,7 +183,7 @@ get_current_github_branch() {
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
 		# Verify the branch exists
-		branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
+		branch_check_result="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
 		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
 		if [ "$last_line_branch_check_result" == "FOUND" ]; then
 		
@@ -219,7 +222,7 @@ get_current_github_branch_commit() {
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
 		# Verify the branch exists
-		branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
+		branch_check_result="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
 		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
 		if [ "$last_line_branch_check_result" == "FOUND" ]; then
 		
@@ -315,6 +318,7 @@ verify_github_branch_contains_gitlab_yaml() {
 # source src/import.sh src/helper_github_status.sh && get_org_repos "hiveminds"
 # source src/import.sh src/helper_github_status.sh && get_org_repos "a-t-0"
 get_org_repos() {
+	# shellcheck disable=SC2178
 	local -n arr=$1 # use nameref for indirection
 	local github_organisation_or_username="$2"
 	
@@ -323,7 +327,7 @@ get_org_repos() {
 	# get GitHub personal access token or verify ssh access to support private repositories.
 	github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 	
-	theoutput=$(curl -H "Authorization: token $github_personal_access_code" "Accept: application/vnd.github.v3+json" https://api.github.com/users/${github_organisation_or_username}/repos?per_page=100 | jq -r '.[] | .name')
+	theoutput=$(curl -H "Authorization: token $github_personal_access_code" "Accept: application/vnd.github.v3+json" https://api.github.com/users/"${github_organisation_or_username}"/repos?per_page=100 | jq -r '.[] | .name')
 	
 	# Parse branches from branch list response
 	while IFS= read -r line; do
@@ -342,5 +346,6 @@ get_org_repos() {
 initialise_github_repositories_array() {
 	local github_organisation_or_username="$1"
 	get_org_repos github_repositories "$github_organisation_or_username" # call function to populate the array
+	# shellcheck disable=SC2154
 	declare -p github_repositories
 }

@@ -28,12 +28,14 @@ github_personal_access_code=$3
 verbose=$4
 
 # Get GitLab username.
+# shellcheck disable=SC2154
 gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
 
 # Get GitLab user password.
 gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')
 
 # Get GitLab personal access token from hardcoded file.
+# shellcheck disable=SC2153
 gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 
 # Specify GitLab mirror repository name.
@@ -56,6 +58,7 @@ fi
 initialise_github_branches_array() {
 	github_repo=$1
 	get_git_branches github_branches "GitHub" "$github_repo"      # call function to populate the array
+	# shellcheck disable=SC2154
 	declare -p github_branches
 }
 
@@ -64,6 +67,7 @@ initialise_github_branches_array() {
 initialise_gitlab_branches_array() {
 	gitlab_repo=$1
 	get_git_branches gitlab_branches "GitLab" "$gitlab_repo"      # call function to populate the array
+	# shellcheck disable=SC2154
 	declare -p gitlab_branches
 }
 

@@ -15,23 +15,27 @@ yes | sudo apt install jq
 yes | sudo apt install xclip
 
 # Read from which repository and branch one would like to push the build status
+# shellcheck disable=SC2034
 github_username=$1
 desired_repository=$2
 desired_branch=$3
 has_access=$4
 
 # load personal_access_token, gitlab username, repository name
-personal_access_token=$(echo $GITLAB_PERSONAL_ACCESS_TOKEN | tr -d '\r')
-gitlab_username=$(echo $gitlab_server_account | tr -d '\r')
+personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
+# shellcheck disable=SC2154
+gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
 
 # Clone the build-status-website repository from GitHub.
 # Note the github user here is not the owner of the repo on which the CI is ran, but the owner of the github build-status-website repository (which is hardcoded, hence capitalised).
 # TODO: verify bash recognises difference between capitalised and non-captialised variables.
+# shellcheck disable=SC2153
 clone_github_repository "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE" "$has_access" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE"
 
 
 # Get a list of the repositories in your own local GitLab server (that runs the GitLab runner CI).
 repositories=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
+# shellcheck disable=SC2034
 readarray -t repo_arr <  <(echo "$repositories" | jq ".[].path")
 #echo "repo_arr =${repo_arr[@]}"
 
@@ -47,14 +51,14 @@ get_and_export_build_status_to_github_build_status_website_repo() {
 	pipelines=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repository_name/pipelines")
 	
 	# get build status from pipelines
-	job=$(echo $pipelines | jq -r 'map(select(.sha == "'"$branch_commit"'"))')
-	status=$(echo "$(echo $job | jq ".[].status")" | tr -d '"')
+	job=$(echo "$pipelines" | jq -r 'map(select(.sha == "'"$branch_commit"'"))')
+	status=$(cmd "$(echo "$job" | jq ".[].status")" | tr -d '"')
 		
 	# Create a folder of the repository on which a CI has been ran, inside the GitHub build status website repository, if it does not exist yet
 	# Also add a folder for the branch(es) of that GitLab CI repository, in that respective folder.
 	
-	mkdir -p "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch_name"
-	read -p "branch_name=$branch_name,status=$status"
+	mkdir -p "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE/$repository_name/$branch_name"
+	read -rp "branch_name=$branch_name,status=$status"
 	
 	# Create build status icon
 	if [  "$status" == "pending" ] || [ "$status" == "running" ]; then
@@ -62,13 +66,13 @@ get_and_export_build_status_to_github_build_status_website_repo() {
 		sleep 10
 		get_and_export_build_status_to_github_build_status_website_repo "$1" "$2" "$3"
 	elif [  "$status" == "passed" ]; then
-		cp "src/svgs/passed.svg" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch_name""/build_status.svg"
+		cp "src/svgs/passed.svg" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE/$repository_name/$branch_name""/build_status.svg"
 	elif [  "$status" == "failed" ]; then
-		cp "src/svgs/failed.svg" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch_name""/build_status.svg"
+		cp "src/svgs/failed.svg" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE/$repository_name/$branch_name""/build_status.svg"
 	elif [  "$status" == "error" ]; then
-		cp "src/svgs/error.svg" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch_name""/build_status.svg"
+		cp "src/svgs/error.svg" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE/$repository_name/$branch_name""/build_status.svg"
 	elif [  "$status" == "unknown" ]; then
-		cp "src/svgs/unknown.svg" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE"/"$repository_name"/"$branch_name""/build_status.svg"
+		cp "src/svgs/unknown.svg" "$MIRROR_LOCATION/$GITHUB_STATUS_WEBSITE/$repository_name/$branch_name""/build_status.svg"
 	fi
 	
     # Assert the build status is exported correctly.

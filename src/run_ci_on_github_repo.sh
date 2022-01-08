@@ -42,6 +42,27 @@ if [ "$verbose" == "TRUE" ]; then
 	echo "gitlab_repo=$gitlab_repo"
 fi
 
+# source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "hiveminds"
+# source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "a-t-0"
+# Make a list of the repositories in the GitHub repository.
+initialise_github_repositories_array() {
+	local github_organisation_or_username="$1"
+	get_org_repos github_repositories "$github_organisation_or_username" # call function to populate the array
+	declare -p github_repositories
+}
+
+# source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user "hiveminds"
+# source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user "a-t-0"
+run_ci_on_all_repositories_of_user(){
+	local github_organisation_or_username="$1"
+	
+	initialise_github_repositories_array "$github_organisation_or_username"
+	
+	for github_repository in "${github_repositories[@]}"; do
+		echo "$github_repository"
+		run_ci_on_github_repo "$github_organisation_or_username" "$github_repository"
+	done
+}
 
 # run with:
 # source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo "a-t-0" "sponsor_example"

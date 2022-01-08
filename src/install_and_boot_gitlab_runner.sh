@@ -46,6 +46,7 @@ get_runner_package() {
 	# Download GitLab runner installer package if it is not yet found
 	if [ "$(check_md5_sum "$expected_checksum" "gitlab-runner_${arch}.deb")" != "EQUAL" ]; then
 		# install curl
+		# shellcheck disable=SC2034
 		install_curl=$(yes | sudo apt install curl)
 		# TODO: write test to verifiy output install curl command.
 		
@@ -101,7 +102,7 @@ register_gitlab_runner() {
 	get_gitlab_server_runner_tokenV1
 	
 	# runner_token=$(get_last_line_of_set_of_lines "\${output}") # python code output is given after last echo in shell, so read it from file instead of from output
-	runner_token=$(cat $RUNNER_REGISTRATION_TOKEN_FILEPATH)
+	runner_token=$(cat "$RUNNER_REGISTRATION_TOKEN_FILEPATH")
 	
 	# TODO: delete plain text registration token after reading.
 	echo "runner_token=$runner_token""nonewlines"
@@ -155,10 +156,10 @@ install_gitlab_runner_service() {
 	if [  "$(lines_contain_string "$RUNNER_USERNAME" "\${user_list}")" == "NOTFOUND" ]; then
 		if [  "$(gitlab_runner_service_is_installed)" == "NO" ]; then
 			#sudo gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab_runner
-			sudo gitlab-runner install --user=$RUNNER_USERNAME --working-directory=/home/$RUNNER_USERNAME
+			sudo gitlab-runner install --user="$RUNNER_USERNAME" --working-directory=/home/"$RUNNER_USERNAME"
 		fi
 	fi
-	sudo usermod -a -G sudo $RUNNER_USERNAME
+	sudo usermod -a -G sudo "$RUNNER_USERNAME"
 	# TODO: determine why this folder should be removed after installing the service (instead of before).
 	#$(sudo rm -r /home/$RUNNER_USERNAME/.*)
 	

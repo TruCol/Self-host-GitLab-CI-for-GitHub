@@ -21,14 +21,14 @@ uninstall_gitlab_server() {
 	
 	# Start stopping, removing and uninstalling GitLab server.
 	stop_docker
-	stop_gitlab_package_docker $gitlab_package
-	remove_gitlab_package_docker $gitlab_package
+	stop_gitlab_package_docker "$gitlab_package"
+	remove_gitlab_package_docker "$gitlab_package"
 	remove_gitlab_docker_containers
 	
 	# Uninstall docker if an explicit argument for uninstallation is passed. 
 	if [ "$is_docker_uninstall" == true ]; then
-		$(uninstall_docker)
-		$(uninstall_docker_compose)
+		uninstall_docker
+		uninstall_docker_compose
 	fi
 	stop_apache_service
 	stop_nginx_service
@@ -52,7 +52,7 @@ uninstall_docker_compose() {
 
 
 delete_gitlab_folder() {
-	sudo rm -r $GITLAB_HOME
+	sudo rm -r "$GITLAB_HOME"
 }
 ## Trouble shooting
 # If it returns:

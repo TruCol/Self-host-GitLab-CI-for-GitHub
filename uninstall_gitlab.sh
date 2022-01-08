@@ -14,7 +14,7 @@ print_usage() {
   printf "you can also combine the separate arguments in different orders, e.g. -r -y etc.\n\n"
 }
 
-while getopts 'shyr' flag; do
+while getopts 'phyr' flag; do
   case "${flag}" in
     p) server_preserve_flag='true' ;;
     h) server_hard_flag='true' ;;
@@ -53,7 +53,7 @@ if [ "$server_preserve_flag" == "true" ]; then
 fi
 
 if [ "$server_hard_flag" == "true" ] && [ "$server_hard_yes_flag" == "false" ]; then
-	read -p "Do you wish to uninstall GitLab and remove all its repositories, issues, users and server settings?" yn
+	read -rp "Do you wish to uninstall GitLab and remove all its repositories, issues, users and server settings?" yn
 	case $yn in
 		[Yy]* ) uninstall_gitlab_server "true";;
 		[Nn]* ) echo "The GitLab server was NOT uninstalled"; exit 0;;

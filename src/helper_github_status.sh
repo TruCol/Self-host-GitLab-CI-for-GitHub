@@ -336,11 +336,3 @@ get_org_repos() {
 }
 
 
-# source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "hiveminds"
-# source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "a-t-0"
-# Make a list of the repositories in the GitHub repository.
-initialise_github_repositories_array() {
-	local github_organisation_or_username="$1"
-	get_org_repos github_repositories "$github_organisation_or_username" # call function to populate the array
-	declare -p github_repositories
-}

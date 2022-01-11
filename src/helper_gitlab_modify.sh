@@ -656,8 +656,21 @@ push_changes() {
 
 
 # Structure:gitlab_modify
-# source src/run_ci_job.sh && export_repo
-# Write function that exportis the test-repository to a separate external folder.
+#######################################
+# Checks if the target folder already exist and then deletes it.  
+# How to run:
+#  source src/run_ci_job.sh && export_rep
+# Local variables:
+#  None
+# Globals:
+#  SOURCE_FOLDERNAME
+# Arguments:
+#  None
+# Returns:
+#  0 if funciton was evaluated succesfull.
+# Outputs:
+#  None.
+#######################################
 delete_target_folder() {
   # check if target folder already exists
   # delete target folder if it already exists
@@ -669,9 +682,46 @@ delete_target_folder() {
 }
 
 
-#TODO:
 # Structure:gitlab_modify
 # 6.k Commit the GitLab branch changes, with the sha from the GitHub branch.
+#######################################
+# First checks if the GitHub repository exist. Then checks locally if the 
+# GitHub branch and yaml file exist. Afterwards, GitLab is checked for existing
+# repository and branch. Once checked, the local GitHub branch files are copied 
+# to GitLab branch. At the end the files are verified if they were correctly 
+# copied from GitHub branch to GitLab branch  by comparing the paths before and
+#  after the function was executed. If not, an  error is thrown.    
+# Local variables:
+#  github_repo_name
+#  github_branch_name
+#  github_commit_sha
+#  gitlab_repo_name
+#  gitlab_branch_name
+#  github_branch_check_result
+#  last_line_github_branch_check_result
+#  filepath
+#  found_branch_name
+# Globals:
+#  MIRROR_LOCATION
+# Arguments:
+#  None
+# Returns:
+#  0 if funciton was evaluated succesfull.
+#  11 if the content in the GitHub branch is not exactly copied into the 
+#  GitLab branch, even when excluding the .git directory.
+#  12 if the GitLab branch does not exist locally.
+#  13 if the GitLab repository does not exist locally.
+#  14 if the GitHub branch does contain a yaml file.
+#  24 if the GitHub branch does not exist locally.
+#  25 if the GitHub repository does not exist locally.
+# Outputs:
+#  None.
+# TODO (a-t-0): Verify the changes were committed to GitLab correctly.(There
+# are no remaining files to be added)
+# TODO (a-t-0): Verify the changes were committed to GitLab correctly.(There 
+# commit message equals the sha)
+#######################################
+delete_target_folder() {
 commit_changes_to_gitlab() {
   local github_repo_name="$1"
   local github_branch_name="$2"

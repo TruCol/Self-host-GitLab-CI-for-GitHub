@@ -386,7 +386,7 @@ delete_gitlab_repository_if_it_exists() {
 
 
 #######################################
-# Checks if repository exists in the GitLab server and deletes it. Otherwise an  
+# Checks if repository exists in the GitLab server and deletes it. Otherwise, an  
 # error is shown.
 # How to run:
 #  source src/import.sh src/helper_gitlab_modify.sh && delete_existing_repository 
@@ -425,7 +425,6 @@ delete_existing_repository() {
 }
 
 
-# TODO: rename to clone_gitlab_repository_from _local_server
 #######################################
 # Clones the GitLab repository into the GitLab mirror storage location.
 # How to run:
@@ -449,6 +448,8 @@ delete_existing_repository() {
 #  None.
 # Outputs:
 #  None.
+# TODO (a-t-0): write test to verify the gitlab username and server don't end with a spacebar character.
+# TODO (a-t-0): rename to clone_gitlab_repository_from _local_server.
 #######################################
 clone_repository() {
   local repo_name=$1
@@ -463,8 +464,36 @@ clone_repository() {
   output=$(cd "$target_directory" && git clone http://$gitlab_username:$gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
 }
 
+
 # Structure:gitlab_modify
 # 6.f.0 Checkout that branch in the local GitHub mirror repository.
+#######################################
+# Checks if a GitHub repository exists locally. If so, the branch path is 
+# verified before and after the command has been executed to check if the
+# branch path has changed. if the path has changed, an error is shown.
+# Local variables:
+#  github_repo_name
+#  github_branch_name
+#  company
+#  pwd_before
+#  pwd_after
+# Globals:
+#  MIRROR_LOCATION
+# Arguments:
+#  The GitHub repository name.
+#  The GitHub branch name.
+#  The company.
+#  The path before the iniziation of a function.
+#  The path after the iniziation of a function.
+# Returns:
+#  0 if funciton was evaluated succesfull.
+#  15 if the current path was not returned to what it origally was before the function 
+#  was activated.
+#  16 if the GitHub branch did not exist locally before the function started.
+#  172 if the GitHub repository did not exist locally before the function started.
+# Outputs:
+#  None.
+#######################################
 checkout_branch_in_github_repo() {
   local github_repo_name="$1"
   local github_branch_name="$2"
@@ -478,15 +507,18 @@ checkout_branch_in_github_repo() {
     if [ "$last_line_branch_check_result" == "FOUND" ]; then
 
       # Get the path before executing the command (to verify it is restored correctly after).
-      pwd_before="$PWD"
+      local pwd_before
+	  pwd_before="$PWD"
 
       # Checkout the branch inside the repository.
       cd "$MIRROR_LOCATION/$company/$github_repo_name" && git checkout "$github_branch_name"
       cd ../../../..
       # Get the path after executing the command (to verify it is restored correctly after).
-      pwd_after="$PWD"
+      local pwd_after
+	  pwd_after="$PWD"
 
-      # Test to verify the current branch in the GitHub repository is indeed checked out.
+      # Test to verify the current 
+	  branch in the GitHub repository is indeed checked out.
       # TODO: check if this passes
       assert_current_github_branch "$github_repo_name" "$github_branch_name"
 
@@ -508,11 +540,36 @@ checkout_branch_in_github_repo() {
   fi
 }
 
+
 # Structure:gitlab_modify
 # assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
 # 6.h.1 Checkout that branch in the local GitLab mirror repository if it exists.
 # 6.h.2 If the branch does not exist in the GitLab repo, create it.
 # 6.h.0 Checkout that branch in the local GitLab mirror repository. (Assuming the GitHub branch contains a gitlab yaml file)
+#######################################
+# Checks if the desired branch exists in GitLab. Afterwards, the path before 
+# and after the function has started to verify if the path is restored correctly.  
+# If a branch is not found in the repository a nw one is created
+# Local variables:
+#  github_repo_name
+#  github_branch_name
+#  company
+#  pwd_before
+#  pwd_after
+# Globals:
+#  MIRROR_LOCATION
+# Arguments:
+#  The GitHub repository name.
+#  The GitHub branch name.
+#  The company.
+#  The path before the iniziation of a function.
+#  The path after the iniziation of a function.
+# Returns:
+#  0 if funciton was evaluated succesfull.
+#  20 if the GitLab repository didn't exist locally.
+# Outputs:
+#  None.
+#######################################
 checkout_branch_in_gitlab_repo() {
   local gitlab_repo_name="$1"
   local gitlab_branch_name="$2"
@@ -565,7 +622,28 @@ checkout_branch_in_gitlab_repo() {
   fi
 }
 
-# Structure:gitlab_modify
+
+#######################################
+# Pushes the changes to the target directory in the GitLab server.
+# Local variables:
+#  repo_name
+#  gitlab_username
+#  gitlab_server_password
+#  gitlab_server
+#  target_directory
+# Globals:
+#  None
+# Arguments:
+#  The name of the repository.
+#  The GitLab username.
+#  The GitLab server password.
+#  The GitLab server.
+#  The targer directory.
+# Returns:
+#  0 if funciton was evaluated succesfull.
+# Outputs:
+#  None.
+#######################################
 push_changes() {
   local repo_name=$1
   local gitlab_username=$2
@@ -575,6 +653,7 @@ push_changes() {
 
   output=$(cd "$target_directory" && git push http://$gitlab_username:$gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
 }
+
 
 # Structure:gitlab_modify
 # source src/run_ci_job.sh && export_repo
@@ -588,6 +667,7 @@ delete_target_folder() {
   # create target folder
   # copy source folder to target
 }
+
 
 #TODO:
 # Structure:gitlab_modify
@@ -688,7 +768,7 @@ commit_changes_to_gitlab() {
 # a GitLab  yaml file, the code checks if a GitLab repository and branch exist.
 # Then files and folders are copied from GitHub to GitLab. Afterwards, the files 
 # and folders are verified if they are identical. At the end the changes are 
-# pushed  to Gitlab and verified.Errors are thrown if one of the steps cannot 
+# pushed  to Gitlab and verified. Errors are thrown if one of the steps cannot 
 # be completed.
 # Local variables:
 #  github_repo_name

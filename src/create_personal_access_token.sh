@@ -7,10 +7,10 @@ source src/helper.sh
 gitlab_host=$GITLAB_SERVER_HTTP_URL
 # shellcheck disable=SC2154
 # shellcheck disable=SC2034
-gitlab_user=$gitlab_server_account
+gitlab_user=$GITLAB_SERVER_ACCOUNT
 # shellcheck disable=SC2154
 # shellcheck disable=SC2034
-gitlab_password=$gitlab_server_password
+gitlab_password=$GITLAB_SERVER_PASSWORD
 
 
 # Get shared registration token:
@@ -25,7 +25,7 @@ create_gitlab_personal_access_token() {
 	docker_container_id=$(get_docker_container_id_of_gitlab_server)
 	# trim newlines
 	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 	token_name=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME" | tr -d '\r')
 	
 	# Source: https://gitlab.example.com/-/profile/personal_access_tokens?name=Example+Access+token&scopes=api,read_user,read_registry

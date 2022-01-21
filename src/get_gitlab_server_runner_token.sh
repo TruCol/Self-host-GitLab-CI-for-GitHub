@@ -7,9 +7,9 @@ source src/helper.sh
 get_gitlab_server_runner_tokenV1() {
 	GITURL="$GITLAB_SERVER_HTTP_URL"
 	# shellcheck disable=SC2154
-	GITUSER="$gitlab_server_account"
+	GITUSER="$GITLAB_SERVER_ACCOUNT"
 	# shellcheck disable=SC2154
-	GITROOTPWD="$gitlab_server_password"
+	GITROOTPWD="$GITLAB_SERVER_PASSWORD"
 	#echo "GITUSER=$GITUSER"
 	#echo "GITROOTPWD=$GITROOTPWD"
 	
@@ -47,8 +47,8 @@ get_gitlab_server_runner_tokenV1() {
 
 get_gitlab_server_runner_tokenV0() {
 	export GITURL="$GITLAB_SERVER_HTTP_URL"
-	export GITUSER="$gitlab_server_account"
-	export GITROOTPWD="$gitlab_server_password"
+	export GITUSER="$GITLAB_SERVER_ACCOUNT"
+	export GITROOTPWD="$GITLAB_SERVER_PASSWORD"
 	
 	# 1. curl for the login page to get a session cookie and the sources with the auth tokens
 	body_header=$(curl -k -c gitlab-cookies.txt -i "${GITURL}/users/sign_in" -sS)
@@ -115,8 +115,8 @@ download_repository() {
 
 get_gitlab_server_runner_tokenV2() {
 	GITURL="$GITLAB_SERVER_HTTP_URL"
-	GITUSER="$gitlab_server_account"
-	GITROOTPWD="$gitlab_server_password"
+	GITUSER="$GITLAB_SERVER_ACCOUNT"
+	GITROOTPWD="$GITLAB_SERVER_PASSWORD"
 	
 	# 1. curl for the login page to get a session cookie and the sources with the auth tokens
 	body_header=$(curl -k -c gitlab-cookies.txt -i "${GITURL}/users/sign_in" -sS)
@@ -142,9 +142,9 @@ get_gitlab_server_runner_tokenV3() {
 	source src/hardcoded_variables.txt
 	export GITURL="$GITLAB_SERVER_HTTP_URL"
 	#read  -p "GITURL=$GITURL"
-	export GITUSER="$gitlab_server_account"
+	export GITUSER="$GITLAB_SERVER_ACCOUNT"
 	#read  -p "GITUSER=$GITUSER"
-	export GITROOTPWD="$gitlab_server_password"
+	export GITROOTPWD="$GITLAB_SERVER_PASSWORD"
 	#read  -p "GITROOTPWD=$GITROOTPWD"
 	
 	# 1. curl for the login page to get a session cookie and the sources with the auth tokens

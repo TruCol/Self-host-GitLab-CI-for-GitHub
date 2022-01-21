@@ -103,7 +103,7 @@ setup() {
 	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
 	
 	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT" "$gitlab_repo_name"
 	
 	# Checkout branch, if branch is found in local Gitlab repo.
 	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
@@ -121,7 +121,7 @@ setup() {
 
 # TODO verify consistent usage of gitlab_repo_name and PUBLIC_GITHUB_TEST_REPO
 @test "Test whether an empty repository is created, regardless of whether it already existed or not." {
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	# Create the empty GitLab repository.
@@ -133,7 +133,7 @@ setup() {
 }
 
 @test "Test whether an empty repository is created with create_empty_repository_v0, if it did not exist in advance." {
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	# Check if the GitLab repository exists.
@@ -163,7 +163,7 @@ setup() {
 }
 
 @test "Test whether an empty repository is created with create_gitlab_repository_if_not_exists, if it did not exist in advance." {
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	# Check if the GitLab repository exists.
@@ -197,7 +197,7 @@ setup() {
 # the repository still contains the file (meaning no new empty repo is created).
 
 @test "Test whether a repository is deleted if it exists." {
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	# Check if the GitLab repository exists.
@@ -224,7 +224,7 @@ setup() {
 }
 
 @test "Test whether deleting a repository that does not exist does not yield an error with delete_gitlab_repository_if_it_exists." {
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	# Check if the GitLab repository exists.
@@ -252,7 +252,7 @@ setup() {
 }
 
 @test "Test whether deleting a repository that does not exist throws an error." {
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	# Check if the GitLab repository exists.
@@ -299,7 +299,7 @@ setup() {
 	company="GitLab"
 	
 	# Get GitLab default username.
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	# Delete GitLab repo from server
@@ -354,7 +354,7 @@ setup() {
 	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
 	
 	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT" "$gitlab_repo_name"
 	
 	# Checkout branch, if branch is found in local Gitlab repo.
 	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
@@ -388,7 +388,7 @@ setup() {
 	company="GitLab"
 	
 	# Get GitLab default username.
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	# Delete GitLab repo from server
@@ -440,7 +440,7 @@ setup() {
 	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
 	
 	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT" "$gitlab_repo_name"
 	
 	# Checkout branch, if branch is found in local Gitlab repo.
 	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"

@@ -531,7 +531,7 @@ get_build_status() {
 	# load personal_access_token, gitlab username, repository name
 	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 	# shellcheck disable=SC2154
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 	repo_name=$SOURCE_FOLDERNAME
 	
 	sleep 30

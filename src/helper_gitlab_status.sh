@@ -29,7 +29,7 @@ verbose=$4
 
 # Get GitLab username.
 # shellcheck disable=SC2154
-gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 
 # Get GitLab user password.
 gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')

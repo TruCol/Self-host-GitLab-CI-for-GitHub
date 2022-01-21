@@ -1,7 +1,7 @@
-gitlab_server_account=root
+GITLAB_SERVER_ACCOUNT=root
 # notice the password is currently hardcoded in src/install_and_boot_gitlab_server.sh
-gitlab_server_password=yoursecretpassword
+GITLAB_SERVER_PASSWORD=yoursecretpassword
 GITLAB_ROOT_EMAIL=root@someemailprovider.com
 GITLAB_PERSONAL_ACCESS_TOKEN=somelongpersonalaccesscode3
 GITHUB_PERSONAL_ACCESS_TOKEN=somegithubtoken
-gitlab_website_url="http://127.0.0.1"
+GITLAB_WEBSITE_URL="http://127.0.0.1"

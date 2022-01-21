@@ -24,7 +24,7 @@ has_access=$4
 # load personal_access_token, gitlab username, repository name
 personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 # shellcheck disable=SC2154
-gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 
 # Clone the build-status-website repository from GitHub.
 # Note the github user here is not the owner of the repo on which the CI is ran, but the owner of the github build-status-website repository (which is hardcoded, hence capitalised).

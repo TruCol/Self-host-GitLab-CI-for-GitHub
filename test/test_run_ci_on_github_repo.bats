@@ -186,7 +186,7 @@ setup() {
 	github_branch_name="main"
 	
 	# Get GitLab username.
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 	
 	# Get GitLab personal access token from hardcoded file.
 	gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
@@ -216,7 +216,7 @@ setup() {
 	github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 	
 	# Get GitLab username.
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 	
 	# Get GitLab personal access token from hardcoded file.
 	gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
@@ -257,7 +257,7 @@ setup() {
 	github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 	
 	# Get GitLab username.
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 	
 	# Get GitLab personal access token from hardcoded file.
 	gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')

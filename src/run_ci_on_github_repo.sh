@@ -19,10 +19,10 @@ github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 
 # Get GitLab username.
 # shellcheck disable=SC2154
-gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 
 # Get GitLab user password.
-gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')
+GITLAB_SERVER_PASSWORD=$(echo "$GITLAB_SERVER_PASSWORD" | tr -d '\r')
 
 # Get GitLab personal access token from hardcoded file.
 # shellcheck disable=SC2153
@@ -37,7 +37,7 @@ if [ "$verbose" == "TRUE" ]; then
 	echo "github_repo=$github_repo"
 	echo "github_personal_access_code=$github_personal_access_code"
 	echo "gitlab_username=$gitlab_username"
-	echo "gitlab_server_password=$gitlab_server_password"
+	echo "GITLAB_SERVER_PASSWORD=$GITLAB_SERVER_PASSWORD"
 	echo "gitlab_personal_access_token=$gitlab_personal_access_token"
 	echo "gitlab_repo=$gitlab_repo"
 fi
@@ -189,7 +189,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 	
 	# Get GitLab username.
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 	
 	# Get GitLab server url from credentials file.
 	gitlab_website_url=$(echo "$gitlab_website_url" | tr -d '\r')
@@ -207,7 +207,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
 	
 	# 5.2 Clone the empty Gitlab repo from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT" "$gitlab_repo_name"
 	
 	# 5.3 Check if the GitLab branch exists, if not, create it.
 	# 5.4 Check out the GitLab branch
@@ -305,7 +305,7 @@ rebuild_get_gitlab_ci_build_status() {
 	gitlab_branch_name="$github_branch_name"
 	
 	# Get GitLab username.
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 
 	
 	

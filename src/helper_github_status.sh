@@ -24,12 +24,6 @@ github_repo=$2
 
 verbose=$3
 
-# Get GitLab username.
-# shellcheck disable=SC2154
-gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
-
-# Get GitLab user password.
-gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')
 
 # Get GitLab personal access token from hardcoded file.
 # shellcheck disable=SC2153
@@ -43,8 +37,6 @@ if [ "$verbose" == "TRUE" ]; then
 	echo "github_username=$github_username"
 	echo "github_repo=$github_repo"
 	echo "github_personal_access_code=$github_personal_access_code"
-	echo "gitlab_username=$gitlab_username"
-	echo "gitlab_server_password=$gitlab_server_password"
 	echo "gitlab_personal_access_token=$gitlab_personal_access_token"
 	echo "gitlab_repo=$gitlab_repo"
 fi

@@ -48,28 +48,28 @@ download_github_repo_on_which_to_run_ci() {
 	# 1. Clone the GitHub repo.
 	# Delete GitHub repo at start of test.
 	remove_mirror_directories
-	manual_assert_not_equal "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" ""
-	manual_assert_dir_not_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
-	manual_assert_dir_not_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub"
-	manual_assert_dir_not_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab"
+	manual_assert_not_equal "$MIRROR_LOCATION" ""
+	manual_assert_dir_not_exists "$MIRROR_LOCATION"
+	manual_assert_dir_not_exists "$MIRROR_LOCATION/GitHub"
+	manual_assert_dir_not_exists "$MIRROR_LOCATION/GitLab"
 	
 	# Create mmirror directories
 	create_mirror_directories
 	# TODO: replace asserts with functions
-	manual_assert_not_equal "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" ""
-	manual_assert_dir_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
-	manual_assert_dir_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub"
-	manual_assert_dir_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab"
+	manual_assert_not_equal "$MIRROR_LOCATION" ""
+	manual_assert_dir_exists "$MIRROR_LOCATION"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
 	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
-	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
 	
 	
 	# 2. Verify the GitHub repo is cloned.
-	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name")
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	manual_assert_equal "$repo_was_cloned" "FOUND"
 	
 }
@@ -82,7 +82,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 	github_repo_name="$2"
 	
 	# 2. Verify the GitHub repo is cloned.
-	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name")
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	manual_assert_equal "$repo_was_cloned" "FOUND"
 
 	# 3. Get the GitHub branches
@@ -361,26 +361,26 @@ copy_commit_build_status_to_github_status_repo() {
 	status="$5"
 	
 	# Verify the mirror location exists
-	manual_assert_not_equal "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" ""
-	manual_assert_file_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
-	manual_assert_file_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub"
-	manual_assert_file_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab"
+	manual_assert_not_equal "$MIRROR_LOCATION" ""
+	manual_assert_file_exists "$MIRROR_LOCATION"
+	manual_assert_file_exists "$MIRROR_LOCATION/GitHub"
+	manual_assert_file_exists "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
 	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	# 8. Clone the GitHub build statusses repository.
-	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL" "$has_access" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 	
 	# 9. Verify the Build status repository is cloned.
-	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")
+	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")
 	manual_assert_equal "$repo_was_cloned" "FOUND"
 	
 	# 10. Copy the GitLab CI Build status icon to the build status repository.
 	# Create a folder of the repository on which a CI has been ran, inside the GitHub build status website repository, if it does not exist yet
 	# Also add a folder for the branch(es) of that GitLab CI repository, in that respective folder.
 	
-	mkdir -p "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name"
+	mkdir -p "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name"
 	
 	
 	# TODO: 11. Include the build status and link to the GitHub commit in the repository in the SVG file.
@@ -389,44 +389,44 @@ copy_commit_build_status_to_github_status_repo() {
 		echo "ERROR, a pending or running build status should not reach this method."
 		exit 121
 	elif [  "$status" == "success" ]; then
-		cp "src/svgs/passed.svg" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/build_status.svg"
+		cp "src/svgs/passed.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/build_status.svg"
 	elif [  "$status" == "failure" ]; then
-		cp "src/svgs/failed.svg" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/build_status.svg"
+		cp "src/svgs/failed.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/build_status.svg"
 	elif [  "$status" == "error" ]; then
-		cp "src/svgs/error.svg" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/build_status.svg"
+		cp "src/svgs/error.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/build_status.svg"
 	elif [  "$status" == "unknown" ]; then
-		cp "src/svgs/unknown.svg" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/build_status.svg"
+		cp "src/svgs/unknown.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/build_status.svg"
 	fi
 	
 	# Assert svg file is created correctly
-	manual_assert_equal "$(file_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/build_status.svg")" "FOUND"
+	manual_assert_equal "$(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/build_status.svg")" "FOUND"
 	
 	# Explicitly store build status per commit per branch per repo.
-	echo "$status" > "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/$github_commit_sha.txt"
+	echo "$status" > "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/$github_commit_sha.txt"
 	
 	# manual_assert GitHub commit build status txt file is created correctly
-	manual_assert_equal "$(file_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/$github_commit_sha.txt")" "FOUND"
+	manual_assert_equal "$(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/$github_commit_sha.txt")" "FOUND"
 	
 	# manual_assert GitHub commit build status txt file contains the right data.
-	manual_assert_equal "$(cat "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/$github_commit_sha.txt")" "$status"
+	manual_assert_equal "$(cat "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/$github_commit_sha.txt")" "$status"
 }
 
 push_commit_build_status_in_github_status_repo_to_github() {
 	GITHUB_USERNAME_GLOBAL="$1"
 	
 	# Verify the Build status repository is cloned.
-	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")
+	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")
 	manual_assert_equal "$repo_was_cloned" "FOUND"
 	
 	# 12. Verify there have been changes made. Only push if changes are added."
-	if [[ "$(git_has_changes "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")" == "FOUND" ]]; then
-		commit_changes "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+	if [[ "$(git_has_changes "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")" == "FOUND" ]]; then
+		commit_changes "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 		
 		# Verify ssh-access
 		has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 		
 		# 13. Push the changes to the GitHub build status repository.
-		push_to_github_repository "$GITHUB_USERNAME_GLOBAL" "$has_access" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+		push_to_github_repository "$GITHUB_USERNAME_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 	fi
 	
 	# TODO 14. Verify the changes are pushed to the GitHub build status repository.

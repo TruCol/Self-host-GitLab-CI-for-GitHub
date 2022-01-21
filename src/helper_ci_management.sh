@@ -10,15 +10,15 @@ github_commit_already_has_gitlab_ci_build_status_result() {
 	
 	
 	# Verify the mirror location exists
-	manual_assert_not_equal "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" ""
-	manual_assert_dir_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
-	manual_assert_dir_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub"
+	manual_assert_not_equal "$MIRROR_LOCATION" ""
+	manual_assert_dir_exists "$MIRROR_LOCATION"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub"
 	
 	# Verify ssh-access
 	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	# Determine whether the Build status repository is cloned.
-	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")
+	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")
 	
 	
 	# Ensure the GitLab build status repository is cloned.
@@ -27,14 +27,14 @@ github_commit_already_has_gitlab_ci_build_status_result() {
 		git_pull_github_repo "$GITHUB_STATUS_WEBSITE_GLOBAL"
 	else
 		# 8. Clone the GitHub build statusses repository.
-		clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL" "$has_access" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+		clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 	fi
 	
 	# 9. Verify the Build status repository is cloned.
-	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")
+	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")
 	manual_assert_equal "$repo_was_cloned" "FOUND"
 	
 	# Check if the commit build status file exists, if yes, echo FOUND.
 	# Otherwise, echo NOTFOUND.
-	cmd "$(file_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name/$github_commit_sha.txt")"
+	cmd "$(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name/$github_commit_sha.txt")"
 }

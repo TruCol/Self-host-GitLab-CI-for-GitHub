@@ -52,7 +52,7 @@ delete_gitlab_repo_if_it_exists() {
 # Local variables:
 #  gitlab_repo_name
 # Globals:
-#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
+#  MIRROR_LOCATION
 # Arguments:
 #  The GitLab repository name.
 # Returns:
@@ -63,7 +63,7 @@ delete_gitlab_repo_if_it_exists() {
 #######################################
 gitlab_repo_exists_locally(){
   local gitlab_repo_name="$1"
-  if test -d "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$gitlab_repo_name"; then
+  if test -d "$MIRROR_LOCATION/GitLab/$gitlab_repo_name"; then
     echo "FOUND"
   else
     echo "NOTFOUND"
@@ -79,7 +79,7 @@ gitlab_repo_exists_locally(){
 #  gitlab_repo_name
 #  GITLAB_SERVER_PASSWORD_GLOBAL
 # Globals:
-#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
+#  MIRROR_LOCATION
 #  GITLAB_SERVER
 #  GITLAB_SERVER_ACCOUNT_GLOBAL
 #  GITLAB_SERVER_PASSWORD_GLOBAL
@@ -121,7 +121,7 @@ get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
   else
     if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "NOTFOUND" ]; then
       # shellcheck disable=SC2153
-	  clone_repository "$gitlab_repo_name" "$gitlab_username" "$GITLAB_SERVER_PASSWORD_GLOBAL" "$GITLAB_SERVER" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/"
+	  clone_repository "$gitlab_repo_name" "$gitlab_username" "$GITLAB_SERVER_PASSWORD_GLOBAL" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
       assert_equal "$(gitlab_repo_exists_locally "$gitlab_repo_name")" "FOUND"
       echo "FOUND"
     elif [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
@@ -143,7 +143,7 @@ get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
 #  pwd_before
 #  pwd_àfter
 # Globals:
-#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
+#  MIRROR_LOCATION
 # Arguments:
 #   Name of the GitLab repository.
 # Returns:
@@ -163,7 +163,7 @@ git_pull_gitlab_repo() {
 	pwd_before="$PWD"
 
     # Do a git pull inside the gitlab repository.
-    cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$gitlab_repo_name" && git pull
+    cd "$MIRROR_LOCATION/GitLab/$gitlab_repo_name" && git pull
     cd ../../..
 
     # Get the path after executing the command (to verify it is restored
@@ -197,7 +197,7 @@ git_pull_gitlab_repo() {
 #  gitlab_username
 # Globals:
 #  GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL
-#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
+#  MIRROR_LOCATION
 #  GITLAB_SERVER_HTTP_URL
 # Arguments:
 #   Name of the GitLab repository.
@@ -431,7 +431,7 @@ clone_repository() {
 #  pwd_before
 #  pwd_after
 # Globals:
-#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
+#  MIRROR_LOCATION
 # Arguments:
 #  The GitHub repository name.
 #  The GitHub branch name.
@@ -464,7 +464,7 @@ checkout_branch_in_github_repo() {
 	  pwd_before="$PWD"
 
       # Checkout the branch inside the repository.
-      cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/$company/$github_repo_name" && git checkout "$github_branch_name"
+      cd "$MIRROR_LOCATION/$company/$github_repo_name" && git checkout "$github_branch_name"
       cd ../../../..
       # Get the path after executing the command (to verify it is restored correctly after).
       local pwd_after
@@ -510,7 +510,7 @@ checkout_branch_in_github_repo() {
 #  pwd_before
 #  pwd_after
 # Globals:
-#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
+#  MIRROR_LOCATION
 # Arguments:
 #  The GitHub repository name.
 #  The GitHub branch name.
@@ -541,7 +541,7 @@ checkout_branch_in_gitlab_repo() {
 	  pwd_before="$PWD"
 
       # Checkout the branch inside the repository.
-      cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/$company/$gitlab_repo_name" && git checkout "$gitlab_branch_name"
+      cd "$MIRROR_LOCATION/$company/$gitlab_repo_name" && git checkout "$gitlab_branch_name"
       cd ../../../..
 
       # Get the path after executing the command (to verify it is restored correctly after).
@@ -557,7 +557,7 @@ checkout_branch_in_gitlab_repo() {
       pwd_before="$PWD"
 
       # Create the branch.
-      cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/$company/$gitlab_repo_name" && git checkout -b "$gitlab_branch_name"
+      cd "$MIRROR_LOCATION/$company/$gitlab_repo_name" && git checkout -b "$gitlab_branch_name"
       cd ../../../..
       # Get the path after executing the command (to verify it is restored correctly after).
       pwd_after="$PWD"
@@ -655,7 +655,7 @@ delete_target_folder() {
 #  filepath
 #  found_branch_name
 # Globals:
-#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
+#  MIRROR_LOCATION
 # Arguments:
 #  None
 # Returns:
@@ -694,7 +694,7 @@ commit_changes_to_gitlab() {
 
       # If the GitHub branch contains a gitlab yaml file
       local filepath
-	  filepath="$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name/.gitlab-ci.yml"
+	  filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
       if [ "$(file_exists $filepath)" == "FOUND" ]; then
 
         # If the GitLab repository exists
@@ -708,10 +708,10 @@ commit_changes_to_gitlab() {
 
             # Then copy the files and folders from the GitHub branch into the GitLab branch (excluding the .git directory)
             # That also deletes the files that exist in the GitLab branch that do not exist in the GitHub branch (excluding the .git directory)
-            copy_github_files_and_folders_to_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$github_repo_name"
+            copy_github_files_and_folders_to_gitlab "$MIRROR_LOCATION/GitHub/$github_repo_name" "$MIRROR_LOCATION/GitLab/$github_repo_name"
 
             # Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
-            comparison_result="$(two_folders_are_identical_excluding_subdir $PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name $PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$github_repo_name .git)"
+            comparison_result="$(two_folders_are_identical_excluding_subdir $MIRROR_LOCATION/GitHub/$github_repo_name $MIRROR_LOCATION/GitLab/$github_repo_name .git)"
 
             # Verify the files were correctly copied from GitHub branch to GitLab branch.
             if [ "$comparison_result" == "IDENTICAL" ]; then
@@ -720,10 +720,10 @@ commit_changes_to_gitlab() {
               # Get the path before executing the command (to verify it is restored correctly after).
               pwd_before="$PWD"
 
-              if [[ "$(git_has_changes "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$github_repo_name")" == "FOUND" ]]; then
+              if [[ "$(git_has_changes "$MIRROR_LOCATION/GitLab/$github_repo_name")" == "FOUND" ]]; then
 
                 # Commit the changes to GitLab.
-                cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$github_repo_name" && git add -A && git commit -m \"$github_commit_sha\"
+                cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit -m \"$github_commit_sha\"
                 cd ../../../..
               fi
 
@@ -784,7 +784,7 @@ commit_changes_to_gitlab() {
 #  comparison_result
 #  found_branch_name
 # Globals:
-#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
+#  MIRROR_LOCATION
 #  GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL
 #  GITLAB_SERVER_HTTP_URL
 # Arguments:
@@ -837,7 +837,7 @@ push_changes_to_gitlab() {
 
       # If the GitHub branch contains a gitlab yaml file
       local filepath
-	  filepath="$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name/.gitlab-ci.yml"
+	  filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
       if [ "$(file_exists $filepath)" == "FOUND" ]; then
 
         # If the GitLab repository exists
@@ -853,11 +853,11 @@ push_changes_to_gitlab() {
 
             # Then copy the files and folders from the GitHub branch into the GitLab branch (excluding the .git directory)
             # That also deletes the files that exist in the GitLab branch that do not exist in the GitHub branch (excluding the .git directory)
-            copy_github_files_and_folders_to_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$github_repo_name"
+            copy_github_files_and_folders_to_gitlab "$MIRROR_LOCATION/GitHub/$github_repo_name" "$MIRROR_LOCATION/GitLab/$github_repo_name"
 
             # Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
             local comparison_result
-			comparison_result="$(two_folders_are_identical_excluding_subdir $PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name $PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$github_repo_name .git)"
+			comparison_result="$(two_folders_are_identical_excluding_subdir $MIRROR_LOCATION/GitHub/$github_repo_name $MIRROR_LOCATION/GitLab/$github_repo_name .git)"
 
             # Verify the files were correctly copied from GitHub branch to GitLab branch.
             if [ "$comparison_result" == "IDENTICAL" ]; then
@@ -873,7 +873,7 @@ push_changes_to_gitlab() {
               #git log
 
               # Commit the changes to GitLab.
-              cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$github_repo_name" && git push --set-upstream origin "$gitlab_branch_name"
+              cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git push --set-upstream origin "$gitlab_branch_name"
               cd ../../../..
 
               # Get the path after executing the command (to verify it is

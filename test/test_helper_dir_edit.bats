@@ -46,17 +46,17 @@ setup() {
 ### 1. Remove mirror directories
 @test "Check if mirror directories are removed." {
 	remove_mirror_directories
-	assert_not_equal "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" ""
-	assert_file_not_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
-	assert_file_not_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub"
-	assert_file_not_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab"
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_not_exist "$MIRROR_LOCATION"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
 }
 
 ### 2. Create mirror directories
 @test "Check if mirror directories are created." {
 	create_mirror_directories
-	assert_not_equal "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" ""
-	assert_file_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
-	assert_file_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub"
-	assert_file_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab"
+	assert_not_equal "$MIRROR_LOCATION" ""
+	assert_file_exist "$MIRROR_LOCATION"
+	assert_file_exist "$MIRROR_LOCATION/GitHub"
+	assert_file_exist "$MIRROR_LOCATION/GitLab"
 }

@@ -7,7 +7,7 @@ create_new_branch() {
 	git_repository=$3
 	
 	# create_repo branch
-	theoutput=$(cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/$company/$git_repository" && git checkout -b "$branch_name")
+	theoutput=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git checkout -b "$branch_name")
 	
 	# TODO: assert the branch is created
 	
@@ -55,7 +55,7 @@ copy_files_from_github_to_gitlab_branch() {
 		if [ "$last_line_github_branch_check_result" == "FOUND" ]; then
 		
 			# If the GitHub branch contains a gitlab yaml file
-			filepath="$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name/.gitlab-ci.yml"
+			filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
 			if [ "$(file_exists "$filepath")" == "FOUND" ]; then
 				
 				# If the GitLab repository exists
@@ -69,10 +69,10 @@ copy_files_from_github_to_gitlab_branch() {
 						
 						# Then copy the files and folders from the GitHub branch into the GitLab branch (excluding the .git directory)
 						# That also deletes the files that exist in the GitLab branch that do not exist in the GitHub branch (excluding the .git directory)
-						copy_github_files_and_folders_to_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$github_repo_name"
+						copy_github_files_and_folders_to_gitlab "$MIRROR_LOCATION/GitHub/$github_repo_name" "$MIRROR_LOCATION/GitLab/$github_repo_name"
 						
 						# Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
-						comparison_result="$(two_folders_are_identical_excluding_subdir "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"/GitHub/"$github_repo_name" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"/GitLab/"$github_repo_name" .git)"
+						comparison_result="$(two_folders_are_identical_excluding_subdir "$MIRROR_LOCATION"/GitHub/"$github_repo_name" "$MIRROR_LOCATION"/GitLab/"$github_repo_name" .git)"
 						
 						if [ "$comparison_result" == "IDENTICAL" ]; then
 							echo "IDENTICAL"
@@ -150,7 +150,7 @@ create_new_branch() {
 	git_repository=$3
 	
 	# create_repo branch
-	theoutput=$(cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/$company/$git_repository" && git checkout -b "$branch_name")
+	theoutput=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git checkout -b "$branch_name")
 	
 	# TODO: assert the branch is created
 	

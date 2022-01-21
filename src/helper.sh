@@ -828,7 +828,7 @@ get_current_gitlab_branch() {
 			pwd_before="$PWD"
 			
 			# Checkout the branch inside the repository.
-			current_branch=$(cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/$company/$gitlab_repo_name" && git rev-parse --abbrev-ref HEAD)
+			current_branch=$(cd "$MIRROR_LOCATION/$company/$gitlab_repo_name" && git rev-parse --abbrev-ref HEAD)
 			pwd_after="$PWD"
 			# Verify the current path is the same as it was when this function started.
 			path_before_equals_path_after_command "$pwd_before" "$pwd_after"
@@ -868,7 +868,7 @@ get_current_unborn_gitlab_branch() {
 			pwd_before="$PWD"
 			
 			# Checkout the branch inside the repository.
-			git_status_output=$(cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/$company/$gitlab_repo_name" && git status)
+			git_status_output=$(cd "$MIRROR_LOCATION/$company/$gitlab_repo_name" && git status)
 			pwd_after="$PWD"
 			path_before_equals_path_after_command "$pwd_before" "$pwd_after"
 			

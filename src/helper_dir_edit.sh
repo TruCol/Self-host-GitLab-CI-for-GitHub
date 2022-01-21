@@ -6,21 +6,21 @@ source src/import.sh
 # Structure:dir_edit
 # Ensure mirrors directory is created.
 create_mirror_directories() {
-	create_dir "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
-	create_dir "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub"
-	create_dir "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab"
+	create_dir "$MIRROR_LOCATION"
+	create_dir "$MIRROR_LOCATION/GitHub"
+	create_dir "$MIRROR_LOCATION/GitLab"
 }
 
 # Structure:dir_edit
-#assert_equal "$(dir_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")" "FOUND" 
+#assert_equal "$(dir_exists "$MIRROR_LOCATION")" "FOUND" 
 verify_mirror_directories_are_created() {
-	if [ "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" == "" ]; then
+	if [ "$MIRROR_LOCATION" == "" ]; then
 		echo "Mirror location is not created"
 		exit 1
-	elif test ! -d "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"; then
+	elif test ! -d "$MIRROR_LOCATION"; then
 		echo "Mirror location is not created"
 		exit 2
-	elif test ! -d "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab"; then
+	elif test ! -d "$MIRROR_LOCATION/GitLab"; then
 		echo "Mirror location GitLab directory is not created"
 		exit 3
 	else
@@ -30,14 +30,14 @@ verify_mirror_directories_are_created() {
 
 # Structure:dir_edit
 remove_mirror_directories() {
-	remove_dir "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
-	remove_dir "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub"
-	remove_dir "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab"
+	remove_dir "$MIRROR_LOCATION"
+	remove_dir "$MIRROR_LOCATION/GitHub"
+	remove_dir "$MIRROR_LOCATION/GitLab"
 }
 
 # Structure:dir_edit
 copy_files_from_github_to_gitlab_repo_branches() {
 	git_repository=$1
-	rsync -av --progress "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$git_repository/" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$git_repository" --exclude .git
+	rsync -av --progress "$MIRROR_LOCATION/GitHub/$git_repository/" "$MIRROR_LOCATION/GitLab/$git_repository" --exclude .git
 }
 

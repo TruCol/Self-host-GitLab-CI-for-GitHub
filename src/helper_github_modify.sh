@@ -96,7 +96,7 @@ git_pull_github_repo() {
 	
 	
 	# Determine whether the Build status repository is cloned.
-	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name")
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	
 	# Ensure the GitLab build status repository is cloned.
 	if [ "$repo_was_cloned" == "FOUND" ]; then
@@ -105,7 +105,7 @@ git_pull_github_repo() {
 		pwd_before="$PWD"
 		
 		# Do a git pull inside the gitlab repository.
-		cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name" && git pull
+		cd "$MIRROR_LOCATION/GitHub/$github_repo_name" && git pull
 		cd ../../../..
 		
 		# Get the path after executing the command (to verify it is restored correctly after).

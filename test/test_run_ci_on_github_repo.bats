@@ -41,7 +41,7 @@ setup() {
 	copy_github_branches_with_yaml_to_gitlab_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name"
 	
 	
-	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name")
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	assert_equal "$repo_was_cloned" "FOUND"
 
 }
@@ -59,20 +59,20 @@ setup() {
 	
 	# TODO: write asserts
 	# Assert svg file is created correctly
-	assert_equal $(file_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/build_status.svg") "FOUND"
+	assert_equal $(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/build_status.svg") "FOUND"
 	
 	# Assert GitHub commit build status txt file is created correctly
-	assert_equal $(file_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "FOUND"
+	assert_equal $(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "FOUND"
 	
 	# Assert GitHub commit build status txt file contains the right data.
-	assert_equal $(cat "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "success"
+	assert_equal $(cat "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "success"
 	
 	push_commit_build_status_in_github_status_repo_to_github "$GITHUB_USERNAME_GLOBAL"
 	assert_success
 	
 	# Delete GitHub build status repository after test.
-	sudo rm -r "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
-	assert_file_not_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+	sudo rm -r "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 }
 
 # TODO: make this run after the loop over github branches.
@@ -87,17 +87,17 @@ setup() {
 	
 	# TODO: write asserts
 	# Assert svg file is created correctly
-	assert_equal $(file_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/build_status.svg") "FOUND"
+	assert_equal $(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/build_status.svg") "FOUND"
 	
 	# Assert GitHub commit build status txt file is created correctly
-	assert_equal $(file_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "FOUND"
+	assert_equal $(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "FOUND"
 	
 	# Assert GitHub commit build status txt file contains the right data.
-	assert_equal $(cat "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "success"
+	assert_equal $(cat "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "success"
 	
 	# Delete GitHub build status repository after test.
-	sudo rm -r "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
-	assert_file_not_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+	sudo rm -r "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 }
 
 # TODO: make this run after the loop over github branches.
@@ -112,17 +112,17 @@ setup() {
 	
 	# TODO: write asserts
 	# Assert svg file is created correctly
-	assert_equal $(file_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/build_status.svg") "FOUND"
+	assert_equal $(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/build_status.svg") "FOUND"
 	
 	# Assert GitHub commit build status txt file is created correctly
-	assert_equal $(file_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "FOUND"
+	assert_equal $(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "FOUND"
 	
 	# Assert GitHub commit build status txt file contains the right data.
-	assert_equal $(cat "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "failed"
+	assert_equal $(cat "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "failed"
 	
 	# Delete GitHub build status repository after test.
-	sudo rm -r "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
-	assert_file_not_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+	sudo rm -r "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 }
 
 # TODO: make this run after the loop over github branches.
@@ -137,17 +137,17 @@ setup() {
 	
 	# TODO: write asserts
 	# Assert svg file is created correctly
-	assert_equal $(file_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/build_status.svg") "FOUND"
+	assert_equal $(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/build_status.svg") "FOUND"
 	
 	# Assert GitHub commit build status txt file is created correctly
-	assert_equal $(file_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "FOUND"
+	assert_equal $(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "FOUND"
 	
 	# Assert GitHub commit build status txt file contains the right data.
-	assert_equal $(cat "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "error"
+	assert_equal $(cat "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "error"
 	
 	# Delete GitHub build status repository after test.
-	sudo rm -r "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
-	assert_file_not_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+	sudo rm -r "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+	assert_file_not_exist "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 }
 
 @test "Trivial test." {
@@ -166,7 +166,7 @@ setup() {
 	
 	download_github_repo_on_which_to_run_ci "$GITHUB_USERNAME_GLOBAL" "$github_repo_name"
 	
-	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name")
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	assert_equal "$repo_was_cloned" "FOUND"
 
 }

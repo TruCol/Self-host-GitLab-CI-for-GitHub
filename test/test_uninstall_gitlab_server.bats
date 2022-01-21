@@ -3,8 +3,8 @@
 load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 
-source src/install_and_boot_gitlab_server.sh
-#source src/helper.sh
+# TODO: move to import
+# TODO: before moving, verify the function names do not collide.
 source test/helper.sh
 source test/hardcoded_testdata.txt
 

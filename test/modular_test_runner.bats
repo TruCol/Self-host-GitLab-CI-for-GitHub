@@ -4,12 +4,7 @@ load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 load 'libs/bats-file/load'
 
-source src/install_and_boot_gitlab_server.sh
-source src/install_and_boot_gitlab_runner.sh
-source src/run_ci_job.sh
-source src/uninstall_gitlab_runner.sh
-source src/helper.sh
-source src/hardcoded_variables.txt
+source src/import.sh
 
 # Method that executes all tested main code before running tests.
 setup() {

@@ -1,47 +1,7 @@
 #!/bin/bash
-# run with:
-#./mirror_github_to_gitlab.sh "a-t-0" "testrepo" "filler_github"
 
-source src/hardcoded_variables.txt
-#source src/creds.txt
+source src/import.sh
 
-# Hardcoded data:
-
-# Get GitHub username.
-GITHUB_USERNAME_GLOBAL=$1
-
-# Get GitHub repository name.
-github_repo=$2
-
-# OPTIONAL: get GitHub personal access token or verify ssh access to support private repositories.
-github_personal_access_code=$3
-
-verbose=$4
-
-# Get GitLab username.
-# shellcheck disable=SC2154
-gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
-
-# Get GitLab user password.
-GITLAB_SERVER_PASSWORD_GLOBAL=$(echo "$GITLAB_SERVER_PASSWORD_GLOBAL" | tr -d '\r')
-
-# Get GitLab personal access token from hardcoded file.
-# shellcheck disable=SC2153
-GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
-
-# Specify GitLab mirror repository name.
-gitlab_repo="$github_repo"
-
-if [ "$verbose" == "TRUE" ]; then
-	echo "PUBLIC_GITHUB_TEST_REPO_GLOBAL=$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
-	echo "GITHUB_USERNAME_GLOBAL=$GITHUB_USERNAME_GLOBAL"
-	echo "github_repo=$github_repo"
-	echo "github_personal_access_code=$github_personal_access_code"
-	echo "gitlab_username=$gitlab_username"
-	echo "GITLAB_SERVER_PASSWORD_GLOBAL=$GITLAB_SERVER_PASSWORD_GLOBAL"
-	echo "GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL=$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL"
-	echo "gitlab_repo=$gitlab_repo"
-fi
 
 # Structure:dir_edit
 # Ensure mirrors directory is created.

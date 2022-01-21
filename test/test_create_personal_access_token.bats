@@ -3,12 +3,8 @@
 load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 
+source src/import.sh
 
-source src/create_personal_access_token.sh
-source src/helper.sh
-source test/helper.sh
-source src/hardcoded_variables.txt
-source test/hardcoded_testdata.txt
 
 # Source: https://docs.gitlab.com/ee/api/personal_access_tokens.html#personal-access-tokens-api
 @test "Checking get line containing substring." {

@@ -1,17 +1,6 @@
 #!/bin/bash
 # Source: https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#programmatically-creating-a-personal-access-token
-source src/hardcoded_variables.txt
-#source src/creds.txt
-source src/helper.sh
-
-gitlab_host=$GITLAB_SERVER_HTTP_URL
-# shellcheck disable=SC2154
-# shellcheck disable=SC2034
-gitlab_user=$GITLAB_SERVER_ACCOUNT_GLOBAL
-# shellcheck disable=SC2154
-# shellcheck disable=SC2034
-gitlab_password=$GITLAB_SERVER_PASSWORD_GLOBAL
-
+source src/import.sh
 
 # Get shared registration token:
 #source: https://github.com/veertuinc/getting-started/blob/ef159275743b2481e68feb92b2c56b5698ad6d6c/GITLAB/install-and-run-anka-gitlab-runners-on-mac.bash
@@ -54,6 +43,6 @@ get_personal_access_token_list() {
 	#command="curl --header \"PRIVATE-TOKEN:$personal_access_token\" ""$gitlab_host""/api/v4/personal_access_tokens"
 	#echo "Command=$command"
 	# TODO: Note used to be a space after the semicolon, check if it is required
-	token_list=$(curl --header "PRIVATE-TOKEN:$personal_access_token" "$gitlab_host""/api/v4/personal_access_tokens")
+	token_list=$(curl --header "PRIVATE-TOKEN:$personal_access_token" "$GITLAB_SERVER_HTTP_URL""/api/v4/personal_access_tokens")
 	echo "$token_list"
 }

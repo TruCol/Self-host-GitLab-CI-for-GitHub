@@ -403,19 +403,18 @@ delete_existing_repository() {
 #  None.
 # TODO (a-t-0): write test to verify the gitlab username and server don't end with a spacebar character.
 # TODO (a-t-0): rename to clone_gitlab_repository_from _local_server.
-# TODO (a-t-0): change GITLAB_SERVER_PASSWORD_GLOBAL_GLOBAL to and rename local_GITLAB_SERVER_PASSWORD_GLOBAL to GITLAB_SERVER_PASSWORD_GLOBAL
 #######################################
 clone_repository() {
   local repo_name=$1
   local gitlab_username=$2
-  local local_GITLAB_SERVER_PASSWORD_GLOBAL=$3
+  local local_gitlab_server_password=$3
   local gitlab_server=$4
   local target_directory=$5
 
   # TODO:write test to verify the gitlab username and server don't end with a spacebar character.
 
   # Clone the GitLab repository into the GitLab mirror storage location.
-  output=$(cd "$target_directory" && git clone http://$gitlab_username:$local_GITLAB_SERVER_PASSWORD_GLOBAL@$gitlab_server/$gitlab_username/$repo_name.git)
+  output=$(cd "$target_directory" && git clone http://$gitlab_username:$local_gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
 }
 
 

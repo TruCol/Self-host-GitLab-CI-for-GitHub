@@ -15,10 +15,7 @@
 # @reboot bash /home/ubuntu/startup/torssh.sh >1 /dev/null 2> /home/ubuntu/startup/some_job.er
 
 
-source src/install_and_boot_gitlab_server.sh
-source src/install_and_boot_gitlab_runner.sh
-source src/helper.sh
-source src/hardcoded_variables.txt
+source src/import.sh
 
 # TODO: verify the reboot script is executable, otherwise throw a warning
 

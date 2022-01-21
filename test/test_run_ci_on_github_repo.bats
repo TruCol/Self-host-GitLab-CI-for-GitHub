@@ -7,7 +7,6 @@ load 'libs/bats-file/load'
 # https://github.com/bats-core/bats-assert#usage
 load 'assert_utils'
 
-source src/hardcoded_variables.txt
 source src/import.sh
 
 

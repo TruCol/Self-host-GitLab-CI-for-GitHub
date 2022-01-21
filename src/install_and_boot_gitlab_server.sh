@@ -9,9 +9,7 @@
 		# Install GitLab
 		# Run command to host GitLab server
 
-source src/helper.sh
-source src/hardcoded_variables.txt
-#source src/creds.txt
+source src/import.sh
 
 install_and_run_gitlab_server() {
 	gitlab_package=$(get_gitlab_package)

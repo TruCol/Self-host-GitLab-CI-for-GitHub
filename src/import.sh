@@ -3,6 +3,9 @@ source src/hardcoded_variables.txt
 #source src/creds.txt
 source ../personal_creds.txt
 filler="Filler"
+
+# TODO: differentiate between GLOBAL and HARDCODED with:
+#GITLAB_SERVER_ACCOUNT_GLOBAL=$(echo "$GITLAB_SERVER_ACCOUNT_HARDCODED" | tr -d '\r')
 GITLAB_SERVER_ACCOUNT_GLOBAL=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 GITLAB_SERVER_PASSWORD_GLOBAL=$(echo "$GITLAB_SERVER_PASSWORD_GLOBAL" | tr -d '\r')
 GITLAB_ROOT_EMAIL_GLOBAL=$(echo "$GITLAB_ROOT_EMAIL_GLOBAL" | tr -d '\r')

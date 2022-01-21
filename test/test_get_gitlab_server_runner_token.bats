@@ -4,8 +4,7 @@ load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 load 'libs/bats-file/load'
 
-source src/get_gitlab_server_runner_token.sh
-source src/hardcoded_variables.txt
+source src/import.sh
 
 @test "Checking if the gitlab runner registration token is obtained correctly." {
 	# TODO: ensure Gitlab server is started before this test is executed (do not install runner for this test)

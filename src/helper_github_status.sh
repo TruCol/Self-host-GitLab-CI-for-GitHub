@@ -4,7 +4,7 @@
 # Structure:github_status
 github_repo_exists_locally(){
 	github_repo="$1"
-	if test -d "$MIRROR_LOCATION/GitHub/$github_repo"; then
+	if test -d "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo"; then
 		echo "FOUND"
 	else
 		echo "NOTFOUND"
@@ -24,7 +24,7 @@ verify_github_repository_is_cloned() {
 	found_repo=$(dir_exists "$target_directory")
 	if [ "$found_repo" == "NOTFOUND" ]; then
 		# shellcheck disable=SC2059
-		printf "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
+		printf "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repository"
 		exit 11
 	elif [ "$found_repo" == "FOUND" ]; then
 		echo "FOUND"
@@ -37,17 +37,17 @@ verify_github_repository_is_cloned() {
 # Structure:Github_status (?or?)
 # Structure:git_neutral
 # Clone GitHub repository to folder src/mirror/GITHUB
-####clone_github_repository "$github_username" "$github_repo" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo"
-####verify_github_repository_is_cloned "$github_repo" "$MIRROR_LOCATION/GitHub/$github_repository"
+####clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo" "$has_access" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo"
+####verify_github_repository_is_cloned "$github_repo" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repository"
 get_git_branches() {
     local -n arr=$1             # use nameref for indirection
 	company=$2
 	git_repository=$3
 	arr=() # innitialise array with branches
 	
-	theoutput=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git branch --all)
+	theoutput=$(cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/$company/$git_repository" && git branch --all)
 	#read -p  "IN GET PWD=$PWD"
-	#read -p  "MIRROR_LOCATION=$MIRROR_LOCATION"
+	#read -p  "PUBLIC_GITHUB_TEST_REPO_GLOBAL=$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	#read -p  "company=$company"
 	#read -p  "git_repository=$git_repository"
 	#read -p  "theoutput=$theoutput"
@@ -143,7 +143,7 @@ get_current_github_branch() {
 			pwd_before="$PWD"
 			
 			# Checkout the branch inside the repository.
-			current_branch=$(cd "$MIRROR_LOCATION/$company/$github_repo_name" && git rev-parse --abbrev-ref HEAD)
+			current_branch=$(cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/$company/$github_repo_name" && git rev-parse --abbrev-ref HEAD)
 			pwd_after="$PWD"
 			
 			echo "$current_branch"
@@ -182,7 +182,7 @@ get_current_github_branch_commit() {
 			pwd_before="$PWD"
 			
 			# Checkout the branch inside the repository.
-			current_branch_commit=$(cd "$MIRROR_LOCATION/$company/$github_repo_name" && git rev-parse HEAD)
+			current_branch_commit=$(cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/$company/$github_repo_name" && git rev-parse HEAD)
 			pwd_after="$PWD"
 			
 			echo "$current_branch_commit"
@@ -250,7 +250,7 @@ verify_github_branch_contains_gitlab_yaml() {
 		if [ "$last_line_branch_check_result" == "FOUND" ]; then
 		
 			# Test if GitHub branch contains a GitLab yaml file.
-			filepath="$MIRROR_LOCATION/$company/$github_repo_name/.gitlab-ci.yml"
+			filepath="$PUBLIC_GITHUB_TEST_REPO_GLOBAL/$company/$github_repo_name/.gitlab-ci.yml"
 			if [ "$(file_exists "$filepath")" == "FOUND" ]; then
 				echo "FOUND"
 			else
@@ -277,7 +277,7 @@ get_org_repos() {
 	arr=() # innitialise array with branches
 	
 	# get GitHub personal access token or verify ssh access to support private repositories.
-	github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
+	github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 	
 	theoutput=$(curl -H "Authorization: token $github_personal_access_code" "Accept: application/vnd.github.v3+json" https://api.github.com/users/"${github_organisation_or_username}"/repos?per_page=100 | jq -r '.[] | .name')
 	

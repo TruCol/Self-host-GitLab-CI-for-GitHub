@@ -70,25 +70,25 @@ setup() {
 	
 	# Delete GitHub repo at start of test.
 	remove_mirror_directories
-	assert_not_equal "$MIRROR_LOCATION" ""
-	assert_file_not_exist "$MIRROR_LOCATION"
-	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
-	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+	assert_not_equal "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" ""
+	assert_file_not_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
+	assert_file_not_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub"
+	assert_file_not_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab"
 	
 	# Create mmirror directories
 	create_mirror_directories
-	assert_not_equal "$MIRROR_LOCATION" ""
-	assert_file_exist "$MIRROR_LOCATION"
-	assert_file_exist "$MIRROR_LOCATION/GitHub"
-	assert_file_exist "$MIRROR_LOCATION/GitLab"
+	assert_not_equal "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" ""
+	assert_file_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
+	assert_file_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub"
+	assert_file_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab"
 	
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	# Clone GitHub repo at start of test.
-	clone_github_repository "$GITHUB_USERNAME" "$gitlab_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$gitlab_repo_name"
-	repo_was_cloned=$(verify_github_repository_is_cloned "$gitlab_repo_name" "$MIRROR_LOCATION/GitHub/$gitlab_repo_name")
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$gitlab_repo_name" "$has_access" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$gitlab_repo_name"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$gitlab_repo_name" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$gitlab_repo_name")
 	assert_equal "$repo_was_cloned" "FOUND"
 	
 	# Checkout GitHub branch, if branch is found in local GitHub repo.
@@ -103,7 +103,7 @@ setup() {
 	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
 	
 	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT" "$gitlab_repo_name"
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"
 	
 	# Checkout branch, if branch is found in local Gitlab repo.
 	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
@@ -119,25 +119,25 @@ setup() {
 	assert_equal "$last_line_result" "IDENTICAL"
 }
 
-# TODO verify consistent usage of gitlab_repo_name and PUBLIC_GITHUB_TEST_REPO
+# TODO verify consistent usage of gitlab_repo_name and PUBLIC_GITHUB_TEST_REPO_GLOBAL
 @test "Test whether an empty repository is created, regardless of whether it already existed or not." {
-	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	# Create the empty GitLab repository.
-	create_empty_repository_v0 "$PUBLIC_GITHUB_TEST_REPO" "$gitlab_username"
+	create_empty_repository_v0 "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$gitlab_username"
 	
 	# Verify the repository is created.
-	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
 	assert_equal "$gitlab_repo_exists" "FOUND"
 }
 
 @test "Test whether an empty repository is created with create_empty_repository_v0, if it did not exist in advance." {
-	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	# Check if the GitLab repository exists.
-	gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO"
+	gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	
 	# If the repository exists, delete it.
 	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
@@ -155,19 +155,19 @@ setup() {
 	fi
 	
 	# Create the empty GitLab repository.
-	create_empty_repository_v0 "$PUBLIC_GITHUB_TEST_REPO" "$gitlab_username"
+	create_empty_repository_v0 "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$gitlab_username"
 	
 	# Verify the repository is created.
-	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
 	assert_equal "$gitlab_repo_exists" "FOUND"
 }
 
 @test "Test whether an empty repository is created with create_gitlab_repository_if_not_exists, if it did not exist in advance." {
-	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	# Check if the GitLab repository exists.
-	gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO"
+	gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	
 	# If the repository exists, delete it.
 	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
@@ -185,10 +185,10 @@ setup() {
 	fi
 	
 	# Create the empty GitLab repository.
-	create_gitlab_repository_if_not_exists "$PUBLIC_GITHUB_TEST_REPO" "$gitlab_username"
+	create_gitlab_repository_if_not_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$gitlab_username"
 	
 	# Verify the repository is created.
-	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
 	assert_equal "$gitlab_repo_exists" "FOUND"
 }
 
@@ -197,20 +197,20 @@ setup() {
 # the repository still contains the file (meaning no new empty repo is created).
 
 @test "Test whether a repository is deleted if it exists." {
-	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	# Check if the GitLab repository exists.
-	gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO"
+	gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	
 	# If the repository exists, delete it.
 	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "NOTFOUND" ]; then
 	
 		# Create the empty GitLab repository.
-		create_gitlab_repository_if_not_exists "$PUBLIC_GITHUB_TEST_REPO" "$gitlab_username"
+		create_gitlab_repository_if_not_exists "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$gitlab_username"
 	
 		# Verify the repository is created.
-		gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+		gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
 		assert_equal "$gitlab_repo_exists" "FOUND"
 	fi
 	
@@ -219,16 +219,16 @@ setup() {
 	sleep 60
 	
 	# Verify the repository is deleted.
-	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
 	assert_equal "$gitlab_repo_exists" "NOTFOUND"
 }
 
 @test "Test whether deleting a repository that does not exist does not yield an error with delete_gitlab_repository_if_it_exists." {
-	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	# Check if the GitLab repository exists.
-	gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO"
+	gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	
 	# If the repository exists, delete it.
 	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
@@ -238,7 +238,7 @@ setup() {
 		sleep 60
 		
 		# Verify the repository is deleted.
-		gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+		gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
 		assert_equal "$gitlab_repo_exists" "NOTFOUND"
 	fi
 	
@@ -247,16 +247,16 @@ setup() {
 	sleep 60
 	
 	# Verify the repository is deleted.
-	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
 	assert_equal "$gitlab_repo_exists" "NOTFOUND"
 }
 
 @test "Test whether deleting a repository that does not exist throws an error." {
-	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	# Check if the GitLab repository exists.
-	gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO"
+	gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	
 	# If the repository exists, delete it.
 	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
@@ -266,7 +266,7 @@ setup() {
 		sleep 60
 		
 		# Verify the repository is deleted.
-		gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+		gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
 		assert_equal "$gitlab_repo_exists" "NOTFOUND"
 	fi
 	
@@ -299,14 +299,14 @@ setup() {
 	company="GitLab"
 	
 	# Get GitLab default username.
-	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	# Delete GitLab repo from server
 	delete_gitlab_repository_if_it_exists "$gitlab_repo_name" "$gitlab_username"
 	
 	# Verify the repository is deleted.
-	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
 	assert_equal "$gitlab_repo_exists" "NOTFOUND"
 	
 	
@@ -320,25 +320,25 @@ setup() {
 	
 	# Delete GitHub repo at start of test.
 	remove_mirror_directories
-	assert_not_equal "$MIRROR_LOCATION" ""
-	assert_file_not_exist "$MIRROR_LOCATION"
-	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
-	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+	assert_not_equal "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" ""
+	assert_file_not_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
+	assert_file_not_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub"
+	assert_file_not_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab"
 	
 	# Create mmirror directories
 	create_mirror_directories
-	assert_not_equal "$MIRROR_LOCATION" ""
-	assert_file_exist "$MIRROR_LOCATION"
-	assert_file_exist "$MIRROR_LOCATION/GitHub"
-	assert_file_exist "$MIRROR_LOCATION/GitLab"
+	assert_not_equal "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" ""
+	assert_file_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
+	assert_file_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub"
+	assert_file_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab"
 	
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	# Clone GitHub repo at start of test.
-	clone_github_repository "$GITHUB_USERNAME" "$PUBLIC_GITHUB_TEST_REPO" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO"
-	repo_was_cloned=$(verify_github_repository_is_cloned "$PUBLIC_GITHUB_TEST_REPO" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO")
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
 	assert_equal "$repo_was_cloned" "FOUND"
 	
 	# checkout GitHub branch
@@ -354,7 +354,7 @@ setup() {
 	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
 	
 	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT" "$gitlab_repo_name"
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"
 	
 	# Checkout branch, if branch is found in local Gitlab repo.
 	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
@@ -388,14 +388,14 @@ setup() {
 	company="GitLab"
 	
 	# Get GitLab default username.
-	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	# Delete GitLab repo from server
 	delete_gitlab_repository_if_it_exists "$gitlab_repo_name" "$gitlab_username"
 	
 	# Verify the repository is deleted.
-	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
 	assert_equal "$gitlab_repo_exists" "NOTFOUND"
 	
 	# Create GitLab repo in server
@@ -407,25 +407,25 @@ setup() {
 	
 	# Delete GitHub and GitLab repos at start of test.
 	remove_mirror_directories
-	assert_not_equal "$MIRROR_LOCATION" ""
-	assert_file_not_exist "$MIRROR_LOCATION"
-	assert_file_not_exist "$MIRROR_LOCATION/GitHub"
-	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
+	assert_not_equal "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" ""
+	assert_file_not_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
+	assert_file_not_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub"
+	assert_file_not_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab"
 	
 	# Create mmirror directories
 	create_mirror_directories
-	assert_not_equal "$MIRROR_LOCATION" ""
-	assert_file_exist "$MIRROR_LOCATION"
-	assert_file_exist "$MIRROR_LOCATION/GitHub"
-	assert_file_exist "$MIRROR_LOCATION/GitLab"
+	assert_not_equal "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" ""
+	assert_file_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
+	assert_file_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub"
+	assert_file_exist "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab"
 	
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	# Clone GitHub repository.
-	clone_github_repository "$GITHUB_USERNAME" "$gitlab_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$gitlab_repo_name"
-	repo_was_cloned=$(verify_github_repository_is_cloned "$gitlab_repo_name" "$MIRROR_LOCATION/GitHub/$gitlab_repo_name")
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$gitlab_repo_name" "$has_access" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$gitlab_repo_name"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$gitlab_repo_name" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$gitlab_repo_name")
 	assert_equal "$repo_was_cloned" "FOUND"
 	
 	# Checkout GitHub branch, if branch is found in local GitHub repo.
@@ -440,7 +440,7 @@ setup() {
 	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
 	
 	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT" "$gitlab_repo_name"
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"
 	
 	# Checkout branch, if branch is found in local Gitlab repo.
 	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"

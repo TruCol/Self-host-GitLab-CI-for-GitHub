@@ -1,15 +1,11 @@
 #!/bin/bash
-# Source: https://github.com/MxNxPx/gitlab-cicd-demo/blob/aee86e45f5bc603a5055f0cd391cd6b184f1d6c3/get-runner-reg.sh
-source src/hardcoded_variables.txt
-#source src/creds.txt
-source src/helper.sh
 
 get_gitlab_server_runner_tokenV1() {
 	GITURL="$GITLAB_SERVER_HTTP_URL"
 	# shellcheck disable=SC2154
-	GITUSER="$GITLAB_SERVER_ACCOUNT"
+	GITUSER="$GITLAB_SERVER_ACCOUNT_GLOBAL"
 	# shellcheck disable=SC2154
-	GITROOTPWD="$GITLAB_SERVER_PASSWORD"
+	GITROOTPWD="$GITLAB_SERVER_PASSWORD_GLOBAL"
 	#echo "GITUSER=$GITUSER"
 	#echo "GITROOTPWD=$GITROOTPWD"
 	
@@ -47,8 +43,8 @@ get_gitlab_server_runner_tokenV1() {
 
 get_gitlab_server_runner_tokenV0() {
 	export GITURL="$GITLAB_SERVER_HTTP_URL"
-	export GITUSER="$GITLAB_SERVER_ACCOUNT"
-	export GITROOTPWD="$GITLAB_SERVER_PASSWORD"
+	export GITUSER="$GITLAB_SERVER_ACCOUNT_GLOBAL"
+	export GITROOTPWD="$GITLAB_SERVER_PASSWORD_GLOBAL"
 	
 	# 1. curl for the login page to get a session cookie and the sources with the auth tokens
 	body_header=$(curl -k -c gitlab-cookies.txt -i "${GITURL}/users/sign_in" -sS)
@@ -115,8 +111,8 @@ download_repository() {
 
 get_gitlab_server_runner_tokenV2() {
 	GITURL="$GITLAB_SERVER_HTTP_URL"
-	GITUSER="$GITLAB_SERVER_ACCOUNT"
-	GITROOTPWD="$GITLAB_SERVER_PASSWORD"
+	GITUSER="$GITLAB_SERVER_ACCOUNT_GLOBAL"
+	GITROOTPWD="$GITLAB_SERVER_PASSWORD_GLOBAL"
 	
 	# 1. curl for the login page to get a session cookie and the sources with the auth tokens
 	body_header=$(curl -k -c gitlab-cookies.txt -i "${GITURL}/users/sign_in" -sS)
@@ -142,9 +138,9 @@ get_gitlab_server_runner_tokenV3() {
 	source src/hardcoded_variables.txt
 	export GITURL="$GITLAB_SERVER_HTTP_URL"
 	#read  -p "GITURL=$GITURL"
-	export GITUSER="$GITLAB_SERVER_ACCOUNT"
+	export GITUSER="$GITLAB_SERVER_ACCOUNT_GLOBAL"
 	#read  -p "GITUSER=$GITUSER"
-	export GITROOTPWD="$GITLAB_SERVER_PASSWORD"
+	export GITROOTPWD="$GITLAB_SERVER_PASSWORD_GLOBAL"
 	#read  -p "GITROOTPWD=$GITROOTPWD"
 	
 	# 1. curl for the login page to get a session cookie and the sources with the auth tokens

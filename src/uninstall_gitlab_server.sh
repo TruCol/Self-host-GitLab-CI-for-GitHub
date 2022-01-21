@@ -8,10 +8,7 @@
 	# If no:
 		# Install GitLab
 		# Run command to host GitLab server
-
-source src/helper.sh
-source src/hardcoded_variables.txt
-
+	
 uninstall_gitlab_server() {
 	is_hard_uninstall=$1
 	is_docker_uninstall=$2

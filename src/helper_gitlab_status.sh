@@ -32,7 +32,7 @@ get_project_list(){
 	local -n repo_arr="$1"     # use nameref for indirection
 
     # Get a list of the repositories in your own local GitLab server (that runs the GitLab runner CI).
-	repositories=$(curl --header "PRIVATE-TOKEN: $GITLAB_PERSONAL_ACCESS_TOKEN" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
+	repositories=$(curl --header "PRIVATE-TOKEN: $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
 	
 	# TODO: identify why the response of the repositories command is inconsistent.
 	# shellcheck disable=2034

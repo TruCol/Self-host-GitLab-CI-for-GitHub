@@ -30,12 +30,12 @@ github_branch_exists() {
 # Structure:github_modify
 clone_github_repository() {
 	if [[ "$1" != "" ]] && [[ "$2" != "" ]] && [[ "$3" != "" ]] && [[ "$4" != "" ]]; then
-		github_username="$1"
+		GITHUB_USERNAME_GLOBAL="$1"
 		github_repository="$2"
 		has_access="$3"
 		target_directory="$4"
 	fi
-	#echo  "github_username=$github_username"
+	#echo  "GITHUB_USERNAME_GLOBAL=$GITHUB_USERNAME_GLOBAL"
 	#echo  "github_repository=$github_repository"
 	#echo  "has_access=$has_access"
 	#echo  "target_directory=$target_directory"
@@ -44,9 +44,9 @@ clone_github_repository() {
 	remove_dir "$target_directory"
 	
 	if [[ "$has_access" == "HASACCESS" ]]; then
-		git clone git@github.com:"$github_username"/"$github_repository" "$target_directory"
+		git clone git@github.com:"$GITHUB_USERNAME_GLOBAL"/"$github_repository" "$target_directory"
 	else
-		git clone https://github.com/"$github_username"/"$github_repository".git "$target_directory"
+		git clone https://github.com/"$GITHUB_USERNAME_GLOBAL"/"$github_repository".git "$target_directory"
 		echo "Did not get ssh_access, downloaded using https, assumed it was a public repository."
 		# TODO: support asking for GitHub username and pw to allow cloning private repositories over HTTPS.
 		# TODO: support asking for GitHub personal access token to allow cloning private repositories over HTTPS.
@@ -55,16 +55,16 @@ clone_github_repository() {
 
 # Structure:github_modify
 push_to_github_repository() {
-	github_username=$1
+	GITHUB_USERNAME_GLOBAL=$1
 	has_access=$2
 	target_directory=$3
 	
 	if [[ "$has_access" == "HASACCESS" ]]; then
-		#git push git@github.com:"$github_username"/"$github_repository"
+		#git push git@github.com:"$GITHUB_USERNAME_GLOBAL"/"$github_repository"
 		# shellcheck disable=SC2034
 		output=$(cd "$target_directory" && git push)
 	else
-		#$(cd "$target_directory" && git push https://github.com/"$github_username"/"$github_repository".git)
+		#$(cd "$target_directory" && git push https://github.com/"$GITHUB_USERNAME_GLOBAL"/"$github_repository".git)
 		echo "Did not get ssh_access, downloaded using https, assumed it was a public repository."
 		# TODO: support asking for GitHub username and pw to allow cloning private repositories over HTTPS.
 		# TODO: support asking for GitHub personal access token to allow cloning private repositories over HTTPS.
@@ -96,7 +96,7 @@ git_pull_github_repo() {
 	
 	
 	# Determine whether the Build status repository is cloned.
-	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name")
 	
 	# Ensure the GitLab build status repository is cloned.
 	if [ "$repo_was_cloned" == "FOUND" ]; then
@@ -105,7 +105,7 @@ git_pull_github_repo() {
 		pwd_before="$PWD"
 		
 		# Do a git pull inside the gitlab repository.
-		cd "$MIRROR_LOCATION/GitHub/$github_repo_name" && git pull
+		cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name" && git pull
 		cd ../../../..
 		
 		# Get the path after executing the command (to verify it is restored correctly after).

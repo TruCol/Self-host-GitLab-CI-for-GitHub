@@ -2,59 +2,15 @@
 # A file that contains functions to make modifications to GitLab
 # repositories.
 
-# run with:
-#./mirror_github_to_gitlab.sh "a-t-0" "testrepo" "filler_github"
-
-###source src/helper_dir_edit.sh
-###source src/helper_github_modify.sh
-###source src/helper_github_status.sh
-####source src/helper_gitlab_modify.sh
-###source src/helper_gitlab_status.sh
-###source src/helper_git_neutral.sh
-###source src/helper_ssh.sh
-###source src/hardcoded_variables.txt
-###source src/creds.txt
-###source src/get_gitlab_server_runner_token.sh
-###source src/push_repo_to_gitlab.sh
-
-# Hardcoded data:
-
-# Get GitHub username.
-github_username=$1
-
-# Get GitHub repository name.
-github_repo=$2
-
-# OPTIONAL: get GitHub personal access token or verify ssh access to support
-# private repositories.
-github_personal_access_code=$3
-
-verbose=$4
-
-# Get GitLab username.
-# shellcheck disable=SC2154
-gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
 
 # Get GitLab user password.
-GITLAB_SERVER_PASSWORD=$(echo "$GITLAB_SERVER_PASSWORD" | tr -d '\r')
+GITLAB_SERVER_PASSWORD_GLOBAL=$(echo "$GITLAB_SERVER_PASSWORD_GLOBAL" | tr -d '\r')
 
 # Get GitLab personal access token from hardcoded file.
-gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
+GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 
 # Specify GitLab mirror repository name.
 gitlab_repo="$github_repo"
-
-if [ "$verbose" == "TRUE" ]; then
-  echo "MIRROR_LOCATION=$MIRROR_LOCATION"
-  echo "github_username=$github_username"
-  echo "github_repo=$github_repo"
-  echo "github_personal_access_code=$github_personal_access_code"
-  echo "gitlab_username=$gitlab_username"
-  echo "GITLAB_SERVER_PASSWORD=$GITLAB_SERVER_PASSWORD"
-  echo "gitlab_personal_access_token=$gitlab_personal_access_token"
-  echo "gitlab_repo=$gitlab_repo"
-fi
-
 
 #######################################
 # Deletes the repository if it doesn't exist in the GitLab server.
@@ -96,7 +52,7 @@ delete_gitlab_repo_if_it_exists() {
 # Local variables:
 #  gitlab_repo_name
 # Globals:
-#  MIRROR_LOCATION
+#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
 # Arguments:
 #  The GitLab repository name.
 # Returns:
@@ -107,7 +63,7 @@ delete_gitlab_repo_if_it_exists() {
 #######################################
 gitlab_repo_exists_locally(){
   local gitlab_repo_name="$1"
-  if test -d "$MIRROR_LOCATION/GitLab/$gitlab_repo_name"; then
+  if test -d "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$gitlab_repo_name"; then
     echo "FOUND"
   else
     echo "NOTFOUND"
@@ -121,12 +77,12 @@ gitlab_repo_exists_locally(){
 # Local variables:
 #  gitlab_username
 #  gitlab_repo_name
-#  GITLAB_SERVER_PASSWORD
+#  GITLAB_SERVER_PASSWORD_GLOBAL
 # Globals:
-#  MIRROR_LOCATION
+#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
 #  GITLAB_SERVER
-#  GITLAB_SERVER_ACCOUNT
-#  GITLAB_SERVER_PASSWORD
+#  GITLAB_SERVER_ACCOUNT_GLOBAL
+#  GITLAB_SERVER_PASSWORD_GLOBAL
 # Arguments:
 #  The GitLab username.
 #  The GitLab repository name.
@@ -144,16 +100,13 @@ gitlab_repo_exists_locally(){
 # TODO(a-t-0): verify local GitLab mirror repo directories are created.
 # TODO(a-t-0): verify the repository exists in GitLab, throw error otherwise.
 # TODO(a-t-0): do a gitlab pull to get the latest version.
-# TODO(a-t-0): Capitalize $GITLAB_SERVER_ACCOUNT in all files.
-# TODO(a-t-0): Capitalize $GITLAB_SERVER_PASSWORD in all files.
+# TODO(a-t-0): Capitalize $GITLAB_SERVER_ACCOUNT_GLOBAL in all files.
+# TODO(a-t-0): Capitalize $GITLAB_SERVER_PASSWORD_GLOBAL in all files.
 #######################################
 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
   local gitlab_username="$1"
   local gitlab_repo_name="$2"
-
-  # Remove spaces at end of username and servername.
-  local GITLAB_SERVER_PASSWORD
-  GITLAB_SERVER_PASSWORD=$(echo "$GITLAB_SERVER_PASSWORD" | tr -d '\r')
+  
 
   # TODO(a-t-0): verify local gitlab mirror repo directories are created
   create_mirror_directories
@@ -168,7 +121,7 @@ get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
   else
     if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "NOTFOUND" ]; then
       # shellcheck disable=SC2153
-	  clone_repository "$gitlab_repo_name" "$gitlab_username" "$GITLAB_SERVER_PASSWORD" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
+	  clone_repository "$gitlab_repo_name" "$gitlab_username" "$GITLAB_SERVER_PASSWORD_GLOBAL" "$GITLAB_SERVER" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/"
       assert_equal "$(gitlab_repo_exists_locally "$gitlab_repo_name")" "FOUND"
       echo "FOUND"
     elif [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
@@ -190,7 +143,7 @@ get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
 #  pwd_before
 #  pwd_àfter
 # Globals:
-#  MIRROR_LOCATION
+#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
 # Arguments:
 #   Name of the GitLab repository.
 # Returns:
@@ -210,7 +163,7 @@ git_pull_gitlab_repo() {
 	pwd_before="$PWD"
 
     # Do a git pull inside the gitlab repository.
-    cd "$MIRROR_LOCATION/GitLab/$gitlab_repo_name" && git pull
+    cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$gitlab_repo_name" && git pull
     cd ../../..
 
     # Get the path after executing the command (to verify it is restored
@@ -243,8 +196,8 @@ git_pull_gitlab_repo() {
 #  gitlab_repo_name
 #  gitlab_username
 # Globals:
-#  GITLAB_PERSONAL_ACCESS_TOKEN
-#  MIRROR_LOCATION
+#  GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL
+#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
 #  GITLAB_SERVER_HTTP_URL
 # Arguments:
 #   Name of the GitLab repository.
@@ -257,14 +210,14 @@ git_pull_gitlab_repo() {
 #  None.
 # TODO(a-t-0): Check if GitLab server is running.
 # TODO(a-t-0): Capitalize $personal_access_token in all files.
-# TODO(a-t-0): Localize $GITLAB_PERSONAL_ACCESS_TOKEN as an argument.
+# TODO(a-t-0): Localize $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL as an argument.
 #######################################
 create_empty_repository_v0() {
   local gitlab_repo_name="$1"
   local gitlab_username="$2"
 
    # load personal_access_token (from hardcoded data)
-    personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
+    personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 
   # TODO(a-t-0): Check if GitLab server is running.
 
@@ -396,7 +349,7 @@ delete_gitlab_repository_if_it_exists() {
 #  gitlab_username
 #  personal_access_token
 # Globals:
-#  GITLAB_PERSONAL_ACCESS_TOKEN
+#  GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL
 #  GITLAB_SERVER_HTTP_URL
 # Arguments:
 #  Name of the GitLab repository.
@@ -413,7 +366,7 @@ delete_existing_repository() {
 
   # load personal_access_token
   local personal_access_token
-  personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
+  personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 
   local output
   output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE "$GITLAB_SERVER_HTTP_URL"/api/v4/projects/"$repo_username"%2F"$repo_name")
@@ -432,7 +385,7 @@ delete_existing_repository() {
 # Local variables:
 #  gitlab_repo_name
 #  gitlab_username
-#  GITLAB_SERVER_PASSWORD
+#  GITLAB_SERVER_PASSWORD_GLOBAL
 #  gitlab_server
 #  target_directory
 #  output
@@ -450,18 +403,19 @@ delete_existing_repository() {
 #  None.
 # TODO (a-t-0): write test to verify the gitlab username and server don't end with a spacebar character.
 # TODO (a-t-0): rename to clone_gitlab_repository_from _local_server.
+# TODO (a-t-0): change GITLAB_SERVER_PASSWORD_GLOBAL_GLOBAL to and rename local_GITLAB_SERVER_PASSWORD_GLOBAL to GITLAB_SERVER_PASSWORD_GLOBAL
 #######################################
 clone_repository() {
   local repo_name=$1
   local gitlab_username=$2
-  local GITLAB_SERVER_PASSWORD=$3
+  local local_GITLAB_SERVER_PASSWORD_GLOBAL=$3
   local gitlab_server=$4
   local target_directory=$5
 
   # TODO:write test to verify the gitlab username and server don't end with a spacebar character.
 
   # Clone the GitLab repository into the GitLab mirror storage location.
-  output=$(cd "$target_directory" && git clone http://$gitlab_username:$GITLAB_SERVER_PASSWORD@$gitlab_server/$gitlab_username/$repo_name.git)
+  output=$(cd "$target_directory" && git clone http://$gitlab_username:$local_GITLAB_SERVER_PASSWORD_GLOBAL@$gitlab_server/$gitlab_username/$repo_name.git)
 }
 
 
@@ -478,7 +432,7 @@ clone_repository() {
 #  pwd_before
 #  pwd_after
 # Globals:
-#  MIRROR_LOCATION
+#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
 # Arguments:
 #  The GitHub repository name.
 #  The GitHub branch name.
@@ -511,7 +465,7 @@ checkout_branch_in_github_repo() {
 	  pwd_before="$PWD"
 
       # Checkout the branch inside the repository.
-      cd "$MIRROR_LOCATION/$company/$github_repo_name" && git checkout "$github_branch_name"
+      cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/$company/$github_repo_name" && git checkout "$github_branch_name"
       cd ../../../..
       # Get the path after executing the command (to verify it is restored correctly after).
       local pwd_after
@@ -557,7 +511,7 @@ checkout_branch_in_github_repo() {
 #  pwd_before
 #  pwd_after
 # Globals:
-#  MIRROR_LOCATION
+#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
 # Arguments:
 #  The GitHub repository name.
 #  The GitHub branch name.
@@ -588,7 +542,7 @@ checkout_branch_in_gitlab_repo() {
 	  pwd_before="$PWD"
 
       # Checkout the branch inside the repository.
-      cd "$MIRROR_LOCATION/$company/$gitlab_repo_name" && git checkout "$gitlab_branch_name"
+      cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/$company/$gitlab_repo_name" && git checkout "$gitlab_branch_name"
       cd ../../../..
 
       # Get the path after executing the command (to verify it is restored correctly after).
@@ -604,7 +558,7 @@ checkout_branch_in_gitlab_repo() {
       pwd_before="$PWD"
 
       # Create the branch.
-      cd "$MIRROR_LOCATION/$company/$gitlab_repo_name" && git checkout -b "$gitlab_branch_name"
+      cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/$company/$gitlab_repo_name" && git checkout -b "$gitlab_branch_name"
       cd ../../../..
       # Get the path after executing the command (to verify it is restored correctly after).
       pwd_after="$PWD"
@@ -628,7 +582,7 @@ checkout_branch_in_gitlab_repo() {
 # Local variables:
 #  repo_name
 #  gitlab_username
-#  GITLAB_SERVER_PASSWORD
+#  GITLAB_SERVER_PASSWORD_GLOBAL
 #  gitlab_server
 #  target_directory
 # Globals:
@@ -647,11 +601,11 @@ checkout_branch_in_gitlab_repo() {
 push_changes() {
   local repo_name=$1
   local gitlab_username=$2
-  local GITLAB_SERVER_PASSWORD=$3
+  local GITLAB_SERVER_PASSWORD_GLOBAL=$3
   local gitlab_server=$4
   local target_directory=$5
 
-  output=$(cd "$target_directory" && git push http://$gitlab_username:$GITLAB_SERVER_PASSWORD@$gitlab_server/$gitlab_username/$repo_name.git)
+  output=$(cd "$target_directory" && git push http://$gitlab_username:$GITLAB_SERVER_PASSWORD_GLOBAL@$gitlab_server/$gitlab_username/$repo_name.git)
 }
 
 
@@ -702,7 +656,7 @@ delete_target_folder() {
 #  filepath
 #  found_branch_name
 # Globals:
-#  MIRROR_LOCATION
+#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
 # Arguments:
 #  None
 # Returns:
@@ -741,7 +695,7 @@ commit_changes_to_gitlab() {
 
       # If the GitHub branch contains a gitlab yaml file
       local filepath
-	  filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
+	  filepath="$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name/.gitlab-ci.yml"
       if [ "$(file_exists $filepath)" == "FOUND" ]; then
 
         # If the GitLab repository exists
@@ -755,10 +709,10 @@ commit_changes_to_gitlab() {
 
             # Then copy the files and folders from the GitHub branch into the GitLab branch (excluding the .git directory)
             # That also deletes the files that exist in the GitLab branch that do not exist in the GitHub branch (excluding the .git directory)
-            copy_github_files_and_folders_to_gitlab "$MIRROR_LOCATION/GitHub/$github_repo_name" "$MIRROR_LOCATION/GitLab/$github_repo_name"
+            copy_github_files_and_folders_to_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$github_repo_name"
 
             # Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
-            comparison_result="$(two_folders_are_identical_excluding_subdir $MIRROR_LOCATION/GitHub/$github_repo_name $MIRROR_LOCATION/GitLab/$github_repo_name .git)"
+            comparison_result="$(two_folders_are_identical_excluding_subdir $PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name $PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$github_repo_name .git)"
 
             # Verify the files were correctly copied from GitHub branch to GitLab branch.
             if [ "$comparison_result" == "IDENTICAL" ]; then
@@ -767,10 +721,10 @@ commit_changes_to_gitlab() {
               # Get the path before executing the command (to verify it is restored correctly after).
               pwd_before="$PWD"
 
-              if [[ "$(git_has_changes "$MIRROR_LOCATION/GitLab/$github_repo_name")" == "FOUND" ]]; then
+              if [[ "$(git_has_changes "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$github_repo_name")" == "FOUND" ]]; then
 
                 # Commit the changes to GitLab.
-                cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit -m \"$github_commit_sha\"
+                cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$github_repo_name" && git add -A && git commit -m \"$github_commit_sha\"
                 cd ../../../..
               fi
 
@@ -831,8 +785,8 @@ commit_changes_to_gitlab() {
 #  comparison_result
 #  found_branch_name
 # Globals:
-#  MIRROR_LOCATION
-#  GITLAB_PERSONAL_ACCESS_TOKEN
+#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
+#  GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL
 #  GITLAB_SERVER_HTTP_URL
 # Arguments:
 #  The GitHub repository name.
@@ -884,7 +838,7 @@ push_changes_to_gitlab() {
 
       # If the GitHub branch contains a gitlab yaml file
       local filepath
-	  filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
+	  filepath="$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name/.gitlab-ci.yml"
       if [ "$(file_exists $filepath)" == "FOUND" ]; then
 
         # If the GitLab repository exists
@@ -900,11 +854,11 @@ push_changes_to_gitlab() {
 
             # Then copy the files and folders from the GitHub branch into the GitLab branch (excluding the .git directory)
             # That also deletes the files that exist in the GitLab branch that do not exist in the GitHub branch (excluding the .git directory)
-            copy_github_files_and_folders_to_gitlab "$MIRROR_LOCATION/GitHub/$github_repo_name" "$MIRROR_LOCATION/GitLab/$github_repo_name"
+            copy_github_files_and_folders_to_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$github_repo_name"
 
             # Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
             local comparison_result
-			comparison_result="$(two_folders_are_identical_excluding_subdir $MIRROR_LOCATION/GitHub/$github_repo_name $MIRROR_LOCATION/GitLab/$github_repo_name .git)"
+			comparison_result="$(two_folders_are_identical_excluding_subdir $PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repo_name $PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$github_repo_name .git)"
 
             # Verify the files were correctly copied from GitHub branch to GitLab branch.
             if [ "$comparison_result" == "IDENTICAL" ]; then
@@ -920,7 +874,7 @@ push_changes_to_gitlab() {
               #git log
 
               # Commit the changes to GitLab.
-              cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git push --set-upstream origin "$gitlab_branch_name"
+              cd "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitLab/$github_repo_name" && git push --set-upstream origin "$gitlab_branch_name"
               cd ../../../..
 
               # Get the path after executing the command (to verify it is

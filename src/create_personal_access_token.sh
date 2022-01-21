@@ -7,10 +7,10 @@ source src/helper.sh
 gitlab_host=$GITLAB_SERVER_HTTP_URL
 # shellcheck disable=SC2154
 # shellcheck disable=SC2034
-gitlab_user=$GITLAB_SERVER_ACCOUNT
+gitlab_user=$GITLAB_SERVER_ACCOUNT_GLOBAL
 # shellcheck disable=SC2154
 # shellcheck disable=SC2034
-gitlab_password=$GITLAB_SERVER_PASSWORD
+gitlab_password=$GITLAB_SERVER_PASSWORD_GLOBAL
 
 
 # Get shared registration token:
@@ -19,30 +19,30 @@ gitlab_password=$GITLAB_SERVER_PASSWORD
 #9r6sPoAx3BFqZnxfexLS
 
 
-# source src/create_personal_access_token.sh && create_gitlab_personal_access_token
+# source src/create_personal_access_token.sh && create_GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL
 # verify at: http://127.0.0.1/-/profile/personal_access_tokens
-create_gitlab_personal_access_token() {
+create_GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL() {
 	docker_container_id=$(get_docker_container_id_of_gitlab_server)
 	# trim newlines
-	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
-	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
-	token_name=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME" | tr -d '\r')
+	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
+	token_name=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL_NAME" | tr -d '\r')
 	
 	# Source: https://gitlab.example.com/-/profile/personal_access_tokens?name=Example+Access+token&scopes=api,read_user,read_registry
 	# Create a personal access token
 	# TODO: limit scope to only required scope
 	# https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html
 	# shellcheck disable=SC2154
-	if [ "$gitlab_personal_access_token_exists" == "NOTFOUND" ]; then
+	if [ "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL_exists" == "NOTFOUND" ]; then
 		# shellcheck disable=SC2034
 		output="$(sudo docker exec -i "$docker_container_id" bash -c "gitlab-rails runner \"token = User.find_by_username('$gitlab_username').personal_access_tokens.create(scopes: [:api], name: '$token_name'); token.set_token('$personal_access_token'); token.save! \"")"
 	fi
 }
 
-gitlab_personal_access_token_exists() {
+GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL_exists() {
 	# shellcheck disable=SC2034
 	list_of_personal_access_tokens=$(get_personal_access_token_list "Filler")
-	if [  "$(lines_contain_string "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME" "\${list_of_personal_access_tokens}")" == "NOTFOUND" ]; then
+	if [  "$(lines_contain_string "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL_NAME" "\${list_of_personal_access_tokens}")" == "NOTFOUND" ]; then
 		echo "NOTFOUND"
 	else
 		echo "FOUND"
@@ -50,7 +50,7 @@ gitlab_personal_access_token_exists() {
 }
 
 get_personal_access_token_list() {
-	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
+	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 	#command="curl --header \"PRIVATE-TOKEN:$personal_access_token\" ""$gitlab_host""/api/v4/personal_access_tokens"
 	#echo "Command=$command"
 	# TODO: Note used to be a space after the semicolon, check if it is required

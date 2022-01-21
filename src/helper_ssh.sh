@@ -17,7 +17,7 @@
 # Hardcoded data:
 
 # Get GitHub username.
-github_username=$1
+GITHUB_USERNAME_GLOBAL=$1
 
 # Get GitHub repository name.
 github_repo=$2
@@ -29,26 +29,26 @@ verbose=$4
 
 # Get GitLab username.
 # shellcheck disable=SC2154
-gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT" | tr -d '\r')
+gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 
 # Get GitLab user password.
-GITLAB_SERVER_PASSWORD=$(echo "$GITLAB_SERVER_PASSWORD" | tr -d '\r')
+GITLAB_SERVER_PASSWORD_GLOBAL=$(echo "$GITLAB_SERVER_PASSWORD_GLOBAL" | tr -d '\r')
 
 # Get GitLab personal access token from hardcoded file.
 # shellcheck disable=SC2153
-gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
+GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 
 # Specify GitLab mirror repository name.
 gitlab_repo="$github_repo"
 
 if [ "$verbose" == "TRUE" ]; then
-	echo "MIRROR_LOCATION=$MIRROR_LOCATION"
-	echo "github_username=$github_username"
+	echo "PUBLIC_GITHUB_TEST_REPO_GLOBAL=$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
+	echo "GITHUB_USERNAME_GLOBAL=$GITHUB_USERNAME_GLOBAL"
 	echo "github_repo=$github_repo"
 	echo "github_personal_access_code=$github_personal_access_code"
 	echo "gitlab_username=$gitlab_username"
-	echo "GITLAB_SERVER_PASSWORD=$GITLAB_SERVER_PASSWORD"
-	echo "gitlab_personal_access_token=$gitlab_personal_access_token"
+	echo "GITLAB_SERVER_PASSWORD_GLOBAL=$GITLAB_SERVER_PASSWORD_GLOBAL"
+	echo "GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL=$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL"
 	echo "gitlab_repo=$gitlab_repo"
 fi
 
@@ -69,31 +69,31 @@ activate_ssh_account() {
 # Structure:ssh
 # Check ssh-access to GitHub repo.
 check_ssh_access_to_repo() {
-	github_username=$1
+	GITHUB_USERNAME_GLOBAL=$1
 	github_repository=$2
 	retry=$3
 	
 	# shellcheck disable=SC2034
-	my_service_status=$(git ls-remote git@github.com:"$github_username"/"$github_repository".git 2>&1)
+	my_service_status=$(git ls-remote git@github.com:"$GITHUB_USERNAME_GLOBAL"/"$github_repository".git 2>&1)
 	found_error_in_ssh_command=$(lines_contain_string "ERROR" "\${my_service_status}")
 	
 	if [ "$found_error_in_ssh_command" == "NOTFOUND" ]; then
 		echo "HASACCESS"
 	elif [ "$found_error_in_ssh_command" == "FOUND" ]; then
 		if [ "$retry" == "YES" ]; then
-			echo "Your ssh-account:$github_username does not have pull access to the repository:$github_repository"
+			echo "Your ssh-account:$GITHUB_USERNAME_GLOBAL does not have pull access to the repository:$github_repository"
 			exit 4
 			# TODO: Throw error
 			#(A public repository should grant ssh access even if no ssh credentials for that GitHub user is given.)
 		else
-			#activate_ssh_account "$github_username"
-			check_ssh_access_to_repo "$github_username" "$github_repository" "YES"
+			#activate_ssh_account "$GITHUB_USERNAME_GLOBAL"
+			check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repository" "YES"
 		fi
 	fi
 }
 
 # Structure:ssh
 has_access() {
-	#echo $(check_ssh_access_to_repo "$github_username" "$github_repo")
-	check_ssh_access_to_repo "$github_username" "$github_repo"
+	#echo $(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo")
+	check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo"
 }

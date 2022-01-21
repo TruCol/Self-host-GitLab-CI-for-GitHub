@@ -22,13 +22,13 @@ create_gitlab_personal_access_token() {
 	# TODO: limit scope to only required scope
 	# https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html
 	# shellcheck disable=SC2154
-	if [ "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL_exists" == "NOTFOUND" ]; then
+	if [ "$gitlab_personal_access_token_exists" == "NOTFOUND" ]; then
 		# shellcheck disable=SC2034
 		output="$(sudo docker exec -i "$docker_container_id" bash -c "gitlab-rails runner \"token = User.find_by_username('$gitlab_username').personal_access_tokens.create(scopes: [:api], name: '$token_name'); token.set_token('$personal_access_token'); token.save! \"")"
 	fi
 }
 
-GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL_exists() {
+gitlab_personal_access_token_exists() {
 	# shellcheck disable=SC2034
 	list_of_personal_access_tokens=$(get_personal_access_token_list "Filler")
 	if [  "$(lines_contain_string "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL" "\${list_of_personal_access_tokens}")" == "NOTFOUND" ]; then

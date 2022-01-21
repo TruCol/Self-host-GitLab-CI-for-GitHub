@@ -21,7 +21,7 @@ source src/import.sh
 
  
 @test "Checking decision logic." {
-	output=$(GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL_exists "Filler")
+	output=$(gitlab_personal_access_token_exists "Filler")
 	EXPECTED_OUTPUT="FOUND"
 	assert_equal "$output" "$EXPECTED_OUTPUT"
 }
@@ -30,5 +30,5 @@ source src/import.sh
 @test "Checking list of existing personal-access-tokens." {
 	output=$(get_personal_access_token_list "Filler")
 	echo "output=$output"
-	assert_equal "$(lines_contain_string "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL_NAME" "\${output}")" "FOUND"
+	assert_equal "$(lines_contain_string "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL" "\${output}")" "FOUND"
 }

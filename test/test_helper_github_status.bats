@@ -92,7 +92,7 @@ setup() {
 	# Specify the variables as they are inside the function
 	GITHUB_USERNAME_GLOBAL="$GITHUB_USERNAME_GLOBAL"
 	github_repository="$non_existant_repository"
-	target_directory="$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$non_existant_repository"
+	target_directory="$MIRROR_LOCATION/GitHub/$non_existant_repository"
 	
 	export GITHUB_USERNAME_GLOBAL  github_repository has_access target_directory
 	run bash -c 'source src/import.sh src/push_repo_to_gitlab.sh &&  export GITHUB_USERNAME_GLOBAL  github_repository && clone_github_repository'
@@ -112,12 +112,12 @@ setup() {
 	remove_mirror_directories
 	
 	github_repository="$non_existant_repository"
-	target_directory="$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$non_existant_repository"
+	target_directory="$MIRROR_LOCATION/GitHub/$non_existant_repository"
 	
 	export github_repository target_directory
 	run bash -c 'source src/import.sh src/mirror_github_to_gitlab.sh &&  verify_github_repository_is_cloned'
 	assert_failure
-	assert_output "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$github_repository"
+	assert_output "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
 }
 
 # 3.c Clone repository and verify it is cloned
@@ -125,8 +125,8 @@ setup() {
 	# Verify ssh-access
 	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
-	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
-	repo_was_cloned=$(verify_github_repository_is_cloned "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
 	assert_equal "$repo_was_cloned" "FOUND"
 }
 
@@ -137,7 +137,7 @@ setup() {
 	# Verify ssh-access
 	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
-	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	###################### Self contained test ###############
 	
 	
@@ -158,7 +158,7 @@ setup() {
 	# Verify ssh-access
 	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
-	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	###################### Self contained test ###############
 	
 	initialise_github_branches_array "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
@@ -186,7 +186,7 @@ END
 	# Verify ssh-access
 	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
-	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	###################### Self contained test ###############
 		
 	# Get a list of existing branches in the GitHub example_repository

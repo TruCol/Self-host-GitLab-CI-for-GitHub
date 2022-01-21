@@ -24,7 +24,7 @@ RUNNER_REGISTRATION_TOKEN_FILEPATH=src/runner_registration_token.txt
 CONDA_ENVIRONMENT_NAME=batch_copy_issues
 REPONAME_GET_RUNNER_TOKEN_PYTHON="get-gitlab-runner-registration-token"
 RUNNER_USERNAME="gitlab-runner" 
-GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL_NAME=sometokenname
+GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL=sometokenname
 
 # Run GitLab repository
 SOURCE_FOLDERNAME=repo_to_test_runner

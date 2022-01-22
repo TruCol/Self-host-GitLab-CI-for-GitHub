@@ -7,7 +7,7 @@ load 'libs/bats-file/load'
 # https://github.com/bats-core/bats-assert#usage
 load 'assert_utils'
 
-source src/import.sh
+# source src/import.sh
 
 example_lines=$(cat <<-END
 ssh-ed25519 longcode/longcode somename-somename-123
@@ -98,7 +98,7 @@ setup() {
 	assert_equal "$GITHUB_USERNAME_GLOBAL" a-t-0
 	#has_access="$()"
 	non_existant_repository="NON_EXISTANT_REPOSITORY"
-	run bash -c "source src/import.sh src/mirror_github_to_gitlab.sh && check_ssh_access_to_repo $GITHUB_USERNAME_GLOBAL $non_existant_repository"
+	run bash -c "# source src/import.sh src/mirror_github_to_gitlab.sh && check_ssh_access_to_repo $GITHUB_USERNAME_GLOBAL $non_existant_repository"
 	assert_failure
 	assert_output 'Your ssh-account:'$GITHUB_USERNAME_GLOBAL' does not have pull access to the repository:'$non_existant_repository
 }
@@ -136,7 +136,7 @@ setup() {
 @test "Assert code execution is terminated if a required ssh-key is not activated." {
 	non_existant_ssh_account="Some_random_non_existing_ssh_account_31415926531"
 	
-	run bash -c "source src/import.sh src/helper.sh && verify_ssh_key_is_added_to_ssh_agent $non_existant_ssh_account"
+	run bash -c "# source src/import.sh src/helper.sh && verify_ssh_key_is_added_to_ssh_agent $non_existant_ssh_account"
 	assert_failure
 	assert_output 'Please ensure the ssh-account '$non_existant_ssh_account' key is added to the ssh agent. You can do that with commands:'"\\n"' eval $(ssh-agent -s)'"\n"'ssh-add ~/.ssh/'$non_existant_ssh_account''"\n"' Please run this script again once you are done.'
 	#assert_output "$feedback"
@@ -148,7 +148,7 @@ setup() {
 	
 	existant_ssh_account="$GITHUB_USERNAME_GLOBAL"
 	
-	run bash -c "source src/import.sh src/helper.sh && verify_ssh_key_is_added_to_ssh_agent $existant_ssh_account"
+	run bash -c "# source src/import.sh src/helper.sh && verify_ssh_key_is_added_to_ssh_agent $existant_ssh_account"
 	assert_success
 }
 

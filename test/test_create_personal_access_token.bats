@@ -3,7 +3,7 @@
 load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 
-source src/import.sh
+# source src/import.sh
 
 
 # Source: https://docs.gitlab.com/ee/api/personal_access_tokens.html#personal-access-tokens-api

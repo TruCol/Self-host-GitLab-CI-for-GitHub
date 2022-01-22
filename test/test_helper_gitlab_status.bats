@@ -7,7 +7,7 @@ load 'libs/bats-file/load'
 # https://github.com/bats-core/bats-assert#usage
 load 'assert_utils'
 
-source src/import.sh
+# source src/import.sh
 
 example_lines=$(cat <<-END
 ssh-ed25519 longcode/longcode somename-somename-123
@@ -169,7 +169,7 @@ setup() {
 	# TODO: make it work if the GitLab repo is private.
 	
 	gitlab_repo_name="non-existing-repository"
-	run bash -c "source src/import.sh src/mirror_github_to_gitlab.sh && get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab $gitlab_username $gitlab_repo_name"
+	run bash -c "# source src/import.sh src/mirror_github_to_gitlab.sh && get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab $gitlab_username $gitlab_repo_name"
 	assert_failure
 	assert_output --partial "ERROR, the GitLab repository was not found in the GitLab server."
 }
@@ -192,7 +192,7 @@ setup() {
 	#assert_equal --partial "$paths" "PWD=$PWD"
 	# TODO: generate list of acceptable output statements
 	# Already up to date.
-	run bash -c "source src/import.sh src/mirror_github_to_gitlab.sh && git_pull_gitlab_repo $gitlab_repo_name"
+	run bash -c "# source src/import.sh src/mirror_github_to_gitlab.sh && git_pull_gitlab_repo $gitlab_repo_name"
 	assert_failure
 	assert_output "ERROR, the GitLab repository does not exist locally."
 }
@@ -305,8 +305,8 @@ setup() {
 	
 	
 	# Verify the get_current_gitlab_branch function returns the correct branch.
-	#run bash -c "source src/import.sh src/helper.sh src/mirror_github_to_gitlab.sh && assert_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company"
-	run bash -c "source src/import.sh src/mirror_github_to_gitlab.sh && assert_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company"
+	#run bash -c "# source src/import.sh src/helper.sh src/mirror_github_to_gitlab.sh && assert_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company"
+	run bash -c "# source src/import.sh src/mirror_github_to_gitlab.sh && assert_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name $company"
 	assert_success
 }
 
@@ -336,8 +336,8 @@ setup() {
 	
 	# Verify the get_current_gitlab_branch function returns the correct branch.
 	non_existing_branchname="non-existing-branchname"
-	#run bash -c "source src/import.sh src/helper.sh && assert_current_gitlab_branch $gitlab_repo_name $non_existing_branchname $company"
-	run bash -c "source src/import.sh src/mirror_github_to_gitlab.sh && assert_current_gitlab_branch $gitlab_repo_name $non_existing_branchname $company"
+	#run bash -c "# source src/import.sh src/helper.sh && assert_current_gitlab_branch $gitlab_repo_name $non_existing_branchname $company"
+	run bash -c "# source src/import.sh src/mirror_github_to_gitlab.sh && assert_current_gitlab_branch $gitlab_repo_name $non_existing_branchname $company"
 	
 	assert_failure
 	assert_output "The current Gitlab branch does not match the expected Gitlab branch:$non_existing_branchname"

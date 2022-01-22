@@ -368,7 +368,7 @@ delete_existing_repository() {
   fi
 }
 
-
+#
 #######################################
 # Clones the GitLab repository into the GitLab mirror storage location.
 # How to run:
@@ -665,7 +665,6 @@ delete_target_folder() {
 # TODO (a-t-0): Verify the changes were committed to GitLab correctly.(There 
 # commit message equals the sha)
 #######################################
-delete_target_folder() {
 commit_changes_to_gitlab() {
   local github_repo_name="$1"
   local github_branch_name="$2"
@@ -875,7 +874,7 @@ push_changes_to_gitlab() {
               path_before_equals_path_after_command "$pwd_before" "$pwd_after"
 
             else
-              echo <<END "ERROR, the content in the GitHub branch is not exactly
+              echo "ERROR, the content in the GitHub branch is not exactly
 			  copied into the GitLab branch, even when excluding the .git directory."
 			  END
               exit 11

@@ -7,7 +7,7 @@ load 'libs/bats-file/load'
 # https://github.com/bats-core/bats-assert#usage
 load 'assert_utils'
 
-source src/import.sh
+# source src/import.sh
 
 @test "Verify manual_assert_equal passes on equal input." {
 	left="same"
@@ -16,7 +16,7 @@ source src/import.sh
 	assert_equal "$left" "$right"
 	
 	
-	run bash -c "source src/import.sh src/helper_asserts.sh && manual_assert_equal $left $right"
+	run bash -c "# source src/import.sh src/helper_asserts.sh && manual_assert_equal $left $right"
 	assert_success
 }
 
@@ -27,7 +27,7 @@ source src/import.sh
 	assert_not_equal "$left" "$right"
 	
 	
-	run bash -c "source src/import.sh src/helper_asserts.sh && manual_assert_equal $left $right"
+	run bash -c "# source src/import.sh src/helper_asserts.sh && manual_assert_equal $left $right"
 	assert_failure
 	assert_output --partial "Error, same does not equal: different"
 	
@@ -40,7 +40,7 @@ source src/import.sh
 	assert_not_equal "$left" "$right"
 	
 	
-	run bash -c "source src/import.sh src/helper_asserts.sh && manual_assert_not_equal $left $right"
+	run bash -c "# source src/import.sh src/helper_asserts.sh && manual_assert_not_equal $left $right"
 	assert_success
 }
 
@@ -52,7 +52,7 @@ source src/import.sh
 	assert_equal "$left" "$right"
 	
 	
-	run bash -c "source src/import.sh src/helper_asserts.sh && manual_assert_not_equal $left $right"
+	run bash -c "# source src/import.sh src/helper_asserts.sh && manual_assert_not_equal $left $right"
 	assert_failure
 	assert_output --partial "Error, same equals: same"
 }

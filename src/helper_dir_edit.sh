@@ -1,6 +1,5 @@
 #!/bin/bash
 
-source src/import.sh
 
 
 # Structure:dir_edit

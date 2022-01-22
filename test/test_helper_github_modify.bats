@@ -7,7 +7,7 @@ load 'libs/bats-file/load'
 # https://github.com/bats-core/bats-assert#usage
 load 'assert_utils'
 
-source src/import.sh
+# source src/import.sh
 
 example_lines=$(cat <<-END
 ssh-ed25519 longcode/longcode somename-somename-123
@@ -128,7 +128,7 @@ setup() {
 	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
 
 	# Check if branch is found in local GitHub repo.
-	run bash -c "source src/import.sh src/helper_github_modify.sh && github_branch_exists $github_repo_name $github_branch_name"
+	run bash -c "# source src/import.sh src/helper_github_modify.sh && github_branch_exists $github_repo_name $github_branch_name"
 	assert_failure
 	assert_output --partial "ERROR, the GitHub repository does not exist locally."
 }
@@ -232,7 +232,7 @@ setup() {
 	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
 		
 	# Check if branch is found in local GitHub repo.
-	run bash -c "source src/import.sh src/helper_gitlab_modify.sh src/import.sh && checkout_branch_in_github_repo $github_repo_name $github_branch_name $company"
+	run bash -c "# source src/import.sh src/helper_gitlab_modify.sh src/import.sh && checkout_branch_in_github_repo $github_repo_name $github_branch_name $company"
 	assert_failure
 	assert_output --partial "ERROR, the GitHub repository does not exist locally."
 	
@@ -272,7 +272,7 @@ setup() {
 	assert_equal "$repo_was_cloned" "FOUND"
 	
 	# Check if branch is found in local GitHub repo.
-	run bash -c "source src/import.sh src/helper_gitlab_modify.sh && checkout_branch_in_github_repo $github_repo_name $github_branch_name $company"
+	run bash -c "# source src/import.sh src/helper_gitlab_modify.sh && checkout_branch_in_github_repo $github_repo_name $github_branch_name $company"
 	assert_failure
 	assert_output --partial "ERROR, the GitHub branch does not exist locally."
 	

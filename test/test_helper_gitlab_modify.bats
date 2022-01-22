@@ -7,7 +7,7 @@ load 'libs/bats-file/load'
 # https://github.com/bats-core/bats-assert#usage
 load 'assert_utils'
 
-source src/import.sh
+# source src/import.sh
 
 example_lines=$(cat <<-END
 ssh-ed25519 longcode/longcode somename-somename-123
@@ -271,7 +271,7 @@ setup() {
 	fi
 	
 	# If it already exists, delete the repository
-	run bash -c "source src/import.sh src/helper_gitlab_modify.sh && delete_existing_repository sponsor_example root"
+	run bash -c "# source src/import.sh src/helper_gitlab_modify.sh && delete_existing_repository sponsor_example root"
 	assert_failure
 	assert_output --partial "ERROR, you tried to delete a GitLab repository that does not exist."
 }

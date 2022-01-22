@@ -73,7 +73,7 @@ run_gitlab_docker() {
 	gitlab_package=$(get_gitlab_package)
 	#read -p "Create command." >&2
 	# shellcheck disable=SC2154
-	command="sudo docker run --detach --hostname $GITLAB_SERVER --publish $GITLAB_PORT_1 --publish $GITLAB_PORT_2 --publish $GITLAB_PORT_3 --name $GITLAB_NAME --restart always --volume $GITLAB_HOME/config:/etc/gitlab --volume $GITLAB_HOME/logs:/var/log/gitlab --volume $GITLAB_HOME/data:/var/opt/gitlab -e GITLAB_ROOT_EMAIL_GLOBAL=$GITLAB_ROOT_EMAIL_GLOBAL -e GITLAB_ROOT_PASSWORD=$GITLAB_SERVER_PASSWORD_GLOBAL $gitlab_package"
+	command="sudo docker run --detach --hostname $GITLAB_SERVER --publish $GITLAB_PORT_1 --publish $GITLAB_PORT_2 --publish $GITLAB_PORT_3 --name $GITLAB_NAME --restart always --volume $GITLAB_HOME/config:/etc/gitlab --volume $GITLAB_HOME/logs:/var/log/gitlab --volume $GITLAB_HOME/data:/var/opt/gitlab -e GITLAB_ROOT_EMAIL=$GITLAB_ROOT_EMAIL_GLOBAL -e GITLAB_ROOT_PASSWORD=$GITLAB_SERVER_PASSWORD_GLOBAL $gitlab_package"
 	#read -p "Created command." >&2
 	echo "command=$command" > "$LOG_LOCATION""run_gitlab.txt"
 	#read -p "Exportedcommand." >&2
@@ -85,7 +85,7 @@ run_gitlab_docker() {
 #	  --volume $GITLAB_HOME/config:/etc/gitlab \
 #	  --volume $GITLAB_HOME/logs:/var/log/gitlab \
 #	  --volume $GITLAB_HOME/data:/var/opt/gitlab \
-#	  -e GITLAB_ROOT_EMAIL_GLOBAL=$GITLAB_ROOT_EMAIL_GLOBAL -e GITLAB_ROOT_PASSWORD=$GITLAB_SERVER_PASSWORD_GLOBAL \
+#	  -e GITLAB_ROOT_EMAIL=$GITLAB_ROOT_EMAIL_GLOBAL -e GITLAB_ROOT_PASSWORD=$GITLAB_SERVER_PASSWORD_GLOBAL \
 #	  $gitlab_package)
 	  
 	  # Works for both root and for some_email@protonmail.com
@@ -97,7 +97,7 @@ run_gitlab_docker() {
 #	  --volume $GITLAB_HOME/config:/etc/gitlab \
 #	  --volume $GITLAB_HOME/logs:/var/log/gitlab \
 #	  --volume $GITLAB_HOME/data:/var/opt/gitlab \
-#	  -e GITLAB_ROOT_EMAIL_GLOBAL="some_email@protonmail.com" -e GITLAB_ROOT_PASSWORD="gitlab_root_password" -e EXTERNAL_URL="http://127.0.0.1" \
+#	  -e GITLAB_ROOT_EMAIL="some_email@protonmail.com" -e GITLAB_ROOT_PASSWORD="gitlab_root_password" -e EXTERNAL_URL="http://127.0.0.1" \
 #	  $gitlab_package)
 	  
 	  output=$(sudo docker run --detach \
@@ -108,13 +108,13 @@ run_gitlab_docker() {
 	  --volume "$GITLAB_HOME"/config:/etc/gitlab \
 	  --volume "$GITLAB_HOME"/logs:/var/log/gitlab \
 	  --volume "$GITLAB_HOME"/data:/var/opt/gitlab \
-	  -e GITLAB_ROOT_EMAIL_GLOBAL="$GITLAB_ROOT_EMAIL_GLOBAL" -e GITLAB_ROOT_PASSWORD="yoursecretpassword" -e EXTERNAL_URL="http://127.0.0.1" \
+	  -e GITLAB_ROOT_EMAIL="$GITLAB_ROOT_EMAIL_GLOBAL" -e GITLAB_ROOT_PASSWORD="yoursecretpassword" -e EXTERNAL_URL="http://127.0.0.1" \
 	  "$gitlab_package")
 	  #read -p "Ran command." >&2
 	  echo "$output"
-	  #-e GITLAB_ROOT_EMAIL_GLOBAL="some_email@protonmail.com" -e GITLAB_ROOT_PASSWORD="$GITLAB_SERVER_PASSWORD_GLOBAL" -e EXTERNAL_URL="http://127.0.0.1" \
-	  #-e GITLAB_ROOT_EMAIL_GLOBAL="some_email@protonmail.com" -e GITLAB_ROOT_PASSWORD=$GITLAB_SERVER_PASSWORD_GLOBAL -e EXTERNAL_URL="http://127.0.0.1" \
-	  #-e GITLAB_ROOT_EMAIL_GLOBAL=$GITLAB_ROOT_EMAIL_GLOBAL -e GITLAB_ROOT_PASSWORD=yoursecretpassword -e EXTERNAL_URL="http://127.0.0.1" \
+	  #-e GITLAB_ROOT_EMAIL="some_email@protonmail.com" -e GITLAB_ROOT_PASSWORD="$GITLAB_SERVER_PASSWORD_GLOBAL" -e EXTERNAL_URL="http://127.0.0.1" \
+	  #-e GITLAB_ROOT_EMAIL="some_email@protonmail.com" -e GITLAB_ROOT_PASSWORD=$GITLAB_SERVER_PASSWORD_GLOBAL -e EXTERNAL_URL="http://127.0.0.1" \
+	  #-e GITLAB_ROOT_EMAIL=$GITLAB_ROOT_EMAIL_GLOBAL -e GITLAB_ROOT_PASSWORD=yoursecretpassword -e EXTERNAL_URL="http://127.0.0.1" \
 	  
 }
 

@@ -2,16 +2,6 @@
 # A file that contains functions to make modifications to GitLab
 # repositories.
 
-
-# Get GitLab user password.
-GITLAB_SERVER_PASSWORD_GLOBAL=$(echo "$GITLAB_SERVER_PASSWORD_GLOBAL" | tr -d '\r')
-
-# Get GitLab personal access token from hardcoded file.
-GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
-
-# Specify GitLab mirror repository name.
-gitlab_repo="$github_repo"
-
 #######################################
 # Deletes the repository if it doesn't exist in the GitLab server.
 # Local variables:
@@ -77,7 +67,6 @@ gitlab_repo_exists_locally(){
 # Local variables:
 #  gitlab_username
 #  gitlab_repo_name
-#  GITLAB_SERVER_PASSWORD_GLOBAL
 # Globals:
 #  MIRROR_LOCATION
 #  GITLAB_SERVER
@@ -100,8 +89,10 @@ gitlab_repo_exists_locally(){
 # TODO(a-t-0): verify local GitLab mirror repo directories are created.
 # TODO(a-t-0): verify the repository exists in GitLab, throw error otherwise.
 # TODO(a-t-0): do a gitlab pull to get the latest version.
-# TODO(a-t-0): Capitalize $GITLAB_SERVER_ACCOUNT_GLOBAL in all files.
-# TODO(a-t-0): Capitalize $GITLAB_SERVER_PASSWORD_GLOBAL in all files.
+# TODO(a-t-0): Change the use of MIRROR_LOCATION to local input argument.
+# TODO(a-t-0): Change the use of GITLAB_SERVER to local input argument.
+# TODO(a-t-0): Change the use of GITLAB_SERVER_ACCOUNT_GLOBAL to local input argument.
+# TODO(a-t-0): Change the use of GITLAB_SERVER_PASSWORD_GLOBAL to local input argument.
 #######################################
 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
   local gitlab_username="$1"
@@ -600,11 +591,11 @@ checkout_branch_in_gitlab_repo() {
 push_changes() {
   local repo_name=$1
   local gitlab_username=$2
-  local GITLAB_SERVER_PASSWORD_GLOBAL=$3
+  local gitlab_server_password=$3
   local gitlab_server=$4
   local target_directory=$5
 
-  output=$(cd "$target_directory" && git push http://$gitlab_username:$GITLAB_SERVER_PASSWORD_GLOBAL@$gitlab_server/$gitlab_username/$repo_name.git)
+  output=$(cd "$target_directory" && git push http://$gitlab_username:$gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
 }
 
 
@@ -785,7 +776,6 @@ commit_changes_to_gitlab() {
 #  found_branch_name
 # Globals:
 #  MIRROR_LOCATION
-#  GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL
 #  GITLAB_SERVER_HTTP_URL
 # Arguments:
 #  The GitHub repository name.

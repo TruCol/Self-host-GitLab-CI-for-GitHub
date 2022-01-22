@@ -3,7 +3,6 @@
 # Source: https://docs.gitlab.com/runner/install/
 # Source: https://docs.gitlab.com/runner/install/linux-manually.html
 
-source src/import.sh
 
 # TODO: change to install and boot
 install_and_run_gitlab_runner() {

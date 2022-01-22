@@ -4,7 +4,7 @@ load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 
 
-source src/import.sh
+# source src/import.sh
 
 # TODO: move to import
 # TODO: verify there are no function name collisons.

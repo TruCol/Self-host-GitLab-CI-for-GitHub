@@ -4,7 +4,7 @@ load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 load 'libs/bats-file/load'
 
-source src/import.sh
+# source src/import.sh
 
 # Method that executes all tested main code before running tests.
 setup() {

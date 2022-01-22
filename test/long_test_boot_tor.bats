@@ -4,7 +4,7 @@ load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 load 'libs/bats-file/load'
 
-source src/import.sh
+# source src/import.sh
 
 
 # TODO: ensure they always pass without requiring user input (probably by ensuring process output is piped into /dev/null, or by changing sleep methods.)

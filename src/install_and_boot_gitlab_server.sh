@@ -9,8 +9,6 @@
 		# Install GitLab
 		# Run command to host GitLab server
 
-source src/import.sh
-
 install_and_run_gitlab_server() {
 	gitlab_package=$(get_gitlab_package)
 	# TODO: verify if architecture is supported, raise error if not

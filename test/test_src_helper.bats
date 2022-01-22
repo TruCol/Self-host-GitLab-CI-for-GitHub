@@ -4,7 +4,7 @@ load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 
 source src/import.sh
-source src/boot_tor.sh
+#source src/boot_tor.sh
 
 @test "Verify the timestamp is created and contains the recent time." {
 	filepath=test/timestamp.txt
@@ -442,4 +442,3 @@ source src/boot_tor.sh
 	EXPECTED_OUTPUT="NOTFOUND"
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }
-

@@ -22,8 +22,7 @@ GITLAB_SERVER_PASSWORD_GLOBAL=$(echo "$GITLAB_SERVER_PASSWORD_GLOBAL" | tr -d '\
 #echo "$GITLAB_SERVER_PASSWORD_GLOBAL$filler"
 #read -p "Done"
 
-# TODO: salvage the used functions of this file and move it into src.
-source src/first_time/src/helper_first_time.sh
+
 
 source src/helper_ci_management.sh
 source src/helper_dir_edit.sh
@@ -34,7 +33,12 @@ source src/helper_gitlab_status.sh
 source src/helper_git_neutral.sh
 source src/helper_ssh.sh
 
+# For tests
 
+# TODO: salvage the used functions of this file and move it into src.
+source src/first_time/src/helper_first_time.sh
+source src/boot_tor.sh
+source src/helper_dir_edit.sh
 
 
 source src/get_gitlab_server_runner_token.sh

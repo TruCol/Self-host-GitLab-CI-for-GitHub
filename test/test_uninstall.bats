@@ -4,9 +4,10 @@ load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 load 'libs/bats-file/load'
 
-
-
+# TODO: prevent it is ran automatically
 source uninstall_gitlab.sh
+
+
 
 
 @test "If error is thrown for arguments -s and -y." {

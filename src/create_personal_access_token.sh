@@ -1,17 +1,6 @@
 #!/bin/bash
 # Source: https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#programmatically-creating-a-personal-access-token
-source src/hardcoded_variables.txt
-#source src/creds.txt
-source src/helper.sh
-
-gitlab_host=$GITLAB_SERVER_HTTP_URL
-# shellcheck disable=SC2154
-# shellcheck disable=SC2034
-gitlab_user=$gitlab_server_account
-# shellcheck disable=SC2154
-# shellcheck disable=SC2034
-gitlab_password=$gitlab_server_password
-
+source src/import.sh
 
 # Get shared registration token:
 #source: https://github.com/veertuinc/getting-started/blob/ef159275743b2481e68feb92b2c56b5698ad6d6c/GITLAB/install-and-run-anka-gitlab-runners-on-mac.bash
@@ -24,9 +13,9 @@ gitlab_password=$gitlab_server_password
 create_gitlab_personal_access_token() {
 	docker_container_id=$(get_docker_container_id_of_gitlab_server)
 	# trim newlines
-	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
-	token_name=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME" | tr -d '\r')
+	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
+	token_name=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL" | tr -d '\r')
 	
 	# Source: https://gitlab.example.com/-/profile/personal_access_tokens?name=Example+Access+token&scopes=api,read_user,read_registry
 	# Create a personal access token
@@ -42,7 +31,7 @@ create_gitlab_personal_access_token() {
 gitlab_personal_access_token_exists() {
 	# shellcheck disable=SC2034
 	list_of_personal_access_tokens=$(get_personal_access_token_list "Filler")
-	if [  "$(lines_contain_string "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME" "\${list_of_personal_access_tokens}")" == "NOTFOUND" ]; then
+	if [  "$(lines_contain_string "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL" "\${list_of_personal_access_tokens}")" == "NOTFOUND" ]; then
 		echo "NOTFOUND"
 	else
 		echo "FOUND"
@@ -50,10 +39,10 @@ gitlab_personal_access_token_exists() {
 }
 
 get_personal_access_token_list() {
-	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
+	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 	#command="curl --header \"PRIVATE-TOKEN:$personal_access_token\" ""$gitlab_host""/api/v4/personal_access_tokens"
 	#echo "Command=$command"
 	# TODO: Note used to be a space after the semicolon, check if it is required
-	token_list=$(curl --header "PRIVATE-TOKEN:$personal_access_token" "$gitlab_host""/api/v4/personal_access_tokens")
+	token_list=$(curl --header "PRIVATE-TOKEN:$personal_access_token" "$GITLAB_SERVER_HTTP_URL""/api/v4/personal_access_tokens")
 	echo "$token_list"
 }

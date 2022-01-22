@@ -3,9 +3,6 @@
 # Source: https://docs.gitlab.com/runner/install/
 # Source: https://docs.gitlab.com/runner/install/linux-manually.html
 
-source src/helper.sh
-source src/install_and_boot_gitlab_runner.sh
-
 uninstall_gitlab_runner() {
 	arch=$(get_architecture)
 	# TODO: verify if architecture is supported, raise error if not

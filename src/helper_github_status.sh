@@ -1,53 +1,5 @@
 #!/bin/bash
-# run with:
-#./mirror_github_to_gitlab.sh "a-t-0" "testrepo" "filler_github"
 
-###source src/helper_dir_edit.sh
-###source src/helper_github_modify.sh
-####source src/helper_github_status.sh
-###source src/helper_gitlab_modify.sh
-###source src/helper_gitlab_status.sh
-###source src/helper_git_neutral.sh
-###source src/helper_ssh.sh
-###source src/hardcoded_variables.txt
-###source src/creds.txt
-###source src/get_gitlab_server_runner_token.sh
-###source src/push_repo_to_gitlab.sh
-
-# Hardcoded data:
-
-# Get GitHub username.
-github_username=$1
-
-# Get GitHub repository name.
-github_repo=$2
-
-verbose=$3
-
-# Get GitLab username.
-# shellcheck disable=SC2154
-gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
-
-# Get GitLab user password.
-gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')
-
-# Get GitLab personal access token from hardcoded file.
-# shellcheck disable=SC2153
-gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
-
-# Specify GitLab mirror repository name.
-gitlab_repo="$github_repo"
-
-if [ "$verbose" == "TRUE" ]; then
-	echo "MIRROR_LOCATION=$MIRROR_LOCATION"
-	echo "github_username=$github_username"
-	echo "github_repo=$github_repo"
-	echo "github_personal_access_code=$github_personal_access_code"
-	echo "gitlab_username=$gitlab_username"
-	echo "gitlab_server_password=$gitlab_server_password"
-	echo "gitlab_personal_access_token=$gitlab_personal_access_token"
-	echo "gitlab_repo=$gitlab_repo"
-fi
 
 # Structure:github_status
 github_repo_exists_locally(){
@@ -85,7 +37,7 @@ verify_github_repository_is_cloned() {
 # Structure:Github_status (?or?)
 # Structure:git_neutral
 # Clone GitHub repository to folder src/mirror/GITHUB
-####clone_github_repository "$github_username" "$github_repo" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo"
+####clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo"
 ####verify_github_repository_is_cloned "$github_repo" "$MIRROR_LOCATION/GitHub/$github_repository"
 get_git_branches() {
     local -n arr=$1             # use nameref for indirection
@@ -325,7 +277,7 @@ get_org_repos() {
 	arr=() # innitialise array with branches
 	
 	# get GitHub personal access token or verify ssh access to support private repositories.
-	github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
+	github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 	
 	theoutput=$(curl -H "Authorization: token $github_personal_access_code" "Accept: application/vnd.github.v3+json" https://api.github.com/users/"${github_organisation_or_username}"/repos?per_page=100 | jq -r '.[] | .name')
 	

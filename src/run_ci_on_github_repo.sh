@@ -1,47 +1,5 @@
 #!/bin/bash
 
-
-
-# Hardcoded data:
-
-# Get GitHub username.
-github_username=$1
-
-# Get GitHub repository name.
-github_repo=$2
-
-
-
-verbose=$3
-
-# get GitHub personal access token or verify ssh access to support private repositories.
-github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
-
-# Get GitLab username.
-# shellcheck disable=SC2154
-gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
-
-# Get GitLab user password.
-gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')
-
-# Get GitLab personal access token from hardcoded file.
-# shellcheck disable=SC2153
-gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
-
-# Specify GitLab mirror repository name.
-gitlab_repo="$github_repo"
-
-if [ "$verbose" == "TRUE" ]; then
-	echo "MIRROR_LOCATION=$MIRROR_LOCATION"
-	echo "github_username=$github_username"
-	echo "github_repo=$github_repo"
-	echo "github_personal_access_code=$github_personal_access_code"
-	echo "gitlab_username=$gitlab_username"
-	echo "gitlab_server_password=$gitlab_server_password"
-	echo "gitlab_personal_access_token=$gitlab_personal_access_token"
-	echo "gitlab_repo=$gitlab_repo"
-fi
-
 # source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "hiveminds"
 # source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "a-t-0"
 # Make a list of the repositories in the GitHub repository.
@@ -67,22 +25,22 @@ run_ci_on_all_repositories_of_user(){
 # run with:
 # source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo "a-t-0" "sponsor_example"
 run_ci_on_github_repo() {
-	github_username="$1"
+	GITHUB_USERNAME_GLOBAL="$1"
 	github_repo_name="$2"
 	
 	# TODO: write test to verify whether the build status can be pushed to a branch. (access wise).
 	# TODO: Store log file output if a repo (and/or branch) have been skipped.
 	# TODO: In that log file, inlcude: time, which user, which repo, which branch, why.
 	
-	download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
-	copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name"
+	download_github_repo_on_which_to_run_ci "$GITHUB_USERNAME_GLOBAL" "$github_repo_name"
+	copy_github_branches_with_yaml_to_gitlab_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name"
 }
 
 
 # run with:
 # source src/import.sh src/run_ci_on_github_repo.sh && download_github_repo_on_which_to_run_ci "a-t-0" "sponsor_example"
 download_github_repo_on_which_to_run_ci() {
-	github_username="$1"
+	GITHUB_USERNAME_GLOBAL="$1"
 	github_repo_name="$2"
 	
 	# 0. Check access to GitHub repository
@@ -104,10 +62,10 @@ download_github_repo_on_which_to_run_ci() {
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$github_username" "$github_repo_name")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
-	clone_github_repository "$github_username" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
 	
 	
 	# 2. Verify the GitHub repo is cloned.
@@ -120,7 +78,7 @@ download_github_repo_on_which_to_run_ci() {
 #run bash -c "source src/import.sh src/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example"
 #source src/import.sh src/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example
 copy_github_branches_with_yaml_to_gitlab_repo() {
-	github_username="$1"
+	GITHUB_USERNAME_GLOBAL="$1"
 	github_repo_name="$2"
 	
 	# 2. Verify the GitHub repo is cloned.
@@ -158,13 +116,13 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 		
 			# TODO: check if github commit already has CI build status
 			# TODO: allow overriding this check to enforce the CI to run again on this commit.
-			already_has_build_status_result="$(github_commit_already_has_gitlab_ci_build_status_result "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha")"
+			already_has_build_status_result="$(github_commit_already_has_gitlab_ci_build_status_result "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$github_branch_name" "$github_commit_sha")"
 			# Get last line of that check, because the git pull command also produces output.
 			last_line_already_has_build_status_result=$(get_last_line_of_set_of_lines "\"${already_has_build_status_result}")
 			
 			if [[ "$last_line_already_has_build_status_result" == "NOTFOUND" ]]; then
 				if [[ "$branch_contains_yaml" == "FOUND" ]]; then
-					copy_github_branch_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "${github_branches[i]}" "$commit"
+					copy_github_branch_with_yaml_to_gitlab_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "${github_branches[i]}" "$commit"
 				fi
 			else
 				echo "Already has a build status:$github_repo_name / $github_branch_name / $github_commit_sha"
@@ -176,7 +134,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 
 
 copy_github_branch_with_yaml_to_gitlab_repo() {
-	github_username="$1"
+	GITHUB_USERNAME_GLOBAL="$1"
 	github_repo_name="$2"
 	github_branch_name="$3"
 	github_commit_sha="$4"
@@ -185,14 +143,10 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	gitlab_repo_name="$github_repo_name"
 	gitlab_branch_name="$github_branch_name"
 	
-	# get GitHub personal access token or verify ssh access to support private repositories.
-	github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
 	
-	# Get GitLab username.
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
 	
 	# Get GitLab server url from credentials file.
-	gitlab_website_url=$(echo "$gitlab_website_url" | tr -d '\r')
+	GITLAB_WEBSITE_URL_GLOBAL=$(echo "$GITLAB_WEBSITE_URL_GLOBAL" | tr -d '\r')
 	
 	# Verify the get_current_github_branch function returns the correct branch.
 	actual_result="$(get_current_github_branch "$github_repo_name" "$github_branch_name" "GitHub")"
@@ -204,10 +158,10 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	
 	# 5.1 Create the empty GitLab repo.
 	# Create the empty GitLab repository (deletes any existing GitLab repos with same name).
-	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
+	create_empty_repository_v0 "$gitlab_repo_name" "$GITLAB_SERVER_ACCOUNT_GLOBAL"
 	
 	# 5.2 Clone the empty Gitlab repo from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"
 	
 	# 5.3 Check if the GitLab branch exists, if not, create it.
 	# 5.4 Check out the GitLab branch
@@ -241,11 +195,8 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	push_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
 	# TODO: verify the changes are pushed correctly
 
-	# Get GitLab personal access token from hardcoded file.
-	gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
-
 	# Get last commit of GitLab repo.
-	gitlab_commit_sha=$(get_commit_sha_of_branch "$github_branch_name" "$github_repo_name" "$gitlab_username" "$gitlab_personal_access_token")
+	gitlab_commit_sha=$(get_commit_sha_of_branch "$github_branch_name" "$github_repo_name" "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL")
 	gitlab_commit_sha=$(echo "$gitlab_commit_sha" | tr -d '"') # removes double quotes at start and end.
 	#echo "gitlab_commit_sha=$gitlab_commit_sha"
 	
@@ -259,13 +210,13 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	
 	# 7. Once the build status is found, use github personal access token to
 	# set the build status in the GitHub commit.
-	output=$(set_build_status_of_github_commit "$github_username" "$github_repo_name" "$github_commit_sha" "$github_personal_access_code" "$gitlab_website_url" "$last_line_gitlab_ci_build_status")
+	output=$(set_build_status_of_github_commit "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$github_commit_sha" "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$GITLAB_WEBSITE_URL_GLOBAL" "$last_line_gitlab_ci_build_status")
 	echo "output=$output"
 	
 	
-	copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$last_line_gitlab_ci_build_status"
+	copy_commit_build_status_to_github_status_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$last_line_gitlab_ci_build_status"
 	
-	push_commit_build_status_in_github_status_repo_to_github "$github_username"
+	push_commit_build_status_in_github_status_repo_to_github "$GITHUB_USERNAME_GLOBAL"
 	
 	# TODO: delete this function
 	#get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha"
@@ -303,16 +254,11 @@ rebuild_get_gitlab_ci_build_status() {
 	# Assume identical repository and branch names:
 	gitlab_repo_name="$github_repo_name"
 	gitlab_branch_name="$github_branch_name"
-	
-	# Get GitLab username.
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
 
 	
 	
 	# curl --header "PRIVATE-TOKEN: <your_access_token>" "http://127.0.0.1/api/v4/projects/1/pipelines"
-	pipelines=$(curl --header "PRIVATE-TOKEN: $gitlab_personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$gitlab_repo_name/pipelines")
-	#echo "gitlab_personal_access_token=$gitlab_personal_access_token"
-	#echo "pipelines=$pipelines"
+	pipelines=$(curl --header "PRIVATE-TOKEN: $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "http://127.0.0.1/api/v4/projects/$GITLAB_SERVER_ACCOUNT_GLOBAL%2F$gitlab_repo_name/pipelines")
 	
 	# get build status from pipelines
 	job=$(echo "$pipelines" | jq -r 'map(select(.sha == "'"$gitlab_commit_sha"'"))')
@@ -347,40 +293,40 @@ parse_gitlab_ci_status_to_github_build_status() {
 
 # 7. Once the build status is found, use github personal access token to
 # set the build status in the GitHub commit.
+# TODO: change the input arguments to remove GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL
 set_build_status_of_github_commit() {
-	github_username="$1"
+	GITHUB_USERNAME_GLOBAL="$1"
 	github_repo_name="$2"
 	github_commit_sha="$3"
-	github_personal_access_code="$4"
-	gitlab_website_url="$5"
-	commit_build_status="$6"
+	GITLAB_WEBSITE_URL_GLOBAL="$4"
+	commit_build_status="$5"
 	
 	# Check if arguments are valid.
 	if [[ "$github_commit_sha" == "" ]]; then
 		echo "ERROR, the github commit sha is empty, whereas it shouldn't be."
 		exit 113
-	elif [[ "$github_personal_access_code" == "" ]]; then
+	elif [[ "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" == "" ]]; then
 		echo "ERROR, the github personal access token is empty, whereas it shouldn't be."
 		exit 114
 	elif [[ "$commit_build_status" == "" ]]; then
 		echo "ERROR, the GitLab build status is empty, whereas it shouldn't be."
 		exit 115
-	elif [[ "$gitlab_website_url" == "" ]]; then
+	elif [[ "$GITLAB_WEBSITE_URL_GLOBAL" == "" ]]; then
 		echo "ERROR, the GitLab server website url is empty, whereas it shouldn't be."
 		exit 116
 	fi
 	
-	#echo "gitlab_website_url=$gitlab_website_url"
+	#echo "GITLAB_WEBSITE_URL_GLOBAL=$GITLAB_WEBSITE_URL_GLOBAL"
 	#echo "commit_build_status=$commit_build_status"
 	
 	# Create message in JSON format
 	JSON_FMT='{"state":"%s","description":"%s","target_url":"%s"}\n'
 	# shellcheck disable=SC2059
-	json_string=$(printf "$JSON_FMT" "$commit_build_status" "$commit_build_status" "$gitlab_website_url")
+	json_string=$(printf "$JSON_FMT" "$commit_build_status" "$commit_build_status" "$GITLAB_WEBSITE_URL_GLOBAL")
 	#echo "json_string=$json_string"
 	
 	# Set the build status
-	setting_output=$(curl -H "Authorization: token $github_personal_access_code" --request POST --data "$json_string" https://api.github.com/repos/"$github_username"/"$github_repo_name"/statuses/"$github_commit_sha")
+	setting_output=$(curl -H "Authorization: token $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" --request POST --data "$json_string" https://api.github.com/repos/"$GITHUB_USERNAME_GLOBAL"/"$github_repo_name"/statuses/"$github_commit_sha")
 	
 	# Check if output is valid
 	#echo "setting_output=$setting_output"
@@ -394,8 +340,8 @@ set_build_status_of_github_commit() {
 	fi
 	
 	# Verify the build status is set correctly
-	getting_output=$(GET https://api.github.com/repos/"$github_username"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
-	expected_url="\"url\":\"https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha\","
+	getting_output=$(GET https://api.github.com/repos/"$GITHUB_USERNAME_GLOBAL"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
+	expected_url="\"url\":\"https://api.github.com/repos/$GITHUB_USERNAME_GLOBAL/$github_repo_name/statuses/$github_commit_sha\","
 	expected_state="\"state\":\"$commit_build_status\","
 	if [ "$(lines_contain_string "$expected_url" "\${getting_output}")" == "NOTFOUND" ]; then
 		# shellcheck disable=SC2059
@@ -408,7 +354,7 @@ set_build_status_of_github_commit() {
 }
 
 copy_commit_build_status_to_github_status_repo() {
-	github_username="$1"
+	GITHUB_USERNAME_GLOBAL="$1"
 	github_repo_name="$2"
 	github_branch_name="$3"
 	github_commit_sha="$4"
@@ -421,20 +367,20 @@ copy_commit_build_status_to_github_status_repo() {
 	manual_assert_file_exists "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	# 8. Clone the GitHub build statusses repository.
-	clone_github_repository "$github_username" "$GITHUB_STATUS_WEBSITE" "$has_access" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 	
 	# 9. Verify the Build status repository is cloned.
-	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE")
+	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")
 	manual_assert_equal "$repo_was_cloned" "FOUND"
 	
 	# 10. Copy the GitLab CI Build status icon to the build status repository.
 	# Create a folder of the repository on which a CI has been ran, inside the GitHub build status website repository, if it does not exist yet
 	# Also add a folder for the branch(es) of that GitLab CI repository, in that respective folder.
 	
-	mkdir -p "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name"
+	mkdir -p "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name"
 	
 	
 	# TODO: 11. Include the build status and link to the GitHub commit in the repository in the SVG file.
@@ -443,44 +389,44 @@ copy_commit_build_status_to_github_status_repo() {
 		echo "ERROR, a pending or running build status should not reach this method."
 		exit 121
 	elif [  "$status" == "success" ]; then
-		cp "src/svgs/passed.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name""/build_status.svg"
+		cp "src/svgs/passed.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/build_status.svg"
 	elif [  "$status" == "failure" ]; then
-		cp "src/svgs/failed.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name""/build_status.svg"
+		cp "src/svgs/failed.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/build_status.svg"
 	elif [  "$status" == "error" ]; then
-		cp "src/svgs/error.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name""/build_status.svg"
+		cp "src/svgs/error.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/build_status.svg"
 	elif [  "$status" == "unknown" ]; then
-		cp "src/svgs/unknown.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name""/build_status.svg"
+		cp "src/svgs/unknown.svg" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/build_status.svg"
 	fi
 	
 	# Assert svg file is created correctly
-	manual_assert_equal "$(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name""/build_status.svg")" "FOUND"
+	manual_assert_equal "$(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/build_status.svg")" "FOUND"
 	
 	# Explicitly store build status per commit per branch per repo.
-	echo "$status" > "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name""/$github_commit_sha.txt"
+	echo "$status" > "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/$github_commit_sha.txt"
 	
 	# manual_assert GitHub commit build status txt file is created correctly
-	manual_assert_equal "$(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name""/$github_commit_sha.txt")" "FOUND"
+	manual_assert_equal "$(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/$github_commit_sha.txt")" "FOUND"
 	
 	# manual_assert GitHub commit build status txt file contains the right data.
-	manual_assert_equal "$(cat "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE/$github_repo_name/$github_branch_name""/$github_commit_sha.txt")" "$status"
+	manual_assert_equal "$(cat "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name""/$github_commit_sha.txt")" "$status"
 }
 
 push_commit_build_status_in_github_status_repo_to_github() {
-	github_username="$1"
+	GITHUB_USERNAME_GLOBAL="$1"
 	
 	# Verify the Build status repository is cloned.
-	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE")
+	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")
 	manual_assert_equal "$repo_was_cloned" "FOUND"
 	
 	# 12. Verify there have been changes made. Only push if changes are added."
-	if [[ "$(git_has_changes "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE")" == "FOUND" ]]; then
-		commit_changes "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"
+	if [[ "$(git_has_changes "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")" == "FOUND" ]]; then
+		commit_changes "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 		
 		# Verify ssh-access
-		has_access="$(check_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE")"
+		has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 		
 		# 13. Push the changes to the GitHub build status repository.
-		push_to_github_repository "$github_username" "$has_access" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE"
+		push_to_github_repository "$GITHUB_USERNAME_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 	fi
 	
 	# TODO 14. Verify the changes are pushed to the GitHub build status repository.

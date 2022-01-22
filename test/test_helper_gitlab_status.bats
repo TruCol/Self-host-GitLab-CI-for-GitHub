@@ -71,13 +71,13 @@ setup() {
 @test "Test if GitLab repository is created." {
 	
 	# Get GitLab default username.
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 
-	create_empty_repository_v0 "$PUBLIC_GITHUB_TEST_REPO" "$gitlab_username"
+	create_empty_repository_v0 "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$gitlab_username"
 	
 	# Verify the repo is created.
-	output_after_creation=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO")
+	output_after_creation=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
 	assert_equal "$output_after_creation" "FOUND"
 }
 
@@ -86,7 +86,7 @@ setup() {
 	# TODO: verify the repository is added before testing whether it exists.
 	# TODO: remove the repository after verifying it exists
 	
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	test_repo_name="extra-project"
@@ -116,7 +116,7 @@ setup() {
 	# TODO: verify the repository is added before testing whether it exists.
 	# TODO: remove the repository after verifying it exists
 	
-	gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
+	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
 	create_empty_repository_v0 "non-existing-repository" "$gitlab_username" 
@@ -210,7 +210,7 @@ setup() {
 	# TODO: Check whether the repository exists in the GitLab server
 	# TODO: If the repository does not exist in the GitLab server, upload it.
 	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"
 	
 	# Checkout branch, if branch is found in local Gitlab repo.
 	# TODO: re-enable
@@ -238,7 +238,7 @@ setup() {
 	# TODO: Check whether the repository exists in the GitLab server
 	# TODO: If the repository does not exist in the GitLab server, upload it.
 	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"
 	
 	# Checkout branch, if branch is found in local Gitlab repo.
 	# TODO: re-enable
@@ -268,7 +268,7 @@ setup() {
 	# TODO: Check whether the repository exists in the GitLab server
 	# TODO: If the repository does not exist in the GitLab server, upload it.
 	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"
 	
 	# Checkout branch, if branch is found in local Gitlab repo.
 	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
@@ -293,7 +293,7 @@ setup() {
 	# TODO: Check whether the repository exists in the GitLab server
 	# TODO: If the repository does not exist in the GitLab server, upload it.
 	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"
 	
 	# Checkout branch, if branch is found in local Gitlab repo.
 	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
@@ -322,7 +322,7 @@ setup() {
 	# TODO: Check whether the repository exists in the GitLab server
 	# TODO: If the repository does not exist in the GitLab server, upload it.
 	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"
 	
 	# Checkout branch, if branch is found in local Gitlab repo.
 	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"
@@ -356,7 +356,7 @@ setup() {
 	# TODO: Check whether the repository exists in the GitLab server
 	# TODO: If the repository does not exist in the GitLab server, upload it.
 	# Clone the GitLab repository from the GitLab server
-	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$gitlab_server_account" "$gitlab_repo_name"
+	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"
 	
 	# Checkout branch, if branch is found in local Gitlab repo.
 	actual_result="$(checkout_branch_in_gitlab_repo $gitlab_repo_name $gitlab_branch_name $company)"

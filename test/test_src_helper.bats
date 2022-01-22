@@ -4,11 +4,11 @@ load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 
 
-source src/helper.sh
-source src/install_and_boot_gitlab_server.sh
-source test/helper.sh
+source src/import.sh
 
-source src/hardcoded_variables.txt
+# TODO: move to import
+# TODO: verify there are no function name collisons.
+source test/helper.sh
 source test/hardcoded_testdata.txt
 
 #@test "Checking get_checksum." {

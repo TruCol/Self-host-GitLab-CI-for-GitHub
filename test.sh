@@ -1,6 +1,7 @@
 # Run this file to run all the tests, once
-source src/import.sh
+###source src/import.sh
 #./test/libs/bats/bin/bats test/*.bats
+
 
 
 # Long tests (failing)
@@ -19,8 +20,9 @@ source src/import.sh
 # Short tests (failing):
 #./test/libs/bats/bin/bats test/test_install_ssh_over_tor.bats
 # Short tests (passing):
+## Works again
 ./test/libs/bats/bin/bats test/test_boot_tor.bats
-#./test/libs/bats/bin/bats test/test_src_helper.bats
+./test/libs/bats/bin/bats test/test_src_helper.bats
 #./test/libs/bats/bin/bats test/test_uninstall.bats
 #./test/libs/bats/bin/bats test/test_install_and_boot_gitlab_server.bats
 

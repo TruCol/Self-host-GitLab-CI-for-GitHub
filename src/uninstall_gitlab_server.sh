@@ -13,8 +13,10 @@ uninstall_gitlab_server() {
 	is_hard_uninstall=$1
 	is_docker_uninstall=$2
 	
+	
 	# Get which GitLab package is used based on the machine architecture
 	gitlab_package=$(get_gitlab_package)
+	# TODO: assert the gitlab_package is indeed the right package to be removed.
 	
 	# Start stopping, removing and uninstalling GitLab server.
 	stop_docker
@@ -28,7 +30,11 @@ uninstall_gitlab_server() {
 		uninstall_docker_compose
 	fi
 	stop_apache_service
+	# TODO: determine why this passes the lines "${status}" instead of some 
+	# actual content of that status.
+	read -p "Stopped apache."
 	stop_nginx_service
+	read -p "Stopped nginx."
 	#stop_nginx
 	if [ "$is_hard_uninstall" == true ]; then
 		delete_gitlab_folder

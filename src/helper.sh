@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# 
-
 #######################################
 # Returns the architecture of the machine on which this service is ran.
 # Source: https://askubuntu.com/questions/189640/how-to-find-architecture-of-my-pc-and-ubuntu
@@ -243,10 +241,14 @@ file_contains_string() {
 #######################################
 # Structure:Parsing
 lines_contain_string() {
-	STRING=$1
-	eval lines="$2"
+	local substring="$1"
+	#read -p "substring=$substring"
+	#read -p  "2=$2"
+	#eval lines="$2"
+	#lines="$2"
+	lines="$@"
 	# shellcheck disable=SC2154
-	if [[ $lines =~ $STRING ]]; then
+	if [[ "$lines" =~ "$substring" ]]; then
 		echo "FOUND"; 
 	else
 		echo "NOTFOUND";
@@ -852,13 +854,13 @@ stop_apache_service() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0): include throwing warning if nginx was not found (but removed).
 #######################################
 # Structure:status
 #source src/helper.sh && stop_nginx_service
 stop_nginx_service() {
-	services_list=$(systemctl list-units --type=service)
-	if [  "$(lines_contain_string "nginx" "\"${services_list}")" == "FOUND" ]; then
+	local services_list=$(systemctl list-units --type=service)
+	if [  "$(lines_contain_string "nginx" "${services_list}")" == "FOUND" ]; then
 		output=$(sudo service nginx stop)
 		echo "$output"
 	fi

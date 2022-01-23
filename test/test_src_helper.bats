@@ -76,7 +76,18 @@ source src/import.sh
 }
 
 
-@test "Lines contain string." {
+@test "Substring in first line is found in lines by lines_contain_string." {
+	lines=$(printf 'First line\nsecond line \nthird line \n')
+	
+	contained_substring="First line"
+	
+	actual_result=$(lines_contain_string "$contained_substring" "\${lines}")
+	EXPECTED_OUTPUT="FOUND"
+		
+	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
+}
+
+@test "Substring in second line is found in lines by lines_contain_string." {
 	lines=$(printf 'First line\nsecond line \nthird line \n')
 	
 	contained_substring="second"
@@ -86,6 +97,19 @@ source src/import.sh
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }
+
+
+@test "Substring in last line is found in lines by lines_contain_string." {
+	lines=$(printf 'First line\nsecond line \nthird line \n')
+	
+	contained_substring="third line "
+	
+	actual_result=$(lines_contain_string "$contained_substring" "\${lines}")
+	EXPECTED_OUTPUT="FOUND"
+		
+	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
+}
+
 
 
 @test "Test get remainder of line starting from the semicolon character." {

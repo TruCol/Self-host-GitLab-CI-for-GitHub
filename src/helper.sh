@@ -854,13 +854,12 @@ stop_apache_service() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0): include throwing warning if nginx was not found (but removed).
 #######################################
 # Structure:status
 #source src/helper.sh && stop_nginx_service
 stop_nginx_service() {
 	local services_list=$(systemctl list-units --type=service)
-	#read -p "services_list=$services_list"
 	if [  "$(lines_contain_string "nginx" "${services_list}")" == "FOUND" ]; then
 		output=$(sudo service nginx stop)
 		echo "$output"

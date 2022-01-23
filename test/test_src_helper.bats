@@ -3,13 +3,30 @@
 load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 
+source src/import.sh
+#source src/boot_tor.sh
 
-# source src/import.sh
+@test "Verify the timestamp is created and contains the recent time." {
+	filepath=test/timestamp.txt
+	
+	# Delete the file if it exists
+	if [ -f "$filepath" ]; then
+		rm "$filepath"
+	fi
+	
+	# call function that is being tested
+	export_timestamp $filepath
+	
+	# get results and specify expected result.
+	actual_output=$(cat "$filepath")
+	EXPECTED_OUTPUT=$[$(date +%s)]
 
-# TODO: move to import
-# TODO: verify there are no function name collisons.
-source test/helper.sh
-source test/hardcoded_testdata.txt
+	timestamp_age="$(echo $EXPECTED_OUTPUT $actual_output-p | dc)"
+	
+	# assert at most a delay of 5 seconds between file creation and file reading.
+	[ "$timestamp_age" -lt 5 ]
+}
+
 
 #@test "Checking get_checksum." {
 #	md5sum=$(get_expected_md5sum_of_gitlab_runner_installer_for_architecture "amd64")
@@ -425,4 +442,3 @@ source test/hardcoded_testdata.txt
 	EXPECTED_OUTPUT="NOTFOUND"
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }
-

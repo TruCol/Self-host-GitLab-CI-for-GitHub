@@ -1,7 +1,24 @@
 #!/bin/bash
 
-# Structure:github_status
-# 6.a  Make a list of the branches in the GitHub repository
+#######################################
+# Creates a Bash array that can be used by other functions in this script.
+# The array is named github_branches and it contains the names of the
+# GitHub branches in the repository that is passed as an argument.
+# Local variables:
+#  github_repo
+# Globals:
+#  None.
+# Arguments:
+#   Name of the GitHub repository for which the array with branches is created.
+# Returns:
+#  0 if funciton was evaluated succesfull.
+#  7 if the repository was not found.
+# Outputs:
+#  None.
+# TODO(a-t-0): Create consistency in local var naming of github_repo and 
+# github_repo_name. Change it to github_repo. Apply repository wide.
+#######################################
+# TODO(a-t-0): Capitalise github_branches as it is a global variable.
 initialise_github_branches_array() {
 	github_repo=$1
 	get_git_branches github_branches "GitHub" "$github_repo"      # call function to populate the array
@@ -9,7 +26,25 @@ initialise_github_branches_array() {
 	declare -p github_branches
 }
 
-# Structure:gitlab_status
+#######################################
+# Creates a Bash array that can be used by other functions in this script.
+# The array is named gitlab_branches and it contains the names of the
+# GitLab branches in the repository that is passed as an argument.
+# Local variables:
+#  gitlab_repo
+# Globals:
+#  None.
+# Arguments:
+#   Name of the GitLab repository for which the array with branches is created.
+# Returns:
+#  0 if funciton was evaluated succesfull.
+#  7 if the repository was not found.
+# Outputs:
+#  None.
+# TODO(a-t-0): Create consistency in local var naming of github_repo and 
+# github_repo_name. Change it to github_repo. Apply repository wide.
+# TODO(a-t-0): Capitalise gitlab_branches as it is a global variable.
+#######################################
 # 6.a  Make a list of the branches in the gitlab repository
 initialise_gitlab_branches_array() {
 	gitlab_repo=$1
@@ -18,7 +53,26 @@ initialise_gitlab_branches_array() {
 	declare -p gitlab_branches
 }
 
-# Structure:github_status
+
+#######################################
+# Echo's the names of all the branches in the github_branches array.
+# Local variables:
+#  github_branch
+# Globals:
+#  github_branches.
+# Arguments:
+#   None.
+# Returns:
+#  0 if funciton was evaluated succesfull.
+# Outputs:
+#  The list of branches in the repository that was
+# TODO: make sure this function calls the function that populates the branches 
+# array, such that this function indeed loops through the branches in that 
+# repository, and not another, if it is changed inbetween. (TODO: verify if 
+# this function is used before fixing todo).
+# TODO(a-t-0): Determine how to define github_branch as a local variable
+# within the for loop.
+#######################################
 # 6.b Loop through the GitHub mirror repository branches that are already in GitLab
 loop_through_github_branches() {
 	for github_branch in "${github_branches[@]}"; do

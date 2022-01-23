@@ -1,7 +1,10 @@
+source src/import.sh
+
 server_preserve_flag='false'
 server_hard_flag='false'
 server_hard_yes_flag='false'
 runner_flag='false'
+
 
 #verbose='false'
 
@@ -33,9 +36,9 @@ done
 #echo "server_hard_yes_flag=$server_hard_yes_flag";
 #echo "runner_flag=$runner_flag";
 
-source src/uninstall_gitlab_server.sh
-source src/uninstall_gitlab_runner.sh
-source src/hardcoded_variables.txt
+#source src/uninstall_gitlab_server.sh
+#source src/uninstall_gitlab_runner.sh
+#source src/hardcoded_variables.txt
 
 ## argument parsing logic:
 if [ "$server_hard_yes_flag" == "true" ] && [ "$server_preserve_flag" == "true" ]; then

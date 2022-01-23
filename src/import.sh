@@ -23,7 +23,7 @@ GITLAB_SERVER_PASSWORD_GLOBAL=$(echo "$GITLAB_SERVER_PASSWORD_GLOBAL" | tr -d '\
 #read -p "Done"
 
 
-
+# For installation
 source src/helper_ci_management.sh
 source src/helper_dir_edit.sh
 source src/helper_github_modify.sh
@@ -33,8 +33,10 @@ source src/helper_gitlab_status.sh
 source src/helper_git_neutral.sh
 source src/helper_ssh.sh
 
-# For tests
+# For uninstallation
+source src/uninstall_gitlab_server.sh
 
+# For tests
 # TODO: salvage the used functions of this file and move it into src.
 source src/first_time/src/helper_first_time.sh
 source src/boot_tor.sh
@@ -42,6 +44,7 @@ source src/helper_dir_edit.sh
 source src/install_and_boot_gitlab_server.sh
 
 
+# Unsorted imports.
 source src/get_gitlab_server_runner_token.sh
 source src/run_ci_on_github_repo.sh
 

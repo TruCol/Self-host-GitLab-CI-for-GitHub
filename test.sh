@@ -21,28 +21,28 @@
 #./test/libs/bats/bin/bats test/test_install_ssh_over_tor.bats
 
 ### Short tests (passing):
-# Works again
-./test/libs/bats/bin/bats test/test_boot_tor.bats
+## Works again
+#./test/libs/bats/bin/bats test/test_boot_tor.bats
 
 ## Partially working (2 tests still fail)
 ## One test needs to be moved into after installation.
 ./test/libs/bats/bin/bats test/test_src_helper.bats
 
 ## Works Again
-./test/libs/bats/bin/bats test/test_uninstall.bats
+#./test/libs/bats/bin/bats test/test_uninstall.bats
 
 ## Working again
-./test/libs/bats/bin/bats test/test_install_and_boot_gitlab_server.bats
+#./test/libs/bats/bin/bats test/test_install_and_boot_gitlab_server.bats
 
 
 
-# Test mirroring GitHub to GitLab
+#### Test mirroring GitHub to GitLab
 ### Works Again
-./test/libs/bats/bin/bats test/test_helper_dir_edit.bats
+#./test/libs/bats/bin/bats test/test_helper_dir_edit.bats
 ### Partially working (requires installation)
-./test/libs/bats/bin/bats test/test_helper_github_status.bats
+##./test/libs/bats/bin/bats test/test_helper_github_status.bats
 #### # Does not work, it seems to be hanging
-#./test/libs/bats/bin/bats test/test_helper_github_modify.bats
+##./test/libs/bats/bin/bats test/test_helper_github_modify.bats
 #### Works
 ###./test/libs/bats/bin/bats test/test_helper_gitlab_modify.bats
 #### Works

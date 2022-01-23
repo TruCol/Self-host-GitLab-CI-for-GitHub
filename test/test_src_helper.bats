@@ -152,11 +152,14 @@ source src/import.sh
 }
 
 
+# TODO: fix test
 @test "Test file contains string with variable username that does not exist." {
 	username=an-unused-username
 	line="$username	ALL=(ALL:ALL) ALL"
 	actual_result=$(visudo_contains "$line" )
 	EXPECTED_OUTPUT="NOTFOUND"
+	
+	read -p "line=$line"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }

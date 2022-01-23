@@ -1,62 +1,137 @@
 #!/bin/bash
 
-# Structure:Configuration
+# 
+
+#######################################
 # Returns the architecture of the machine on which this service is ran.
 # Source: https://askubuntu.com/questions/189640/how-to-find-architecture-of-my-pc-and-ubuntu
+# Local variables:
+#  architecture
+# mapped_architecture
+# Globals:
+#  None.
+# Arguments:
+#   The detected architecture of the device on which this code is running.
+# Returns:
+#  0 if funciton was evaluated succesfull.
+#  14 if the code is ran on an architecture that is not (yet) supported.
+# Outputs:
+#  A string that represents the architecture on which this code is running. 
+# The code that detects the architecture on the device returns something
+# diffent (x86_64) than the identifier that GitLab uses to indicate which 
+# architecture is used (amd64). That is why the detected architecture is 
+# mapped. 
+#######################################
+# Structure: configuration/hardware
 get_architecture() {
-	architecture=$(uname -m)
+	local architecture=$(uname -m)
 	# TODO: replace with: dpkg --print-architecture and remove if condition
 	
 	# Parse architecture to what is available for GitLab Runner
 	# Source: https://stackoverflow.com/questions/65450286/how-to-install-gitlab-runner-to-centos-fedora
 	if [ "$architecture" == "x86_64" ]; then
-		architecture=amd64
+		local mapped_architecture=amd64
 	else
-		read -rp "ERROR, did not yet find GitLab installation package and GitLab runner installation package for this architecture:$architecture"
+		error "ERROR, did not yet find GitLab installation package and GitLab runner installation package for this architecture:$architecture"
+		exit 14
 	fi
 	
-	echo $architecture
+	echo $mapped_architecture
 }
 
-# Structure:Verification
+
+#######################################
 # Checks whether the md5 checkum of the file specified with the incoming filepath
 # matches that of an expected md5 filepath that is incoming.
-# echo's "EQUAL" if the the expected md5sum equals the measured md5sum
-# returns "NOTEQUAL" otherwise.
+# Local variables:
+# expected_md5sum
+# relative_filepath
+# actual_md5sum
+# actual_md5sum_head
+# Globals:
+#  None.
+# Arguments:
+#  expected_md5sum - the md5sum that is expected to be found at some file/dir.
+#  relative_filepath - Filepath to file/dir whose md5sum is computed, seen from 
+#  the root directory of this repository.
+# Returns:
+#  0 at all times, unless an unexpected error is thrown by e.g. md5sum.
+# Outputs:
+#  "EQUAL" if the the expected md5sum equals the measured md5sum.
+# "NOTEQUAL" otherwise.
+# TODO(a-t-0): rename the method to "check if md5sum is as expected.
+# TODO(a-t-0): Create a duplicate named "assert.." that throws an error if the
+# md5sum of the dir/file that is being inspected, is different than expected.
+#######################################
+# Structure:Verification
 check_md5_sum() {
-	expected_md5=$1
-	REL_FILEPATH=$2
+	local expected_md5sum=$1
+	local relative_filepath=$2
 	
 	# Read out the md5 checksum of the downloaded social package.
-	md5sum=$(sudo md5sum "$REL_FILEPATH")
+	local actual_md5sum=$(sudo md5sum "$relative_filepath")
 	
 	# Extract actual md5 checksum from the md5 command response.
-	md5sum_head=${md5sum:0:32}
+	local actual_md5sum_head=${actual_md5sum:0:32}
 	
 	# Assert the measured md5 checksum equals the hardcoded md5 checksum of the expected file.
 	#manual_assert_equal "$md5_of_social_package_head" "$TWRP_MD5"
-	if [ "$md5sum_head" == "$expected_md5" ]; then
+	if [ "$actual_md5sum_head" == "$expected_md5sum" ]; then
 		echo "EQUAL"
 	else
 		echo "NOTEQUAL"
 	fi
 }
 
+#######################################
+# Calls the function that computes the md5sum of the GitLab installation file 
+# that is being downloaded for the architecture that's detected in this system.
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): Make this function call a hardcoded list/swtich case of expected
+# md5sums from eg hardcoded variables.txt, and make it automatically 
+# compute the md5sum of the respective architecture.
+# TODO(a-t-0):  Run the "has supported architecture check before running the 
+# md5 check.
+#######################################
 # Structure:Verification
-# Computes the md5sum of the GitLab installation file that is being downloaded
-# with respect to the expected md5sum of that file. (For safety).
+# 
 # 
 get_expected_md5sum_of_gitlab_runner_installer_for_architecture() {
-	arch=$1
-	if [ "$arch" == "amd64" ]; then
+	local mapped_architecture=$1
+	if [ "$mapped_architecture" == "amd64" ]; then
 		# shellcheck disable=SC2154
 		echo $x86_64_runner_checksum
 	else
-		read -rp "ERROR, this architecture:$arch is not yet supported by this repository, meaning we did not yet find a GitLab runner package for this architecture. So there is no md5sum available for verification of the md5 checksum of such a downloaded package."
-		#exit 1
+		echo "ERROR, this architecture:$mapped_architecture is not yet supported by this repository, meaning we did not yet find a GitLab runner package for this architecture. So there is no md5sum available for verification of the md5 checksum of such a downloaded package."
+		exit 15
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:Configuration
 # Returns the GitLab installation package name that matches the architecture of the device 
 # on which it is installed. Not every package/GitLab source repository works on each computer/architecture.
@@ -71,6 +146,21 @@ get_gitlab_package() {
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:html
 # Downloads the source code of an incoming website into a file.
 # TODO: ensure/verify curl is installed before calling this method.
@@ -81,31 +171,76 @@ downoad_website_source() {
 	output=$(curl "$site" > "$output_path")
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:Parsing
 get_last_n_lines_without_spaces() {
 	number=$1
-	REL_FILEPATH=$2
+	relative_filepath=$2
 	
 	# get last number lines of file
-	last_number_of_lines=$(sudo tail -n "$number" "$REL_FILEPATH")
+	last_number_of_lines=$(sudo tail -n "$number" "$relative_filepath")
 	
 	# Output true or false to pass the equality test result to parent function
 	echo "$last_number_of_lines"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:Parsing
 # allows a string with spaces, hence allows a line
 file_contains_string() {
 	STRING=$1
-	REL_FILEPATH=$2
+	relative_filepath=$2
 	
-	if grep -q "$STRING" "$REL_FILEPATH" ; then
+	if grep -q "$STRING" "$relative_filepath" ; then
 		echo "FOUND"; 
 	else
 		echo "NOTFOUND";
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:Parsing
 lines_contain_string() {
 	STRING=$1
@@ -118,24 +253,69 @@ lines_contain_string() {
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:Parsing
 get_line_nr() {
 	eval STRING="$1"
-	REL_FILEPATH=$2
-	line_nr=$(awk "/$STRING/{ print NR; exit }" "$REL_FILEPATH")
+	relative_filepath=$2
+	line_nr=$(awk "/$STRING/{ print NR; exit }" "$relative_filepath")
 	echo "$line_nr"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:Parsing
 get_line_by_nr() {
 	number=$1
-	REL_FILEPATH=$2
+	relative_filepath=$2
 	#read -p "number=$number"
-	#read -p "REL_FILEPATH=$REL_FILEPATH"
-	the_line=$(sed "${number}q;d" "$REL_FILEPATH")
+	#read -p "relative_filepath=$relative_filepath"
+	the_line=$(sed "${number}q;d" "$relative_filepath")
 	echo "$the_line"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:Parsing
 get_line_by_nr_from_variable() {
 	number=$1
@@ -150,30 +330,60 @@ get_line_by_nr_from_variable() {
 	done <<< "$lines"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:Parsing
 get_first_line_containing_substring() {
 	# Returns the first line in a file that contains a substring, silent otherwise.
-	eval REL_FILEPATH="$1"
+	eval relative_filepath="$1"
 	eval identification_str="$2"
 	
 	# Get line containing <code id="registration_token">
-	if [ "$(file_contains_string "$identification_str" "$REL_FILEPATH")" == "FOUND" ]; then
-		line_nr=$(get_line_nr "\${identification_str}" "$REL_FILEPATH")
+	if [ "$(file_contains_string "$identification_str" "$relative_filepath")" == "FOUND" ]; then
+		line_nr=$(get_line_nr "\${identification_str}" "$relative_filepath")
 		if [ "$line_nr" != "" ]; then
-			line=$(get_line_by_nr "$line_nr" "$REL_FILEPATH")
+			line=$(get_line_by_nr "$line_nr" "$relative_filepath")
 			echo "$line"
 		else
-			#read -p "ERROR, did find the string in the file but did not find the line number, identification str =\${identification_str} And filecontent=$(cat $REL_FILEPATH)"
+			#read -p "ERROR, did find the string in the file but did not find the line number, identification str =\${identification_str} And filecontent=$(cat $relative_filepath)"
 			#exit 1
 			true #equivalent of Python pass
 		fi
 	else
-		#read -p "ERROR, did not find the string in the file identification str =\${identification_str} And filecontent=$(cat $REL_FILEPATH)"
+		#read -p "ERROR, did not find the string in the file identification str =\${identification_str} And filecontent=$(cat $relative_filepath)"
 		#exit 1
 		true #equivalent of Python pass
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:Parsing
 get_lhs_of_line_till_character() {
 	line=$1
@@ -188,6 +398,21 @@ get_lhs_of_line_till_character() {
 	echo "$lhs"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:Parsing
 get_rhs_of_line_till_character() {
 	# TODO: include space right after character, e.g. return " with" instead of "width" on ": with".
@@ -198,6 +423,21 @@ get_rhs_of_line_till_character() {
 	echo "$rhs"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_docker
 get_docker_container_id_of_gitlab_server() {
 	# echo's the Docker container id if it is found, silent otherwise.
@@ -233,6 +473,21 @@ get_docker_image_identifier() {
 	echo "$(get_lhs_of_line_till_character "$docker_image_name" "/")"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:Configuration
 visudo_contains() {
 	line=$1
@@ -244,6 +499,21 @@ visudo_contains() {
 	echo "$actual_result"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_status
 # gitlab runner status:
 check_gitlab_runner_status() {
@@ -251,6 +521,21 @@ check_gitlab_runner_status() {
 	echo "$status"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_status
 #sudo docker exec -i 79751949c099 bash -c "gitlab-rails status"
 #sudo docker exec -i 79751949c099 bash -c "gitlab-ctl status"
@@ -261,6 +546,21 @@ check_gitlab_server_status() {
 	echo "$status"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_status
 gitlab_server_is_running() {
 	actual_result=$(check_gitlab_server_status)
@@ -287,6 +587,21 @@ gitlab_server_is_running() {
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_status
 # Echo's "RUNNING" if the GitLab runner service is running, "NOTRUNNING" otherwise.
 gitlab_runner_is_running() {
@@ -299,10 +614,21 @@ gitlab_runner_is_running() {
 	fi
 }
 
-# Structure:gitlab_status
-# reconfigure:
-#sudo docker exec -i 4544ce711468 bash -c "gitlab-ctl reconfigure"
-
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Runs for $duration [seconds] and checks whether the GitLab server status is: RUNNING.
 # Throws an error and terminates the code if the GitLab server status is not found to be
 # running within $duration [seconds]
@@ -322,12 +648,42 @@ check_for_n_seconds_if_gitlab_server_is_running() {
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:Parsing
 get_nr_of_lines_in_var() {
 	eval lines="$1"
 	echo "$lines" | wc -l
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:Parsing
 get_last_line_of_set_of_lines() {
 	eval lines="$1"
@@ -339,6 +695,21 @@ get_last_line_of_set_of_lines() {
 	echo "$last_line"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_docker
 docker_image_exists() {
 	# shellcheck disable=SC2034
@@ -355,6 +726,21 @@ docker_image_exists() {
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_docker
 # Returns FOUND if the container is running, returns NOTFOUND if it is not running
 container_is_running() {
@@ -378,6 +764,21 @@ container_is_running() {
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:status
 # Returns "FOUND" if the service is found, NOTFOUND otherwise
 # TODO: write test for case when apache2 is actually running.
@@ -388,6 +789,21 @@ apache2_is_running() {
 	lines_contain_string "unrecognized service" "\${status}"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:status
 # Returns "FOUND" if the service is found, NOTFOUND otherwise
 # TODO: write test for case when nginx is actually running.
@@ -398,6 +814,21 @@ nginx_is_running() {
 	lines_contain_string "unrecognized service" "\${status}"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:status
 # stop ngix service
 stop_apache_service() {
@@ -408,6 +839,21 @@ stop_apache_service() {
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:status
 #source src/helper.sh && stop_nginx_service
 stop_nginx_service() {
@@ -419,7 +865,21 @@ stop_nginx_service() {
 
 }
 
-
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_docker
 ####### STOP START SERVICES
 # Install docker:
@@ -434,12 +894,42 @@ install_docker() {
 	echo "$output"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_docker
 install_docker_compose() {
 	output=$(yes | sudo apt install docker-compose)
 	echo "$output"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_docker
 # Stop docker
 stop_docker() {
@@ -447,6 +937,22 @@ stop_docker() {
 	echo "$output"
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_docker
 # start docker
 start_docker() {
@@ -455,6 +961,21 @@ start_docker() {
 	echo "$output"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_docker
 # Delete all existing gitlab containers
 # 0. First clear all relevant containres using their NAMES:
@@ -463,6 +984,21 @@ list_all_docker_containers() {
 	echo "$output"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_docker
 stop_gitlab_package_docker() {
 	# Get Docker container id
@@ -475,6 +1011,21 @@ stop_gitlab_package_docker() {
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_docker
 remove_gitlab_package_docker() {
 	
@@ -493,6 +1044,21 @@ remove_gitlab_package_docker() {
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_docker
 # Remove all containers
 remove_gitlab_docker_containers() {
@@ -508,7 +1074,21 @@ remove_gitlab_docker_containers() {
 }
 
 
-
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_status
 # Echo's "NO" if the GitLab Runner is not installed, "YES" otherwise.
 #+ TODO: Write test for this function in "modular-test_runner.bats".
@@ -526,6 +1106,21 @@ gitlab_runner_service_is_installed() {
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_status
 #source src/helper.sh && get_build_status
 get_build_status() {
@@ -571,12 +1166,44 @@ get_build_status() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:dir_edit
 dir_exists() {
 	dir=$1 
 	[ -d "$dir" ] && echo "FOUND" || echo "NOTFOUND"
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:dir_edit
 sudo_dir_exists() {
 	dir=$1 
@@ -587,6 +1214,21 @@ sudo_dir_exists() {
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:file_edit
 file_exists() {
 	filepath=$1 
@@ -598,6 +1240,22 @@ file_exists() {
 
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # # Structure:file_edit
 sudo_file_exists() {
 	filepath=$1 
@@ -609,6 +1267,22 @@ sudo_file_exists() {
 
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:dir_edit
 create_dir() {
 	abs_dir=$1
@@ -617,6 +1291,22 @@ create_dir() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:dir_edit
 remove_dir() {
 	abs_dir=$1
@@ -625,6 +1315,22 @@ remove_dir() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:dir_edit
 sudo_create_dir() {
 	abs_dir=$1
@@ -633,6 +1339,22 @@ sudo_create_dir() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:dir_edit
 docker_sudo_create_dir(){
 	abs_dir=$1
@@ -647,6 +1369,21 @@ docker_sudo_create_dir(){
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:dir_edit
 make_user_owner_of_dir() {
 	user=$1
@@ -655,6 +1392,21 @@ make_user_owner_of_dir() {
 	sudo chown -R "$user": "$dir"
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:dir_edit
 is_owner_of_dir() {
 	owner=$1
@@ -664,6 +1416,22 @@ is_owner_of_dir() {
 	echo "$actual_result"
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:Parsing
 get_array() {
 	json=$1
@@ -683,7 +1451,21 @@ get_array() {
 }
 
 
-
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:Parsing
 get_last_space_delimted_item_in_line() {
 	line="$1"
@@ -693,6 +1475,22 @@ get_last_space_delimted_item_in_line() {
 	echo "${stringarray[-1]}"
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:Github_status
 # Structure:ssh
 # Returns FOUND if the incoming ssh account is activated,
@@ -724,6 +1522,22 @@ github_account_ssh_key_is_added_to_ssh_agent() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:ssh
 # Checks for both GitHub username as well as for the email address that is 
 # tied to that acount.
@@ -761,6 +1575,22 @@ any_ssh_key_is_added_to_ssh_agent() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:ssh
 verify_ssh_key_is_added_to_ssh_agent() {
 	local ssh_account=$1
@@ -774,6 +1604,22 @@ verify_ssh_key_is_added_to_ssh_agent() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:ssh
 # Untested function to retrieve email pertaining to ssh key
 get_ssh_email() {
@@ -796,6 +1642,22 @@ get_ssh_email() {
 	echo "$email"
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_status
 # 6.f.1.helper0
 # Verifies the current branch equals the incoming branch, throws an error otherwise.
@@ -812,6 +1674,22 @@ assert_current_gitlab_branch() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_status
 # 6.f.1.helper1
 # TODO: test
@@ -856,6 +1734,22 @@ get_current_gitlab_branch() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_status
 # 6.f.1.helper2
 # Uses git status to get 1the current branch name. 
@@ -885,6 +1779,21 @@ get_current_unborn_gitlab_branch() {
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_status
 # 6.f.1.helper3
 parse_git_status_to_get_gitlab_branch() {
@@ -906,6 +1815,21 @@ parse_git_status_to_get_gitlab_branch() {
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:dir_edit
 # Checks whether the path before and after a command that 
 # contains: "cd", is the same.
@@ -918,6 +1842,21 @@ path_before_equals_path_after_command() {
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_status
 # Verifies the current branch equals the incoming branch, throws an error otherwise.
 ################################## TODO: test function
@@ -935,7 +1874,21 @@ assert_current_github_branch() {
 }
 
 
-
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_status
 delete_all_gitlab_files() {
 	source_dir="$1"
@@ -949,6 +1902,21 @@ delete_all_gitlab_files() {
 	done
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_status
 delete_all_gitlab_folders() {
 	source_dir="$1"
@@ -966,6 +1934,22 @@ delete_all_gitlab_folders() {
 	done
 }
 
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_status
 copy_all_gitlab_files() {
 	source_dir="$1"
@@ -980,6 +1964,21 @@ copy_all_gitlab_files() {
 	done
 }
 
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
 # Structure:gitlab_status
 copy_all_gitlab_folders() {
 	source_dir="$1"
@@ -998,4 +1997,3 @@ copy_all_gitlab_folders() {
 	fi
 	done
 }
-#check_md5_sum

@@ -28,6 +28,16 @@ source src/import.sh
 }
 
 
+@test "Test file contains string with variable username that does exist." {
+	# TODO: Move this test to a function where the installation is completed.
+	username="$GITLAB_SERVER_ACCOUNT_GLOBAL"
+	line="$username	ALL=(ALL:ALL) ALL"
+	actual_result=$(visudo_contains "$line" )
+	EXPECTED_OUTPUT="FOUND"
+		
+	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
+}
+
 #@test "Checking get_checksum." {
 #	md5sum=$(get_expected_md5sum_of_gitlab_runner_installer_for_architecture "amd64")
 #	EXPECTED_OUTPUT="31f2cb520079da881c02ce479c562ae9"
@@ -84,8 +94,8 @@ source src/import.sh
 	
 	actual_result=$(get_rhs_of_line_till_character "$line" "$character")
 	# TODO: make it work with space included.
-	#EXPECTED_OUTPUT=" with some spaces in it"
-	EXPECTED_OUTPUT="with some spaces in it"
+	EXPECTED_OUTPUT=" with some spaces in it"
+	#EXPECTED_OUTPUT="with some spaces in it"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }
@@ -141,15 +151,6 @@ source src/import.sh
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }
 
-
-@test "Test file contains string with variable username that does exist." {
-	username=root
-	line="$username	ALL=(ALL:ALL) ALL"
-	actual_result=$(visudo_contains "$line" )
-	EXPECTED_OUTPUT="FOUND"
-		
-	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
-}
 
 @test "Test file contains string with variable username that does not exist." {
 	username=an-unused-username
@@ -217,6 +218,7 @@ source src/import.sh
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }
 
+# TODO: determine why this test does not work.
 @test "Last line is returrend correctly." {
 	lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
 	

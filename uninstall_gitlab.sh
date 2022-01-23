@@ -8,9 +8,9 @@ runner_flag='false'
 print_usage() {
   printf "\nUsage: write:"
   printf "\n\n ./uninstall -p\n to do an uninstall of the GitLab server that Preserves repositories etc."
-  printf "\n./uninstall -h\n to do a hard uninstallation and removal of the GitLab server (DELETES repositories, user accounts etc.)."
-  printf "\n./uninstall -y\n to do a hard uninstallation and removal of the GitLab server without prompting for confirmation (DELETES repositories, user accounts etc.)."
-  printf "\n./uninstall -r \n to uninstall the GitLab runners,"
+  printf "\n./uninstall -h\n to do a Hard uninstallation and removal of the GitLab server (DELETES repositories, user accounts etc.)."
+  printf "\n./uninstall -y\n to do a hard uninstallation and removal of the GitLab server and skip Y/n prompt (DELETES repositories, user accounts etc.)."
+  printf "\n./uninstall -r \n to uninstall the GitLab Runners,"
   printf "you can also combine the separate arguments in different orders, e.g. -r -y etc.\n\n"
 }
 
@@ -39,7 +39,7 @@ source src/hardcoded_variables.txt
 
 ## argument parsing logic:
 if [ "$server_hard_yes_flag" == "true" ] && [ "$server_preserve_flag" == "true" ]; then
-	echo "ERROR, you chose to manually override the prompt for the data preserving uninstallation, but the data preserving uninstallation does not not prompt for confirmation."
+	echo "ERROR, you chose to manually override the y/n prompt for the soft uninstallation, but the soft uninstallation does not have a y/n prompt for confirmation."
 	exit 1
 fi
 

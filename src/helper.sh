@@ -383,7 +383,9 @@ container_is_running() {
 # TODO: write test for case when apache2 is actually running.
 apache2_is_running() {
 	status=$(sudo service apache2 --status-all)
-	cmd="$(lines_contain_string "unrecognized service" "\${status}")"
+	#cmd="$(lines_contain_string "unrecognized service" "\${status}")"
+	#"$(lines_contain_string "unrecognized service" "\${status}")"
+	lines_contain_string "unrecognized service" "\${status}"
 }
 
 # Structure:status
@@ -392,7 +394,8 @@ apache2_is_running() {
 nginx_is_running() {
 
 	status=$(sudo service nginx --status-all)
-	cmd="$(lines_contain_string "unrecognized service" "\${status}")"
+	#cmd="$(lines_contain_string "unrecognized service" "\${status}")"
+	lines_contain_string "unrecognized service" "\${status}"
 }
 
 # Structure:status

@@ -32,15 +32,15 @@
 #./test/libs/bats/bin/bats test/test_uninstall.bats
 
 ### Partially working
-#./test/libs/bats/bin/bats test/test_install_and_boot_gitlab_server.bats
+./test/libs/bats/bin/bats test/test_install_and_boot_gitlab_server.bats
 
 
 
 # Test mirroring GitHub to GitLab
 #### Works Again
 #./test/libs/bats/bin/bats test/test_helper_dir_edit.bats
-#### Works
-./test/libs/bats/bin/bats test/test_helper_github_status.bats
+#### Partially working (requires installation)
+#./test/libs/bats/bin/bats test/test_helper_github_status.bats
 #### Works
 ###./test/libs/bats/bin/bats test/test_helper_github_modify.bats
 #### Works

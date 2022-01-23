@@ -8,7 +8,7 @@ load 'libs/bats-file/load'
 load 'assert_utils'
 
 
-# source src/import.sh
+source src/import.sh
 
 example_lines=$(cat <<-END
 ssh-ed25519 longcode/longcode somename-somename-123
@@ -89,6 +89,11 @@ END
 	
 	# Verify ssh-access
 	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+	# TODO: Assert the code indeed has ssh-access.
+	# TODO: preserve duplicate of has_access and rename it to has_ssh_access.
+	# TODO: rename duplicate has_access function to: verify_ssh_access and ensure it throws an error.
+	# TODO: change repository wide.
+	
 	
 	# Specify the variables as they are inside the function
 	GITHUB_USERNAME_GLOBAL="$GITHUB_USERNAME_GLOBAL"

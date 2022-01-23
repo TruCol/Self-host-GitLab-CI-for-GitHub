@@ -4,12 +4,13 @@ load 'libs/bats-support/load'
 load 'libs/bats-assert/load'
 
 # TODO: move to import
-source src/install_and_boot_gitlab_server.sh
+#source src/install_and_boot_gitlab_server.sh
+source src/import.sh
 
 # TODO: move to import
 # TODO: verify there are no function name collisons.
 source test/helper.sh
-source test/hardcoded_testdata.txt
+#source test/hardcoded_testdata.txt
 
 # Method that executes all tested main code before running tests.
 setup() {

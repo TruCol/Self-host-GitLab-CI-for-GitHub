@@ -3,6 +3,35 @@
 # repositories.
 
 #######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
+# Structure:Configuration
+# Returns the GitLab installation package name that matches the architecture of the device 
+# on which it is installed. Not every package/GitLab source repository works on each computer/architecture.
+# Currently working GitLab installation packages have only been found for the amd64 architecture and 
+# the RaspberryPi 4b architectures have been verified.
+get_gitlab_package() {
+	architecture=$(dpkg --print-architecture)
+	if [ "$architecture" == "amd64" ]; then
+		echo "$GITLAB_DEFAULT_PACKAGE"
+	elif [ "$architecture" == "armhf" ]; then
+		echo "$GITLAB_RASPBERRY_PACKAGE"
+	fi
+}
+
+#######################################
 # Deletes the repository if it doesn't exist in the GitLab server.
 # Local variables:
 #  deleted_repo_is_found
@@ -900,4 +929,138 @@ push_changes_to_gitlab() {
     echo "ERROR, the GitHub repository does not exist locally."
     exit 25
   fi
+}
+
+
+
+
+
+
+
+
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
+# Structure:gitlab_status
+delete_all_gitlab_files() {
+	source_dir="$1"
+	
+	for f in $source_dir
+	do
+	if [ -f "$f" ]; then
+		echo "File DELETE $f"
+		rm "$f"
+	fi
+	done
+}
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
+# Structure:gitlab_status
+delete_all_gitlab_folders() {
+	source_dir="$1"
+	
+	for f in $source_dir
+	do
+	if [ -d "$f" ]; then
+		if [[ "${f: -2}" != "/." && "${f: -3}" != "/.." && "${f: -5}" != "/.git" ]]; then
+			echo "Dir Delete $f"
+			rm -r "$f"
+		else
+			echo "Dir EXCLUDE FROM DELETE $f"
+		fi
+	fi
+	done
+}
+
+
+
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
+# Structure:gitlab_status
+copy_all_gitlab_files() {
+	source_dir="$1"
+	target_dir="$2"
+	
+	for f in $source_dir
+	do
+	if [ -f "$f" ]; then
+		echo "File Copy $f"
+		cp -r "$f" "$target_dir"
+	fi
+	done
+}
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
+# Structure:gitlab_status
+copy_all_gitlab_folders() {
+	source_dir="$1"
+	target_dir="$2"
+	
+	for f in $source_dir
+	do
+	if [ -d "$f" ]; then
+		if [[ "${f: -2}" != "/." && "${f: -3}" != "/.." && "${f: -5}" != "/.git" ]]; then
+			echo "Dir Copy $f to $target_dir"
+			cp -r "$f" "$target_dir"
+			#cp "$f" "$target_dir"
+		else
+			echo "Dir EXCLUDE FROM COPY $f"
+		fi
+	fi
+	done
 }

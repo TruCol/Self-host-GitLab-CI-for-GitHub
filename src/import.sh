@@ -38,7 +38,6 @@ source src/uninstall_gitlab_server.sh
 
 # For tests
 # TODO: salvage the used functions of this file and move it into src.
-source src/first_time/src/helper_first_time.sh
 source src/boot_tor.sh
 source src/helper_dir_edit.sh
 source src/install_and_boot_gitlab_server.sh

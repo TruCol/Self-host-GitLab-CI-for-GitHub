@@ -1,7 +1,8 @@
 #!/bin/bash
 
 #######################################
-# Installs docker on the machine.
+# Installs docker on the machine and verifies it is installed correctly.
+# Run with: run bash -c "source src/import.sh && install_docker"
 # Local variables:
 # output
 # Globals:
@@ -13,11 +14,7 @@
 #  7 If the verification of the installation failed.
 # Outputs:
 #  The installation output.
-# TODO(a-t-0): include verification that checks if docker is indeed installed.
 #######################################
-# Structure:gitlab_docker
-####### STOP START SERVICES
-# Install docker:
 install_docker() {
 	# If one gets warning: 
 	#+  dpkg: warning: ignoring request to remove gitlab-runner_amd64 which isn't installed
@@ -25,10 +22,119 @@ install_docker() {
 	# sudo dpkg -i gitlab-runner.deb
 	#+ Same if the sudo apt install docker-compose command throws an error saying
 	#+ need gitlab runner to be re-installed but can't find the package.
-	local output=$(yes | sudo apt install docker)
+	local output=$(yes | sudo apt install docker.io)
 	echo "$output"
 	
-	# TODO: verify docker is installed.
+	assert_docker_is_installed
+}
+
+
+#######################################
+# Fully remove docker from the machine and verifies it is removed correctly.
+# Note this does not delete docker compose. (/usr/local/bin/docker-compose)
+# Source: https://askubuntu.com/a/1021506
+# Run with: source src/import.sh && completely_remove_docker
+# Local variables:
+# output
+# Globals:
+#  None.
+# Arguments:
+#   None
+# Returns:
+#  0 If the command was succesfull.
+#  7 If the verification of the installation failed.
+# Outputs:
+#  The installation output.
+#######################################
+completely_remove_docker() {
+
+	# Identify which docker package is installed.
+	dpkg -l | grep -i docker
+	
+	# Remove the installed docker programs.
+	sudo apt-get purge -y docker-engine docker docker.io docker-ce docker-ce-cli
+	sudo apt-get autoremove -y --purge docker-engine docker docker.io docker-ce
+	
+	
+	sudo rm -rf /var/lib/docker /etc/docker
+	sudo rm /etc/apparmor.d/docker
+	sudo groupdel docker
+	sudo rm -rf /var/run/docker.sock
+}
+
+#######################################
+# Removes docker on the machine and verifies it is removed correctly.
+# Run with: source src/import.sh && remove_docker
+# Local variables:
+# output
+# Globals:
+#  None.
+# Arguments:
+#   None
+# Returns:
+#  0 If the command was succesfull.
+#  7 If the verification of the installation failed.
+# Outputs:
+#  The installation output.
+#######################################
+remove_docker() {
+	# If one gets warning: 
+	#+  dpkg: warning: ignoring request to remove gitlab-runner_amd64 which isn't installed
+	#+ it can be resolved by re-installing GitLab-runner. This can be done with:
+	# sudo dpkg -i gitlab-runner.deb
+	#+ Same if the sudo apt install docker-compose command throws an error saying
+	#+ need gitlab runner to be re-installed but can't find the package.
+	local output=$(yes | sudo apt remove docker)
+	echo "$output"
+	
+	assert_docker_is_installed
+}
+
+
+
+#######################################
+# Verifies docker is installed correctly, throws error otherwise.
+# Run with: source src/import.sh && install_docker
+# Local variables:
+# docker_version_response
+# Globals:
+#  None.
+# Arguments:
+#   None
+# Returns:
+#  0 If the command was succesfull.
+#  7 If the verification of the docker installation failed.
+# Outputs:
+#  None
+#######################################
+assert_docker_is_installed() {
+
+	# Get the docker version response to see if it is installed.
+	docker_version_response=$(get_docker_version)
+	
+	# Verify docker is installed by parsing the version response.
+	if [  "$(lines_contain_string "Docker version 2" "\${docker_version_response}")" == "NOTFOUND" ]; then
+		echo "Docker is not correctly installed on this system. The docker --version response was:$docker_version_response"
+		exit 7
+	fi
+}
+
+#######################################
+# Gets the version response of the docker command.
+# Local variables:
+# output
+# Globals:
+#  None.
+# Arguments:
+#   None
+# Returns:
+#  0 If the command was succesfull.
+# Outputs:
+#  The response to the docker version command.
+#######################################
+get_docker_version() {
+	local output=$(docker --version)
+	echo "$output"
 }
 
 #######################################

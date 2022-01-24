@@ -2,8 +2,10 @@
 #source src/import.sh
 #./test/libs/bats/bin/bats test/*.bats
 
+# New tests.
+./test/libs/bats/bin/bats test/test_helper_docker.bats
 
-
+exit 1
 # Long tests (failing)
 #./test/libs/bats/bin/bats test/long_test_helper.bats
 #./test/libs/bats/bin/bats test/long_test_boot_tor.bats
@@ -12,6 +14,8 @@
 
 
 ###./test/libs/bats/bin/bats test/test_create_personal_access_token.bats
+
+
 
 # Long tests (passing)
 ####./test/libs/bats/bin/bats test/modular_test_runner.bats
@@ -33,6 +37,8 @@
 
 ## Working again
 ./test/libs/bats/bin/bats test/test_install_and_boot_gitlab_server.bats
+
+
 
 
 

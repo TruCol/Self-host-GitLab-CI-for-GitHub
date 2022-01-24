@@ -684,15 +684,13 @@ get_nr_of_lines_in_var() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0): Include detection for empty variable: lines and return "" accordingly.
+# https://stackoverflow.com/a/42399738/7437143
 #######################################
 # Structure:Parsing
 get_last_line_of_set_of_lines() {
 	eval lines="$1"
-	set -f # disable glob (wildcard) expansion
-	IFS=$'\n' # let's make sure we split on newline chars
-	var=("${lines}") # parse the lines into a variable that is countable
-	nr_of_lines=${#var[@]}
+	nr_of_lines=$(echo "$lines" | wc -l)
 	last_line=$(get_line_by_nr_from_variable "$nr_of_lines" "\${lines}")
 	echo "$last_line"
 }
@@ -868,19 +866,19 @@ stop_nginx_service() {
 }
 
 #######################################
-# 
+# Installs docker on the machine.
 # Local variables:
-# 
+# output
 # Globals:
 #  None.
 # Arguments:
-#   
+#   None
 # Returns:
-#  0 if 
-#  7 if 
+#  0 If the command was succesfull.
+#  7 If the verification of the installation failed.
 # Outputs:
-#  None.
-# TODO(a-t-0): change root with Global variable.
+#  The installation output.
+# TODO(a-t-0): include verification that checks if docker is indeed installed.
 #######################################
 # Structure:gitlab_docker
 ####### STOP START SERVICES
@@ -892,8 +890,10 @@ install_docker() {
 	# sudo dpkg -i gitlab-runner.deb
 	#+ Same if the sudo apt install docker-compose command throws an error saying
 	#+ need gitlab runner to be re-installed but can't find the package.
-	output=$(yes | sudo apt install docker)
+	local output=$(yes | sudo apt install docker)
 	echo "$output"
+	
+	# TODO: verify docker is installed.
 }
 
 #######################################

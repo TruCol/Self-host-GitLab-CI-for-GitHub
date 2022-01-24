@@ -6,6 +6,14 @@ load 'libs/bats-assert/load'
 source src/import.sh
 #source src/boot_tor.sh
 
+example_lines=$(cat <<-END
+First line
+second line 
+third line 
+sometoken
+END
+)
+
 @test "Verify the timestamp is created and contains the recent time." {
 	filepath=test/timestamp.txt
 	
@@ -189,16 +197,16 @@ source src/import.sh
 }
 
 
-@test "Line 1 is returrend correctly." {
-	lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
+@test "Line 1 is returned correctly." {
+	local lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
 	
-	actual_result=$(get_line_by_nr_from_variable 1 "\${lines}")
+	local actual_result=$(get_line_by_nr_from_variable 1 "\${lines}")
 	EXPECTED_OUTPUT="First line"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }
 
-@test "Line 2 is returrend correctly." {
+@test "Line 2 is returned correctly." {
 	lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
 	
 	actual_result=$(get_line_by_nr_from_variable 2 "\${lines}")
@@ -207,7 +215,7 @@ source src/import.sh
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }
 
-@test "Line 3 is returrend correctly." {
+@test "Line 3 is returned correctly." {
 	lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
 	
 	actual_result=$(get_line_by_nr_from_variable 3 "\${lines}")
@@ -216,7 +224,7 @@ source src/import.sh
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }
 
-@test "Line 4 is returrend correctly." {
+@test "Line 4 is returned correctly." {
 	lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
 	
 	actual_result=$(get_line_by_nr_from_variable 4 "\${lines}")
@@ -225,7 +233,7 @@ source src/import.sh
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }
 
-@test "Line four is returrend correctly." {
+@test "Line four is returned correctly." {
 	lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
 	
 	line_nr="4"
@@ -236,7 +244,7 @@ source src/import.sh
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }
 
-@test "Number of lines is returrend correctly." {
+@test "Number of lines is returned correctly." {
 	lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
 	
 	actual_result=$(get_nr_of_lines_in_var "\${lines}")
@@ -245,11 +253,12 @@ source src/import.sh
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }
 
-# TODO: determine why this test does not work.
-@test "Last line is returrend correctly." {
-	lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
+
+@test "Last line is returned correctly." {
+	# TODO: determine why this test does not work.
+	#lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
 	
-	actual_result=$(get_last_line_of_set_of_lines "\${lines}")
+	actual_result=$(get_last_line_of_set_of_lines "\${example_lines}")
 	EXPECTED_OUTPUT="sometoken"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"

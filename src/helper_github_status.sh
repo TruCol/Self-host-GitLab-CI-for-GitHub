@@ -290,3 +290,36 @@ get_org_repos() {
 	# List repositories and feed them into a line by line parser
 	done <<< "$theoutput"
 }
+
+
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
+# Structure:gitlab_status
+# Verifies the current branch equals the incoming branch, throws an error otherwise.
+################################## TODO: test function
+assert_current_github_branch() {
+	github_repo_name="$1"
+	github_branch_name="$2"
+	company="GitHub"
+	
+	actual_result="$(get_current_github_branch "$github_repo_name" "$github_branch_name" $company)"
+	if [ "$actual_result" != "$github_branch_name" ]; then
+		echo "The current GitHub branch does not match the expected GitHub branch:$github_branch_name"
+		exit 171
+	fi 
+	manual_assert_equal "$actual_result" "$github_branch_name"
+}

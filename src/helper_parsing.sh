@@ -324,4 +324,3 @@ get_last_space_delimted_item_in_line() {
 	stringarray=("$line")
 	echo "${stringarray[-1]}"
 }
-

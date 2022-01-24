@@ -25,6 +25,7 @@ install_docker() {
 	local output=$(yes | sudo apt install docker.io)
 	echo "$output"
 	
+	# Verify the docker is indeed installed
 	assert_docker_is_installed
 }
 

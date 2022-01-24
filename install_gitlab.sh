@@ -1,4 +1,7 @@
 #!/bin/bash
+
+source src/import.sh
+
 server_flag='false'
 #wait_flag='false'
 runner_flag='false'

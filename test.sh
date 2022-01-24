@@ -4,6 +4,7 @@
 
 
 
+exit 1
 # Long tests (failing)
 #./test/libs/bats/bin/bats test/long_test_helper.bats
 #./test/libs/bats/bin/bats test/long_test_boot_tor.bats
@@ -13,12 +14,22 @@
 
 ###./test/libs/bats/bin/bats test/test_create_personal_access_token.bats
 
+
+
 # Long tests (passing)
+# Works (Takes 45 sec)
+./test/libs/bats/bin/bats test/test_helper_docker.bats
+
+# Test status unknown
 ####./test/libs/bats/bin/bats test/modular_test_runner.bats
+# Test status unknown
 #./test/libs/bats/bin/bats test/test_runner_works.bats
+
+
 
 # Short tests (failing):
 #./test/libs/bats/bin/bats test/test_install_ssh_over_tor.bats
+
 
 ### Short tests (passing):
 ## Works again
@@ -35,7 +46,6 @@
 ./test/libs/bats/bin/bats test/test_install_and_boot_gitlab_server.bats
 
 
-
 #### Test mirroring GitHub to GitLab
 ### Works Again
 ./test/libs/bats/bin/bats test/test_helper_dir_edit.bats
@@ -45,15 +55,15 @@
 ##./test/libs/bats/bin/bats test/test_helper_github_modify.bats
 
 # TODO:
-#### Works
+#### Works # Test status unknown
 ###./test/libs/bats/bin/bats test/test_helper_gitlab_modify.bats
-#### Works
+#### Works # Test status unknown
 ###./test/libs/bats/bin/bats test/test_helper_gitlab_status.bats
-#### Works
+#### Works # Test status unknown
 ###./test/libs/bats/bin/bats test/test_helper_git_neutral.bats
-##### Semi-works
+##### Semi-works # Test status unknown
 ####./test/libs/bats/bin/bats test/test_helper_ssh.bats
-#### Works
+#### Works # Test status unknown
 ###./test/libs/bats/bin/bats test/test_sha256_checksum.bats
 
 # New test

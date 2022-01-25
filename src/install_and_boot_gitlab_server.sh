@@ -19,6 +19,7 @@ install_and_run_gitlab_server() {
 	gitlab_server_is_running="$(gitlab_server_is_running "$gitlab_package")"
 	echo "gitlab_server_is_running=$gitlab_server_is_running"
 	if [ "$gitlab_server_is_running" == "NOTRUNNING" ]; then
+		remove_sshd
 		install_docker
 		echo "install_docker"
 		create_log_folder

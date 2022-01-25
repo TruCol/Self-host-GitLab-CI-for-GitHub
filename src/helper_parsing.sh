@@ -324,3 +324,20 @@ get_last_space_delimted_item_in_line() {
 	stringarray=("$line")
 	echo "${stringarray[-1]}"
 }
+
+
+function stringStripNCharsFromStart {
+    echo ${1:$2:${#1}}
+    #echo ${1:$2}
+}
+
+assert_first_four_chars_are_sshd() {
+	local string="$"
+	
+	if [ "${string:0:4}" == "sshd" ]; then
+		echo "FOUND"
+	else
+		echo "The response to the lsof command does not start with:sshd"
+		exit 7
+	fi
+}

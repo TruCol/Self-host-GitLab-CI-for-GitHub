@@ -189,7 +189,9 @@ check_gitlab_runner_status() {
 # Structure:gitlab_status
 #sudo docker exec -i 79751949c099 bash -c "gitlab-rails status"
 #sudo docker exec -i 79751949c099 bash -c "gitlab-ctl status"
+# run with: source src/import.sh && check_gitlab_server_status
 check_gitlab_server_status() {
+	
 	container_id=$(get_docker_container_id_of_gitlab_server)
 	#echo "container_id=$container_id"
 	status=$(sudo docker exec -i "$container_id" bash -c "gitlab-ctl status")
@@ -213,7 +215,9 @@ check_gitlab_server_status() {
 #######################################
 # Structure:gitlab_status
 gitlab_server_is_running() {
+	
 	actual_result=$(check_gitlab_server_status)
+	#echo "actual_result=$actual_result"
 	if
 	[  "$(lines_contain_string 'run: alertmanager: (pid ' "\${actual_result}")" == "FOUND" ] &&
 	[  "$(lines_contain_string 'run: gitaly: (pid ' "\${actual_result}")" == "FOUND" ] &&
@@ -229,7 +233,8 @@ gitlab_server_is_running() {
     [  "$(lines_contain_string 'run: redis: (pid ' "\${actual_result}")" == "FOUND" ] &&
     [  "$(lines_contain_string 'run: redis-exporter: (pid ' "\${actual_result}")" == "FOUND" ] &&
     [  "$(lines_contain_string 'run: sidekiq: (pid ' "\${actual_result}")" == "FOUND" ] &&
-    [  "$(lines_contain_string 'run: sshd: (pid ' "\${actual_result}")" == "FOUND" ]
+    [  "$(lines_contain_string 'run: sshd: (pid ' "\${actual_result}")" == "FOUND" ] &&
+	[  "$actual_result" != "" ]
 	then
 		echo "RUNNING"
 	else

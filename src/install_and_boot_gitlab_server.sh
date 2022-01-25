@@ -16,24 +16,43 @@ install_and_run_gitlab_server() {
 	# downloading the right GitLab Runner installation package and adding
 	# its verified md5sum into hardcoded_variables.txt (possibly adding an if statement 
 	# to get_architecture().)
-	
-	if [ "$(gitlab_server_is_running "$gitlab_package")" == "NOTRUNNING" ]; then
+	gitlab_server_is_running="$(gitlab_server_is_running "$gitlab_package")"
+	echo "gitlab_server_is_running=$gitlab_server_is_running"
+	if [ "$gitlab_server_is_running" == "NOTRUNNING" ]; then
 		install_docker
+		echo "install_docker"
 		create_log_folder
+		echo "create_log_folder"
 		create_gitlab_folder
+		echo "create_gitlab_folder"
 		install_docker
+		echo "install_docker"
 		install_docker_compose
+		echo "install_docker_compose"
 		stop_docker
+		echo "stop_docker"
 		start_docker
+		echo "start_docker"
 		list_all_docker_containers
+		echo "list_all_docker_containers"
 		stop_gitlab_package_docker "$gitlab_package"
+		echo "stop_gitlab_package_docker"
 		remove_gitlab_package_docker "$gitlab_package"
+		echo "remove_gitlab_package_docker"
 		remove_gitlab_docker_containers
+		echo "remove_gitlab_docker_containers"
 		stop_apache_service
+		echo "stop_apache_service"
 		stop_nginx_service
+		echo "stop_nginx_service"
 		#stop_nginx
 		run_gitlab_docker
 		verify_gitlab_server_status "$SERVER_STARTUP_TIME_LIMIT"
+	elif [ "$gitlab_server_is_running" == "RUNNING" ]; then
+		echo "The GitLab server is already running."
+	else
+		echo "An error occured, the GitLab server status was neither RUNNING, nor NOTRUNNING."
+		exit 123
 	fi
 }
 

@@ -27,6 +27,7 @@ install_docker() {
 	
 	# Verify the docker is indeed installed
 	assert_docker_is_installed
+	$(assert_docker_is_installed)
 }
 
 
@@ -112,11 +113,13 @@ assert_docker_is_installed() {
 
 	# Get the docker version response to see if it is installed.
 	docker_version_response=$(get_docker_version)
+	#echo "docker_version_response=$docker_version_response"
+	
 	
 	# Verify docker is installed by parsing the version response.
-	if [  "$(lines_contain_string "Docker version 2" "\${docker_version_response}")" == "NOTFOUND" ]; then
+	if [  "$(lines_contain_string "Docker version 2" "\${docker_version_response}")" == "NOTFOUND" ] || [ "$docker_version_response" == "" ]; then
 		echo "Docker is not correctly installed on this system. The docker --version response was:$docker_version_response"
-		exit 7
+		exit 112
 	fi
 }
 
@@ -134,6 +137,8 @@ assert_docker_is_installed() {
 #  The response to the docker version command.
 #######################################
 get_docker_version() {
+	#docker --version
+	#docker --version
 	local output=$(docker --version)
 	echo "$output"
 }

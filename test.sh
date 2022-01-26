@@ -19,6 +19,23 @@
 #./test/libs/bats/bin/bats test/test_install_ssh_over_tor.bats
 
 
+
+############### no_server_required - preserves_server##########################
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_logging.bats
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_docker.bats
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parsing.bats
+./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_file_dir_related.bats
+./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_support_programs.bats
+
+############### no_server_required - breaks_server##########################
+
+############### server_required - preserves_server##########################
+./test/libs/bats/bin/bats test/server_required/breaks_server/test_docker.bats
+############### server_required - breaks_server##########################
+exit 1
+
+############### no_server_required #################
+
 ### Short tests (passing):
 ## Works again (does not require working GitLab installation)
 #./test/libs/bats/bin/bats test/test_boot_tor.bats
@@ -29,7 +46,7 @@
 #Verify apache2 is not found
 #Test file contains string with variable username that does not exist.
 ./test/libs/bats/bin/bats test/test_src_helper.bats
-exit 1
+
 
 ## Works Again
 ./test/libs/bats/bin/bats test/test_uninstall.bats

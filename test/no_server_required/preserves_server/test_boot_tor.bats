@@ -1,7 +1,7 @@
 #!./test/libs/bats/bin/bats
 
-load 'libs/bats-support/load'
-load 'libs/bats-assert/load'
+load '../../libs/bats-support/load'
+load '../../libs/bats-assert/load'
 
 
 source src/import.sh

@@ -22,44 +22,35 @@
 
 ############### no_server_required - preserves_server##########################
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_logging.bats
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_boot_tor.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_docker.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parsing.bats
-./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_file_dir_related.bats
-./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_support_programs.bats
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_file_dir_related.bats
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_support_programs.bats
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_uninstall.bats
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_install_and_boot_gitlab_server.bats
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_helper_dir_edit.bats
 
 ############### no_server_required - breaks_server##########################
-
-############### server_required - preserves_server##########################
-./test/libs/bats/bin/bats test/server_required/breaks_server/test_docker.bats
-############### server_required - breaks_server##########################
+# Works (Takes 45 sec)
+./test/libs/bats/bin/bats test/test_helper_docker.bats
 exit 1
 
-############### no_server_required #################
-
-### Short tests (passing):
-## Works again (does not require working GitLab installation)
-#./test/libs/bats/bin/bats test/test_boot_tor.bats
-
-
-## Partially working (2 tests still fail)
-## One test needs to be moved into after installation.
-#Verify apache2 is not found
-#Test file contains string with variable username that does not exist.
-./test/libs/bats/bin/bats test/test_src_helper.bats
-
-
-## Works Again
-./test/libs/bats/bin/bats test/test_uninstall.bats
-
-## Working again
-./test/libs/bats/bin/bats test/test_install_and_boot_gitlab_server.bats
-
-
-#### Test mirroring GitHub to GitLab
-### Works Again
-./test/libs/bats/bin/bats test/test_helper_dir_edit.bats
+############### server_required - preserves_server##########################
 ### Partially working (requires installation)
-./test/libs/bats/bin/bats test/test_helper_github_status.bats
+./test/libs/bats/bin/bats test/server_required/preserves_server/test_helper_github_status.bats
+
+# FAIL
+./test/libs/bats/bin/bats test/server_required/breaks_server/test_docker.bats
+# New test
+./test/libs/bats/bin/bats test/test_run_ci_on_github_repo.bats
+############### server_required - breaks_server##########################
+
+
+
+
+
+
 #### # Does not work, it seems to be hanging
 ##./test/libs/bats/bin/bats test/test_helper_github_modify.bats
 
@@ -76,11 +67,8 @@ exit 1
 ###./test/libs/bats/bin/bats test/test_sha256_checksum.bats
 
 # New test
-./test/libs/bats/bin/bats test/test_run_ci_on_github_repo.bats
+
 ###./test/libs/bats/bin/bats test/test_helper_asserts.bats
 
 
 # Long tests (passing)
-# Works (Takes 45 sec)
-# DISABLES GitLab Installation
-./test/libs/bats/bin/bats test/test_helper_docker.bats

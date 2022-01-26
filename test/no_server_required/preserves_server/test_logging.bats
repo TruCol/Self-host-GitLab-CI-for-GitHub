@@ -14,6 +14,7 @@ sometoken
 END
 )
 
+# TODO: remove duplicate with: test_boot_tor.bats
 @test "Verify the timestamp is created and contains the recent time." {
 	filepath=test/timestamp.txt
 	

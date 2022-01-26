@@ -90,7 +90,7 @@ get_registration_token_with_python() {
 		#cd get-gitlab-runner-registration-token && conda init batch_copy_issues && python -m code.project1.src
 		# eval $(conda shell.bash hook)
 	else
-		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate batch_copy_issues && python -m code.project1.src
+		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate "$CONDA_ENVIRONMENT_NAME" && python -m code.project1.src
 	fi
 	cd ..
 }

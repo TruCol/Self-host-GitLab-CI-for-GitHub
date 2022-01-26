@@ -2,39 +2,34 @@
 #source src/import.sh
 #./test/libs/bats/bin/bats test/*.bats
 
-
-
 # Long tests (failing)
 #./test/libs/bats/bin/bats test/long_test_helper.bats
 #./test/libs/bats/bin/bats test/long_test_boot_tor.bats
 #./test/libs/bats/bin/bats test/test_get_gitlab_server_runner_token.bats
 #./test/libs/bats/bin/bats test/test_install_and_boot_gitlab_runner.bats
 
-
 ###./test/libs/bats/bin/bats test/test_create_personal_access_token.bats
-
-
-
-
 
 # Test status unknown
 ####./test/libs/bats/bin/bats test/modular_test_runner.bats
 # Test status unknown
 #./test/libs/bats/bin/bats test/test_runner_works.bats
 
-
-
 # Short tests (failing):
 #./test/libs/bats/bin/bats test/test_install_ssh_over_tor.bats
 
 
 ### Short tests (passing):
-## Works again
-./test/libs/bats/bin/bats test/test_boot_tor.bats
+## Works again (does not require working GitLab installation)
+#./test/libs/bats/bin/bats test/test_boot_tor.bats
+
 
 ## Partially working (2 tests still fail)
 ## One test needs to be moved into after installation.
+#Verify apache2 is not found
+#Test file contains string with variable username that does not exist.
 ./test/libs/bats/bin/bats test/test_src_helper.bats
+exit 1
 
 ## Works Again
 ./test/libs/bats/bin/bats test/test_uninstall.bats

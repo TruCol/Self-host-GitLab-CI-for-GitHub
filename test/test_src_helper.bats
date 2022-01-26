@@ -14,6 +14,16 @@ sometoken
 END
 )
 
+# TODO: fix test
+@test "Test file contains string with variable username that does not exist." {
+	username=an-unused-username
+	line="$username	ALL=(ALL:ALL) ALL"
+	actual_result=$(visudo_contains "$line" )
+	EXPECTED_OUTPUT="NOTFOUND"
+	
+	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
+}
+
 @test "Verify the timestamp is created and contains the recent time." {
 	filepath=test/timestamp.txt
 	
@@ -35,7 +45,6 @@ END
 	[ "$timestamp_age" -lt 5 ]
 }
 
-
 @test "Test file contains string with variable username that does exist." {
 	# TODO: Move this test to a function where the installation is completed.
 	username="$GITLAB_SERVER_ACCOUNT_GLOBAL"
@@ -53,13 +62,7 @@ END
 #	assert_equal "$md5sum" "$EXPECTED_OUTPUT"
 #}
 
-@test "Verify apache2 is not found." {
 
-	actual_result=$(apache2_is_running)
-	EXPECTED_OUTPUT="NOTFOUND"
-		
-	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
-}
 
 
 @test "Checking check_md5_sum." {
@@ -184,15 +187,7 @@ END
 }
 
 
-# TODO: fix test
-@test "Test file contains string with variable username that does not exist." {
-	username=an-unused-username
-	line="$username	ALL=(ALL:ALL) ALL"
-	actual_result=$(visudo_contains "$line" )
-	EXPECTED_OUTPUT="NOTFOUND"
-	
-	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
-}
+
 
 
 @test "Line 1 is returned correctly." {
@@ -478,3 +473,13 @@ END
 	EXPECTED_OUTPUT="NOTFOUND"
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }
+
+# Requires working installation
+@test "Verify apache2 is not found." {
+
+	actual_result=$(apache2_is_running)
+	EXPECTED_OUTPUT="NOTFOUND"
+		
+	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
+}
+

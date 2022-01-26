@@ -43,6 +43,7 @@ source src/helper_md5sum.sh
 
 # For uninstallation
 source src/uninstall_gitlab_server.sh
+source src/uninstall_gitlab_runner.sh
 
 # For tests
 # TODO: salvage the used functions of this file and move it into src.

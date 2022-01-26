@@ -13,16 +13,39 @@
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0): Write test to verify if it detects apache if it is installed.
 #######################################
 # Structure:status
 # Returns "FOUND" if the service is found, NOTFOUND otherwise
 # TODO: write test for case when apache2 is actually running.
 apache2_is_running() {
-	status=$(sudo service apache2 --status-all)
-	#cmd="$(lines_contain_string "unrecognized service" "\${status}")"
-	#"$(lines_contain_string "unrecognized service" "\${status}")"
-	lines_contain_string "unrecognized service" "\${status}"
+	if [[ "$(sudo_service_exists apache2)" == "FOUND" ]]; then
+		status=$(sudo service apache2 --status-all)
+		#cmd="$(lines_contain_string "unrecognized service" "\${status}")"
+		#"$(lines_contain_string "unrecognized service" "\${status}")"
+		lines_contain_string "unrecognized service" "\${status}"
+	else
+		echo "NOTFOUND"
+	fi
+}
+
+# TODO: write test to see if function works.
+service_exists() {
+    local service_name=$1
+    if [[ $(systemctl list-units --all -t service --full --no-legend "$service_name.service" | sed 's/^\s*//g' | cut -f1 -d' ') == $service_name.service ]]; then
+        return "NOTFOUND"
+    else
+        return "FOUND"
+    fi
+}
+
+sudo_service_exists() {
+    local service_name=$1
+    if [[ $(sudo systemctl list-units --all -t service --full --no-legend "$service_name.service" | sed 's/^\s*//g' | cut -f1 -d' ') == $service_name.service ]]; then
+        return "NOTFOUND"
+    else
+        return "FOUND"
+    fi
 }
 
 #######################################

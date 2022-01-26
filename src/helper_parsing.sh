@@ -73,19 +73,43 @@ file_contains_string() {
 # Structure:Parsing
 lines_contain_string() {
 	local substring="$1"
-	#read -p "substring=$substring"
-	#read -p  "2=$2"
-	#eval lines="$2"
-	#lines="$2"
 	lines="$@"
+	if [ "$lines" == "" ]; then
+		echo "NOTFOUND"
 	# shellcheck disable=SC2154
-	if [[ "$lines" =~ "$substring" ]]; then
+	elif [[ "$lines" =~ "$substring" ]]; then
 		echo "FOUND"; 
 	else
 		echo "NOTFOUND";
 	fi
 }
 
+lines_contain_string_for_visudo() {
+	local substring="$1"
+	shift
+	local lines="$@"
+	local some_line
+	nr_of_lines=$(echo "$lines" | wc -l)
+		
+	for i in $( eval echo {0..$nr_of_lines} )
+	do 
+		# do whatever on "$i" here
+		#echo "i=$i"
+		custom_line=$(get_line_by_nr_from_variable "$i"  "\${lines}")
+		#echo "custom_line=$custom_line"
+		if [[ "$custom_line" != "" ]]; then
+			if [[ "$custom_line" == *"$substring"* ]]; then
+				local found_substring="FOUND"
+				echo "FOUND"
+				#echo "some_line=$some_line"
+				#echo "substring=$substring"
+			fi
+		fi
+	done
+	if [[ "$found_substring" != "FOUND" ]]; then
+		echo "NOTFOUND"
+	fi
+}
 #######################################
 # 
 # Local variables:

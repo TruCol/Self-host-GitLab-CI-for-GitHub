@@ -1,11 +1,11 @@
 #!./test/libs/bats/bin/bats
 
-load 'libs/bats-support/load'
-load 'libs/bats-assert/load'
+load '../../libs/bats-support/load'
+load '../../libs/bats-assert/load'
 # https://github.com/bats-core/bats-file#Index-of-all-functions
-load 'libs/bats-file/load'
+load '../../libs/bats-file/load'
 # https://github.com/bats-core/bats-assert#usage
-load 'assert_utils'
+load '../../assert_utils'
 
 
 source src/import.sh

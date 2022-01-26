@@ -42,12 +42,17 @@ downoad_website_source() {
 #######################################
 # Structure:Configuration
 visudo_contains() {
-	line=$1
+	local line="$1"
 	#echo "line=$line"
-	visudo_content=$(sudo cat /etc/sudoers)
+	local visudo_content=$(sudo cat /etc/sudoers)
 	#echo $visudo_content
+	#nr_of_lines=${#visudo_content} 
+	#nr_of_lines=$(wc -l $visudo_content)
+	nr_of_lines=$(echo "$visudo_content" | wc -l)
+	#echo "nr_of_lines=$nr_of_lines"
 	
-	actual_result=$(lines_contain_string "$line" "\"${visudo_content}")
+	#actual_result=$(lines_contain_string "$line" "\"${visudo_content}")
+	actual_result=$(lines_contain_string_for_visudo "$line" "\"${visudo_content}")
 	echo "$actual_result"
 }
 

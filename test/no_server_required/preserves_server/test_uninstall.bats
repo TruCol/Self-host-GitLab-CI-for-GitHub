@@ -1,8 +1,8 @@
 #!./test/libs/bats/bin/bats
 
-load 'libs/bats-support/load'
-load 'libs/bats-assert/load'
-load 'libs/bats-file/load'
+load '../../libs/bats-support/load'
+load '../../libs/bats-assert/load'
+load '../../libs/bats-file/load'
 
 # Test that an error is thrown if user decides to do a soft-uninstallation 
 # (which does not have a y/n prompt), while trying to override the y/n 

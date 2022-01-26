@@ -87,7 +87,6 @@ deploy_gitlab() {
 			echo "Starting gitlab server"
 			# start GitLab server
 			output=$(start_gitlab_server "$SERVER_TIMESTAMP_FILEPATH")
-			read -p "server start output=$output"
 		fi
 	# Check if GitLab server is running, if yes: 
 	elif [ "$(gitlab_server_is_running | tail -1)" == "RUNNING" ]; then

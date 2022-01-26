@@ -48,7 +48,6 @@ setup() {
 	if [ $(gitlab_server_is_running | tail -1) == "RUNNING" ]; then
 		true
 	else
-		read -p "Now re-installing GitLab."
 		#+ uninstall and re-installation by default
 		# Uninstall GitLab Runner and GitLab Server
 		run bash -c "./uninstall_gitlab.sh -h -r -y"

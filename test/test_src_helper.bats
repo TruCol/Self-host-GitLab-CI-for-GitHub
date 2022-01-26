@@ -191,8 +191,6 @@ END
 	actual_result=$(visudo_contains "$line" )
 	EXPECTED_OUTPUT="NOTFOUND"
 	
-	read -p "line=$line"
-		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }
 

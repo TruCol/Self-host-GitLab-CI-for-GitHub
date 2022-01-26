@@ -74,7 +74,7 @@ remove_sshd() {
 		if [ "${left_of_root_user:0:4}" == "sshd" ]; then
 			local port_str=$(stringStripNCharsFromStart "$left_of_root_user" 4)
 			echo "port_str=$port_str"
-			local port_nr=$(echo "$prt_nr" | tr -dc '0-9')
+			local port_nr=$(echo "$port_str" | tr -dc '0-9')
 			echo "port_nr=$port_nr"
 			sudo kill "$port_nr"
 		else

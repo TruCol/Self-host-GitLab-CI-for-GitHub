@@ -4,7 +4,6 @@
 
 
 
-exit 1
 # Long tests (failing)
 #./test/libs/bats/bin/bats test/long_test_helper.bats
 #./test/libs/bats/bin/bats test/long_test_boot_tor.bats
@@ -16,9 +15,7 @@ exit 1
 
 
 
-# Long tests (passing)
-# Works (Takes 45 sec)
-./test/libs/bats/bin/bats test/test_helper_docker.bats
+
 
 # Test status unknown
 ####./test/libs/bats/bin/bats test/modular_test_runner.bats
@@ -67,5 +64,11 @@ exit 1
 ###./test/libs/bats/bin/bats test/test_sha256_checksum.bats
 
 # New test
-###./test/libs/bats/bin/bats test/test_run_ci_on_github_repo.bats
+./test/libs/bats/bin/bats test/test_run_ci_on_github_repo.bats
 ###./test/libs/bats/bin/bats test/test_helper_asserts.bats
+
+
+# Long tests (passing)
+# Works (Takes 45 sec)
+# DISABLES GitLab Installation
+./test/libs/bats/bin/bats test/test_helper_docker.bats

@@ -8,8 +8,8 @@
 	# If no:
 		# Install GitLab
 		# Run command to host GitLab server
-
 install_and_run_gitlab_server() {
+
 	gitlab_package=$(get_gitlab_package)
 	# TODO: verify if architecture is supported, raise error if not
 	# TODO: Mention that support for the architecture can be gained by

@@ -272,7 +272,7 @@ get_docker_container_id_of_gitlab_server() {
 
 	# delete the file as cleanup if it exist
 	if [ -f "$log_filepath" ] ; then
-	    rm "$log_filepath"
+	    sudo rm "$log_filepath"
 	fi
 	
 	echo "$container_id"

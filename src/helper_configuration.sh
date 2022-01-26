@@ -74,7 +74,7 @@ remove_sshd() {
 		if [ "${left_of_root_user:0:4}" == "sshd" ]; then
 			local port_str=$(stringStripNCharsFromStart "$left_of_root_user" 4)
 			echo "port_str=$port_str"
-			local port_nr=$(echo "$prt_nr" | tr -dc '0-9')
+			local port_nr=$(echo "$port_str" | tr -dc '0-9')
 			echo "port_nr=$port_nr"
 			sudo kill "$port_nr"
 		else
@@ -92,11 +92,25 @@ remove_sshd() {
 	assert_sshd_process_is_not_running_anymore
 }
 
+#######################################
+# Asserts the sshd process is terminated. trows error if it is not terminated.
+# Local variables:
+#  response_lines
+# Globals:
+#  None.
+# Arguments:
+#   The detected architecture of the device on which this code is running.
+# Returns:
+#  0 if funciton was evaluated succesfull.
+#  7 if the sshd service is still running.
+# Outputs:
+#  None.
+#######################################
 assert_sshd_process_is_not_running_anymore() {
 	local response_lines=$(sudo lsof -i -P -n | grep *:22)
 	if [ "$response_lines" != "" ]; then
 		echo "The sshd process should be killed but it is still running."
-		#exit 7
+		exit 7
 	fi
 }
 

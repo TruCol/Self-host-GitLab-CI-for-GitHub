@@ -215,7 +215,6 @@ check_gitlab_server_status() {
 #######################################
 # Structure:gitlab_status
 gitlab_server_is_running() {
-	
 	actual_result=$(check_gitlab_server_status)
 	#echo "actual_result=$actual_result"
 	if

@@ -32,10 +32,10 @@ uninstall_gitlab_server() {
 	stop_apache_service
 	# TODO: determine why this passes the lines "${status}" instead of some 
 	# actual content of that status.
-	read -p "Stopped apache."
-	stop_nginx_service
-	read -p "Stopped nginx."
+	
 	#stop_nginx
+	stop_nginx_service
+	
 	if [ "$is_hard_uninstall" == true ]; then
 		delete_gitlab_folder
 	fi

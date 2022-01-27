@@ -21,21 +21,28 @@
 
 
 ############### no_server_required - preserves_server##########################
-./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_logging.bats
-./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_boot_tor.bats
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_logging.bats
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_boot_tor.bats
+
+# Fail: Docker image name is recognised correctly.
+# Fail: Docker container is reported as stopped correctly.
 ./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_docker.bats
-./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parsing.bats
-./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_file_dir_related.bats
-./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_support_programs.bats
-./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_uninstall.bats
-./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_install_and_boot_gitlab_server.bats
-./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_helper_dir_edit.bats
+exit 1
+
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parsing.bats
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_file_dir_related.bats
+#Fail: Verify apache2 is not found.
+###./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_support_programs.bats
+
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_uninstall.bats
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_install_and_boot_gitlab_server.bats
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_helper_dir_edit.bats
 
 ############### no_server_required - breaks_server##########################
 # Works (Takes 45 sec)
 # TODO: move into right folder
-./test/libs/bats/bin/bats test/test_helper_docker.bats
-exit 1
+###./test/libs/bats/bin/bats test/test_helper_docker.bats
+./test/libs/bats/bin/bats test/no_server_required/breaks_server/test_docker.bats
 
 ############### server_required - preserves_server##########################
 ### Partially working (requires installation)

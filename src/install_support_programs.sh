@@ -33,18 +33,18 @@ apache2_is_running() {
 service_exists() {
     local service_name=$1
     if [[ $(systemctl list-units --all -t service --full --no-legend "$service_name.service" | sed 's/^\s*//g' | cut -f1 -d' ') == $service_name.service ]]; then
-        return "NOTFOUND"
+        echo "NOTFOUND"
     else
-        return "FOUND"
+        echo "FOUND"
     fi
 }
 
 sudo_service_exists() {
     local service_name=$1
     if [[ $(sudo systemctl list-units --all -t service --full --no-legend "$service_name.service" | sed 's/^\s*//g' | cut -f1 -d' ') == $service_name.service ]]; then
-        return "NOTFOUND"
+        echo "NOTFOUND"
     else
-        return "FOUND"
+        echo "FOUND"
     fi
 }
 

@@ -129,8 +129,10 @@ remove_docker() {
 	#+ need gitlab runner to be re-installed but can't find the package.
 	local output_one=$(yes | sudo apt remove docker)
 	local output_two=$(yes | sudo apt remove docker.io)
+	local output_three=$(yes | sudo apt remove docker-compose)
 	echo "$output_one"
 	echo "$output_two"
+	echo "$output_three"
 	
 	#assert_docker_is_installed
 	# TODO: assert docker is removed.

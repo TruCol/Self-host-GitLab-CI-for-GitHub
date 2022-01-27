@@ -172,7 +172,7 @@ check_gitlab_runner_status() {
 
 
 #######################################
-# 
+# Returns the state of the GitLab server. Assumes Docker is installed.
 # Local variables:
 # 
 # Globals:
@@ -180,13 +180,11 @@ check_gitlab_runner_status() {
 # Arguments:
 #   
 # Returns:
-#  0 if 
-#  7 if 
+#  0 if the code was executed succesfully
+
 # Outputs:
-#  None.
-# TODO(a-t-0): change root with Global variable.
+#  The state of the GitLab server
 #######################################
-# Structure:gitlab_status
 #sudo docker exec -i 79751949c099 bash -c "gitlab-rails status"
 #sudo docker exec -i 79751949c099 bash -c "gitlab-ctl status"
 # run with: source src/import.sh && check_gitlab_server_status
@@ -215,27 +213,31 @@ check_gitlab_server_status() {
 #######################################
 # Structure:gitlab_status
 gitlab_server_is_running() {
-	actual_result=$(check_gitlab_server_status)
-	#echo "actual_result=$actual_result"
-	if
-	[  "$(lines_contain_string 'run: alertmanager: (pid ' "\${actual_result}")" == "FOUND" ] &&
-	[  "$(lines_contain_string 'run: gitaly: (pid ' "\${actual_result}")" == "FOUND" ] &&
-	[  "$(lines_contain_string 'run: gitlab-exporter: (pid ' "\${actual_result}")" == "FOUND" ] &&
-	[  "$(lines_contain_string 'run: gitlab-workhorse: (pid ' "\${actual_result}")" == "FOUND" ] &&
-	[  "$(lines_contain_string 'run: grafana: (pid ' "\${actual_result}")" == "FOUND" ] &&
-	[  "$(lines_contain_string 'run: logrotate: (pid ' "\${actual_result}")" == "FOUND" ] &&
-    [  "$(lines_contain_string 'run: nginx: (pid ' "\${actual_result}")" == "FOUND" ] &&
-    [  "$(lines_contain_string 'run: postgres-exporter: (pid ' "\${actual_result}")" == "FOUND" ] &&
-    [  "$(lines_contain_string 'run: postgresql: (pid ' "\${actual_result}")" == "FOUND" ] &&
-    [  "$(lines_contain_string 'run: prometheus: (pid ' "\${actual_result}")" == "FOUND" ] &&
-    [  "$(lines_contain_string 'run: puma: (pid ' "\${actual_result}")" == "FOUND" ] &&
-    [  "$(lines_contain_string 'run: redis: (pid ' "\${actual_result}")" == "FOUND" ] &&
-    [  "$(lines_contain_string 'run: redis-exporter: (pid ' "\${actual_result}")" == "FOUND" ] &&
-    [  "$(lines_contain_string 'run: sidekiq: (pid ' "\${actual_result}")" == "FOUND" ] &&
-    [  "$(lines_contain_string 'run: sshd: (pid ' "\${actual_result}")" == "FOUND" ] &&
-	[  "$actual_result" != "" ]
-	then
-		echo "RUNNING"
+	if [ $(safely_check_if_program_is_installed "docker") == "FOUND" ]; then
+		actual_result=$(check_gitlab_server_status)
+		echo "actual_result=$actual_result"
+		if
+		[  "$(lines_contain_string 'run: alertmanager: (pid ' "\${actual_result}")" == "FOUND" ] &&
+		[  "$(lines_contain_string 'run: gitaly: (pid ' "\${actual_result}")" == "FOUND" ] &&
+		[  "$(lines_contain_string 'run: gitlab-exporter: (pid ' "\${actual_result}")" == "FOUND" ] &&
+		[  "$(lines_contain_string 'run: gitlab-workhorse: (pid ' "\${actual_result}")" == "FOUND" ] &&
+		[  "$(lines_contain_string 'run: grafana: (pid ' "\${actual_result}")" == "FOUND" ] &&
+		[  "$(lines_contain_string 'run: logrotate: (pid ' "\${actual_result}")" == "FOUND" ] &&
+		[  "$(lines_contain_string 'run: nginx: (pid ' "\${actual_result}")" == "FOUND" ] &&
+		[  "$(lines_contain_string 'run: postgres-exporter: (pid ' "\${actual_result}")" == "FOUND" ] &&
+		[  "$(lines_contain_string 'run: postgresql: (pid ' "\${actual_result}")" == "FOUND" ] &&
+		[  "$(lines_contain_string 'run: prometheus: (pid ' "\${actual_result}")" == "FOUND" ] &&
+		[  "$(lines_contain_string 'run: puma: (pid ' "\${actual_result}")" == "FOUND" ] &&
+		[  "$(lines_contain_string 'run: redis: (pid ' "\${actual_result}")" == "FOUND" ] &&
+		[  "$(lines_contain_string 'run: redis-exporter: (pid ' "\${actual_result}")" == "FOUND" ] &&
+		[  "$(lines_contain_string 'run: sidekiq: (pid ' "\${actual_result}")" == "FOUND" ] &&
+		[  "$(lines_contain_string 'run: sshd: (pid ' "\${actual_result}")" == "FOUND" ] &&
+		[  "$actual_result" != "" ]
+		then
+			echo "RUNNING"
+		else
+			echo "NOTRUNNING"
+		fi
 	else
 		echo "NOTRUNNING"
 	fi

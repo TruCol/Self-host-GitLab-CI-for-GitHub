@@ -26,28 +26,27 @@
 ############### no_server_required - preserves_server##########################
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_logging.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_boot_tor.bats
-# Works with server installed
+### Doubt: Works with server installed( however, also still works after ./uninstall_gitlab.sh)
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_docker.bats
-
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parsing.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_file_dir_related.bats
-#Fail: Verify apache2 is not found.
-###./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_support_programs.bats
-
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_uninstall.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_install_and_boot_gitlab_server.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_helper_dir_edit.bats
 
 ############### no_server_required - breaks_server##########################
-./test/libs/bats/bin/bats test/no_server_required/breaks_server/test_docker.bats
-exit 1
+#./test/libs/bats/bin/bats test/no_server_required/breaks_server/test_docker.bats
+
 
 ############### server_required - preserves_server##########################
 ### Partially working (requires installation)
 # TODO: separate into: requires installation, does not require installation.
-###./test/libs/bats/bin/bats test/server_required/preserves_server/test_helper_github_status.bats
-#./test/libs/bats/bin/bats test/server_required/breaks_server/test_docker.bats
+./test/libs/bats/bin/bats test/server_required/preserves_server/test_helper_github_status.bats
+./test/libs/bats/bin/bats test/server_required/breaks_server/test_docker.bats
 
+#Fail: Verify apache2 is not found.
+./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_support_programs.bats
+exit 1
 
 # New test
 # TODO: move into right folder

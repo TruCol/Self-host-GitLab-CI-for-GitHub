@@ -215,7 +215,7 @@ check_gitlab_server_status() {
 gitlab_server_is_running() {
 	if [ $(safely_check_if_program_is_installed "docker") == "FOUND" ]; then
 		actual_result=$(check_gitlab_server_status)
-		echo "actual_result=$actual_result"
+		#echo "actual_result=$actual_result"
 		if
 		[  "$(lines_contain_string 'run: alertmanager: (pid ' "\${actual_result}")" == "FOUND" ] &&
 		[  "$(lines_contain_string 'run: gitaly: (pid ' "\${actual_result}")" == "FOUND" ] &&

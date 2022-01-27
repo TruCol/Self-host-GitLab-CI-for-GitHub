@@ -175,10 +175,10 @@ get_line_by_nr() {
 #######################################
 # Structure:Parsing
 get_line_by_nr_from_variable() {
-	number=$1
+	local number=$1
 	eval lines="$2"
 	
-	count=0
+	local count=0
 	while IFS= read -r line; do
 		count=$((count+1))
 		if [ "$count" -eq "$number" ]; then

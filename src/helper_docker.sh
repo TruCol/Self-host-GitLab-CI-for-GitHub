@@ -70,6 +70,8 @@ sudo_safely_check_if_program_is_installed() {
 #######################################
 completely_remove_docker() {
 	
+	safely_remove_docker
+	
 	# TODO: include checks to safely remove it (e.g. prevent docker-ce not found)
 
 	# Identify which docker package is installed.
@@ -389,7 +391,7 @@ container_is_running() {
 	elif [ "$container_exists" == "YES" ]; then
 		# Check if the container is running
 		running_containers_output=$(sudo docker ps --filter status=running)
-		cmd "$(lines_contain_string "$docker_container_id" "\"${running_containers_output}")"
+		echo "$(lines_contain_string "$docker_container_id" "\"${running_containers_output}")"
 	else
 		echo "NOTFOUND"
 	fi

@@ -23,17 +23,25 @@
 ############### no_server_required - preserves_server##########################
 ./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_logging.bats
 ./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_boot_tor.bats
+
+#2 Fails:
+# Docker image name is recognised correctly.
+# Docker container is reported as stopped correctly.
 ./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_docker.bats
 ./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parsing.bats
 ./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_file_dir_related.bats
 ./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_support_programs.bats
 ./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_uninstall.bats
 ./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_install_and_boot_gitlab_server.bats
+# 1 Fail:
+# Check if mirror directories are created.
 ./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_helper_dir_edit.bats
 
 ############### no_server_required - breaks_server##########################
 # Works (Takes 45 sec)
 # TODO: move into right folder
+# 1 Fail:
+# Checking Docker version response fails if docker is removed.
 ./test/libs/bats/bin/bats test/test_helper_docker.bats
 exit 1
 

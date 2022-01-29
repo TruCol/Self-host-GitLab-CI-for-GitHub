@@ -33,6 +33,8 @@ source src/import.sh
 ### 2. Create mirror directories
 @test "Check if mirror directories are created." {
 	create_mirror_directories
+	# TODO: determine if one should change assert_file_exists
+	# to assert_folder_exists.
 	assert_not_equal "$MIRROR_LOCATION" ""
 	assert_file_exist "$MIRROR_LOCATION"
 	assert_file_exist "$MIRROR_LOCATION/GitHub"

@@ -1,7 +1,25 @@
 # No shebang because that breaks the tests.
 source src/hardcoded_variables.txt
-#source src/creds.txt
-source ../personal_creds.txt
+source src/helper_file_dir_related.sh
+
+# Raise sudo permission at the start, to prevent requiring user permission half way through tests.
+{
+  sudo echo "hi"
+} &> /dev/null
+
+if [ "$(file_exists "../personal_creds.txt")" == "FOUND" ]; then
+	source ../personal_creds.txt
+elif [ "$(file_exists "src/creds.txt")" == "FOUND" ]; then
+	source src/creds.txt
+	echo "Note you are using the default credentials, would you like to create your own personal credentials file (outside this repo) y/n?"
+else
+	echo "No credentials found."
+	exit 7
+fi
+
+
+
+
 filler="Filler"
 # TODO: differentiate between GLOBAL and HARDCODED with:
 #GITLAB_SERVER_ACCOUNT_GLOBAL=$(echo "$GITLAB_SERVER_ACCOUNT_HARDCODED" | tr -d '\r')
@@ -36,7 +54,7 @@ source src/helper.sh
 source src/helper_docker.sh
 source src/helper_parsing.sh
 source src/helper_configuration.sh
-source src/helper_file_dir_related.sh
+
 source src/install_support_programs.sh
 source src/helper_md5sum.sh
 

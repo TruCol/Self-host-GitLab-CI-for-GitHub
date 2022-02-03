@@ -101,7 +101,7 @@ register_gitlab_runner() {
 	runner_token=$(cat "$RUNNER_REGISTRATION_TOKEN_FILEPATH")
 	
 	# TODO: delete plain text registration token after reading.
-	echo "runner_token=$runner_token""nonewlines"
+	#echo "runner_token=$runner_token"
 	# Command to run runner in Docker (won't access the machine localhost this way/doesn't work).
 	#registration=$(sudo gitlab-runner register \
 	#--non-interactive \

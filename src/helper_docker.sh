@@ -30,6 +30,26 @@ install_docker() {
 	$(assert_docker_is_installed)
 }
 
+# run with: source src/helper_docker.sh && safely_check_if_program_is_installed docker
+safely_check_if_program_is_installed() {
+	program_name="$1"
+	if ! foobar_loc="$(type -p "$program_name")" || [[ -z $foobar_loc ]]; then
+		# install foobar here
+		echo "NOTFOUND"
+	else
+		echo "FOUND"
+	fi
+}
+
+sudo_safely_check_if_program_is_installed() {
+	program_name="$1"
+	if ! foobar_loc="$(sudo type -p "$program_name")" || [[ -z $foobar_loc ]]; then
+		# install foobar here
+		echo "NOTFOUND"
+	else
+		echo "FOUND"
+	fi
+}
 
 #######################################
 # Fully remove docker from the machine and verifies it is removed correctly.
@@ -49,6 +69,10 @@ install_docker() {
 #  The installation output.
 #######################################
 completely_remove_docker() {
+	
+	safely_remove_docker
+	
+	# TODO: include checks to safely remove it (e.g. prevent docker-ce not found)
 
 	# Identify which docker package is installed.
 	dpkg -l | grep -i docker
@@ -62,6 +86,23 @@ completely_remove_docker() {
 	sudo rm /etc/apparmor.d/docker
 	sudo groupdel docker
 	sudo rm -rf /var/run/docker.sock
+	
+	#
+	sudo rm -r /etc/docker
+}
+
+# run with: source src/helper_docker.sh && safely_remove_docker
+safely_remove_docker() {
+	if [ $(safely_check_if_program_is_installed "docker") == "FOUND" ]; then
+		remove_docker
+	fi
+}
+
+safely_completely_remove_docker() {
+	if [ $(safely_check_if_program_is_installed "docker") == "FOUND" ]; then
+		# TODO: also make this function safe.
+		completely_remove_docker
+	fi
 }
 
 #######################################
@@ -86,10 +127,16 @@ remove_docker() {
 	# sudo dpkg -i gitlab-runner.deb
 	#+ Same if the sudo apt install docker-compose command throws an error saying
 	#+ need gitlab runner to be re-installed but can't find the package.
-	local output=$(yes | sudo apt remove docker)
-	echo "$output"
+	local output_one=$(yes | sudo apt remove docker)
+	local output_two=$(yes | sudo apt remove docker.io)
+	local output_three=$(yes | sudo apt remove docker-compose)
+	echo "$output_one"
+	echo "$output_two"
+	echo "$output_three"
 	
-	assert_docker_is_installed
+	#assert_docker_is_installed
+	# TODO: assert docker is removed.
+	
 }
 
 
@@ -346,7 +393,7 @@ container_is_running() {
 	elif [ "$container_exists" == "YES" ]; then
 		# Check if the container is running
 		running_containers_output=$(sudo docker ps --filter status=running)
-		cmd "$(lines_contain_string "$docker_container_id" "\"${running_containers_output}")"
+		echo "$(lines_contain_string "$docker_container_id" "\"${running_containers_output}")"
 	else
 		echo "NOTFOUND"
 	fi

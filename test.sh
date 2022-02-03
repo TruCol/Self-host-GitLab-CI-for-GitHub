@@ -19,6 +19,9 @@
 #./test/libs/bats/bin/bats test/test_install_ssh_over_tor.bats
 
 
+# TODO: move into right files
+# Fail: Docker image name is recognised correctly.
+# Fail: Docker container is reported as stopped correctly.
 
 ############### no_server_required - preserves_server##########################
 ./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_logging.bats
@@ -49,9 +52,12 @@ exit 1
 ### Partially working (requires installation)
 # TODO: separate into: requires installation, does not require installation.
 ./test/libs/bats/bin/bats test/server_required/preserves_server/test_helper_github_status.bats
-
-# Fails
 ./test/libs/bats/bin/bats test/server_required/breaks_server/test_docker.bats
+
+#Fail: Verify apache2 is not found.
+./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_support_programs.bats
+exit 1
+
 # New test
 # TODO: move into right folder
 # TODO: (if needed) separate into: requires installation, does not require installation.

@@ -34,7 +34,6 @@ install_docker() {
 safely_check_if_program_is_installed() {
 	program_name="$1"
 	if ! foobar_loc="$(type -p "$program_name")" || [[ -z $foobar_loc ]]; then
-		# install foobar here
 		echo "NOTFOUND"
 	else
 		echo "FOUND"
@@ -376,7 +375,6 @@ docker_image_exists() {
 #  None.
 # TODO(a-t-0): change root with Global variable.
 #######################################
-# Structure:gitlab_docker
 # Returns FOUND if the container is running, returns NOTFOUND if it is not running
 container_is_running() {
 	# Get Docker container id
@@ -396,6 +394,28 @@ container_is_running() {
 		echo "$(lines_contain_string "$docker_container_id" "\"${running_containers_output}")"
 	else
 		echo "NOTFOUND"
+	fi
+}
+
+#######################################
+# 
+# Local variables:
+# docker_status
+# Globals:
+#  None.
+# Arguments:
+#  None
+# Returns:
+#  0 if the command was executed succesfully.
+# Outputs:
+#  FOUND if docker is running, returns NOTFOUND if it is not running.
+#######################################
+docker_is_running() {
+	local docker_status=$(sudo systemctl show --property ActiveState docker)
+	if [[ "$docker_status" == "ActiveState=inactive" ]]; then
+		echo "NOTFOUND"
+	elif [[ "$docker_status" == "ActiveState=active" ]]; then
+		echo "FOUND"
 	fi
 }
 

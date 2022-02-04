@@ -190,7 +190,9 @@ check_gitlab_runner_status() {
 # run with: source src/import.sh && check_gitlab_server_status
 check_gitlab_server_status() {
 	
+	read -p "BEFORE GETTING CONTAINER"
 	container_id=$(get_docker_container_id_of_gitlab_server)
+	read -p "AFTER GETTING CONTAINER"
 	#echo "container_id=$container_id"
 	status=$(sudo docker exec -i "$container_id" bash -c "gitlab-ctl status")
 	echo "$status"
@@ -213,28 +215,35 @@ check_gitlab_server_status() {
 #######################################
 # Structure:gitlab_status
 gitlab_server_is_running() {
+	
+	
 	if [ $(safely_check_if_program_is_installed "docker") == "FOUND" ]; then
-		actual_result=$(check_gitlab_server_status)
-		#echo "actual_result=$actual_result"
-		if
-		[  "$(lines_contain_string 'run: alertmanager: (pid ' "\${actual_result}")" == "FOUND" ] &&
-		[  "$(lines_contain_string 'run: gitaly: (pid ' "\${actual_result}")" == "FOUND" ] &&
-		[  "$(lines_contain_string 'run: gitlab-exporter: (pid ' "\${actual_result}")" == "FOUND" ] &&
-		[  "$(lines_contain_string 'run: gitlab-workhorse: (pid ' "\${actual_result}")" == "FOUND" ] &&
-		[  "$(lines_contain_string 'run: grafana: (pid ' "\${actual_result}")" == "FOUND" ] &&
-		[  "$(lines_contain_string 'run: logrotate: (pid ' "\${actual_result}")" == "FOUND" ] &&
-		[  "$(lines_contain_string 'run: nginx: (pid ' "\${actual_result}")" == "FOUND" ] &&
-		[  "$(lines_contain_string 'run: postgres-exporter: (pid ' "\${actual_result}")" == "FOUND" ] &&
-		[  "$(lines_contain_string 'run: postgresql: (pid ' "\${actual_result}")" == "FOUND" ] &&
-		[  "$(lines_contain_string 'run: prometheus: (pid ' "\${actual_result}")" == "FOUND" ] &&
-		[  "$(lines_contain_string 'run: puma: (pid ' "\${actual_result}")" == "FOUND" ] &&
-		[  "$(lines_contain_string 'run: redis: (pid ' "\${actual_result}")" == "FOUND" ] &&
-		[  "$(lines_contain_string 'run: redis-exporter: (pid ' "\${actual_result}")" == "FOUND" ] &&
-		[  "$(lines_contain_string 'run: sidekiq: (pid ' "\${actual_result}")" == "FOUND" ] &&
-		[  "$(lines_contain_string 'run: sshd: (pid ' "\${actual_result}")" == "FOUND" ] &&
-		[  "$actual_result" != "" ]
-		then
-			echo "RUNNING"
+		if [ $(docker_is_running) == "FOUND" ]; then
+			actual_result=$(check_gitlab_server_status)
+			exit 1
+			#echo "actual_result=$actual_result"
+			if
+			[  "$(lines_contain_string 'run: alertmanager: (pid ' "\${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: gitaly: (pid ' "\${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: gitlab-exporter: (pid ' "\${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: gitlab-workhorse: (pid ' "\${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: grafana: (pid ' "\${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: logrotate: (pid ' "\${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: nginx: (pid ' "\${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: postgres-exporter: (pid ' "\${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: postgresql: (pid ' "\${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: prometheus: (pid ' "\${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: puma: (pid ' "\${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: redis: (pid ' "\${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: redis-exporter: (pid ' "\${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: sidekiq: (pid ' "\${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: sshd: (pid ' "\${actual_result}")" == "FOUND" ] &&
+			[  "$actual_result" != "" ]
+			then
+				echo "RUNNING"
+			else
+				echo "NOTRUNNING"
+			fi
 		else
 			echo "NOTRUNNING"
 		fi
@@ -571,5 +580,3 @@ gitlab_runner_service_is_installed() {
 		printf "ERROR, the \n sudo gitlab-runner status\n was not as expected. Please run that command to see what its output is."
 	fi
 }
-
-

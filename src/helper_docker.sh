@@ -467,11 +467,11 @@ start_docker() {
 	output=$(sudo systemctl start docker)
 	#output=$(systemctl reset-failed docker.service)
 
-	# TODO:
-	# sudo groupadd docker
-	# sudo usermod -aG docker $USER
-	# sudo systemctl enable docker
-	# sudo systemctl start docker
+	# TODO: do this only if it is needed.
+	sudo groupadd docker
+	sudo usermod -aG docker $USER
+	sudo systemctl enable docker
+	sudo systemctl start docker
 	echo "$output"
 }
 

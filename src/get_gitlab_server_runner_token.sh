@@ -77,22 +77,31 @@ get_registration_token_with_python() {
 	download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
 	
 	
-	# TODO: turn batch_copy_issues into variable
+	# TODO: turn get_gitlab_generation_token into variable
 	# shellcheck disable=SC2034
-	conda_environments=$(conda env list)
-	
-	if [ "$(lines_contain_string "$CONDA_ENVIRONMENT_NAME" "\${conda_environments}")" == "FOUND" ]; then
-		#cd get-gitlab-runner-registration-token && conda activate batch_copy_issues && python -m code.project1.src
-		#cd get-gitlab-runner-registration-token && conda activate "batch_copy_issues" && python -m code.project1.src
-		#cd get-gitlab-runner-registration-token && conda activate base && conda activate batch_copy_issues && python -m code.project1.src
+	#conda_environments=$(conda env list)
+	#read -p "CONDA_ENVIRONMENT_NAME=$CONDA_ENVIRONMENT_NAME"
+	#read -p "conda_environments=$conda_environments"
+	#if [ "$(lines_contain_string "$CONDA_ENVIRONMENT_NAME" "\${conda_environments}")" == "FOUND" ]; then
+	if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
+		#cd get-gitlab-runner-registration-token && conda activate get_gitlab_generation_token && python -m code.project1.src
+		#cd get-gitlab-runner-registration-token && conda activate "get_gitlab_generation_token" && python -m code.project1.src
+		#cd get-gitlab-runner-registration-token && conda activate base && conda activate get_gitlab_generation_token && python -m code.project1.src
+		read -p "Found environment"
 		eval "$(conda shell.bash hook)"
-		cd get-gitlab-runner-registration-token && conda deactivate && conda activate batch_copy_issues && python -m code.project1.src
-		#cd get-gitlab-runner-registration-token && conda init batch_copy_issues && python -m code.project1.src
+		cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src
+		#cd get-gitlab-runner-registration-token && conda init get_gitlab_generation_token && python -m code.project1.src
 		# eval $(conda shell.bash hook)
+		read -p "Done getting registration token"
 	else
-		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate "$CONDA_ENVIRONMENT_NAME" && python -m code.project1.src
+		read -p "Did not found environment"
+		eval "$(conda shell.bash hook)"
+		#cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate "$CONDA_ENVIRONMENT_NAME" && python -m code.project1.src
+		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src
+		
 	fi
 	cd ..
+	# TODO: verify path
 }
 
 # Downloads a repository into the root directory of this repository if the

@@ -5,7 +5,9 @@ HIDDENSERVICEDIR_SSH=/var/lib/tor/
 HIDDENSERVICENAME_SSH=other_hidden_service
 #x86_64_runner_checksum=ad6cd9a08a2bbb5bd4fc58ece4b4ef48
 #x86_64_runner_checksum=23e035b5e9eedb18b03d56a13953b4db
-x86_64_runner_checksum=fd666592c1cf2147cd0a0ff2f3fbb470
+#x86_64_runner_checksum=fd666592c1cf2147cd0a0ff2f3fbb470
+x86_64_runner_checksum=98915670b9fc238e9a08b61e82edb23f
+# TODO: capitalise x86_64_runner_checksum
 GITLAB_SERVER="127.0.0.1"
 GITLAB_SERVER_HTTP_URL="http://$GITLAB_SERVER"
 GITLAB_PORT_1="443:443"

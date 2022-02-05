@@ -455,13 +455,23 @@ stop_docker() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0): Check if the start docker command throws error:
+# > A dependency job for docker.service failed. See journalctl -xe for details.
+# journalctl -xe | grep docker
+# > Failed to resolve group docker: No such process
+# and if it does, use the group add commands to resolve it.
 #######################################
 # Structure:gitlab_docker
 # start docker
 start_docker() {
 	output=$(sudo systemctl start docker)
 	#output=$(systemctl reset-failed docker.service)
+
+	# TODO:
+	# sudo groupadd docker
+	# sudo usermod -aG docker $USER
+	# sudo systemctl enable docker
+	# sudo systemctl start docker
 	echo "$output"
 }
 

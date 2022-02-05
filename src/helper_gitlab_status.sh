@@ -190,9 +190,7 @@ check_gitlab_runner_status() {
 # run with: source src/import.sh && check_gitlab_server_status
 check_gitlab_server_status() {
 	
-	read -p "BEFORE GETTING CONTAINER"
 	container_id=$(get_docker_container_id_of_gitlab_server)
-	read -p "AFTER GETTING CONTAINER"
 	#echo "container_id=$container_id"
 	status=$(sudo docker exec -i "$container_id" bash -c "gitlab-ctl status")
 	echo "$status"
@@ -220,7 +218,6 @@ gitlab_server_is_running() {
 	if [ $(safely_check_if_program_is_installed "docker") == "FOUND" ]; then
 		if [ $(docker_is_running) == "FOUND" ]; then
 			actual_result=$(check_gitlab_server_status)
-			exit 1
 			#echo "actual_result=$actual_result"
 			if
 			[  "$(lines_contain_string 'run: alertmanager: (pid ' "\${actual_result}")" == "FOUND" ] &&

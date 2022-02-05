@@ -68,7 +68,8 @@ file_contains_string() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0): Determine why it does not work in:
+#if [ "$(lines_contain_string "$CONDA_ENVIRONMENT_NAME" "\${conda_environments}")" == "FOUND" ]; then
 #######################################
 # Structure:Parsing
 lines_contain_string() {
@@ -81,6 +82,20 @@ lines_contain_string() {
 		echo "FOUND"; 
 	else
 		echo "NOTFOUND";
+	fi
+}
+
+# Source: https://stackoverflow.com/questions/70597896/check-if-conda-env-exists-and-create-if-not-in-bash
+find_in_conda_env(){
+    conda env list | grep "${@}" >/dev/null 2>/dev/null
+}
+
+conda_env_exists() {
+	local some_envirionment="$1"
+	if find_in_conda_env ".*$some_envirionment.*" ; then
+   		echo "FOUND"
+	else
+		echo "NOTFOUND"
 	fi
 }
 

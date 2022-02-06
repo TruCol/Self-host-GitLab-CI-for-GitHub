@@ -21,6 +21,7 @@ load 'assert_utils'
 ###	
 ###	if [ $(gitlab_server_is_running | tail -1) == "RUNNING" ]; then
 ###		true
+### # TODO: change into elif to only install and uninstall to NOTRUNNING.
 ###	else
 ###		#+ uninstall and re-installation by default
 ###		# Uninstall GitLab Runner and GitLab Server

@@ -8,26 +8,28 @@ load 'libs/bats-file/load'
 load 'assert_utils'
 
 # source src/import.sh
+#source src/import.sh
 
 
 # Method that executes all tested main code before running tests.
-setup() {
-	# print test filename to screen.
-	if [ "${BATS_TEST_NUMBER}" = 1 ];then
-		echo "# Testfile: $(basename ${BATS_TEST_FILENAME})-" >&3
-	fi
-	
-	if [ $(gitlab_server_is_running | tail -1) == "RUNNING" ]; then
-		true
-	else
-		#+ uninstall and re-installation by default
-		# Uninstall GitLab Runner and GitLab Server
-		run bash -c "./uninstall_gitlab.sh -h -r -y"
-	
-		# Install GitLab Server
-		run bash -c "./install_gitlab.sh -s -r"
-	fi
-}
+###setup() {
+###	
+###	# print test filename to screen.
+###	if [ "${BATS_TEST_NUMBER}" = 1 ];then
+###		echo "# Testfile: $(basename ${BATS_TEST_FILENAME})-" >&3
+###	fi
+###	
+###	if [ $(gitlab_server_is_running | tail -1) == "RUNNING" ]; then
+###		true
+###	else
+###		#+ uninstall and re-installation by default
+###		# Uninstall GitLab Runner and GitLab Server
+###		run bash -c "./uninstall_gitlab.sh -h -r -y"
+###	
+###		# Install GitLab Server
+###		run bash -c "./install_gitlab.sh -s -r"
+###	fi
+###}
 
 @test "Test running the function that loops over the GitHub branches." {
 	GITHUB_USERNAME_GLOBAL="a-t-0"

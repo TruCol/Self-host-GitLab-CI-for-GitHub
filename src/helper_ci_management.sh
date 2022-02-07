@@ -1,5 +1,20 @@
 #!/bin/bash
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 # Run with:
 # source src/import.sh src/helper_ci_management.sh && github_commit_already_has_gitlab_ci_build_status_result "a-t-0" "sponsor_example" "no_attack_in_filecontent" "0dee4abdc50ccd7683eb4326678d8c9dde4ea05d"
 github_commit_already_has_gitlab_ci_build_status_result() {

@@ -40,8 +40,8 @@ run_ci_on_github_repo() {
 # run with:
 # source src/import.sh src/run_ci_on_github_repo.sh && download_github_repo_on_which_to_run_ci "a-t-0" "sponsor_example"
 download_github_repo_on_which_to_run_ci() {
-	GITHUB_USERNAME_GLOBAL="$1"
-	github_repo_name="$2"
+	local github_username="$1"
+	local github_repo_name="$2"
 	
 	# 0. Check access to GitHub repository
 	
@@ -62,10 +62,10 @@ download_github_repo_on_which_to_run_ci() {
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
+	has_access="$(check_ssh_access_to_repo "$github_username" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
-	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	clone_github_repository "$github_username" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
 	
 	
 	# 2. Verify the GitHub repo is cloned.

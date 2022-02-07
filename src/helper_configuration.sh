@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 #######################################
 # Returns the architecture of the machine on which this service is ran.
 # Source: https://askubuntu.com/questions/189640/how-to-find-architecture-of-my-pc-and-ubuntu
@@ -35,6 +36,7 @@ get_architecture() {
 	
 	echo $mapped_architecture
 }
+
 
 #######################################
 # Kills the sshd process to prevent the:
@@ -92,6 +94,7 @@ remove_sshd() {
 	assert_sshd_process_is_not_running_anymore
 }
 
+
 #######################################
 # Asserts the sshd process is terminated. trows error if it is not terminated.
 # Local variables:
@@ -113,8 +116,3 @@ assert_sshd_process_is_not_running_anymore() {
 		exit 7
 	fi
 }
-
-
-
-
-

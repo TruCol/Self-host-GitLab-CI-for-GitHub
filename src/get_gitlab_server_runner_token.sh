@@ -1,5 +1,20 @@
 #!/bin/bash
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 get_gitlab_server_runner_tokenV1() {
 	GITURL="$GITLAB_SERVER_HTTP_URL"
 	# shellcheck disable=SC2154
@@ -41,6 +56,20 @@ get_gitlab_server_runner_tokenV1() {
 }
 
 
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 get_gitlab_server_runner_tokenV0() {
 	export GITURL="$GITLAB_SERVER_HTTP_URL"
 	export GITUSER="$GITLAB_SERVER_ACCOUNT_GLOBAL"
@@ -66,6 +95,21 @@ get_gitlab_server_runner_tokenV0() {
 	#echo "sPgAnNea3WxvTRsZN5hB"
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 # source src/get_gitlab_server_runner_token.sh && get_registration_token_with_python
 get_registration_token_with_python() {
 	# delete the runner registration token file if it exist
@@ -101,6 +145,21 @@ get_registration_token_with_python() {
 	# TODO: verify path
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 # Downloads a repository into the root directory of this repository if the
 #+ destination folder does yet exist
 #+ TODO: write test for method
@@ -140,6 +199,20 @@ get_gitlab_server_runner_tokenV2() {
 }
 
 
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 get_gitlab_server_runner_tokenV3() {
 	source src/hardcoded_variables.txt
 	export GITURL="$GITLAB_SERVER_HTTP_URL"

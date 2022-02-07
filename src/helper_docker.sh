@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 #######################################
 # Installs docker on the machine and verifies it is installed correctly.
 # Run with: run bash -c "source src/import.sh && install_docker"
@@ -30,6 +31,21 @@ install_docker() {
 	$(assert_docker_is_installed)
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 # run with: source src/helper_docker.sh && safely_check_if_program_is_installed docker
 safely_check_if_program_is_installed() {
 	program_name="$1"
@@ -40,6 +56,21 @@ safely_check_if_program_is_installed() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 sudo_safely_check_if_program_is_installed() {
 	program_name="$1"
 	if ! foobar_loc="$(sudo type -p "$program_name")" || [[ -z $foobar_loc ]]; then
@@ -90,6 +121,21 @@ completely_remove_docker() {
 	sudo rm -r /etc/docker
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 # run with: source src/helper_docker.sh && safely_remove_docker
 safely_remove_docker() {
 	if [ $(safely_check_if_program_is_installed "docker") == "FOUND" ]; then
@@ -97,12 +143,28 @@ safely_remove_docker() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 safely_completely_remove_docker() {
 	if [ $(safely_check_if_program_is_installed "docker") == "FOUND" ]; then
 		# TODO: also make this function safe.
 		completely_remove_docker
 	fi
 }
+
 
 #######################################
 # Removes docker on the machine and verifies it is removed correctly.
@@ -474,6 +536,7 @@ start_docker() {
 	sudo systemctl start docker
 	echo "$output"
 }
+
 
 #######################################
 # 

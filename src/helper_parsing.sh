@@ -85,11 +85,41 @@ lines_contain_string() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 # Source: https://stackoverflow.com/questions/70597896/check-if-conda-env-exists-and-create-if-not-in-bash
 find_in_conda_env(){
     conda env list | grep "${@}" >/dev/null 2>/dev/null
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 conda_env_exists() {
 	local some_envirionment="$1"
 	if find_in_conda_env ".*$some_envirionment.*" ; then
@@ -99,6 +129,21 @@ conda_env_exists() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 lines_contain_string_for_visudo() {
 	local substring="$1"
 	shift
@@ -125,6 +170,8 @@ lines_contain_string_for_visudo() {
 		echo "NOTFOUND"
 	fi
 }
+
+
 #######################################
 # 
 # Local variables:
@@ -147,6 +194,7 @@ get_line_nr() {
 	line_nr=$(awk "/$STRING/{ print NR; exit }" "$relative_filepath")
 	echo "$line_nr"
 }
+
 
 #######################################
 # 
@@ -172,6 +220,7 @@ get_line_by_nr() {
 	the_line=$(sed "${number}q;d" "$relative_filepath")
 	echo "$the_line"
 }
+
 
 #######################################
 # 
@@ -201,6 +250,7 @@ get_line_by_nr_from_variable() {
 		fi
 	done <<< "$lines"
 }
+
 
 #######################################
 # 
@@ -241,6 +291,7 @@ get_first_line_containing_substring() {
 	fi
 }
 
+
 #######################################
 # 
 # Local variables:
@@ -270,6 +321,7 @@ get_lhs_of_line_till_character() {
 	echo "$lhs"
 }
 
+
 #######################################
 # 
 # Local variables:
@@ -295,6 +347,7 @@ get_rhs_of_line_till_character() {
 	echo "$rhs"
 }
 
+
 #######################################
 # 
 # Local variables:
@@ -315,6 +368,7 @@ get_nr_of_lines_in_var() {
 	eval lines="$1"
 	echo "$lines" | wc -l
 }
+
 
 #######################################
 # 
@@ -339,6 +393,7 @@ get_last_line_of_set_of_lines() {
 	last_line=$(get_line_by_nr_from_variable "$nr_of_lines" "\${lines}")
 	echo "$last_line"
 }
+
 
 #######################################
 # 
@@ -365,11 +420,40 @@ get_last_space_delimted_item_in_line() {
 }
 
 
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 function stringStripNCharsFromStart {
     echo ${1:$2:${#1}}
     #echo ${1:$2}
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 assert_first_four_chars_are_sshd() {
 	local string="$"
 	

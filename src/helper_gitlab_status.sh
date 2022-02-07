@@ -26,6 +26,7 @@ initialise_github_branches_array() {
 	declare -p github_branches
 }
 
+
 #######################################
 # Creates a Bash array that can be used by other functions in this script.
 # The array is named gitlab_branches and it contains the names of the
@@ -70,23 +71,45 @@ initialise_gitlab_branches_array() {
 # array, such that this function indeed loops through the branches in that 
 # repository, and not another, if it is changed inbetween. (TODO: verify if 
 # this function is used before fixing todo).
-# TODO(a-t-0): Determine how to define github_branch as a local variable
+# TODO: (a-t-0): Determine how to define github_branch as a local variable
 # within the for loop.
+# TODO: (a-t-0) capitalise the global variable: github_branches.
 #######################################
-# 6.b Loop through the GitHub mirror repository branches that are already in GitLab
 loop_through_github_branches() {
+	local github_branch
 	for github_branch in "${github_branches[@]}"; do
 		echo "$github_branch"
 	done
 }
 
-# Structure:gitlab_status
+
+#######################################
+# Echo's list of THE FIRST 1000 repositories in a GitLab server.
+# Local variables:
+#  repo_arr
+#  repositories
+# Globals:
+#  github_branches.
+# Arguments:
+#   None.
+# Returns:
+#  0 if funciton was evaluated succesfull.
+# Outputs:
+#   None.
+# TODO: (a-t-0) Determine whether the repo_arr should indeed be local, or
+# Global.
+# TODO: (a-t-0) Determine whether it indeed outputs nothing or if it outputs
+# the array with repositories.
+# TODO: (a-t-0) Generalise this method to work beyond the first 1000 repositories
+# in a GitLab server.
+#######################################
 get_project_list(){
+	# TODO: (a-t-0) Determine whether the repo_arr should indeed be local, or Global.
 	# shellcheck disable=2034
 	local -n repo_arr="$1"     # use nameref for indirection
 
     # Get a list of the repositories in your own local GitLab server (that runs the GitLab runner CI).
-	repositories=$(curl --header "PRIVATE-TOKEN: $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
+	local repositories=$(curl --header "PRIVATE-TOKEN: $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
 	
 	# TODO: identify why the response of the repositories command is inconsistent.
 	# shellcheck disable=2034
@@ -94,20 +117,40 @@ get_project_list(){
 	#echo "repo_arr=$repo_arr"
 }
 
-# 6.d.0 Check if the mirror repository exists in GitLab
+
+#######################################
+# Echo's if a repository is found in a GitLab server.
+# Local variables:
+#  searched_repo
+# Globals:
+#  github_branches
+# Arguments:
+#  The repository of which one wants to know if it is in the GitLab server.
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  FOUND if the searched repository exists in the GitLab server
+#  NOTFOUND if the searched repository does not exists in the first 1000 
+#  repositories of the GitLab server.
+# TODO(a-t-0): Remove spaces around variables in quotations and verify it 
+# still works.
+#######################################
 gitlab_mirror_repo_exists_in_gitlab() {
-	searched_repo="$1"
-	# The repository array returned by GitLab API contains extra quotations around each repo.
+	local searched_repo="$1"
+	# The repository array returned by GitLab API contains extra quotations 
+	# around each repo. So these are added for similarity.
 	searched_repo_with_quotations='"'"$searched_repo"'"' 
 	
 	local gitlab_repos
     get_project_list gitlab_repos       # call function to populate the array
     
-	# TODO: remove spaces around variables in quotations
+	# TODO(a-t-0): Remove spaces around variables in quotations and verify it
+    # still works.
 	# shellcheck disable=SC2076
 	if [[ " ${gitlab_repos[*]} " =~ " ${searched_repo} " ]]; then
 		echo "FOUND"
-	# TODO: remove spaces around variables in quotations
+	# TODO(a-t-0): Remove spaces around variables in quotations and verify it
+    # still works.
 	elif [[ " ${gitlab_repos[*]} " =~ " ${searched_repo_with_quotations} " ]]; then
 		echo "FOUND"
 	else
@@ -117,9 +160,21 @@ gitlab_mirror_repo_exists_in_gitlab() {
 
 
 
-
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 # Structure:gitlab_status
-# 6.e.0.helper TODO: move to helper
 # TODO: find way to test this function (e.g. copy sponsor repo into GitLab as example.
 gitlab_branch_exists() {
 	gitlab_repo_name="$1"
@@ -149,24 +204,20 @@ gitlab_branch_exists() {
 
 
 #######################################
-# 
+# Outputs the output of the gitlab-runner status command.
 # Local variables:
-# 
+# status
 # Globals:
 #  None.
 # Arguments:
-#   
-# Returns:
-#  0 if 
-#  7 if 
-# Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# Returns:
+#  0 if the status was retrieved and echoed succesfully.
+# Outputs:
+#  The status of the GitLab runner.
 #######################################
-# Structure:gitlab_status
-# gitlab runner status:
 check_gitlab_runner_status() {
-	status=$(sudo gitlab-runner status)
+	local status=$(sudo gitlab-runner status)
 	echo "$status"
 }
 

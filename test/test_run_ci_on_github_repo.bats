@@ -8,8 +8,8 @@ load 'libs/bats-file/load'
 load 'assert_utils'
 
 # source src/import.sh
-#source src/import.sh
-
+source src/import.sh
+#source src/run_ci_on_github_repo.sh
 
 # Method that executes all tested main code before running tests.
 ###setup() {
@@ -33,14 +33,14 @@ load 'assert_utils'
 ###}
 
 @test "Test running the function that loops over the GitHub branches." {
-	GITHUB_USERNAME_GLOBAL="a-t-0"
-	github_repo_name="sponsor_example"
+	local github_username="a-t-0"
+	local github_repo_name="sponsor_example"
 	
 	# Download the GitHub repo on which to run the GitLab CI:
-	download_github_repo_on_which_to_run_ci "$GITHUB_USERNAME_GLOBAL" "$github_repo_name"
+	download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
 	
 	
-	copy_github_branches_with_yaml_to_gitlab_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name"
+	copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name"
 	
 	
 	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
@@ -51,6 +51,7 @@ load 'assert_utils'
 # TODO: write test that verifies this works on a new clean/empty repo.
 # TODO: make this run after the loop over github branches.
 @test "Test pushing GitHub commit build status to repo with build statusses is successful." {
+	skip
 	GITHUB_USERNAME_GLOBAL="a-t-0"
 	github_repo_name="sponsor_example"
 	github_branch_name="main"
@@ -79,6 +80,7 @@ load 'assert_utils'
 
 # TODO: make this run after the loop over github branches.
 @test "Test export successful GitHub commit build status to repo with build statusses is exported correctly." {
+	skip
 	GITHUB_USERNAME_GLOBAL="a-t-0"
 	github_repo_name="sponsor_example"
 	github_branch_name="main"
@@ -104,6 +106,7 @@ load 'assert_utils'
 
 # TODO: make this run after the loop over github branches.
 @test "Test export failed GitHub commit build status to repo with build statusses is exported correctly." {
+	skip
 	GITHUB_USERNAME_GLOBAL="a-t-0"
 	github_repo_name="sponsor_example"
 	github_branch_name="main"
@@ -129,6 +132,7 @@ load 'assert_utils'
 
 # TODO: make this run after the loop over github branches.
 @test "Test export error GitHub commit build status to repo with build statusses is exported correctly." {
+	skip
 	GITHUB_USERNAME_GLOBAL="a-t-0"
 	github_repo_name="sponsor_example"
 	github_branch_name="main"
@@ -163,6 +167,7 @@ load 'assert_utils'
 
 
 @test "Test verifies GitHub repository is cloned." {
+	skip
 	GITHUB_USERNAME_GLOBAL="a-t-0"
 	github_repo_name="sponsor_example"
 	
@@ -182,6 +187,7 @@ load 'assert_utils'
 
 # TODO: make this run after the loop over github branches.
 @test "Test get GitLab commit build status function." {
+	skip
 	GITHUB_USERNAME_GLOBAL="a-t-0"
 	github_repo_name="sponsor_example"
 	github_branch_name="main"
@@ -208,6 +214,7 @@ load 'assert_utils'
 
 # TODO: make this run after the loop over github branches.
 @test "Test set GitHub commit build status function." {
+	skip
 	GITHUB_USERNAME_GLOBAL="a-t-0"
 	github_repo_name="sponsor_example"
 	github_branch_name="main"
@@ -249,6 +256,7 @@ load 'assert_utils'
 
 # TODO: make this run after the loop over github branches.
 @test "Test set GitHub commit build status is exported correctly." {
+	skip
 	GITHUB_USERNAME_GLOBAL="a-t-0"
 	github_repo_name="sponsor_example"
 	github_branch_name="main"
@@ -286,5 +294,3 @@ load 'assert_utils'
 	#echo "output=$output"
 	assert_equal "something" "$output"
 }
-
-

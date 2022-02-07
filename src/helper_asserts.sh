@@ -1,5 +1,20 @@
 #!/bin/bash
 # Structure:dir_edit
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 manual_assert_file_exists() {
 	filepath=$1
 	if [ ! -f "$filepath" ]; then
@@ -8,6 +23,21 @@ manual_assert_file_exists() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 manual_assert_dir_exists() {
 	dirpath=$1
 	if [ ! -d "$dirpath" ]; then
@@ -16,6 +46,21 @@ manual_assert_dir_exists() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 manual_assert_dir_not_exists() {
 	dirpath=$1
 	if [ -d "$dirpath" ]; then
@@ -24,6 +69,21 @@ manual_assert_dir_not_exists() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 manual_assert_equal() {
 	left="$1"
 	right="$2"
@@ -33,6 +93,21 @@ manual_assert_equal() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 manual_assert_not_equal() {
 	left="$1"
 	right="$2"

@@ -1,6 +1,20 @@
 #!/bin/bash
 
-# Structure:ssh
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 # Activates/enables the ssh for 
 activate_ssh_account() {
 	git_username=$1
@@ -39,7 +53,21 @@ check_ssh_access_to_repo() {
 	fi
 }
 
-# Structure:ssh
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 has_access() {
 	local github_repo="$1"
 	#echo $(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo")

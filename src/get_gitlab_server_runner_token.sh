@@ -87,14 +87,11 @@ get_registration_token_with_python() {
 		#cd get-gitlab-runner-registration-token && conda activate get_gitlab_generation_token && python -m code.project1.src
 		#cd get-gitlab-runner-registration-token && conda activate "get_gitlab_generation_token" && python -m code.project1.src
 		#cd get-gitlab-runner-registration-token && conda activate base && conda activate get_gitlab_generation_token && python -m code.project1.src
-		read -p "Found environment"
 		eval "$(conda shell.bash hook)"
 		cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src
 		#cd get-gitlab-runner-registration-token && conda init get_gitlab_generation_token && python -m code.project1.src
 		# eval $(conda shell.bash hook)
-		read -p "Done getting registration token"
 	else
-		read -p "Did not found environment"
 		eval "$(conda shell.bash hook)"
 		#cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate "$CONDA_ENVIRONMENT_NAME" && python -m code.project1.src
 		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src

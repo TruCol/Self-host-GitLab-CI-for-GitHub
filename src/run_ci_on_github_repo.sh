@@ -38,12 +38,10 @@ run_ci_on_github_repo() {
 
 
 # run with:
-# source src/import.sh src/run_ci_on_github_repo.sh && download_github_repo_on_which_to_run_ci "a-t-0" "sponsor_example"
+# source src/import.sh && download_github_repo_on_which_to_run_ci "a-t-0" "sponsor_example"
 download_github_repo_on_which_to_run_ci() {
 	local github_username="$1"
 	local github_repo_name="$2"
-	
-	# 0. Check access to GitHub repository
 	
 	# 1. Clone the GitHub repo.
 	# Delete GitHub repo at start of test.
@@ -61,7 +59,10 @@ download_github_repo_on_which_to_run_ci() {
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub"
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitLab"
 	
+	
+
 	# Verify ssh-access
+	# TODO: resolve error when ran from test.
 	has_access="$(check_ssh_access_to_repo "$github_username" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.

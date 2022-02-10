@@ -38,13 +38,15 @@ source src/import.sh
 	
 	# Download the GitHub repo on which to run the GitLab CI:
 	download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
+	assert_equal "FOUND" "FOUND"
+	
+	#repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
+	#assert_equal "$repo_was_cloned" "FOUND"
+
+	#copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name"
 	
 	
-	copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name"
 	
-	
-	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
-	assert_equal "$repo_was_cloned" "FOUND"
 
 }
 

@@ -27,27 +27,89 @@ activate_ssh_account() {
     ssh-add ~/.ssh/"$git_username"
 }
 
-# Structure:ssh
-# Check ssh-access to GitHub repo.
+
+#######################################
+# Checks if the device has ssh-access to some repository. If retry argument is
+# passed, it will call itself once more.
+# Local variables:
+#  local_git_username
+#  github_repository
+#  is_retry
+#  my_service_status
+#  found_error_in_ssh_command
+# Globals:
+#  None.
+# Arguments:
+#  local_git_username
+#  github_repository
+#  is_retry
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  FOUND if the machine has ssh-access to a repository.
+#  NOTFOUND if the machine does not have ssh-access to a repository.
+#######################################
 check_ssh_access_to_repo() {
 	local local_git_username=$1
-	github_repository=$2
-	retry=$3
+	local github_repository=$2
+	local is_retry=$3
 	
 	# shellcheck disable=SC2034
-	my_service_status=$(git ls-remote git@github.com:"$local_git_username"/"$github_repository".git 2>&1)
-	found_error_in_ssh_command=$(lines_contain_string "ERROR" "\${my_service_status}")
-	
+	local my_service_status=$(git ls-remote git@github.com:"$local_git_username"/"$github_repository".git 2>&1)
+	local found_error_in_ssh_command=$(lines_contain_string "ERROR" "\${my_service_status}")
 	if [ "$found_error_in_ssh_command" == "NOTFOUND" ]; then
-		echo "HASACCESS"
+		echo "FOUND"
 	elif [ "$found_error_in_ssh_command" == "FOUND" ]; then
-		if [ "$retry" == "YES" ]; then
-			echo "Your ssh-account:$local_git_username does not have pull access to the repository:$github_repository"
-			exit 4
-			# TODO: Throw error
-			#(A public repository should grant ssh access even if no ssh credentials for that GitHub user is given.)
+		# Two tries is enough to determine the device does not have ssh-access.
+		if [ "$is_retry" == "YES" ]; then
+			echo "NOTFOUND"
 		else
-			#activate_ssh_account "$local_git_username"
+			# Perform recursive call to run function one more time.
+			check_ssh_access_to_repo "$local_git_username" "$github_repository" "YES"
+		fi
+	fi
+}
+
+
+#######################################
+# Asserts the device has ssh-access to some repository. If retry argument is
+# passed, it will call itself once more. Throws an error upon no ssh-access.
+# Local variables:
+#  local_git_username
+#  github_repository
+#  is_retry
+#  my_service_status
+#  found_error_in_ssh_command
+# Globals:
+#  None.
+# Arguments:
+#  local_git_username
+#  github_repository
+#  is_retry
+# Returns:
+#  0 if the machine has ssh-access to a repository.
+#  4 if the machine does not have ssh-access to a repository.
+# Outputs:
+#  FOUND if the machine has ssh-access to a repository.
+#######################################
+assert_ssh_access_to_repo() {
+	local local_git_username=$1
+	local github_repository=$2
+	local is_retry=$3
+	
+	# shellcheck disable=SC2034
+	local my_service_status=$(git ls-remote git@github.com:"$local_git_username"/"$github_repository".git 2>&1)
+	local found_error_in_ssh_command=$(lines_contain_string "ERROR" "\${my_service_status}")
+	if [ "$found_error_in_ssh_command" == "NOTFOUND" ]; then
+		echo "FOUND"
+	elif [ "$found_error_in_ssh_command" == "FOUND" ]; then
+		# Two tries is enough to determine the device does not have ssh-access.
+		if [ "$is_retry" == "YES" ]; then
+			echo "Your ssh-account:$local_git_username does not have pull access to the repository:$github_repository"
+			#(A public repository should grant ssh access even if no ssh credentials for that GitHub user is given.)
+			exit 4
+		else
+			# Perform recursive call to run function one more time.
 			check_ssh_access_to_repo "$local_git_username" "$github_repository" "YES"
 		fi
 	fi
@@ -66,7 +128,8 @@ check_ssh_access_to_repo() {
 #  0 If function was evaluated succesfull.
 # Outputs:
 #  
-# TODO(a-t-0):
+# TODO(a-t-0): Remove this function and replace its usage with:
+# check_ssh_access_to_repo or assert_ssh_access_to_repo.
 #######################################
 has_access() {
 	local github_repo="$1"

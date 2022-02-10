@@ -1,20 +1,23 @@
+source src/import.sh
+
 server_preserve_flag='false'
 server_hard_flag='false'
 server_hard_yes_flag='false'
 runner_flag='false'
+
 
 #verbose='false'
 
 print_usage() {
   printf "\nUsage: write:"
   printf "\n\n ./uninstall -p\n to do an uninstall of the GitLab server that Preserves repositories etc."
-  printf "\n./uninstall -h\n to do a hard uninstallation and removal of the GitLab server (DELETES repositories, user accounts etc.)."
-  printf "\n./uninstall -y\n to do a hard uninstallation and removal of the GitLab server without prompting for confirmation (DELETES repositories, user accounts etc.)."
-  printf "\n./uninstall -r \n to uninstall the GitLab runners,"
+  printf "\n./uninstall -h\n to do a Hard uninstallation and removal of the GitLab server (DELETES repositories, user accounts etc.)."
+  printf "\n./uninstall -y\n to do a hard uninstallation and removal of the GitLab server and skip Y/n prompt (DELETES repositories, user accounts etc.)."
+  printf "\n./uninstall -r \n to uninstall the GitLab Runners,"
   printf "you can also combine the separate arguments in different orders, e.g. -r -y etc.\n\n"
 }
 
-while getopts 'shyr' flag; do
+while getopts 'phyr' flag; do
   case "${flag}" in
     p) server_preserve_flag='true' ;;
     h) server_hard_flag='true' ;;
@@ -33,13 +36,13 @@ done
 #echo "server_hard_yes_flag=$server_hard_yes_flag";
 #echo "runner_flag=$runner_flag";
 
-source src/uninstall_gitlab_server.sh
-source src/uninstall_gitlab_runner.sh
-source src/hardcoded_variables.txt
+#source src/uninstall_gitlab_server.sh
+#source src/uninstall_gitlab_runner.sh
+#source src/hardcoded_variables.txt
 
 ## argument parsing logic:
 if [ "$server_hard_yes_flag" == "true" ] && [ "$server_preserve_flag" == "true" ]; then
-	echo "ERROR, you chose to manually override the prompt for the data preserving uninstallation, but the data preserving uninstallation does not not prompt for confirmation."
+	echo "ERROR, you chose to manually override the y/n prompt for the soft uninstallation, but the soft uninstallation does not have a y/n prompt for confirmation."
 	exit 1
 fi
 
@@ -53,7 +56,7 @@ if [ "$server_preserve_flag" == "true" ]; then
 fi
 
 if [ "$server_hard_flag" == "true" ] && [ "$server_hard_yes_flag" == "false" ]; then
-	read -p "Do you wish to uninstall GitLab and remove all its repositories, issues, users and server settings?" yn
+	read -rp "Do you wish to uninstall GitLab and remove all its repositories, issues, users and server settings?" yn
 	case $yn in
 		[Yy]* ) uninstall_gitlab_server "true";;
 		[Nn]* ) echo "The GitLab server was NOT uninstalled"; exit 0;;

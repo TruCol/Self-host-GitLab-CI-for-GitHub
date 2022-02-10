@@ -1,12 +1,11 @@
 #!./test/libs/bats/bin/bats
 
-load 'libs/bats-support/load'
-load 'libs/bats-assert/load'
+load '../../libs/bats-support/load'
+load '../../libs/bats-assert/load'
 
-source src/install_and_boot_gitlab_server.sh
-#source src/helper.sh
-source test/helper.sh
-source test/hardcoded_testdata.txt
+# TODO: move to import
+#source src/install_and_boot_gitlab_server.sh
+source src/import.sh
 
 # Method that executes all tested main code before running tests.
 setup() {

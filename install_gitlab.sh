@@ -1,4 +1,7 @@
 #!/bin/bash
+
+source src/import.sh
+
 server_flag='false'
 #wait_flag='false'
 runner_flag='false'
@@ -17,6 +20,7 @@ while getopts 'sr' flag; do
 		s) server_flag='true' ;;
 		r) runner_flag='true' ;;
 		#w) wait_flag='true' ;;
+		*)
 	esac
 done
 
@@ -39,7 +43,7 @@ fi
 # Check if runner is being uninstalled:
 if [ "$runner_flag" == "true" ]; then
 	# Test if the gitlab server is running
-	if [ $(gitlab_server_is_running | tail -1) == "RUNNING" ]; then
+	if [ "$(gitlab_server_is_running | tail -1)" == "RUNNING" ]; then
 		install_and_run_gitlab_runner
 	else
 		echo "ERROR, tried to start GitLab runner directly without the GitLab server running."

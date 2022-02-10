@@ -18,7 +18,7 @@ get_sha256_of_folder() {
 		
 		# Get checksum of directory
 		checksum=$(tar -C "$dir_path" -cf - --sort=name "$dir_path" | sha256sum)
-		echo checksum=$checksum
+		echo checksum="$checksum"
 		
 		# Echo first substring till spacebar character occurs=sha256.
 		echo "$checksum" | cut -d' ' -f1

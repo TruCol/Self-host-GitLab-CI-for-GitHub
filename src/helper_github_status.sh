@@ -1,51 +1,5 @@
 #!/bin/bash
-# run with:
-#./mirror_github_to_gitlab.sh "a-t-0" "testrepo" "filler_github"
 
-###source src/helper_dir_edit.sh
-###source src/helper_github_modify.sh
-####source src/helper_github_status.sh
-###source src/helper_gitlab_modify.sh
-###source src/helper_gitlab_status.sh
-###source src/helper_git_neutral.sh
-###source src/helper_ssh.sh
-###source src/hardcoded_variables.txt
-###source src/creds.txt
-###source src/get_gitlab_server_runner_token.sh
-###source src/push_repo_to_gitlab.sh
-
-# Hardcoded data:
-
-# Get GitHub username.
-github_username=$1
-
-# Get GitHub repository name.
-github_repo=$2
-
-verbose=$3
-
-# Get GitLab username.
-gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
-
-# Get GitLab user password.
-gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')
-
-# Get GitLab personal access token from hardcoded file.
-gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
-
-# Specify GitLab mirror repository name.
-gitlab_repo="$github_repo"
-
-if [ "$verbose" == "TRUE" ]; then
-	echo "MIRROR_LOCATION=$MIRROR_LOCATION"
-	echo "github_username=$github_username"
-	echo "github_repo=$github_repo"
-	echo "github_personal_access_code=$github_personal_access_code"
-	echo "gitlab_username=$gitlab_username"
-	echo "gitlab_server_password=$gitlab_server_password"
-	echo "gitlab_personal_access_token=$gitlab_personal_access_token"
-	echo "gitlab_repo=$gitlab_repo"
-fi
 
 # Structure:github_status
 github_repo_exists_locally(){
@@ -69,7 +23,8 @@ verify_github_repository_is_cloned() {
 	
 	found_repo=$(dir_exists "$target_directory")
 	if [ "$found_repo" == "NOTFOUND" ]; then
-		echo "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
+		# shellcheck disable=SC2059
+		printf "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
 		exit 11
 	elif [ "$found_repo" == "FOUND" ]; then
 		echo "FOUND"
@@ -82,7 +37,7 @@ verify_github_repository_is_cloned() {
 # Structure:Github_status (?or?)
 # Structure:git_neutral
 # Clone GitHub repository to folder src/mirror/GITHUB
-####clone_github_repository "$github_username" "$github_repo" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo"
+####clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo"
 ####verify_github_repository_is_cloned "$github_repo" "$MIRROR_LOCATION/GitHub/$github_repository"
 get_git_branches() {
     local -n arr=$1             # use nameref for indirection
@@ -180,7 +135,7 @@ get_current_github_branch() {
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
 		# Verify the branch exists
-		branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
+		branch_check_result="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
 		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
 		if [ "$last_line_branch_check_result" == "FOUND" ]; then
 		
@@ -219,7 +174,7 @@ get_current_github_branch_commit() {
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
 		# Verify the branch exists
-		branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
+		branch_check_result="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
 		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
 		if [ "$last_line_branch_check_result" == "FOUND" ]; then
 		
@@ -315,15 +270,16 @@ verify_github_branch_contains_gitlab_yaml() {
 # source src/import.sh src/helper_github_status.sh && get_org_repos "hiveminds"
 # source src/import.sh src/helper_github_status.sh && get_org_repos "a-t-0"
 get_org_repos() {
+	# shellcheck disable=SC2178
 	local -n arr=$1 # use nameref for indirection
 	local github_organisation_or_username="$2"
 	
 	arr=() # innitialise array with branches
 	
 	# get GitHub personal access token or verify ssh access to support private repositories.
-	github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
+	github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 	
-	theoutput=$(curl -H "Authorization: token $github_personal_access_code" "Accept: application/vnd.github.v3+json" https://api.github.com/users/${github_organisation_or_username}/repos?per_page=100 | jq -r '.[] | .name')
+	theoutput=$(curl -H "Authorization: token $github_personal_access_code" "Accept: application/vnd.github.v3+json" https://api.github.com/users/"${github_organisation_or_username}"/repos?per_page=100 | jq -r '.[] | .name')
 	
 	# Parse branches from branch list response
 	while IFS= read -r line; do
@@ -336,3 +292,95 @@ get_org_repos() {
 }
 
 
+
+#######################################
+# Verifies the current branch equals the incoming branch, throws an error otherwise.
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): TODO: test function
+#######################################
+assert_current_github_branch() {
+	github_repo_name="$1"
+	github_branch_name="$2"
+	company="GitHub"
+	
+	actual_result="$(get_current_github_branch "$github_repo_name" "$github_branch_name" $company)"
+	if [ "$actual_result" != "$github_branch_name" ]; then
+		echo "The current GitHub branch does not match the expected GitHub branch:$github_branch_name"
+		exit 171
+	fi 
+	manual_assert_equal "$actual_result" "$github_branch_name"
+}
+
+
+#######################################
+# Verifies a public GitHub repository exists.
+# Local variables:
+#  github_username
+#  github_repo_name
+# Globals:
+#  None.
+# Arguments:
+#  github_username
+#  github_repo_name
+# Returns:
+#  0 if the function is completed succesfully.
+# Outputs:
+#  FOUND if the GitHub repository exists and is public.
+#  NOTFOUND if the GitHub repository does not exists or is private.
+# TODO(a-t-0): Write test for function.
+#######################################
+# run with:
+#source src/helper_github_status.sh && check_public_github_repository_exists "a-t-0" "some_non_existing_repository"
+#source src/helper_github_status.sh && check_public_github_repository_exists "a-t-0" "gitlab-ci-build-statuses"
+#source src/helper_github_status.sh && check_public_github_repository_exists "ocaml" "ocaml"
+check_public_github_repository_exists() {
+	local github_username="$1"
+	local github_repo_name="$2"
+	
+	if curl -fsS "https://api.github.com/repos/${github_username}/${github_repo_name}" >/dev/null; then	
+		echo "FOUND"
+	else
+		echo "NOTFOUND"
+	fi
+}
+
+
+#######################################
+# Asserts a public GitHub repository exists. Throws error otherwise.
+# Local variables:
+#  github_username
+#  github_repo_name
+# Globals:
+#  None.
+# Arguments:
+#  github_username
+#  github_repo_name
+# Returns:
+#  0 if the GitHub repository is found.
+#  5 if the GitHub repository is private or if it does not exist.
+# Outputs:
+#  None.
+# TODO(a-t-0): Write test for function.
+#######################################
+# run with:
+#source src/helper_github_status.sh && assert_public_github_repository_exists "a-t-0" "some_non_existing_repository"
+#source src/helper_github_status.sh && assert_public_github_repository_exists "a-t-0" "gitlab-ci-build-statuses"
+assert_public_github_repository_exists() {
+	local github_username="$1"
+	local github_repo_name="$2"
+
+	if [[ $(check_public_github_repository_exists "$github_username" "$github_repo_name") != "FOUND" ]]; then
+		echo "The repository www.github.com/${github_username}/${github_repo_name} is not a public GitHub repository/doesn't exist. Please create it/make it public, and try again."
+		exit 5
+	fi
+}

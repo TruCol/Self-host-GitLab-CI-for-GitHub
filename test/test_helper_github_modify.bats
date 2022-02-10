@@ -7,11 +7,7 @@ load 'libs/bats-file/load'
 # https://github.com/bats-core/bats-assert#usage
 load 'assert_utils'
 
-source src/hardcoded_variables.txt
-
-
-source src/import.sh
-
+# source src/import.sh
 
 example_lines=$(cat <<-END
 ssh-ed25519 longcode/longcode somename-somename-123
@@ -52,7 +48,6 @@ setup() {
 	if [ $(gitlab_server_is_running | tail -1) == "RUNNING" ]; then
 		true
 	else
-		read -p "Now re-installing GitLab."
 		#+ uninstall and re-installation by default
 		# Uninstall GitLab Runner and GitLab Server
 		run bash -c "./uninstall_gitlab.sh -h -r -y"
@@ -91,10 +86,10 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$github_repo_name")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
-	clone_github_repository "$GITHUB_USERNAME" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
 	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	assert_equal "$repo_was_cloned" "FOUND"
 	
@@ -132,7 +127,7 @@ setup() {
 	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
 
 	# Check if branch is found in local GitHub repo.
-	run bash -c "source src/import.sh src/helper_github_modify.sh && github_branch_exists $github_repo_name $github_branch_name"
+	run bash -c "# source src/import.sh src/helper_github_modify.sh && github_branch_exists $github_repo_name $github_branch_name"
 	assert_failure
 	assert_output --partial "ERROR, the GitHub repository does not exist locally."
 }
@@ -157,10 +152,10 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$github_repo_name")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
-	clone_github_repository "$GITHUB_USERNAME" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
 	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	assert_equal "$repo_was_cloned" "FOUND"
 	
@@ -203,10 +198,10 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$github_repo_name")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
-	clone_github_repository "$GITHUB_USERNAME" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
 	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	assert_equal "$repo_was_cloned" "FOUND"
 	
@@ -236,7 +231,7 @@ setup() {
 	assert_file_not_exist "$MIRROR_LOCATION/GitLab"
 		
 	# Check if branch is found in local GitHub repo.
-	run bash -c "source src/import.sh src/helper_gitlab_modify.sh src/import.sh && checkout_branch_in_github_repo $github_repo_name $github_branch_name $company"
+	run bash -c "# source src/import.sh src/helper_gitlab_modify.sh src/import.sh && checkout_branch_in_github_repo $github_repo_name $github_branch_name $company"
 	assert_failure
 	assert_output --partial "ERROR, the GitHub repository does not exist locally."
 	
@@ -268,15 +263,15 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$github_repo_name")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
-	clone_github_repository "$GITHUB_USERNAME" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
 	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	assert_equal "$repo_was_cloned" "FOUND"
 	
 	# Check if branch is found in local GitHub repo.
-	run bash -c "source src/import.sh src/helper_gitlab_modify.sh && checkout_branch_in_github_repo $github_repo_name $github_branch_name $company"
+	run bash -c "# source src/import.sh src/helper_gitlab_modify.sh && checkout_branch_in_github_repo $github_repo_name $github_branch_name $company"
 	assert_failure
 	assert_output --partial "ERROR, the GitHub branch does not exist locally."
 	
@@ -310,10 +305,10 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$github_repo_name")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
-	clone_github_repository "$GITHUB_USERNAME" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
 	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	assert_equal "$repo_was_cloned" "FOUND"
 	
@@ -363,10 +358,10 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$github_repo_name")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
-	clone_github_repository "$GITHUB_USERNAME" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
 	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	assert_equal "$repo_was_cloned" "FOUND"
 	
@@ -416,10 +411,10 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$github_repo_name")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
-	clone_github_repository "$GITHUB_USERNAME" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
 	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	assert_equal "$repo_was_cloned" "FOUND"
 	
@@ -465,10 +460,10 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$github_repo_name")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
-	clone_github_repository "$GITHUB_USERNAME" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
 	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	assert_equal "$repo_was_cloned" "FOUND"
 	

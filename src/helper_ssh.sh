@@ -1,57 +1,20 @@
 #!/bin/bash
-# run with:
-#./mirror_github_to_gitlab.sh "a-t-0" "testrepo" "filler_github"
-
-###source src/helper_dir_edit.sh
-###source src/helper_github_modify.sh
-###source src/helper_github_status.sh
-###source src/helper_gitlab_modify.sh
-###source src/helper_gitlab_status.sh
-###source src/helper_git_neutral.sh
-####source src/helper_ssh.sh
-###source src/hardcoded_variables.txt
-###source src/creds.txt
-###source src/get_gitlab_server_runner_token.sh
-###source src/push_repo_to_gitlab.sh
-
-# Hardcoded data:
-
-# Get GitHub username.
-github_username=$1
-
-# Get GitHub repository name.
-github_repo=$2
-
-# OPTIONAL: get GitHub personal access token or verify ssh access to support private repositories.
-github_personal_access_code=$3
-
-verbose=$4
-
-# Get GitLab username.
-gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
-
-# Get GitLab user password.
-gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')
-
-# Get GitLab personal access token from hardcoded file.
-gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
-
-# Specify GitLab mirror repository name.
-gitlab_repo="$github_repo"
-
-if [ "$verbose" == "TRUE" ]; then
-	echo "MIRROR_LOCATION=$MIRROR_LOCATION"
-	echo "github_username=$github_username"
-	echo "github_repo=$github_repo"
-	echo "github_personal_access_code=$github_personal_access_code"
-	echo "gitlab_username=$gitlab_username"
-	echo "gitlab_server_password=$gitlab_server_password"
-	echo "gitlab_personal_access_token=$gitlab_personal_access_token"
-	echo "gitlab_repo=$gitlab_repo"
-fi
 
 
-# Structure:ssh
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 # Activates/enables the ssh for 
 activate_ssh_account() {
 	git_username=$1
@@ -64,34 +27,326 @@ activate_ssh_account() {
     ssh-add ~/.ssh/"$git_username"
 }
 
-# Structure:ssh
-# Check ssh-access to GitHub repo.
+
+#######################################
+# Checks if the device has ssh-access to some repository. If retry argument is
+# passed, it will call itself once more.
+# Local variables:
+#  local_git_username
+#  github_repository
+#  is_retry
+#  my_service_status
+#  found_error_in_ssh_command
+# Globals:
+#  None.
+# Arguments:
+#  local_git_username
+#  github_repository
+#  is_retry
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  FOUND if the machine has ssh-access to a repository.
+#  NOTFOUND if the machine does not have ssh-access to a repository.
+#######################################
 check_ssh_access_to_repo() {
-	github_username=$1
-	github_repository=$2
-	retry=$3
+	local local_git_username=$1
+	local github_repository=$2
+	local is_retry=$3
 	
 	# shellcheck disable=SC2034
-	my_service_status=$(git ls-remote git@github.com:"$github_username"/"$github_repository".git 2>&1)
-	found_error_in_ssh_command=$(lines_contain_string "ERROR" "\${my_service_status}")
-	
+	local my_service_status=$(git ls-remote git@github.com:"$local_git_username"/"$github_repository".git 2>&1)
+	local found_error_in_ssh_command=$(lines_contain_string "ERROR" "\${my_service_status}")
 	if [ "$found_error_in_ssh_command" == "NOTFOUND" ]; then
-		echo "HASACCESS"
+		echo "FOUND"
 	elif [ "$found_error_in_ssh_command" == "FOUND" ]; then
-		if [ "$retry" == "YES" ]; then
-			echo "Your ssh-account:$github_username does not have pull access to the repository:$github_repository"
-			exit 4
-			# TODO: Throw error
-			#(A public repository should grant ssh access even if no ssh credentials for that GitHub user is given.)
+		# Two tries is enough to determine the device does not have ssh-access.
+		if [ "$is_retry" == "YES" ]; then
+			echo "NOTFOUND"
 		else
-			#activate_ssh_account "$github_username"
-			check_ssh_access_to_repo "$github_username" "$github_repository" "YES"
+			# Perform recursive call to run function one more time.
+			check_ssh_access_to_repo "$local_git_username" "$github_repository" "YES"
 		fi
 	fi
 }
 
-# Structure:ssh
+
+#######################################
+# Asserts the device has ssh-access to some repository. If retry argument is
+# passed, it will call itself once more. Throws an error upon no ssh-access.
+# Local variables:
+#  local_git_username
+#  github_repository
+#  is_retry
+#  my_service_status
+#  found_error_in_ssh_command
+# Globals:
+#  None.
+# Arguments:
+#  local_git_username
+#  github_repository
+#  is_retry
+# Returns:
+#  0 if the machine has ssh-access to a repository.
+#  4 if the machine does not have ssh-access to a repository.
+# Outputs:
+#  FOUND if the machine has ssh-access to a repository.
+#######################################
+assert_ssh_access_to_repo() {
+	local local_git_username=$1
+	local github_repository=$2
+	local is_retry=$3
+	
+	# shellcheck disable=SC2034
+	local my_service_status=$(git ls-remote git@github.com:"$local_git_username"/"$github_repository".git 2>&1)
+	local found_error_in_ssh_command=$(lines_contain_string "ERROR" "\${my_service_status}")
+	if [ "$found_error_in_ssh_command" == "NOTFOUND" ]; then
+		echo "FOUND"
+	elif [ "$found_error_in_ssh_command" == "FOUND" ]; then
+		# Two tries is enough to determine the device does not have ssh-access.
+		if [ "$is_retry" == "YES" ]; then
+			echo "Your ssh-account:$local_git_username does not have pull access to the repository:$github_repository"
+			#(A public repository should grant ssh access even if no ssh credentials for that GitHub user is given.)
+			exit 4
+		else
+			# Perform recursive call to run function one more time.
+			check_ssh_access_to_repo "$local_git_username" "$github_repository" "YES"
+		fi
+	fi
+}
+
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0): Remove this function and replace its usage with:
+# check_ssh_access_to_repo or assert_ssh_access_to_repo.
+#######################################
 has_access() {
-	#echo $(check_ssh_access_to_repo "$github_username" "$github_repo")
-	check_ssh_access_to_repo "$github_username" "$github_repo"
+	local github_repo="$1"
+	#echo $(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo")
+	check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo"
+}
+
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
+# Structure:Github_status
+# Structure:ssh
+# Returns FOUND if the incoming ssh account is activated,
+# returns NOTFOUND otherwise.
+github_account_ssh_key_is_added_to_ssh_agent() {
+	local ssh_account="$1"
+	local activated_ssh_output=("$@")
+	found="false"
+	
+	
+	count=0
+	while IFS= read -r line; do
+		count=$((count+1))
+		
+		# Get the username from the ssh key .pub file.
+		local username
+		username="$(get_last_space_delimted_item_in_line "$line")"
+		
+		if [ "$username" == "$ssh_account" ]; then
+			if [ "$found" == "false" ]; then
+				echo "FOUND"
+				found="true"
+			fi
+		fi
+
+	done <<< "${activated_ssh_output[@]}"
+	if [ "$found" == "false" ]; then
+		echo "NOTFOUND"
+	fi
+}
+
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
+# Structure:ssh
+# Checks for both GitHub username as well as for the email address that is 
+# tied to that acount.
+any_ssh_key_is_added_to_ssh_agent() {
+	local ssh_account=$1
+	local ssh_output
+	ssh_output=$(ssh-add -L)
+	
+	# Check if the ssh key is added to ssh-agent by means of username.
+	found_ssh_username="$(github_account_ssh_key_is_added_to_ssh_agent "$ssh_account" "\"${ssh_output}")"
+	if [[ "$found_ssh_username" == "FOUND" ]]; then
+		echo "FOUND"
+	else
+		
+		# Get the email address tied to the ssh-account.
+		ssh_email=$(get_ssh_email "$ssh_account")
+		#echo "ssh_email=$ssh_email"
+		
+		if [ "$ssh_email" == "" ]; then
+			#echo "The ssh key file does not exist, so the email address of that ssh-account can not be extracted."
+			echo "NOTFOUND_FILE"
+			exit 27
+		else 
+			
+			# Check if the ssh key is added to ssh-agent by means of email.
+			found_ssh_email="$(github_account_ssh_key_is_added_to_ssh_agent "$ssh_email" "\"${ssh_output}")"
+			
+			if [ "$found_ssh_email" == "FOUND" ]; then
+				echo "FOUND"
+			else
+				#manual_assert_equal  "$found_ssh_email" "FOUND"
+				echo "NOTFOUND_EMAIL"
+			fi
+		fi
+	fi
+}
+
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
+# Structure:ssh
+verify_ssh_key_is_added_to_ssh_agent() {
+	local ssh_account=$1
+	local ssh_output
+	ssh_output=$(ssh-add -L)
+	local ssh_key_in_ssh_agent
+	ssh_key_in_ssh_agent=$(any_ssh_key_is_added_to_ssh_agent "$ssh_account")
+	if [[ "$ssh_key_in_ssh_agent" == "NOTFOUND_FILE" ]] || [[ "$ssh_key_in_ssh_agent" == "NOTFOUND_EMAIL" ]]; then
+		printf 'Please ensure the ssh-account '%ssh_account' key is added to the ssh agent. You can do that with commands:'"\\n"" eval $(ssh-agent -s)""\n"'ssh-add ~/.ssh/'$ssh_account''"\n"' Please run this script again once you are done.'
+		exit 28
+	fi
+}
+
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
+# Structure:ssh
+# Untested function to retrieve email pertaining to ssh key
+get_ssh_email() {
+	local ssh_account=$1
+	
+	local username
+	username=$(whoami)
+	local key_filepath="/home/$username/.ssh/$ssh_account.pub"
+	
+	# Check if file exists.
+	manual_assert_file_exists "$key_filepath"
+	
+	# Read the ssh pub file.
+	local public_ssh_content
+	public_ssh_content=$(cat "$key_filepath")
+	
+	# Get email from ssh pub file.
+	local email
+	email=$(get_last_space_delimted_item_in_line "$public_ssh_content")
+	echo "$email"
+}
+
+
+#######################################
+# Gets a new deploy key for the GitHub build status repository.
+# Local variables:
+#  github_username
+#  github_repo_name
+# Globals:
+#  None.
+# Arguments:
+#  github_username
+#  github_repo_name
+# Returns:
+#  0 if the GitHub repository is found.
+#  5 if the GitHub repository is private or if it does not exist.
+# Outputs:
+#  None.
+# TODO(a-t-0): Write test for function.
+#######################################
+# run with:
+# source src/import.sh && get_github_build_status_repo_deploy_key
+get_github_build_status_repo_deploy_key() {
+	delete_file_if_it_exists "$GITHUB_BUILD_STATUS_REPO_DEPLOY_TOKEN_FILEPATH"
+	manual_assert_file_does_not_exists "$GITHUB_BUILD_STATUS_REPO_DEPLOY_TOKEN_FILEPATH"
+	
+	# Get the repository that can automatically get the GitHub deploy token.
+	download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
+
+	# TODO: Verify repository is downloaded.
+
+	# TODO: verify path before running command.
+
+	# TODO: turn get_gitlab_generation_token into variable
+	# shellcheck disable=SC2034
+	if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
+		eval "$(conda shell.bash hook)"
+		# TODO: allow passing and parsing arguments in src/get_gitlab_server_runner_token.sh
+		cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src
+	else
+		eval "$(conda shell.bash hook)"
+		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src
+		
+	fi
+	cd ..
+
+	# TODO: Verify path after running command.
 }

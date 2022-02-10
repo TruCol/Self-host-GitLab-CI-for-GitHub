@@ -1,10 +1,11 @@
 #!./test/libs/bats/bin/bats
 
-load 'libs/bats-support/load'
-load 'libs/bats-assert/load'
+load '../../libs/bats-support/load'
+load '../../libs/bats-assert/load'
 
 
-source src/boot_tor.sh
+source src/import.sh
+#source src/boot_tor.sh
 
 @test "Verify the timestamp is created and contains the recent time." {
 	filepath=test/timestamp.txt

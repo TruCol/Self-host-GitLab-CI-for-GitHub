@@ -7,7 +7,7 @@ load 'libs/bats-file/load'
 # https://github.com/bats-core/bats-assert#usage
 load 'assert_utils'
 
-source src/import.sh
+# source src/import.sh
 
 example_lines=$(cat <<-END
 ssh-ed25519 longcode/longcode somename-somename-123
@@ -48,7 +48,6 @@ setup() {
 	if [ $(gitlab_server_is_running | tail -1) == "RUNNING" ]; then
 		true
 	else
-		read -p "Now re-installing GitLab."
 		#+ uninstall and re-installation by default
 		# Uninstall GitLab Runner and GitLab Server
 		run bash -c "./uninstall_gitlab.sh -h -r -y"
@@ -70,16 +69,16 @@ setup() {
 ### Activate GitHub ssh account
 @test "Check if ssh-account is activated after activating it." {
 	# TODO: ommit this hardcoded username check
-	assert_equal "$GITHUB_USERNAME" a-t-0
+	assert_equal "$GITHUB_USERNAME_GLOBAL" a-t-0
 	
-	activate_ssh_account "$GITHUB_USERNAME"
+	activate_ssh_account "$GITHUB_USERNAME_GLOBAL"
 	# Expected function output
 	#Agent pid 123
 	#Identity added: /home/name/.ssh/a-t-0 (some@email.domain)
 	
 	# Assert the ssh-key is found in the ssh agent
-	assert_equal "$(any_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME" "$(ssh-add -L)")" "FOUND"
-	#assert_equal "$(github_account_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME" "$(ssh-add -L)")" "FOUND"
+	assert_equal "$(any_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME_GLOBAL" "$(ssh-add -L)")" "FOUND"
+	#assert_equal "$(github_account_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME_GLOBAL" "$(ssh-add -L)")" "FOUND"
 }
 
 
@@ -88,19 +87,19 @@ setup() {
 
 @test "Check pull access to public repository." {
 	# TODO: ommit this hardcoded username check
-	assert_equal "$GITHUB_USERNAME" a-t-0
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	assert_equal "$GITHUB_USERNAME_GLOBAL" a-t-0
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	assert_equal "$has_access" "HASACCESS"
 }
 
 @test "Check error is thrown when checking pull access to non-existant repository." {
 	# TODO: ommit this hardcoded username check
-	assert_equal "$GITHUB_USERNAME" a-t-0
+	assert_equal "$GITHUB_USERNAME_GLOBAL" a-t-0
 	#has_access="$()"
 	non_existant_repository="NON_EXISTANT_REPOSITORY"
-	run bash -c "source src/import.sh src/mirror_github_to_gitlab.sh && check_ssh_access_to_repo $GITHUB_USERNAME $non_existant_repository"
+	run bash -c "# source src/import.sh src/mirror_github_to_gitlab.sh && check_ssh_access_to_repo $GITHUB_USERNAME_GLOBAL $non_existant_repository"
 	assert_failure
-	assert_output 'Your ssh-account:'$GITHUB_USERNAME' does not have pull access to the repository:'$non_existant_repository
+	assert_output 'Your ssh-account:'$GITHUB_USERNAME_GLOBAL' does not have pull access to the repository:'$non_existant_repository
 }
 
 
@@ -136,7 +135,7 @@ setup() {
 @test "Assert code execution is terminated if a required ssh-key is not activated." {
 	non_existant_ssh_account="Some_random_non_existing_ssh_account_31415926531"
 	
-	run bash -c "source src/import.sh src/helper.sh && verify_ssh_key_is_added_to_ssh_agent $non_existant_ssh_account"
+	run bash -c "# source src/import.sh src/helper.sh && verify_ssh_key_is_added_to_ssh_agent $non_existant_ssh_account"
 	assert_failure
 	assert_output 'Please ensure the ssh-account '$non_existant_ssh_account' key is added to the ssh agent. You can do that with commands:'"\\n"' eval $(ssh-agent -s)'"\n"'ssh-add ~/.ssh/'$non_existant_ssh_account''"\n"' Please run this script again once you are done.'
 	#assert_output "$feedback"
@@ -144,11 +143,11 @@ setup() {
 
 @test "Assert code execution is proceeded if the required ssh-key is activated." {
 	# TODO: ommit this hardcoded username check
-	assert_equal "$GITHUB_USERNAME" a-t-0
+	assert_equal "$GITHUB_USERNAME_GLOBAL" a-t-0
 	
-	existant_ssh_account="$GITHUB_USERNAME"
+	existant_ssh_account="$GITHUB_USERNAME_GLOBAL"
 	
-	run bash -c "source src/import.sh src/helper.sh && verify_ssh_key_is_added_to_ssh_agent $existant_ssh_account"
+	run bash -c "# source src/import.sh src/helper.sh && verify_ssh_key_is_added_to_ssh_agent $existant_ssh_account"
 	assert_success
 }
 
@@ -160,18 +159,18 @@ setup() {
 ### 0. Test GitHub ssh-key is added to ssh-agent
 @test "Check if ssh-account is activated." {
 	# TODO: ommit this hardcoded username check
-	assert_equal "$GITHUB_USERNAME" a-t-0
+	assert_equal "$GITHUB_USERNAME_GLOBAL" a-t-0
 	
 	ssh_output=$(ssh-add -L)
 	
 	
 	# Get the email address tied to the ssh-account.
-	ssh_email=$(get_ssh_email "$GITHUB_USERNAME")
+	ssh_email=$(get_ssh_email "$GITHUB_USERNAME_GLOBAL")
 	echo "ssh_email=$ssh_email"
 	echo "ssh_output=$ssh_output"
 	
 	# Check if the ssh key is added to ssh-agent by means of username.
-	found_ssh_username="$(github_account_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME" "\${ssh_output}")"
+	found_ssh_username="$(github_account_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME_GLOBAL" "\${ssh_output}")"
 	
 	# Check if the ssh key is added to ssh-agent by means of email.
 	found_ssh_email="$(github_account_ssh_key_is_added_to_ssh_agent "$ssh_email" "\${ssh_output}")"

@@ -8,31 +8,34 @@
 	# If no:
 		# Install GitLab
 		# Run command to host GitLab server
-
-source src/helper.sh
-source src/hardcoded_variables.txt
-
+	
 uninstall_gitlab_server() {
 	is_hard_uninstall=$1
 	is_docker_uninstall=$2
 	
+	
 	# Get which GitLab package is used based on the machine architecture
 	gitlab_package=$(get_gitlab_package)
+	# TODO: assert the gitlab_package is indeed the right package to be removed.
 	
 	# Start stopping, removing and uninstalling GitLab server.
 	stop_docker
-	stop_gitlab_package_docker $gitlab_package
-	remove_gitlab_package_docker $gitlab_package
+	stop_gitlab_package_docker "$gitlab_package"
+	remove_gitlab_package_docker "$gitlab_package"
 	remove_gitlab_docker_containers
 	
 	# Uninstall docker if an explicit argument for uninstallation is passed. 
 	if [ "$is_docker_uninstall" == true ]; then
-		$(uninstall_docker)
-		$(uninstall_docker_compose)
+		uninstall_docker
+		uninstall_docker_compose
 	fi
 	stop_apache_service
-	stop_nginx_service
+	# TODO: determine why this passes the lines "${status}" instead of some 
+	# actual content of that status.
+	
 	#stop_nginx
+	stop_nginx_service
+	
 	if [ "$is_hard_uninstall" == true ]; then
 		delete_gitlab_folder
 	fi
@@ -52,7 +55,7 @@ uninstall_docker_compose() {
 
 
 delete_gitlab_folder() {
-	sudo rm -r $GITLAB_HOME
+	sudo rm -r "$GITLAB_HOME"
 }
 ## Trouble shooting
 # If it returns:

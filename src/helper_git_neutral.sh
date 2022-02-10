@@ -1,55 +1,4 @@
 #!/bin/bash
-# run with:
-#./mirror_github_to_gitlab.sh "a-t-0" "testrepo" "filler_github"
-
-###source src/helper_dir_edit.sh
-###source src/helper_github_modify.sh
-###source src/helper_github_status.sh
-###source src/helper_gitlab_modify.sh
-###source src/helper_gitlab_status.sh
-####source src/helper_git_neutral.sh
-###source src/helper_ssh.sh
-###source src/hardcoded_variables.txt
-###source src/creds.txt
-###source src/get_gitlab_server_runner_token.sh
-###source src/push_repo_to_gitlab.sh
-
-# Hardcoded data:
-
-# Get GitHub username.
-github_username=$1
-
-# Get GitHub repository name.
-github_repo=$2
-
-# OPTIONAL: get GitHub personal access token or verify ssh access to support private repositories.
-github_personal_access_code=$3
-
-verbose=$4
-
-# Get GitLab username.
-gitlab_username=$(echo "$gitlab_server_account" | tr -d '\r')
-
-# Get GitLab user password.
-gitlab_server_password=$(echo "$gitlab_server_password" | tr -d '\r')
-
-# Get GitLab personal access token from hardcoded file.
-gitlab_personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN" | tr -d '\r')
-
-# Specify GitLab mirror repository name.
-gitlab_repo="$github_repo"
-
-if [ "$verbose" == "TRUE" ]; then
-	echo "MIRROR_LOCATION=$MIRROR_LOCATION"
-	echo "github_username=$github_username"
-	echo "github_repo=$github_repo"
-	echo "github_personal_access_code=$github_personal_access_code"
-	echo "gitlab_username=$gitlab_username"
-	echo "gitlab_server_password=$gitlab_server_password"
-	echo "gitlab_personal_access_token=$gitlab_personal_access_token"
-	echo "gitlab_repo=$gitlab_repo"
-fi
-
 
 # Structure:git_neutral
 create_new_branch() {
@@ -58,7 +7,7 @@ create_new_branch() {
 	git_repository=$3
 	
 	# create_repo branch
-	theoutput=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git checkout -b $branch_name)
+	theoutput=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git checkout -b "$branch_name")
 	
 	# TODO: assert the branch is created
 	
@@ -81,7 +30,7 @@ github_branch_is_in_gitlab_branches() {
 	#for gitlab_branch in "${gitlab_branches[@]}"; do
 	#	echo "gitlab_branch=$gitlab_branch"
 	#done
-	if [[ " ${gitlab_branches[*]} " =~ " ${github_branch} " ]]; then
+	if [[ " ${gitlab_branches[*]} " =~ ${github_branch} ]]; then
 		# whatever you want to do when array contains value
 		echo "github_branch=$github_branch"
 		echo "FOUND"
@@ -101,19 +50,19 @@ copy_files_from_github_to_gitlab_branch() {
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
 		# If the GitHub branch exists
-		github_branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
-		last_line_github_branch_check_result=$(get_last_line_of_set_of_lines "\${github_branch_check_result}")
+		github_branch_check_result="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
+		last_line_github_branch_check_result=$(get_last_line_of_set_of_lines "\"${github_branch_check_result}")
 		if [ "$last_line_github_branch_check_result" == "FOUND" ]; then
 		
 			# If the GitHub branch contains a gitlab yaml file
 			filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
-			if [ "$(file_exists $filepath)" == "FOUND" ]; then
+			if [ "$(file_exists "$filepath")" == "FOUND" ]; then
 				
 				# If the GitLab repository exists
 				if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
 					
 					# If the GitLab branch exists
-					found_branch_name="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name "GitLab")"
+					found_branch_name="$(get_current_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name" "GitLab")"
 					if [ "$found_branch_name" == "$gitlab_branch_name" ]; then
 					
 						# If there exist differences in the files or folders in the branch (excluding the .git directory)
@@ -123,7 +72,7 @@ copy_files_from_github_to_gitlab_branch() {
 						copy_github_files_and_folders_to_gitlab "$MIRROR_LOCATION/GitHub/$github_repo_name" "$MIRROR_LOCATION/GitLab/$github_repo_name"
 						
 						# Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
-						comparison_result="$(two_folders_are_identical_excluding_subdir $MIRROR_LOCATION/GitHub/$github_repo_name $MIRROR_LOCATION/GitLab/$github_repo_name .git)"
+						comparison_result="$(two_folders_are_identical_excluding_subdir "$MIRROR_LOCATION"/GitHub/"$github_repo_name" "$MIRROR_LOCATION"/GitLab/"$github_repo_name" .git)"
 						
 						if [ "$comparison_result" == "IDENTICAL" ]; then
 							echo "IDENTICAL"
@@ -201,7 +150,7 @@ create_new_branch() {
 	git_repository=$3
 	
 	# create_repo branch
-	theoutput=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git checkout -b $branch_name)
+	theoutput=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git checkout -b "$branch_name")
 	
 	# TODO: assert the branch is created
 	
@@ -211,8 +160,8 @@ create_new_branch() {
 
 git_has_changes() {
 	target_directory="$1"
-	cd "$target_directory"
-	if [[ `git status --porcelain` ]]; then
+	cd "$target_directory" || exit
+	if [[ $(git status --porcelain) ]]; then
 		# Changes
 		echo "FOUND"
 	else

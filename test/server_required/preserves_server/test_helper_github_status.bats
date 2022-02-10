@@ -1,11 +1,11 @@
 #!./test/libs/bats/bin/bats
 
-load 'libs/bats-support/load'
-load 'libs/bats-assert/load'
+load '../../libs/bats-support/load'
+load '../../libs/bats-assert/load'
 # https://github.com/bats-core/bats-file#Index-of-all-functions
-load 'libs/bats-file/load'
+load '../../libs/bats-file/load'
 # https://github.com/bats-core/bats-assert#usage
-load 'assert_utils'
+load '../../assert_utils'
 
 
 source src/import.sh
@@ -51,24 +51,24 @@ END
 )
 
 # Method that executes all tested main code before running tests.
-setup() {
-	# print test filename to screen.
-	if [ "${BATS_TEST_NUMBER}" = 1 ];then
-		echo "# Testfile: $(basename ${BATS_TEST_FILENAME})-" >&3
-	fi
-	
-	if [ $(gitlab_server_is_running | tail -1) == "RUNNING" ]; then
-		true
-	else
-		read -p "Now re-installing GitLab."
-		#+ uninstall and re-installation by default
-		# Uninstall GitLab Runner and GitLab Server
-		run bash -c "./uninstall_gitlab.sh -h -r -y"
-	
-		# Install GitLab Server
-		run bash -c "./install_gitlab.sh -s -r"
-	fi
-}
+# TODO: determine if this is needed or not.
+###setup() {
+###	# print test filename to screen.
+###	if [ "${BATS_TEST_NUMBER}" = 1 ];then
+###		echo "# Testfile: $(basename ${BATS_TEST_FILENAME})-" >&3
+###	fi
+###	
+###	if [ $(gitlab_server_is_running | tail -1) == "RUNNING" ]; then
+###		true
+###	else
+###		#+ uninstall and re-installation by default
+###		# Uninstall GitLab Runner and GitLab Server
+###		run bash -c "./uninstall_gitlab.sh -h -r -y"
+###	
+###		# Install GitLab Server
+###		run bash -c "./install_gitlab.sh -s -r"
+###	fi
+###}
 
 @test "Trivial test." {
 	assert_equal "True" "True"
@@ -84,18 +84,23 @@ setup() {
 	non_existant_repository="NON_EXISTANT_REPOSITORY"
 	
 	# Assert the GitHub username is correct
-	assert_equal "$GITHUB_USERNAME" a-t-0
+	assert_equal "$GITHUB_USERNAME_GLOBAL" a-t-0
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+	# TODO: Assert the code indeed has ssh-access.
+	# TODO: preserve duplicate of has_access and rename it to has_ssh_access.
+	# TODO: rename duplicate has_access function to: verify_ssh_access and ensure it throws an error.
+	# TODO: change repository wide.
+	
 	
 	# Specify the variables as they are inside the function
-	github_username="$GITHUB_USERNAME"
+	GITHUB_USERNAME_GLOBAL="$GITHUB_USERNAME_GLOBAL"
 	github_repository="$non_existant_repository"
 	target_directory="$MIRROR_LOCATION/GitHub/$non_existant_repository"
 	
-	export github_username  github_repository has_access target_directory
-	run bash -c 'source src/import.sh src/push_repo_to_gitlab.sh &&  export github_username  github_repository && clone_github_repository'
+	export GITHUB_USERNAME_GLOBAL  github_repository has_access target_directory
+	run bash -c '# source src/import.sh src/push_repo_to_gitlab.sh &&  export GITHUB_USERNAME_GLOBAL  github_repository && clone_github_repository'
 	assert_failure
 	#assert_output "$expected_error_message"
 	assert_output "$expected_error_message_with_ssh"
@@ -106,7 +111,7 @@ setup() {
 	non_existant_repository="NON_EXISTANT_REPOSITORY"
 	
 	# Assert the GitHub username is correct
-	assert_equal "$GITHUB_USERNAME" a-t-0
+	assert_equal "$GITHUB_USERNAME_GLOBAL" a-t-0
 	
 	# Remove repositories
 	remove_mirror_directories
@@ -115,7 +120,7 @@ setup() {
 	target_directory="$MIRROR_LOCATION/GitHub/$non_existant_repository"
 	
 	export github_repository target_directory
-	run bash -c 'source src/import.sh src/mirror_github_to_gitlab.sh &&  verify_github_repository_is_cloned'
+	run bash -c '# source src/import.sh src/mirror_github_to_gitlab.sh &&  verify_github_repository_is_cloned'
 	assert_failure
 	assert_output "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
 }
@@ -123,10 +128,10 @@ setup() {
 # 3.c Clone repository and verify it is cloned
 @test "Verify whether the repository is cloned, if it is cloned." {
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
-	clone_github_repository "$GITHUB_USERNAME" "$PUBLIC_GITHUB_TEST_REPO" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO"
-	repo_was_cloned=$(verify_github_repository_is_cloned "$PUBLIC_GITHUB_TEST_REPO" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO")
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
 	assert_equal "$repo_was_cloned" "FOUND"
 }
 
@@ -135,13 +140,13 @@ setup() {
 	
 	###################### Self contained test ###############
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
-	clone_github_repository "$GITHUB_USERNAME" "$PUBLIC_GITHUB_TEST_REPO" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	###################### Self contained test ###############
 	
 	
-	get_git_branches github_branches "GitHub" "$PUBLIC_GITHUB_TEST_REPO"      # call function to populate the array
+	get_git_branches github_branches "GitHub" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"      # call function to populate the array
 	declare -p github_branches
 	
 	assert_equal ""${github_branches[0]}"" "attack_in_new_file"
@@ -156,12 +161,12 @@ setup() {
 	
 	###################### Self contained test ###############
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
-	clone_github_repository "$GITHUB_USERNAME" "$PUBLIC_GITHUB_TEST_REPO" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	###################### Self contained test ###############
 	
-	initialise_github_branches_array "$PUBLIC_GITHUB_TEST_REPO"
+	initialise_github_branches_array "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	output=$(loop_through_github_branches)
 	
 	expected_output=$(cat <<-END
@@ -184,13 +189,13 @@ END
 	company="GitHub"
 	###################### Self contained test ###############
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME" "$GITHUB_STATUS_WEBSITE")"
+	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
-	clone_github_repository "$GITHUB_USERNAME" "$PUBLIC_GITHUB_TEST_REPO" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO"
+	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	###################### Self contained test ###############
 		
 	# Get a list of existing branches in the GitHub example_repository
-	get_git_branches github_branches "GitHub" "$PUBLIC_GITHUB_TEST_REPO"      # call function to populate the array
+	get_git_branches github_branches "GitHub" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"      # call function to populate the array
 	declare -p github_branches
 	
 	assert_equal ""${github_branches[0]}"" "attack_in_new_file"
@@ -204,11 +209,11 @@ END
 		echo "${github_branches[i]}"
 		
 		# Check if branch is found in local GitHub repo.
-		actual_result="$(checkout_branch_in_github_repo $PUBLIC_GITHUB_TEST_REPO ${github_branches[i]} $company)"
+		actual_result="$(checkout_branch_in_github_repo $PUBLIC_GITHUB_TEST_REPO_GLOBAL ${github_branches[i]} $company)"
 		assert_success
 		
 		# Get SHA of commit of local GitHub branch.
-		commit=$(get_current_github_branch_commit $PUBLIC_GITHUB_TEST_REPO ${github_branches[i]} $company)
+		commit=$(get_current_github_branch_commit $PUBLIC_GITHUB_TEST_REPO_GLOBAL ${github_branches[i]} $company)
 	
 		# For each branch, assert the correct commit is returned.
 		if [ $i -eq 0 ]; then

@@ -1,13 +1,26 @@
 #!/bin/bash
-# Source: https://github.com/MxNxPx/gitlab-cicd-demo/blob/aee86e45f5bc603a5055f0cd391cd6b184f1d6c3/get-runner-reg.sh
-source src/hardcoded_variables.txt
-#source src/creds.txt
-source src/helper.sh
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 get_gitlab_server_runner_tokenV1() {
 	GITURL="$GITLAB_SERVER_HTTP_URL"
-	GITUSER="$gitlab_server_account"
-	GITROOTPWD="$gitlab_server_password"
+	# shellcheck disable=SC2154
+	GITUSER="$GITLAB_SERVER_ACCOUNT_GLOBAL"
+	# shellcheck disable=SC2154
+	GITROOTPWD="$GITLAB_SERVER_PASSWORD_GLOBAL"
 	#echo "GITUSER=$GITUSER"
 	#echo "GITROOTPWD=$GITROOTPWD"
 	
@@ -17,7 +30,7 @@ get_gitlab_server_runner_tokenV1() {
 	
 	# grep the auth token for the user login for
 	#   not sure whether another token on the page will work, too - there are 3 of them
-	csrf_token=$(echo $body_header | perl -ne 'print "$1\n" if /new_user.*?authenticity_token"[[:blank:]]value="(.+?)"/' | sed -n 1p)
+	csrf_token=$(echo "$body_header" | perl -ne 'print "$1\n" if /new_user.*?authenticity_token"[[:blank:]]value="(.+?)"/' | sed -n 1p)
 	#echo "csrf_token=$csrf_token"
 	
 	# 2. send login credentials with curl, using cookies and token from previous request
@@ -30,9 +43,9 @@ get_gitlab_server_runner_tokenV1() {
 	
 	if [ "$body_header" == "" ]; then
 		get_registration_token_with_python
-		reg_token=$(cat $RUNNER_REGISTRATION_TOKEN_FILEPATH)
+		reg_token=$(cat "$RUNNER_REGISTRATION_TOKEN_FILEPATH")
 	else
-		reg_token=$(cat "$LOG_LOCATION"gitlab-header.txt | perl -ne 'print "$1\n" if /code id="registration_token">(.+?)</' | sed -n 1p)
+		reg_token=$(cmd < "$LOG_LOCATION"gitlab-header.txt | perl -ne 'print "$1\n" if /code id="registration_token">(.+?)</' | sed -n 1p)
 		echo "$reg_token" > "$RUNNER_REGISTRATION_TOKEN_FILEPATH"
 	fi
 	if [ "$reg_token" == "" ]; then
@@ -43,17 +56,31 @@ get_gitlab_server_runner_tokenV1() {
 }
 
 
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 get_gitlab_server_runner_tokenV0() {
 	export GITURL="$GITLAB_SERVER_HTTP_URL"
-	export GITUSER="$gitlab_server_account"
-	export GITROOTPWD="$gitlab_server_password"
+	export GITUSER="$GITLAB_SERVER_ACCOUNT_GLOBAL"
+	export GITROOTPWD="$GITLAB_SERVER_PASSWORD_GLOBAL"
 	
 	# 1. curl for the login page to get a session cookie and the sources with the auth tokens
 	body_header=$(curl -k -c gitlab-cookies.txt -i "${GITURL}/users/sign_in" -sS)
 	
 	# grep the auth token for the user login for
 	#   not sure whether another token on the page will work, too - there are 3 of them
-	csrf_token=$(echo $body_header | perl -ne 'print "$1\n" if /new_user.*?authenticity_token"[[:blank:]]value="(.+?)"/' | sed -n 1p)
+	csrf_token=$(echo "$body_header" | perl -ne 'print "$1\n" if /new_user.*?authenticity_token"[[:blank:]]value="(.+?)"/' | sed -n 1p)
 	
 	# 2. send login credentials with curl, using cookies and token from previous request
 	curl -sS -k -b gitlab-cookies.txt -c gitlab-cookies.txt "${GITURL}/users/sign_in" \
@@ -62,12 +89,27 @@ get_gitlab_server_runner_tokenV0() {
 	
 	# 3. send curl GET request to gitlab runners page to get registration token
 	body_header=$(curl -sS -k -H 'user-agent: curl' -b gitlab-cookies.txt "${GITURL}/admin/runners" -o gitlab-header.txt)
-	reg_token=$(cat gitlab-header.txt | perl -ne 'print "$1\n" if /code id="registration_token">(.+?)</' | sed -n 1p)
-	echo $reg_token
+	reg_token=$(cmd < gitlab-header.txt | perl -ne 'print "$1\n" if /code id="registration_token">(.+?)</' | sed -n 1p)
+	echo "$reg_token"
 	# TODO: restore the functionality of this method!
 	#echo "sPgAnNea3WxvTRsZN5hB"
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 # source src/get_gitlab_server_runner_token.sh && get_registration_token_with_python
 get_registration_token_with_python() {
 	# delete the runner registration token file if it exist
@@ -76,26 +118,48 @@ get_registration_token_with_python() {
 	fi
 	
 	# Check if the repository exists
-	$(download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON")
+	download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
 	
 	
-	# TODO: turn batch_copy_issues into variable
-	conda_environments=$(conda env list) 
-	
-	if [ $(lines_contain_string "$CONDA_ENVIRONMENT_NAME" "\${conda_environments}") == "FOUND" ]; then
-		#cd get-gitlab-runner-registration-token && conda activate batch_copy_issues && python -m code.project1.src
-		#cd get-gitlab-runner-registration-token && conda activate "batch_copy_issues" && python -m code.project1.src
-		#cd get-gitlab-runner-registration-token && conda activate base && conda activate batch_copy_issues && python -m code.project1.src
+	# TODO: turn get_gitlab_generation_token into variable
+	# shellcheck disable=SC2034
+	#conda_environments=$(conda env list)
+	#read -p "CONDA_ENVIRONMENT_NAME=$CONDA_ENVIRONMENT_NAME"
+	#read -p "conda_environments=$conda_environments"
+	#if [ "$(lines_contain_string "$CONDA_ENVIRONMENT_NAME" "\${conda_environments}")" == "FOUND" ]; then
+	if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
+		#cd get-gitlab-runner-registration-token && conda activate get_gitlab_generation_token && python -m code.project1.src
+		#cd get-gitlab-runner-registration-token && conda activate "get_gitlab_generation_token" && python -m code.project1.src
+		#cd get-gitlab-runner-registration-token && conda activate base && conda activate get_gitlab_generation_token && python -m code.project1.src
 		eval "$(conda shell.bash hook)"
-		cd get-gitlab-runner-registration-token && conda deactivate && conda activate batch_copy_issues && python -m code.project1.src
-		#cd get-gitlab-runner-registration-token && conda init batch_copy_issues && python -m code.project1.src
+		cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src
+		#cd get-gitlab-runner-registration-token && conda init get_gitlab_generation_token && python -m code.project1.src
 		# eval $(conda shell.bash hook)
 	else
-		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate batch_copy_issues && python -m code.project1.src
+		eval "$(conda shell.bash hook)"
+		#cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate "$CONDA_ENVIRONMENT_NAME" && python -m code.project1.src
+		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src
+		
 	fi
 	cd ..
+	# TODO: verify path
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 # Downloads a repository into the root directory of this repository if the
 #+ destination folder does yet exist
 #+ TODO: write test for method
@@ -112,8 +176,8 @@ download_repository() {
 
 get_gitlab_server_runner_tokenV2() {
 	GITURL="$GITLAB_SERVER_HTTP_URL"
-	GITUSER="$gitlab_server_account"
-	GITROOTPWD="$gitlab_server_password"
+	GITUSER="$GITLAB_SERVER_ACCOUNT_GLOBAL"
+	GITROOTPWD="$GITLAB_SERVER_PASSWORD_GLOBAL"
 	
 	# 1. curl for the login page to get a session cookie and the sources with the auth tokens
 	body_header=$(curl -k -c gitlab-cookies.txt -i "${GITURL}/users/sign_in" -sS)
@@ -135,13 +199,27 @@ get_gitlab_server_runner_tokenV2() {
 }
 
 
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 get_gitlab_server_runner_tokenV3() {
 	source src/hardcoded_variables.txt
 	export GITURL="$GITLAB_SERVER_HTTP_URL"
 	#read  -p "GITURL=$GITURL"
-	export GITUSER="$gitlab_server_account"
+	export GITUSER="$GITLAB_SERVER_ACCOUNT_GLOBAL"
 	#read  -p "GITUSER=$GITUSER"
-	export GITROOTPWD="$gitlab_server_password"
+	export GITROOTPWD="$GITLAB_SERVER_PASSWORD_GLOBAL"
 	#read  -p "GITROOTPWD=$GITROOTPWD"
 	
 	# 1. curl for the login page to get a session cookie and the sources with the auth tokens

@@ -5,7 +5,9 @@ HIDDENSERVICEDIR_SSH=/var/lib/tor/
 HIDDENSERVICENAME_SSH=other_hidden_service
 #x86_64_runner_checksum=ad6cd9a08a2bbb5bd4fc58ece4b4ef48
 #x86_64_runner_checksum=23e035b5e9eedb18b03d56a13953b4db
-x86_64_runner_checksum=fd666592c1cf2147cd0a0ff2f3fbb470
+#x86_64_runner_checksum=fd666592c1cf2147cd0a0ff2f3fbb470
+x86_64_runner_checksum=98915670b9fc238e9a08b61e82edb23f
+# TODO: capitalise x86_64_runner_checksum
 GITLAB_SERVER="127.0.0.1"
 GITLAB_SERVER_HTTP_URL="http://$GITLAB_SERVER"
 GITLAB_PORT_1="443:443"
@@ -21,19 +23,20 @@ RUNNER_TIMESTAMP_FILEPATH=src/logs/time_gitlab_runner_started.txt
 SERVER_STARTUP_TIME_LIMIT=1000
 RUNNER_STARTUP_TIME_LIMIT=600
 RUNNER_REGISTRATION_TOKEN_FILEPATH=src/runner_registration_token.txt
-CONDA_ENVIRONMENT_NAME=batch_copy_issues
+GITHUB_BUILD_STATUS_REPO_DEPLOY_TOKEN_FILEPATH=src/github_build_status_repo_deploy_key.txt
+CONDA_ENVIRONMENT_NAME=get_gitlab_generation_token
 REPONAME_GET_RUNNER_TOKEN_PYTHON="get-gitlab-runner-registration-token"
 RUNNER_USERNAME="gitlab-runner" 
-GITLAB_PERSONAL_ACCESS_TOKEN_NAME=sometokenname
+GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL=sometokenname
 
 # Run GitLab repository
 SOURCE_FOLDERNAME=repo_to_test_runner
 SOURCE_FOLDERPATH=src/$SOURCE_FOLDERNAME
 
 # Specify GitHub website settings.
-GITHUB_USERNAME=a-t-0
-GITHUB_STATUS_WEBSITE=gitlab-ci-build-statuses
-PUBLIC_GITHUB_TEST_REPO=sponsor_example
+GITHUB_USERNAME_GLOBAL=a-t-0
+GITHUB_STATUS_WEBSITE_GLOBAL=gitlab-ci-build-statuses
+PUBLIC_GITHUB_TEST_REPO_GLOBAL=sponsor_example
 
 # Specify Mirror folder
 MIRROR_LOCATION=src/mirrors

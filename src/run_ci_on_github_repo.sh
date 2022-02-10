@@ -64,7 +64,7 @@ download_github_repo_on_which_to_run_ci() {
 	# Verify ssh-access
 	# TODO: resolve error when ran from test.
 	has_access="$(check_ssh_access_to_repo "$github_username" "$github_repo_name")"
-	
+
 	# Clone GitHub repo at start of test.
 	clone_github_repository "$github_username" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
 	
@@ -77,7 +77,7 @@ download_github_repo_on_which_to_run_ci() {
 
 
 #run bash -c "source src/import.sh src/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example"
-#source src/import.sh src/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example
+#source src/import.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example
 copy_github_branches_with_yaml_to_gitlab_repo() {
 	GITHUB_USERNAME_GLOBAL="$1"
 	github_repo_name="$2"

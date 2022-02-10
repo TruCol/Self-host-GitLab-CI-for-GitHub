@@ -490,8 +490,8 @@ checkout_branch_in_github_repo() {
       local pwd_after
 	  pwd_after="$PWD"
 
-      # Test to verify the current 
-	  branch in the GitHub repository is indeed checked out.
+      # Test to verify the current branch in the GitHub repository is indeed
+      # checked out.
       # TODO: check if this passes
       assert_current_github_branch "$github_repo_name" "$github_branch_name"
 

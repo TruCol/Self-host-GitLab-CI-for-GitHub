@@ -51,5 +51,5 @@ github_commit_already_has_gitlab_ci_build_status_result() {
 	
 	# Check if the commit build status file exists, if yes, echo FOUND.
 	# Otherwise, echo NOTFOUND.
-	cmd "$(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name/$github_commit_sha.txt")"
+	file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/$github_branch_name/$github_commit_sha.txt"
 }

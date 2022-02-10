@@ -323,9 +323,30 @@ get_ssh_email() {
 # TODO(a-t-0): Write test for function.
 #######################################
 # run with:
-#source src/helper_github_status.sh && assert_public_github_repository_exists "a-t-0" "some_non_existing_repository"
-#source src/helper_github_status.sh && assert_public_github_repository_exists "a-t-0" "gitlab-ci-build-statuses"
+# source src/import.sh && get_github_build_status_repo_deploy_key
 get_github_build_status_repo_deploy_key() {
 	delete_file_if_it_exists "$GITHUB_BUILD_STATUS_REPO_DEPLOY_TOKEN_FILEPATH"
+	manual_assert_file_does_not_exists "$GITHUB_BUILD_STATUS_REPO_DEPLOY_TOKEN_FILEPATH"
+	
+	# Get the repository that can automatically get the GitHub deploy token.
+	download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
 
+	# TODO: Verify repository is downloaded.
+
+	# TODO: verify path before running command.
+
+	# TODO: turn get_gitlab_generation_token into variable
+	# shellcheck disable=SC2034
+	if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
+		eval "$(conda shell.bash hook)"
+		# TODO: allow passing and parsing arguments in src/get_gitlab_server_runner_token.sh
+		cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src
+	else
+		eval "$(conda shell.bash hook)"
+		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src
+		
+	fi
+	cd ..
+
+	# TODO: Verify path after running command.
 }

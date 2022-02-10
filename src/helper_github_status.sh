@@ -380,7 +380,7 @@ assert_public_github_repository_exists() {
 	local github_repo_name="$2"
 
 	if [[ $(check_public_github_repository_exists "$github_username" "$github_repo_name") != "FOUND" ]]; then
-		echo "The repository www.github.com/${github_username}/${github_repo_name} is not a public GitHub repository."
+		echo "The repository www.github.com/${github_username}/${github_repo_name} is not a public GitHub repository/doesn't exist. Please create it/make it public, and try again."
 		exit 5
 	fi
 }

@@ -23,6 +23,28 @@ manual_assert_file_exists() {
 	fi
 }
 
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
+manual_assert_file_does_not_exists() {
+	local filepath="$1"
+	if [ -f "$filepath" ]; then
+		echo "The ssh key file: $filepath does not exist, so the email address of that ssh-account can not be extracted."
+		exit 29
+	fi
+}
+
 
 #######################################
 # 

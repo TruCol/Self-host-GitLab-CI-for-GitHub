@@ -16,7 +16,7 @@ load 'assert_utils'
 	assert_equal "$left" "$right"
 	
 	
-	run bash -c "# source src/import.sh src/helper_asserts.sh && manual_assert_equal $left $right"
+	run bash -c "source src/import.sh src/helper_asserts.sh && manual_assert_equal $left $right"
 	assert_success
 }
 
@@ -27,7 +27,7 @@ load 'assert_utils'
 	assert_not_equal "$left" "$right"
 	
 	
-	run bash -c "# source src/import.sh src/helper_asserts.sh && manual_assert_equal $left $right"
+	run bash -c "source src/import.sh src/helper_asserts.sh && manual_assert_equal $left $right"
 	assert_failure
 	assert_output --partial "Error, same does not equal: different"
 	
@@ -40,7 +40,7 @@ load 'assert_utils'
 	assert_not_equal "$left" "$right"
 	
 	
-	run bash -c "# source src/import.sh src/helper_asserts.sh && manual_assert_not_equal $left $right"
+	run bash -c "source src/import.sh src/helper_asserts.sh && manual_assert_not_equal $left $right"
 	assert_success
 }
 
@@ -52,7 +52,18 @@ load 'assert_utils'
 	assert_equal "$left" "$right"
 	
 	
-	run bash -c "# source src/import.sh src/helper_asserts.sh && manual_assert_not_equal $left $right"
+	run bash -c "source src/import.sh src/helper_asserts.sh && manual_assert_not_equal $left $right"
 	assert_failure
 	assert_output --partial "Error, same equals: same"
+}
+
+
+
+
+@test "Verify manual_assert_file_does_not_exists throws error on existing file." {
+	local existing_filepath="src/hardcoded_variables.txt"
+	
+	run bash -c "source src/helper_asserts.sh && manual_assert_file_does_not_exists $left $existing_filepath"
+	assert_failure
+	assert_output "The ssh key file: $existing_filepath does not exist, so the email address of that ssh-account can not be extracted."
 }

@@ -303,3 +303,29 @@ get_ssh_email() {
 	email=$(get_last_space_delimted_item_in_line "$public_ssh_content")
 	echo "$email"
 }
+
+
+#######################################
+# Gets a new deploy key for the GitHub build status repository.
+# Local variables:
+#  github_username
+#  github_repo_name
+# Globals:
+#  None.
+# Arguments:
+#  github_username
+#  github_repo_name
+# Returns:
+#  0 if the GitHub repository is found.
+#  5 if the GitHub repository is private or if it does not exist.
+# Outputs:
+#  None.
+# TODO(a-t-0): Write test for function.
+#######################################
+# run with:
+#source src/helper_github_status.sh && assert_public_github_repository_exists "a-t-0" "some_non_existing_repository"
+#source src/helper_github_status.sh && assert_public_github_repository_exists "a-t-0" "gitlab-ci-build-statuses"
+get_github_build_status_repo_deploy_key() {
+	delete_file_if_it_exists "$GITHUB_BUILD_STATUS_REPO_DEPLOY_TOKEN_FILEPATH"
+
+}

@@ -221,3 +221,25 @@ path_before_equals_path_after_command() {
 		exit 179
 	fi
 }
+
+
+#######################################
+# Deletes file if it exists, and then asserts the file is deleted.
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
+delete_file_if_it_exists() {
+	local filepath="$1"
+	rm -f -- "$filepath"
+	manual_assert_file_does_not_exists "$filepath"
+}

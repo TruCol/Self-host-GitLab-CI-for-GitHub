@@ -33,6 +33,8 @@ source src/import.sh
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_helper_dir_edit.bats
 
 # Succeeding:
+./test/libs/bats/bin/bats test/test_helper_asserts.bats
+exit 4
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_logging.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_boot_tor.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parsing.bats
@@ -85,7 +87,3 @@ source src/import.sh
 ####./test/libs/bats/bin/bats test/test_helper_ssh.bats
 #### Works # Test status unknown
 ###./test/libs/bats/bin/bats test/test_sha256_checksum.bats
-
-# New test
-###./test/libs/bats/bin/bats test/test_helper_asserts.bats
-

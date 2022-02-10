@@ -63,7 +63,14 @@ load 'assert_utils'
 @test "Verify manual_assert_file_does_not_exists throws error on existing file." {
 	local existing_filepath="src/hardcoded_variables.txt"
 	
-	run bash -c "source src/helper_asserts.sh && manual_assert_file_does_not_exists $left $existing_filepath"
+	run bash -c "source src/helper_asserts.sh && manual_assert_file_does_not_exists $existing_filepath"
 	assert_failure
-	assert_output "The ssh key file: $existing_filepath does not exist, so the email address of that ssh-account can not be extracted."
+	assert_output "The file: $existing_filepath exists, even though it shouldn't."
+}
+
+@test "Verify manual_assert_file_does_not_exists succeeds on non-existing file." {
+	local existing_filepath="src/some_non_existing_file.txt"
+	
+	run bash -c "source src/helper_asserts.sh && manual_assert_file_does_not_exists $existing_filepath"
+	assert_success
 }

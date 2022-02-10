@@ -34,6 +34,7 @@ source src/import.sh
 
 # Succeeding:
 ./test/libs/bats/bin/bats test/test_helper_asserts.bats
+./test/libs/bats/bin/bats test/test_helper_file_dir_related.bats
 exit 4
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_logging.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_boot_tor.bats

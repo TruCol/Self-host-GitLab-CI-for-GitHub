@@ -294,7 +294,7 @@ get_org_repos() {
 
 
 #######################################
-# 
+# Verifies the current branch equals the incoming branch, throws an error otherwise.
 # Local variables:
 # 
 # Globals:
@@ -306,11 +306,8 @@ get_org_repos() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0): TODO: test function
 #######################################
-# Structure:gitlab_status
-# Verifies the current branch equals the incoming branch, throws an error otherwise.
-################################## TODO: test function
 assert_current_github_branch() {
 	github_repo_name="$1"
 	github_branch_name="$2"
@@ -322,4 +319,68 @@ assert_current_github_branch() {
 		exit 171
 	fi 
 	manual_assert_equal "$actual_result" "$github_branch_name"
+}
+
+
+#######################################
+# Verifies a public GitHub repository exists.
+# Local variables:
+#  github_username
+#  github_repo_name
+# Globals:
+#  None.
+# Arguments:
+#  github_username
+#  github_repo_name
+# Returns:
+#  0 if the function is completed succesfully.
+# Outputs:
+#  FOUND if the GitHub repository exists and is public.
+#  NOTFOUND if the GitHub repository does not exists or is private.
+# TODO(a-t-0): Write test for function.
+#######################################
+# run with:
+#source src/helper_github_status.sh && check_public_github_repository_exists "a-t-0" "some_non_existing_repository"
+#source src/helper_github_status.sh && check_public_github_repository_exists "a-t-0" "gitlab-ci-build-statuses"
+#source src/helper_github_status.sh && check_public_github_repository_exists "ocaml" "ocaml"
+check_public_github_repository_exists() {
+	local github_username="$1"
+	local github_repo_name="$2"
+	
+	if curl -fsS "https://api.github.com/repos/${github_username}/${github_repo_name}" >/dev/null; then	
+		echo "FOUND"
+	else
+		echo "NOTFOUND"
+	fi
+}
+
+
+#######################################
+# Asserts a public GitHub repository exists. Throws error otherwise.
+# Local variables:
+#  github_username
+#  github_repo_name
+# Globals:
+#  None.
+# Arguments:
+#  github_username
+#  github_repo_name
+# Returns:
+#  0 if the GitHub repository is found.
+#  5 if the GitHub repository is private or if it does not exist.
+# Outputs:
+#  None.
+# TODO(a-t-0): Write test for function.
+#######################################
+# run with:
+#source src/helper_github_status.sh && assert_public_github_repository_exists "a-t-0" "some_non_existing_repository"
+#source src/helper_github_status.sh && assert_public_github_repository_exists "a-t-0" "gitlab-ci-build-statuses"
+assert_public_github_repository_exists() {
+	local github_username="$1"
+	local github_repo_name="$2"
+
+	if [[ $(check_public_github_repository_exists "$github_username" "$github_repo_name") != "FOUND" ]]; then
+		echo "The repository www.github.com/${github_username}/${github_repo_name} is not a public GitHub repository."
+		exit 5
+	fi
 }

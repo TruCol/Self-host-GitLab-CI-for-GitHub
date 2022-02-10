@@ -32,35 +32,40 @@ source src/import.sh
 ###	fi
 ###}
 
-@test "Test running the function that loops over the GitHub branches." {
+@test "Test if GitHub repository is cloned correctly." {
 	local github_username="a-t-0"
 	local github_repo_name="sponsor_example"
 	
 	# Download the GitHub repo on which to run the GitLab CI:
 	download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
-	assert_equal "FOUND" "FOUND"
 	
-	#repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
-	#assert_equal "$repo_was_cloned" "FOUND"
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
+	assert_equal "$repo_was_cloned" "FOUND"
+}
 
-	#copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name"
+@test "Test copying github branches with yaml to GitLab repo." {
+	local github_username="a-t-0"
+	local github_repo_name="sponsor_example"
 	
+	# Download the GitHub repo on which to run the GitLab CI:
+	download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
 	
-	
+	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
+	assert_equal "$repo_was_cloned" "FOUND"
 
+	copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name"
 }
 
 # TODO: write test that verifies this works on a new clean/empty repo.
 # TODO: make this run after the loop over github branches.
 @test "Test pushing GitHub commit build status to repo with build statusses is successful." {
-	skip
-	GITHUB_USERNAME_GLOBAL="a-t-0"
-	github_repo_name="sponsor_example"
-	github_branch_name="main"
-	github_commit_sha="85ad4b39fe9c9af893b4d7b35a76a595a8e680d5"
+	local github_username="a-t-0"
+	local github_repo_name="sponsor_example"
+	local github_branch_name="main"
+	local github_commit_sha="85ad4b39fe9c9af893b4d7b35a76a595a8e680d5"
 	
 	
-	copy_commit_build_status_to_github_status_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "success"
+	copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "success"
 	
 	# TODO: write asserts
 	# Assert svg file is created correctly
@@ -72,7 +77,7 @@ source src/import.sh
 	# Assert GitHub commit build status txt file contains the right data.
 	assert_equal $(cat "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"/"$github_repo_name"/"$github_branch_name""/$github_commit_sha.txt") "success"
 	
-	push_commit_build_status_in_github_status_repo_to_github "$GITHUB_USERNAME_GLOBAL"
+	push_commit_build_status_in_github_status_repo_to_github "$github_username"
 	assert_success
 	
 	# Delete GitHub build status repository after test.
@@ -83,13 +88,13 @@ source src/import.sh
 # TODO: make this run after the loop over github branches.
 @test "Test export successful GitHub commit build status to repo with build statusses is exported correctly." {
 	skip
-	GITHUB_USERNAME_GLOBAL="a-t-0"
+	github_username="a-t-0"
 	github_repo_name="sponsor_example"
 	github_branch_name="main"
 	github_commit_sha="85ad4b39fe9c9af893b4d7b35a76a595a8e680d5"
 	
 	
-	copy_commit_build_status_to_github_status_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "success"
+	copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "success"
 	
 	# TODO: write asserts
 	# Assert svg file is created correctly
@@ -109,13 +114,13 @@ source src/import.sh
 # TODO: make this run after the loop over github branches.
 @test "Test export failed GitHub commit build status to repo with build statusses is exported correctly." {
 	skip
-	GITHUB_USERNAME_GLOBAL="a-t-0"
+	github_username="a-t-0"
 	github_repo_name="sponsor_example"
 	github_branch_name="main"
 	github_commit_sha="85ad4b39fe9c9af893b4d7b35a76a595a8e680d5"
 	
 	
-	copy_commit_build_status_to_github_status_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "failed"
+	copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "failed"
 	
 	# TODO: write asserts
 	# Assert svg file is created correctly
@@ -135,13 +140,13 @@ source src/import.sh
 # TODO: make this run after the loop over github branches.
 @test "Test export error GitHub commit build status to repo with build statusses is exported correctly." {
 	skip
-	GITHUB_USERNAME_GLOBAL="a-t-0"
+	github_username="a-t-0"
 	github_repo_name="sponsor_example"
 	github_branch_name="main"
 	github_commit_sha="85ad4b39fe9c9af893b4d7b35a76a595a8e680d5"
 	
 	
-	copy_commit_build_status_to_github_status_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "error"
+	copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "error"
 	
 	# TODO: write asserts
 	# Assert svg file is created correctly
@@ -170,10 +175,10 @@ source src/import.sh
 
 @test "Test verifies GitHub repository is cloned." {
 	skip
-	GITHUB_USERNAME_GLOBAL="a-t-0"
+	github_username="a-t-0"
 	github_repo_name="sponsor_example"
 	
-	download_github_repo_on_which_to_run_ci "$GITHUB_USERNAME_GLOBAL" "$github_repo_name"
+	download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
 	
 	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	assert_equal "$repo_was_cloned" "FOUND"
@@ -190,7 +195,7 @@ source src/import.sh
 # TODO: make this run after the loop over github branches.
 @test "Test get GitLab commit build status function." {
 	skip
-	GITHUB_USERNAME_GLOBAL="a-t-0"
+	github_username="a-t-0"
 	github_repo_name="sponsor_example"
 	github_branch_name="main"
 	
@@ -217,7 +222,7 @@ source src/import.sh
 # TODO: make this run after the loop over github branches.
 @test "Test set GitHub commit build status function." {
 	skip
-	GITHUB_USERNAME_GLOBAL="a-t-0"
+	github_username="a-t-0"
 	github_repo_name="sponsor_example"
 	github_branch_name="main"
 	github_commit_sha="85ad4b39fe9c9af893b4d7b35a76a595a8e680d5"
@@ -250,7 +255,7 @@ source src/import.sh
 	#assert_equal "success" "$gitlab_ci_build_status"
 	assert_equal "failure" "$gitlab_ci_build_status"
 	
-	output=$(set_build_status_of_github_commit "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$github_commit_sha" "$github_personal_access_code" "$GITLAB_WEBSITE_URL_GLOBAL" "$gitlab_ci_build_status")
+	output=$(set_build_status_of_github_commit "$github_username" "$github_repo_name" "$github_commit_sha" "$github_personal_access_code" "$GITLAB_WEBSITE_URL_GLOBAL" "$gitlab_ci_build_status")
 	#echo "output=$output"
 	assert_equal "something" "$output"
 }
@@ -259,7 +264,7 @@ source src/import.sh
 # TODO: make this run after the loop over github branches.
 @test "Test set GitHub commit build status is exported correctly." {
 	skip
-	GITHUB_USERNAME_GLOBAL="a-t-0"
+	github_username="a-t-0"
 	github_repo_name="sponsor_example"
 	github_branch_name="main"
 	github_commit_sha="85ad4b39fe9c9af893b4d7b35a76a595a8e680d5"
@@ -292,7 +297,7 @@ source src/import.sh
 	#assert_equal "success" "$gitlab_ci_build_status"
 	assert_equal "failure" "$gitlab_ci_build_status"
 	
-	output=$(set_build_status_of_github_commit "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$github_commit_sha" "$github_personal_access_code" "$GITLAB_WEBSITE_URL_GLOBAL" "$gitlab_ci_build_status")
+	output=$(set_build_status_of_github_commit "$github_username" "$github_repo_name" "$github_commit_sha" "$github_personal_access_code" "$GITLAB_WEBSITE_URL_GLOBAL" "$gitlab_ci_build_status")
 	#echo "output=$output"
 	assert_equal "something" "$output"
 }

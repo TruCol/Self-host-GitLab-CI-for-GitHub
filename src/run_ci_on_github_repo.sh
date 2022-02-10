@@ -25,15 +25,15 @@ run_ci_on_all_repositories_of_user(){
 # run with:
 # source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo "a-t-0" "sponsor_example"
 run_ci_on_github_repo() {
-	GITHUB_USERNAME_GLOBAL="$1"
+	github_username="$1"
 	github_repo_name="$2"
 	
 	# TODO: write test to verify whether the build status can be pushed to a branch. (access wise).
 	# TODO: Store log file output if a repo (and/or branch) have been skipped.
 	# TODO: In that log file, inlcude: time, which user, which repo, which branch, why.
 	
-	download_github_repo_on_which_to_run_ci "$GITHUB_USERNAME_GLOBAL" "$github_repo_name"
-	copy_github_branches_with_yaml_to_gitlab_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name"
+	download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
+	copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name"
 }
 
 
@@ -79,7 +79,7 @@ download_github_repo_on_which_to_run_ci() {
 #run bash -c "source src/import.sh src/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example"
 #source src/import.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example
 copy_github_branches_with_yaml_to_gitlab_repo() {
-	GITHUB_USERNAME_GLOBAL="$1"
+	github_username="$1"
 	github_repo_name="$2"
 	
 	# 2. Verify the GitHub repo is cloned.
@@ -117,13 +117,13 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 		
 			# TODO: check if github commit already has CI build status
 			# TODO: allow overriding this check to enforce the CI to run again on this commit.
-			already_has_build_status_result="$(github_commit_already_has_gitlab_ci_build_status_result "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$github_branch_name" "$github_commit_sha")"
+			already_has_build_status_result="$(github_commit_already_has_gitlab_ci_build_status_result "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha")"
 			# Get last line of that check, because the git pull command also produces output.
 			last_line_already_has_build_status_result=$(get_last_line_of_set_of_lines "\"${already_has_build_status_result}")
 			
 			if [[ "$last_line_already_has_build_status_result" == "NOTFOUND" ]]; then
 				if [[ "$branch_contains_yaml" == "FOUND" ]]; then
-					copy_github_branch_with_yaml_to_gitlab_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "${github_branches[i]}" "$commit"
+					copy_github_branch_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "${github_branches[i]}" "$commit"
 				fi
 			else
 				echo "Already has a build status:$github_repo_name / $github_branch_name / $github_commit_sha"
@@ -135,7 +135,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 
 
 copy_github_branch_with_yaml_to_gitlab_repo() {
-	GITHUB_USERNAME_GLOBAL="$1"
+	github_username="$1"
 	github_repo_name="$2"
 	github_branch_name="$3"
 	github_commit_sha="$4"
@@ -211,13 +211,13 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	
 	# 7. Once the build status is found, use github personal access token to
 	# set the build status in the GitHub commit.
-	output=$(set_build_status_of_github_commit "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$github_commit_sha" "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$GITLAB_WEBSITE_URL_GLOBAL" "$last_line_gitlab_ci_build_status")
+	output=$(set_build_status_of_github_commit "$github_username" "$github_repo_name" "$github_commit_sha" "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$GITLAB_WEBSITE_URL_GLOBAL" "$last_line_gitlab_ci_build_status")
 	echo "output=$output"
 	
 	
-	copy_commit_build_status_to_github_status_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$last_line_gitlab_ci_build_status"
+	copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$last_line_gitlab_ci_build_status"
 	
-	push_commit_build_status_in_github_status_repo_to_github "$GITHUB_USERNAME_GLOBAL"
+	push_commit_build_status_in_github_status_repo_to_github "$github_username"
 	
 	# TODO: delete this function
 	#get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha"
@@ -296,7 +296,7 @@ parse_gitlab_ci_status_to_github_build_status() {
 # set the build status in the GitHub commit.
 # TODO: change the input arguments to remove GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL
 set_build_status_of_github_commit() {
-	GITHUB_USERNAME_GLOBAL="$1"
+	github_username="$1"
 	github_repo_name="$2"
 	github_commit_sha="$3"
 	GITLAB_WEBSITE_URL_GLOBAL="$4"
@@ -327,7 +327,7 @@ set_build_status_of_github_commit() {
 	#echo "json_string=$json_string"
 	
 	# Set the build status
-	setting_output=$(curl -H "Authorization: token $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" --request POST --data "$json_string" https://api.github.com/repos/"$GITHUB_USERNAME_GLOBAL"/"$github_repo_name"/statuses/"$github_commit_sha")
+	setting_output=$(curl -H "Authorization: token $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" --request POST --data "$json_string" https://api.github.com/repos/"$github_username"/"$github_repo_name"/statuses/"$github_commit_sha")
 	
 	# Check if output is valid
 	#echo "setting_output=$setting_output"
@@ -341,8 +341,8 @@ set_build_status_of_github_commit() {
 	fi
 	
 	# Verify the build status is set correctly
-	getting_output=$(GET https://api.github.com/repos/"$GITHUB_USERNAME_GLOBAL"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
-	expected_url="\"url\":\"https://api.github.com/repos/$GITHUB_USERNAME_GLOBAL/$github_repo_name/statuses/$github_commit_sha\","
+	getting_output=$(GET https://api.github.com/repos/"$github_username"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
+	expected_url="\"url\":\"https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha\","
 	expected_state="\"state\":\"$commit_build_status\","
 	if [ "$(lines_contain_string "$expected_url" "\${getting_output}")" == "NOTFOUND" ]; then
 		# shellcheck disable=SC2059
@@ -355,23 +355,23 @@ set_build_status_of_github_commit() {
 }
 
 copy_commit_build_status_to_github_status_repo() {
-	GITHUB_USERNAME_GLOBAL="$1"
-	github_repo_name="$2"
-	github_branch_name="$3"
-	github_commit_sha="$4"
-	status="$5"
+	local github_username="$1"
+	local github_repo_name="$2"
+	local github_branch_name="$3"
+	local github_commit_sha="$4"
+	local status="$5"
 	
 	# Verify the mirror location exists
 	manual_assert_not_equal "$MIRROR_LOCATION" ""
-	manual_assert_file_exists "$MIRROR_LOCATION"
-	manual_assert_file_exists "$MIRROR_LOCATION/GitHub"
-	manual_assert_file_exists "$MIRROR_LOCATION/GitLab"
+	manual_assert_dir_exists "$MIRROR_LOCATION"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+	has_access="$(check_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	# 8. Clone the GitHub build statusses repository.
-	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+	clone_github_repository "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 	
 	# 9. Verify the Build status repository is cloned.
 	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")
@@ -413,7 +413,7 @@ copy_commit_build_status_to_github_status_repo() {
 }
 
 push_commit_build_status_in_github_status_repo_to_github() {
-	GITHUB_USERNAME_GLOBAL="$1"
+	github_username="$1"
 	
 	# Verify the Build status repository is cloned.
 	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")
@@ -424,10 +424,10 @@ push_commit_build_status_in_github_status_repo_to_github() {
 		commit_changes "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 		
 		# Verify ssh-access
-		has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+		has_access="$(check_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 		
 		# 13. Push the changes to the GitHub build status repository.
-		push_to_github_repository "$GITHUB_USERNAME_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+		push_to_github_repository "$github_username" "$has_access" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 	fi
 	
 	# TODO 14. Verify the changes are pushed to the GitHub build status repository.

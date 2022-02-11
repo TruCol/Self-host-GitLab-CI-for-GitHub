@@ -110,14 +110,142 @@ generate_ssh_key_if_not_exists() {
 # TODO(a-t-0): Rename to add_ssh_key_to_ssh_agent()
 #######################################
 activate_ssh_agent_and_add_ssh_key_to_ssh_agent() {
-	local git_username="$1"
+	local identifier="$1"
 
 	# Activate the ssh-agent in this shell.
 	eval "$(ssh-agent -s 3>&-)"
+	assert_ssh_agent_is_running_in_this_shell
 
-	# Add the private ssh-key with name git_username to the ssh-agent that was
+	# Add the private ssh-key with filename identifier to the ssh-agent that was
 	# activated in this shell
-    ssh-add ~/.ssh/"$git_username"
+    ssh-add ~/.ssh/"$identifier"
+}
+
+
+#######################################
+# Deletes a key (pair) from the ssh-agent if it is in the ssh-agent.
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0): Rename to add_ssh_key_to_ssh_agent()
+#######################################
+delete_ssh_key_from_agent_if_it_is_in_agent() {
+	local identifier="$1"
+	
+	local private_key_filename="$identifier"
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
+
+	local public_key_filename="$identifier.pub"
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+
+	# Convert ssh-identifier to public key_sha
+	#ssh-keygen -y -f ~/.ssh/some_test_ssh_key_name > /home/jsmith/keys/mytest.pub
+	#cat ~/.ssh/some_test_ssh_key_name
+	#local public_key_sha="$1"
+
+	# Activate the ssh-agent in this shell.
+	if [ "$(check_if_public_key_sha_is_in_ssh_agent $public_key_sha)" == "FOUND" ]; then
+		ssh-add -d "$DEFAULT_SSH_LOCATION/$public_key_filename"
+	fi
+
+	# TODO: assert it is not in anymore.
+
+}
+
+
+#######################################
+# Deletes a key (pair) from the ssh-agent if it is in the ssh-agent.
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0): Include function to convert identifier into public key sha with:
+# Source: https://stackoverflow.com/a/57365766/7437143
+# solution: ssh-keygen -y -f /home/jsmith/keys/mytest.pem > /home/jsmith/keys/mytest.pub
+# TODO(a-t-0): Write tests for this function. (Re-use: @test "Check if ssh-key 
+# is added to ssh-agent after adding it to ssh-agent." {).
+#######################################
+# Run with: source src/import.sh && check_if_public_key_sha_is_in_ssh_agent 'AAAAC3NzaC1lZDI1NTE5AAAAIMCMWw5DSN7z8O+rZu7WO49pQtLzQeDvN6104bAKjEpb'
+check_if_public_key_sha_is_in_ssh_agent() {
+	local public_key_sha="$1"
+	
+	# Get the list of public sha keys in the ssh-agent.
+	# This does not care if the ssh-agent is activated or not.
+	local output_ssh_key_list=$(ssh-add -L)
+	
+	# Check if the public sha key is found in the ssh-agent
+	found_public_sha=$(lines_contain_string "$public_key_sha" $output_ssh_key_list)
+	
+	# Check if output_ssh_key_list contains the public_key_sha
+	if [ "$found_public_sha" == "FOUND" ]; then
+		echo "FOUND"
+	else
+		echo "NOTFOUND"
+	fi
+}
+
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
+# Run with: source src/import.sh && check_ssh_agent_is_running_in_this_shell
+check_ssh_agent_is_running_in_this_shell() {
+	if [ "$SSH_AGENT_PID" == "" ]; then
+		echo "NOTFOUND"
+	elif ps -p $SSH_AGENT_PID > /dev/null; then
+		echo "FOUND"
+	fi
+}
+
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
+# Run with: source src/import.sh && assert_ssh_agent_is_running_in_this_shell
+assert_ssh_agent_is_running_in_this_shell() {
+	if [ "$(check_ssh_agent_is_running_in_this_shell)" != "FOUND" ]; then
+		echo "The ssh-agent was not running, even though it was expected to be running."
+		exit 5
+	fi
 }
 
 

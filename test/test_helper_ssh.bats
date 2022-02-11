@@ -142,11 +142,17 @@ setup() {
 
 ### Activate GitHub ssh account
 @test "Check if ssh-key is added to ssh-agent after adding it to ssh-agent." {
-	skip
-	# TODO: ommit this hardcoded username check
-	assert_equal "$GITHUB_USERNAME_GLOBAL" a-t-0
+	local email="example@example.com"
+	local identifier="some_test_ssh_key_name"
+	local public_key_filename="$identifier.pub"
+	local private_key_filename="$identifier"
 	
-	activate_ssh_agent_and_add_ssh_key_to_ssh_agent "$GITHUB_USERNAME_GLOBAL"
+	# Run method to (re)create both keys, and assert they exist.
+	output=$(generate_ssh_key_if_not_exists "$email" "$identifier")
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
+
+	activate_ssh_agent_and_add_ssh_key_to_ssh_agent "$identifier"
 	# Expected function output
 	#Agent pid 123
 	#Identity added: /home/name/.ssh/a-t-0 (some@email.domain)

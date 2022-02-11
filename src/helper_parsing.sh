@@ -73,15 +73,32 @@ file_contains_string() {
 #######################################
 # Structure:Parsing
 lines_contain_string() {
+	###local substring="$1"
+	###local lines="$@"
+	###if [ "$lines" == "" ]; then
+	###	echo "NOTFOUND"
+	#### shellcheck disable=SC2154
+	###elif [[ "$lines" =~ "$substring" ]]; then
+	###	echo "FOUND"; 
+	###else
+	###	echo "NOTFOUND";
+	###fi
+
 	local substring="$1"
-	lines="$@"
-	if [ "$lines" == "" ]; then
+	shift
+	local lines=("$@")
+	
+	local found_substring="NOTFOUND"
+
+	for i in "${lines[@]}"; do
+		if [[ $i == *"$substring"* ]]; then
+			echo "FOUND"
+			local found_substring="FOUND"
+		fi
+	done
+
+	if [ "$found_substring" == "NOTFOUND" ]; then
 		echo "NOTFOUND"
-	# shellcheck disable=SC2154
-	elif [[ "$lines" =~ "$substring" ]]; then
-		echo "FOUND"; 
-	else
-		echo "NOTFOUND";
 	fi
 }
 

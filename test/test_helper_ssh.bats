@@ -149,17 +149,17 @@ setup() {
 	
 	# Run method to (re)create both keys, and assert they exist.
 	output=$(generate_ssh_key_if_not_exists "$email" "$identifier")
-	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
-	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
+
+	public_key_sha=$(get_public_key_sha_from_key_filename $identifier)
+	read -p "public_key_sha=$public_key_sha"
 
 	activate_ssh_agent_and_add_ssh_key_to_ssh_agent "$identifier"
-	# Expected function output
-	#Agent pid 123
-	#Identity added: /home/name/.ssh/a-t-0 (some@email.domain)
 	
+	# TODO: assert the ssh agent is running in this shell.
+
 	# Assert the ssh-key is found in the ssh agent
-	assert_equal "$(any_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME_GLOBAL" "$(ssh-add -L)")" "FOUND"
-	#assert_equal "$(github_account_ssh_key_is_added_to_ssh_agent "$GITHUB_USERNAME_GLOBAL" "$(ssh-add -L)")" "FOUND"
+	#check_if_public_key_sha_is_in_ssh_agent
+	assert_equal "$(check_if_public_key_sha_is_in_ssh_agent $public_key_sha)" "FOUND"
 }
 
 

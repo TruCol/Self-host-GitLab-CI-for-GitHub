@@ -107,18 +107,34 @@ generate_ssh_key_if_not_exists() {
 #  0 If function was evaluated succesfull.
 # Outputs:
 #  
-# TODO(a-t-0): Rename to add_ssh_key_to_ssh_agent()
+# TODO(a-t-0): Write test that expect failure if 1 of 2, or both keys of pair
+# is/are missing. Duplicate:
+# @test "Check if ssh-key is added to ssh-agent after adding it to ssh-agent." 
+# for that.
 #######################################
 activate_ssh_agent_and_add_ssh_key_to_ssh_agent() {
 	local identifier="$1"
+	local public_key_filename="$identifier.pub"
+	local private_key_filename="$identifier"
+
+	# Assert the ssh-keys exist.
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
 
 	# Activate the ssh-agent in this shell.
 	eval "$(ssh-agent -s 3>&-)"
 	assert_ssh_agent_is_running_in_this_shell
 
 	# Add the private ssh-key with filename identifier to the ssh-agent that was
-	# activated in this shell
+	# activated in this shell.
     ssh-add ~/.ssh/"$identifier"
+
+	# Verify the ssh-key is added to the ssh-agent
+	public_key_sha=$(get_public_key_sha_from_key_filename $identifier)
+	if [ "$(check_if_public_key_sha_is_in_ssh_agent $public_key_sha)" != "FOUND" ]; then
+		echo "Error, the ssh-key should added to the ssh-agent (in ssh-add -l), however, they were not found in the ssh-agent."
+		exit 10
+	fi
 }
 
 
@@ -135,29 +151,75 @@ activate_ssh_agent_and_add_ssh_key_to_ssh_agent() {
 #  0 If function was evaluated succesfull.
 # Outputs:
 #  
-# TODO(a-t-0): Rename to add_ssh_key_to_ssh_agent()
+# TODO(a-t-0): Write tests for this method.
+# TODO(a-t-0): If only one of two files exists, generate or get the public key
+# sha, then delete the keypair with: ssh-agent d. (Currently it only does that 
+# if both files exist). Also remove the assert that both key files dont exist.
 #######################################
+# Run with: source src/import.sh && delete_ssh_key_from_agent_if_it_is_in_agent some_test_ssh_key_name
 delete_ssh_key_from_agent_if_it_is_in_agent() {
 	local identifier="$1"
-	
+	local public_key_filename="$identifier.pub"
 	local private_key_filename="$identifier"
-	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
 
+	if [ "$(file_exists $DEFAULT_SSH_LOCATION/$private_key_filename)" == "FOUND" ] || [ "$(file_exists $DEFAULT_SSH_LOCATION/$public_key_filename)" == "FOUND" ]; then
+		# Convert ssh-identifier to public key_sha
+		public_key_sha=$(get_public_key_sha_from_key_filename $identifier)
+
+		# Activate the ssh-agent in this shell.
+		if [ "$(check_if_public_key_sha_is_in_ssh_agent $public_key_sha)" == "FOUND" ]; then
+			ssh-add -d "$DEFAULT_SSH_LOCATION/$public_key_filename"
+		fi
+
+		# Assert the key pair is not in ssh-agent -l anymore.
+		if [ "$(check_if_public_key_sha_is_in_ssh_agent $public_key_sha)" == "FOUND" ]; then
+			echo "The ssh-key pair:$identifier was expected to be deleted, but it still exists in: ssh-agent -l"
+			echo "$(ssh-add -l)"
+			#exit 5
+		fi
+	else
+		# Ensure an error is thrown if one of two keyfiles still exists.
+		manual_assert_file_does_not_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
+		manual_assert_file_does_not_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+	fi
+}
+
+#######################################
+# Returns public sha of public ssh key file if the file exists. Throws error otherwise.
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0): write tests.
+#######################################
+# Run with: source src/import.sh && get_public_key_sha_from_key_filename some_test_ssh_key_name
+get_public_key_sha_from_key_filename() {
+	local identifier="$1"
 	local public_key_filename="$identifier.pub"
 	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+	
+	# Get the output that contains the public key sha belonging to the key pair: $identifier.
+	local line_with_public_key_sha="$(cat $DEFAULT_SSH_LOCATION/$public_key_filename)"
+	
+	# Parse the output to extract the public key sha.
+	# The line_with_public_key_sha format is: 
+	# <encoding type> <public sha> <email address>
+	# so first one can get the rhs after the first space, which results in: 
+	# <public sha> <email address>
+	# And then taking the lhs after the first space of that new string results in:
+	# <public sha>
+	rhs_after_first_space=$(get_rhs_of_line_till_character "$line_with_public_key_sha" " ")
+	rhs_before_second_space=$(get_lhs_of_line_till_character "$rhs_after_first_space" " ")
 
-	# Convert ssh-identifier to public key_sha
-	#ssh-keygen -y -f ~/.ssh/some_test_ssh_key_name > /home/jsmith/keys/mytest.pub
-	#cat ~/.ssh/some_test_ssh_key_name
-	#local public_key_sha="$1"
-
-	# Activate the ssh-agent in this shell.
-	if [ "$(check_if_public_key_sha_is_in_ssh_agent $public_key_sha)" == "FOUND" ]; then
-		ssh-add -d "$DEFAULT_SSH_LOCATION/$public_key_filename"
-	fi
-
-	# TODO: assert it is not in anymore.
-
+	# Output the public key sha that belongs to the identifier
+	echo "$rhs_before_second_space"
 }
 
 

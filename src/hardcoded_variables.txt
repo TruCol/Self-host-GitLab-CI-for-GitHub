@@ -1,6 +1,7 @@
 LOG_LOCATION='src/logs/'
 TOR_CONFIG_LOCATION=/etc/tor/torrc
 SSH_CONFIG_LOCATION=/etc/ssh/sshd_config
+DEFAULT_SSH_LOCATION=~/.ssh
 HIDDENSERVICEDIR_SSH=/var/lib/tor/
 HIDDENSERVICENAME_SSH=other_hidden_service
 #x86_64_runner_checksum=ad6cd9a08a2bbb5bd4fc58ece4b4ef48

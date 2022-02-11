@@ -129,7 +129,7 @@ activate_ssh_agent_and_add_ssh_key_to_ssh_agent() {
 	# activated in this shell.
     ssh-add ~/.ssh/"$identifier"
 
-	# Verify the ssh-key is added to the ssh-agent
+	# Verify the ssh-key is added to the ssh-agent.
 	public_key_sha=$(get_public_key_sha_from_key_filename $identifier)
 	if [ "$(check_if_public_key_sha_is_in_ssh_agent $public_key_sha)" != "FOUND" ]; then
 		echo "Error, the ssh-key should added to the ssh-agent (in ssh-add -l), however, they were not found in the ssh-agent."
@@ -362,7 +362,7 @@ get_ssh_email() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0): DELETE IF THIS IS NOT USED
 #######################################
 # Structure:ssh
 # Checks for both GitHub username as well as for the email address that is 
@@ -417,6 +417,7 @@ any_ssh_key_is_added_to_ssh_agent() {
 # Outputs:
 #  FOUND if the incoming ssh account is activated,
 #  NOTFOUND otherwise.
+# TODO(a-t-0): DELETE IF THIS IS NOT USED
 #######################################
 github_account_ssh_key_is_added_to_ssh_agent() {
 	local ssh_account="$1"
@@ -459,9 +460,8 @@ github_account_ssh_key_is_added_to_ssh_agent() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0): DELETE IF THIS IS NOT USED
 #######################################
-# Structure:ssh
 assert_ssh_key_is_added_to_ssh_agent() {
 	local ssh_account=$1
 	local ssh_output
@@ -604,11 +604,22 @@ assert_ssh_access_to_repo() {
 # TODO(a-t-0): Write test for function.
 #######################################
 # run with:
-# source src/import.sh && get_github_build_status_repo_deploy_key
+# source src/import.sh && get_github_build_status_repo_deploy_key "example@example.com" some_github_deploy_key
 get_github_build_status_repo_deploy_key() {
+	local email="$1"
+	local identifier="$2"
+	local public_key_filename="$identifier.pub"
+
+	# Generate ssh-key and add it to ssh-agent
+	generate_ssh_key_if_not_exists "$email" "$identifier"
+	activate_ssh_agent_and_add_ssh_key_to_ssh_agent "$identifier"
+	public_ssh_key_data=$(cat "$DEFAULT_SSH_LOCATION/$public_key_filename")
+
+	# Delete GitHub Build status token
 	delete_file_if_it_exists "$GITHUB_BUILD_STATUS_REPO_DEPLOY_TOKEN_FILEPATH"
 	manual_assert_file_does_not_exists "$GITHUB_BUILD_STATUS_REPO_DEPLOY_TOKEN_FILEPATH"
 	
+
 	# Get the repository that can automatically get the GitHub deploy token.
 	download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
 
@@ -621,10 +632,10 @@ get_github_build_status_repo_deploy_key() {
 	if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
 		eval "$(conda shell.bash hook)"
 		# TODO: allow passing and parsing arguments in src/get_gitlab_server_runner_token.sh
-		cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src
+		cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --d --ssh "$public_ssh_key_data"
 	else
 		eval "$(conda shell.bash hook)"
-		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src
+		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --d --ssh "$public_ssh_key_data"
 		
 	fi
 	cd ..

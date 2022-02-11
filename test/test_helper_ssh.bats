@@ -66,7 +66,7 @@ setup() {
 	some_function
 }
 
-### Activate GitHub ssh account
+
 @test "Check if ssh-key is created if it does not yet exist." {
 	local email="example@example.com"
 	local identifier="some_test_ssh_key_name"
@@ -78,7 +78,66 @@ setup() {
 	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
 }
 
+@test "Check if ssh-key is created if only private_key_filename exists." {
+	local email="example@example.com"
+	local identifier="some_test_ssh_key_name"
+	local public_key_filename="$identifier.pub"
+	local private_key_filename="$identifier"
 
+	# Ensure both keys are created.
+	output=$(generate_ssh_key_if_not_exists "$email" "$identifier")
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
+
+	# Delete private key and assert it does not exist
+	delete_file_if_it_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+	manual_assert_file_does_not_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
+
+	# Run method to (re)create both keys, and assert they are created.
+	output=$(generate_ssh_key_if_not_exists "$email" "$identifier")
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
+}
+
+@test "Check if ssh-key is created if only public_key_filename exists." {
+	local email="example@example.com"
+	local identifier="some_test_ssh_key_name"
+	local public_key_filename="$identifier.pub"
+	local private_key_filename="$identifier"
+
+	# Ensure both keys are created.
+	output=$(generate_ssh_key_if_not_exists "$email" "$identifier")
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
+
+	# Delete public key and assert it does not exist
+	delete_file_if_it_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
+	manual_assert_file_does_not_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+
+	# Run method to (re)create both keys, and assert they are created.
+	output=$(generate_ssh_key_if_not_exists "$email" "$identifier")
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
+}
+
+@test "Check if ssh-key still exists if both keys already exist." {
+	local email="example@example.com"
+	local identifier="some_test_ssh_key_name"
+	local public_key_filename="$identifier.pub"
+	local private_key_filename="$identifier"
+
+	# Ensure both keys are created.
+	output=$(generate_ssh_key_if_not_exists "$email" "$identifier")
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
+
+	# Run method to (re)create both keys, and assert they exist.
+	output=$(generate_ssh_key_if_not_exists "$email" "$identifier")
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
+}
 
 
 ### Activate GitHub ssh account

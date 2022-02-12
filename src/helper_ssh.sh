@@ -602,6 +602,7 @@ assert_ssh_access_to_repo() {
 # Outputs:
 #  None.
 # TODO(a-t-0): Write test for function.
+# TODO(a-t-0): delete, no token is created, using ssh deploy key instead.
 #######################################
 # run with:
 # source src/import.sh && get_github_build_status_repo_deploy_key "example@example.com" some_github_deploy_key
@@ -616,6 +617,7 @@ get_github_build_status_repo_deploy_key() {
 	public_ssh_key_data=$(cat "$DEFAULT_SSH_LOCATION/$public_key_filename")
 
 	# Delete GitHub Build status token
+	# TODO: delete, no token is created, using ssh deploy key instead.
 	delete_file_if_it_exists "$GITHUB_BUILD_STATUS_REPO_DEPLOY_TOKEN_FILEPATH"
 	manual_assert_file_does_not_exists "$GITHUB_BUILD_STATUS_REPO_DEPLOY_TOKEN_FILEPATH"
 	
@@ -641,4 +643,47 @@ get_github_build_status_repo_deploy_key() {
 	cd ..
 
 	# TODO: Verify path after running command.
+}
+
+#######################################
+# Verifies machine has push access to gitlab build status repository in GitHub.
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0): Write tests for this method.
+#######################################
+# Run with: source src/import.sh && delete_ssh_key_from_agent_if_it_is_in_agent some_test_ssh_key_name
+verify_machine_has_push_access_to_gitlab_build_status_repo_in_github() {
+	local identifier="$1"
+
+	# Use the generation and activate functions as verifiers.
+	# TODO: only exctract the verification methods to prevent the functions 
+	# from satisfying missing requirements that should already have been 
+	# fullfilled.
+	generate_ssh_key_if_not_exists "$email" "$identifier"
+	activate_ssh_agent_and_add_ssh_key_to_ssh_agent "$identifier"
+
+	# Clone the repository.
+
+	# Check if some boolean checking file exists, if not create it.
+
+	# If boolean checking file exists, flip its name.
+
+	# Push repository.
+
+	# Delete the repository.
+
+	# Clone the repository again.
+
+	# Verify the boolean file exists.
+
+	# Verify the boolean file is flipped.
 }

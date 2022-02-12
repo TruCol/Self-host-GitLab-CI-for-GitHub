@@ -624,6 +624,7 @@ get_github_build_status_repo_deploy_key() {
 
 	# Get the repository that can automatically get the GitHub deploy token.
 	download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
+	manual_assert_dir_exists "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
 
 	# TODO: Verify repository is downloaded.
 
@@ -671,15 +672,48 @@ verify_machine_has_push_access_to_gitlab_build_status_repo_in_github() {
 	generate_ssh_key_if_not_exists "$email" "$identifier"
 	activate_ssh_agent_and_add_ssh_key_to_ssh_agent "$identifier"
 
+	# Delete the repository locally if it exists.
+
 	# Clone the repository.
+	# Get the repository that can automatically get the GitHub deploy token.
+	# TODO: download repository using SSH!!!!!
+	download_repository_using_ssh "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
+	manual_assert_dir_exists "$GITHUB_STATUS_WEBSITE_GLOBAL"
 
 	# Check if some boolean checking file exists, if not create it.
+	if [ "$(dir_contains_at_least_one_test_boolean_file "$GITHUB_STATUS_WEBSITE_GLOBAL")" == "NOTFOUND" ]; then
+		touch "$GITHUB_STATUS_WEBSITE_GLOBAL/$TEST_FILENAME_TRUE"
+		manual_assert_file_exists "$GITHUB_STATUS_WEBSITE_GLOBAL/$TEST_FILENAME_TRUE"
+		local expected_filename="$TEST_FILENAME_TRUE"
+	if [ "$(file_exists "$GITHUB_STATUS_WEBSITE_GLOBAL/$TEST_FILENAME_TRUE")" == "FOUND" ]; then
+		# If boolean checking file exists, flip its name.
+		rm "$GITHUB_STATUS_WEBSITE_GLOBAL/$TEST_FILENAME_TRUE"
+		manual_assert_file_does_not_exists "$GITHUB_STATUS_WEBSITE_GLOBAL/$TEST_FILENAME_TRUE"
+		manual_assert_file_does_not_exists "$GITHUB_STATUS_WEBSITE_GLOBAL/$TEST_FILENAME_FALSE"
+		touch "$GITHUB_STATUS_WEBSITE_GLOBAL/$TEST_FILENAME_FALSE"
+		manual_assert_file_exists "$GITHUB_STATUS_WEBSITE_GLOBAL/$TEST_FILENAME_FALSE"
+		local expected_filename="$TEST_FILENAME_FALSE"
+	elif [ "$(file_exists "$dir/$TEST_FILENAME_FALSE")" == "FOUND" ]; then
+		# If boolean checking file exists, flip its name.
+		rm "$GITHUB_STATUS_WEBSITE_GLOBAL/$TEST_FILENAME_FALSE"
+		manual_assert_file_does_not_exists "$GITHUB_STATUS_WEBSITE_GLOBAL/$TEST_FILENAME_FALSE"
+		manual_assert_file_does_not_exists "$GITHUB_STATUS_WEBSITE_GLOBAL/$TEST_FILENAME_TRUE"
+		touch "$GITHUB_STATUS_WEBSITE_GLOBAL/$TEST_FILENAME_TRUE"
+		manual_assert_file_exists "$GITHUB_STATUS_WEBSITE_GLOBAL/$TEST_FILENAME_TRUE"
+		local expected_filename="$TEST_FILENAME_TRUE"
+	fi
 
-	# If boolean checking file exists, flip its name.
+	# Verify changes are registered.
+
+	# Commit changes.
+	commit_changes "$GITHUB_STATUS_WEBSITE_GLOBAL" "Flipped the boolean file."
+	
+	# Verify changes are committed.
 
 	# Push repository.
-
-	# Delete the repository.
+	
+	
+	# Delete the repository locally.
 
 	# Clone the repository again.
 

@@ -384,3 +384,63 @@ assert_public_github_repository_exists() {
 		exit 5
 	fi
 }
+
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0): refactor repository wide to download_repository_using_https.
+# TODO(a-t-0): write tests for method.
+#######################################
+# Downloads a repository into the root directory of this repository if the
+#+ destination folder does yet exist
+#+ TODO: write test for method
+download_repository() {
+	git_username=$1
+	reponame=$2
+	repo_url="https://github.com/"$git_username"/"$reponame".git"
+	#echo "repo_url=$repo_url"
+	if [ ! -d "$reponame" ]; then
+		git clone $repo_url &&
+		set +e
+	fi
+}
+
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0): refactor repository wide to download_repository_using_https.
+# TODO(a-t-0): write tests for method.
+#######################################
+# Downloads a repository into the root directory of this repository if the
+#+ destination folder does yet exist
+#+ TODO: write test for method
+download_repository_using_ssh() {
+	local git_username="$1"
+	local reponame="$2"
+	local repo_url="git@github.com:"$git_username"/"$reponame".git"
+	#echo "repo_url=$repo_url"
+	if [ ! -d "$reponame" ]; then
+		git clone $repo_url &&
+		set +e
+	fi
+}

@@ -41,3 +41,5 @@ PUBLIC_GITHUB_TEST_REPO_GLOBAL=sponsor_example
 
 # Specify Mirror folder
 MIRROR_LOCATION=src/mirrors
+TEST_FILENAME_TRUE=test_filename_true
+TEST_FILENAME_FALSE=test_filename_false

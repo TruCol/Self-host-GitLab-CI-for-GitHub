@@ -243,3 +243,32 @@ delete_file_if_it_exists() {
 	rm -f -- "$filepath"
 	manual_assert_file_does_not_exists "$filepath"
 }
+
+TEST_FILENAME_TRUE
+#######################################
+# Checks if either of the two test boolean files exist in a repository.
+# Local variables:
+#  dir
+# Globals:
+#  TEST_FILENAME_TRUE
+#  TEST_FILENAME_FALSE
+# Arguments:
+#   
+# Returns:
+#  0 if the function was executed succesfully. 
+# Outputs:
+#  FOUND if either of the two files is found.
+#  NOTFOUND if neither of the two test boolean files are found.
+# TODO(a-t-0): change root with Global variable.
+#######################################
+dir_contains_at_least_one_test_boolean_file() {
+	local dir="$1"
+	
+	if [ "$(file_exists "$dir/$TEST_FILENAME_TRUE")" == "FOUND" ]; then
+		echo "FOUND"
+	elif [ "$(file_exists "$dir/$TEST_FILENAME_FALSE")" == "FOUND" ]; then
+		echo "FOUND"
+	else
+		echo "NOTFOUND"
+	fi
+}

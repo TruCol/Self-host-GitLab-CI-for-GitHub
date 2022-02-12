@@ -75,6 +75,13 @@ push_to_github_repository() {
 	fi
 }
 
+push_to_github_repository_with_ssh() {
+	local target_directory="$1"
+	
+	output=$(cd "$target_directory" && git push)
+	echo "$output"
+}
+
 # Structure:github_modify
 # TODO: make neutral
 commit_changes() {

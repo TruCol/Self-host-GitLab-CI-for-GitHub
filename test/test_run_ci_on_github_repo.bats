@@ -36,24 +36,45 @@ source src/import.sh
 	local github_username="a-t-0"
 	local github_repo_name="sponsor_example"
 	
+	# Delete the repository locally if it exists.
+	remove_dir "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	manual_assert_dir_not_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
+
+	# TODO: change this method to download with https?
 	# Download the GitHub repo on which to run the GitLab CI:
 	download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
 	
 	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	assert_equal "$repo_was_cloned" "FOUND"
+
+	# Delete the repository locally if it exists.
+	remove_dir "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	manual_assert_dir_not_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
 }
 
 @test "Test copying github branches with yaml to GitLab repo." {
 	local github_username="a-t-0"
 	local github_repo_name="sponsor_example"
 	
+	# Delete the repository locally if it exists.
+	remove_dir "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	manual_assert_dir_not_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
+
+	# TODO: change this method to download with https?
 	# Download the GitHub repo on which to run the GitLab CI:
 	download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
 	
 	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
 	assert_equal "$repo_was_cloned" "FOUND"
 
 	copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name"
+	# TODO: write some assert to verify yamls are copied to GitLab repo.
+
+	# Delete the repository locally if it exists.
+	remove_dir "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	manual_assert_dir_not_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
 }
 
 # TODO: write test that verifies this works on a new clean/empty repo.

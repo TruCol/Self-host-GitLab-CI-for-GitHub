@@ -124,6 +124,17 @@ lines_contain_string_with_space() {
 }
 
 
+string_in_lines() {
+    local substring=$1
+    shift
+    local lines=$1
+    if [[ $lines = *"$substring"* ]] ; then
+        echo FOUND
+    else
+        echo NOTFOUND
+    fi
+}
+
 #######################################
 # 
 # Local variables:
@@ -426,7 +437,8 @@ get_nr_of_lines_in_var() {
 #######################################
 # Structure:Parsing
 get_last_line_of_set_of_lines() {
-	eval lines="$1"
+	#eval lines="$1"
+	eval lines="$@"
 	nr_of_lines=$(echo "$lines" | wc -l)
 	last_line=$(get_line_by_nr_from_variable "$nr_of_lines" "\${lines}")
 	echo "$last_line"

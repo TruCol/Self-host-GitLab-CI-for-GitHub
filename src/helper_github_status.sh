@@ -21,7 +21,7 @@ verify_github_repository_is_cloned() {
 		target_directory="$2"
 	fi
 	
-	found_repo=$(dir_exists "$target_directory")
+	local found_repo=$(dir_exists "$target_directory")
 	if [ "$found_repo" == "NOTFOUND" ]; then
 		# shellcheck disable=SC2059
 		printf "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"

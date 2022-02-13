@@ -76,15 +76,38 @@ download_github_repo_on_which_to_run_ci() {
 }
 
 
+#######################################
+# Copies the GitHub branches that have a yaml file, to the local copy of the
+# GitLab repository.
+#
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0): Write tests for this method.
+#######################################
+# Run with: 
 #run bash -c "source src/import.sh src/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example"
 #source src/import.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example
 copy_github_branches_with_yaml_to_gitlab_repo() {
-	github_username="$1"
-	github_repo_name="$2"
+	local github_username="$1"
+	local github_repo_name="$2"
 	
-	# 2. Verify the GitHub repo is cloned.
-	repo_was_cloned=$(verify_github_repository_is_cloned "$github_repo_name" "$MIRROR_LOCATION/GitHub/$github_repo_name")
-	manual_assert_equal "$repo_was_cloned" "FOUND"
+	# Delete the repository locally if it exists.
+	remove_dir "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	manual_assert_dir_not_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
+
+	# TODO: change this method to download with https?
+	# Download the GitHub repo on which to run the GitLab CI:
+	download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
 
 	# 3. Get the GitHub branches
 	get_git_branches github_branches "GitHub" "$github_repo_name"      # call function to populate the array
@@ -102,24 +125,27 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 		echo "${github_branches[i]}"
 		
 		# Check if branch is found in local GitHub repo.
-		actual_result="$(checkout_branch_in_github_repo "$github_repo_name" "${github_branches[i]}" "GitHub")"
+		local actual_result="$(checkout_branch_in_github_repo "$github_repo_name" "${github_branches[i]}" "GitHub")"
 		# TODO: write some test to verify this.
 		
 		# Get SHA of commit of local GitHub branch.
-		commit=$(get_current_github_branch_commit "$github_repo_name" "${github_branches[i]}" "GitHub")
+		local commit=$(get_current_github_branch_commit "$github_repo_name" "${github_branches[i]}" "GitHub")
 		
 		# 5. If the branch contains a gitlab yaml file then
 		# TODO: change to return a list of branches that contain GitLab 
 		# yaml files, such that this function can get tested, instead 
 		# of diving a method deeper.
-		branch_contains_yaml="$(verify_github_branch_contains_gitlab_yaml "$github_repo_name" "${github_branches[i]}" "GitHub")"
+		local branch_contains_yaml="$(verify_github_branch_contains_gitlab_yaml "$github_repo_name" "${github_branches[i]}" "GitHub")"
 		if [[ "$branch_contains_yaml" == "FOUND" ]]; then
 		
 			# TODO: check if github commit already has CI build status
 			# TODO: allow overriding this check to enforce the CI to run again on this commit.
-			already_has_build_status_result="$(github_commit_already_has_gitlab_ci_build_status_result "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha")"
+			local already_has_build_status_result="$(github_commit_already_has_gitlab_ci_build_status_result "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha")"
+			read -p "already_has_build_status_result=$already_has_build_status_result"
+
 			# Get last line of that check, because the git pull command also produces output.
-			last_line_already_has_build_status_result=$(get_last_line_of_set_of_lines "\"${already_has_build_status_result}")
+			local last_line_already_has_build_status_result=$(get_last_line_of_set_of_lines "\${already_has_build_status_result}")
+			read -p "last_line_already_has_build_status_result=$last_line_already_has_build_status_result"
 			
 			if [[ "$last_line_already_has_build_status_result" == "NOTFOUND" ]]; then
 				if [[ "$branch_contains_yaml" == "FOUND" ]]; then

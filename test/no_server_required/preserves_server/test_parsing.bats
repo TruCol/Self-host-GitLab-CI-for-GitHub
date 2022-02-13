@@ -27,8 +27,11 @@ END
 @test "Substring in first line is found in lines by lines_contain_string." {
 	contained_substring="First line"
 	
-	actual_result=$(lines_contain_string "$contained_substring" "\${EXAMPLE_LINES}")
+	read -p "EXAMPLE_LINES=$EXAMPLE_LINES"
+
+	#actual_result=$(lines_contain_string "$contained_substring" "\${EXAMPLE_LINES}")
 	#actual_result=$(lines_contain_string_with_space "$contained_substring" "\${EXAMPLE_LINES}")
+	actual_result=$(string_in_lines "$contained_substring" "\${EXAMPLE_LINES}")
 	EXPECTED_OUTPUT="FOUND"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
@@ -38,7 +41,8 @@ END
 	contained_substring="second"
 	
 	#actual_result=$(lines_contain_string "$contained_substring" "\${EXAMPLE_LINES}")
-	actual_result=$(lines_contain_string_with_space "$contained_substring" "\${EXAMPLE_LINES}")
+	#actual_result=$(lines_contain_string_with_space "$contained_substring" "\${EXAMPLE_LINES}")
+	actual_result=$(string_in_lines "$contained_substring" "\${EXAMPLE_LINES}")
 	EXPECTED_OUTPUT="FOUND"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
@@ -48,7 +52,8 @@ END
 	contained_substring="Non-existing-substring"
 	
 	#actual_result=$(lines_contain_string "$contained_substring" "\${EXAMPLE_LINES}")
-	actual_result=$(lines_contain_string_with_space "$contained_substring" "\${EXAMPLE_LINES}")
+	#actual_result=$(lines_contain_string_with_space "$contained_substring" "\${EXAMPLE_LINES}")
+	actual_result=$(string_in_lines "$contained_substring" "\${EXAMPLE_LINES}")
 	EXPECTED_OUTPUT="NOTFOUND"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"

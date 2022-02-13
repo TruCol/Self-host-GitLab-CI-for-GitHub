@@ -94,8 +94,8 @@ download_github_repo_on_which_to_run_ci() {
 # TODO(a-t-0): Write tests for this method.
 #######################################
 # Run with: 
-#run bash -c "source src/import.sh src/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example"
-#source src/import.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example
+# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example"
+# source src/import.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example
 copy_github_branches_with_yaml_to_gitlab_repo() {
 	local github_username="$1"
 	local github_repo_name="$2"
@@ -113,7 +113,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 	get_git_branches github_branches "GitHub" "$github_repo_name"      # call function to populate the array
 	# shellcheck disable=SC2154
 	declare -p github_branches
-	
+
 	#manual_assert_equal ""${github_branches[0]}"" "attack_in_new_file"
 	#manual_assert_equal ""${github_branches[1]}"" "attack_unit_test"
 	#manual_assert_equal ""${github_branches[2]}"" "main"
@@ -141,11 +141,11 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 			# TODO: check if github commit already has CI build status
 			# TODO: allow overriding this check to enforce the CI to run again on this commit.
 			local already_has_build_status_result="$(github_commit_already_has_gitlab_ci_build_status_result "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha")"
-			read -p "already_has_build_status_result=$already_has_build_status_result"
+			#read -p "already_has_build_status_result=$already_has_build_status_result"
 
 			# Get last line of that check, because the git pull command also produces output.
 			local last_line_already_has_build_status_result=$(get_last_line_of_set_of_lines "\${already_has_build_status_result}")
-			read -p "last_line_already_has_build_status_result=$last_line_already_has_build_status_result"
+			#read -p "last_line_already_has_build_status_result=$last_line_already_has_build_status_result"
 			
 			if [[ "$last_line_already_has_build_status_result" == "NOTFOUND" ]]; then
 				if [[ "$branch_contains_yaml" == "FOUND" ]]; then

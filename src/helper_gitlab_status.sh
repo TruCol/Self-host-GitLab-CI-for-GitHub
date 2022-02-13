@@ -111,6 +111,13 @@ get_project_list(){
     # Get a list of the repositories in your own local GitLab server (that runs the GitLab runner CI).
 	local repositories=$(curl --header "PRIVATE-TOKEN: $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
 	
+	# Verify the machine has access to the repositories.
+	no_authorisation='{"message":"401 Unauthorized"}'
+	if [ "$repositories" == "$no_authorisation" ]; then
+		read -p "Error, the GitLab personal access token:$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL did not grant access to: $GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&p age=1"
+		exit 3
+	fi
+	
 	# TODO: identify why the response of the repositories command is inconsistent.
 	# shellcheck disable=2034
 	readarray -t repo_arr <  <(echo "$repositories" | jq ".[].path")

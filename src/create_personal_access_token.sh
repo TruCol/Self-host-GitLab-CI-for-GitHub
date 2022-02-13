@@ -8,21 +8,25 @@
 #9r6sPoAx3BFqZnxfexLS
 
 
-# source src/create_personal_access_token.sh && create_gitlab_personal_access_token
+# source src/import.sh && create_gitlab_personal_access_token
 # verify at: http://127.0.0.1/-/profile/personal_access_tokens
 create_gitlab_personal_access_token() {
-	docker_container_id=$(get_docker_container_id_of_gitlab_server)
+	local docker_container_id=$(get_docker_container_id_of_gitlab_server)
+	read -p "This method takes up to 2 minutes"
 	# trim newlines
 	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	token_name=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL" | tr -d '\r')
+	echo "personal_access_token=$personal_access_token"
+	echo "gitlab_username=$gitlab_username"
+	echo "token_name=$token_name"
 	
 	# Source: https://gitlab.example.com/-/profile/personal_access_tokens?name=Example+Access+token&scopes=api,read_user,read_registry
 	# Create a personal access token
 	# TODO: limit scope to only required scope
 	# https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html
 	# shellcheck disable=SC2154
-	if [ "$gitlab_personal_access_token_exists" == "NOTFOUND" ]; then
+	if [ "$(gitlab_personal_access_token_exists)" == "NOTFOUND" ]; then
 		# shellcheck disable=SC2034
 		output="$(sudo docker exec -i "$docker_container_id" bash -c "gitlab-rails runner \"token = User.find_by_username('$gitlab_username').personal_access_tokens.create(scopes: [:api], name: '$token_name'); token.set_token('$personal_access_token'); token.save! \"")"
 	fi

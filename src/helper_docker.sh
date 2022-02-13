@@ -359,23 +359,31 @@ container_is_running() {
 # Structure:gitlab_docker
 get_docker_container_id_of_gitlab_server() {
 	# echo's the Docker container id if it is found, silent otherwise.
-	space=" "
-	log_filepath=$LOG_LOCATION"docker_container.txt"
-	gitlab_package=$(get_gitlab_package)
+	local space=" "
+	local log_filepath=$LOG_LOCATION"docker_container.txt"
+	local gitlab_package=$(get_gitlab_package)
+
+	# Create docker container log file.
+	remove_dir "$LOG_LOCATION"
+	manual_assert_dir_not_exists "$LOG_LOCATION"
+	mkdir -p $LOG_LOCATION
+	manual_assert_dir_exists "$LOG_LOCATION"
+	touch "$log_filepath"
+	manual_assert_file_exists "$log_filepath"
+
 	
 	# TODO: select gitlab_package substring rhs up to / (the sed command does not handle this well)
 	# TODO: OR replace / with \/ (that works)
-	identification_str=$(get_rhs_of_line_till_character "$gitlab_package" "/")
+	local identification_str=$(get_rhs_of_line_till_character "$gitlab_package" "/")
 	
 	# write output to file
-	output=$(sudo docker ps -a | sudo tee "$log_filepath")
+	local output=$(sudo docker ps -a | sudo tee "$log_filepath")
 	# Get line with "gitlab/gitlab-ce:latest" (package name depending on architecture).
-	line=$(get_first_line_containing_substring "$log_filepath" "\${identification_str}")
+	local line=$(get_first_line_containing_substring "$log_filepath" "\${identification_str}")
 	#echo "line=$line"
 	
-	
 	# Get container id of the line containing the id.
-	container_id=$(get_lhs_of_line_till_character "$line" "$space")
+	local container_id=$(get_lhs_of_line_till_character "$line" "$space")
 	#read -p "CONFIRM BELOW in, container_id=$container_id"
 
 	# delete the file as cleanup if it exist
@@ -383,6 +391,15 @@ get_docker_container_id_of_gitlab_server() {
 	    sudo rm "$log_filepath"
 	fi
 	
+	# Verify the docker container is not empty.
+	# TODO: write test to verify the docker container exists.
+	# TODO: write test to verify the docker container id has the correct 
+	# length.
+	if [ "$container_id" == "" ] ; then
+		echo "Error, the docker container id was not found."
+		exit 15
+	fi
+
 	echo "$container_id"
 }
 # Structure:gitlab_docker

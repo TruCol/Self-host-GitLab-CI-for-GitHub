@@ -41,18 +41,19 @@ github_branch_is_in_gitlab_branches() {
 # 6.i If there are differences in files, and if the GitHub branch contains a GitLab yaml file:
 # copy the content from GitHub to GitLab (except for the .git folder).
 copy_files_from_github_to_gitlab_branch() {
-	github_repo_name="$1"
-	github_branch_name="$2"
-	gitlab_repo_name="$3"
-	gitlab_branch_name="$4"
+	local github_repo_name="$1"
+	local github_branch_name="$2"
+	local gitlab_repo_name="$3"
+	local gitlab_branch_name="$4"
 	
+	read -p "Before check exists locally"
 	# If the GitHub repository exists
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
 		# If the GitHub branch exists
-		github_branch_check_result="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
-		last_line_github_branch_check_result=$(get_last_line_of_set_of_lines "\"${github_branch_check_result}")
-		if [ "$last_line_github_branch_check_result" == "FOUND" ]; then
+		github_branch_exists_output="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
+		github_branch_is_found=$(assert_ends_in_found_and_not_in_notfound ${github_branch_exists_output})
+		if [ "$github_branch_is_found" == "TRUE" ]; then
 		
 			# If the GitHub branch contains a gitlab yaml file
 			filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"

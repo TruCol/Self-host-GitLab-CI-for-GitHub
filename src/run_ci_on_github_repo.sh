@@ -152,8 +152,9 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 			#  The commit:aeaaa57120f74a695ef4215e819a175296a3de10 does not yet have a build status, and it DOES have a GitLab yaml.
 			# even though the gitlab-ci-build-statuses repository does have that build status.
  
-			already_has_build_status=$(ends_in_found_and_not_in_notfound ${already_has_build_status_output})
-			if [ "$already_has_build_status_output" == "TRUE" ]; then
+			does_not_yet_have_a_build_status=$(ends_in_notfound_and_not_in_found ${already_has_build_status_output})
+			read -p "does_not_yet_have_a_build_status=$does_not_yet_have_a_build_status"
+			if [ "$does_not_yet_have_a_build_status" == "TRUE" ]; then
 				#echo "The commit:$current_branch_github_commit_sha does not yet have a build status."
 				if [[ "$branch_contains_yaml" == "FOUND" ]]; then
 					echo "The commit:$current_branch_github_commit_sha does not yet have a build status, and it DOES have a GitLab yaml."
@@ -200,19 +201,15 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	create_empty_repository_v0 "$gitlab_repo_name" "$GITLAB_SERVER_ACCOUNT_GLOBAL"
 	
 	# 5.2 Clone the empty Gitlab repo from the GitLab server
-	read -p "CLONING EMPTY REPO"
 	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"
 	
 	# 5.3 Check if the GitLab branch exists, if not, create it.
 	# 5.4 Check out the GitLab branch
 	# Checkout branch, if branch is found in local Gitlab repo.
-	read -p "Calling error function.:gitlab_repo_name=$gitlab_repo_name,gitlab_branch_name=$gitlab_branch_name"
 	actual_result="$(checkout_branch_in_gitlab_repo "$gitlab_repo_name" "$gitlab_branch_name" "GitLab")"
-	assert_success
 	
 	# Verify the get_current_gitlab_branch function returns the correct branch.
 	# shellcheck disable=SC2154
-	read -p "ERROR INCOMING, gitlab_repo_name$gitlab_repo_name gitlab_branch_name$gitlab_branch_name company$company"
 	actual_result="$(get_current_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name" "$company")"
 	read -p "ERROR DONE"
 	manual_assert_equal "$actual_result" "$gitlab_branch_name"
@@ -291,9 +288,9 @@ manage_get_gitlab_ci_build_status() {
 }
 
 rebuild_get_gitlab_ci_build_status() {
-	github_repo_name="$1"
-	github_branch_name="$2"
-	gitlab_commit_sha="$3"
+	local github_repo_name="$1"
+	local github_branch_name="$2"
+	local gitlab_commit_sha="$3"
 	
 	# Assume identical repository and branch names:
 	gitlab_repo_name="$github_repo_name"
@@ -307,8 +304,9 @@ rebuild_get_gitlab_ci_build_status() {
 	# get build status from pipelines
 	job=$(echo "$pipelines" | jq -r 'map(select(.sha == "'"$gitlab_commit_sha"'"))')
 	#echo "job=$job"
-	gitlab_ci_status=$(cmd "$(echo "$job" | jq ".[].status")" | tr -d '"')
-	#echo "gitlab_ci_status=$gitlab_ci_status"
+	#gitlab_ci_status="$(echo "$job" | jq ".[].status")" | tr -d '"')
+	gitlab_ci_status=$(echo "$(echo $job | jq ".[].status")" | tr -d '"')
+	read -p "gitlab_ci_status=$gitlab_ci_status"
 	parsed_github_status="$(parse_gitlab_ci_status_to_github_build_status "$gitlab_ci_status")"
 	echo "$parsed_github_status"
 }

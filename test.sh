@@ -32,20 +32,20 @@ source src/import.sh
 # Check if mirror directories are created.
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_helper_dir_edit.bats
 
-### Semi-works # Test status unknown
-./test/libs/bats/bin/bats test/test_helper_ssh.bats
-exit 4
+
+# 3/20 tests fail on lines contain string function:
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parsing.bats
 # Succeeding:
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_helper_ssh.bats
 #./test/libs/bats/bin/bats test/test_helper_asserts.bats
 #./test/libs/bats/bin/bats test/test_helper_file_dir_related.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_logging.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_boot_tor.bats
-#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parsing.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_file_dir_related.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_support_programs.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_uninstall.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_install_and_boot_gitlab_server.bats
-
+exit 4
 
 ############### no_server_required - breaks_server##########################
 # Works (Takes 45 sec)

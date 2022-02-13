@@ -70,20 +70,14 @@ file_contains_string() {
 #  None.
 # TODO(a-t-0): Determine why it does not work in:
 #if [ "$(lines_contain_string "$CONDA_ENVIRONMENT_NAME" "\${conda_environments}")" == "FOUND" ]; then
+# TODO(a-t-0): Determine why it does not work in:
+# @test "Substring in first line is found in lines by lines_contain_string." {
+# In essence, determine why it does not work when the substring contains spaces, like:
+# First line
+# TODO(a-t-0): rename to: lines_contain_substring_without_spaces() {
+# TODO(a-t-0): create a working modified duplicate named: lines_contain_substring_with_spaces() {
 #######################################
-# Structure:Parsing
 lines_contain_string() {
-	###local substring="$1"
-	###local lines="$@"
-	###if [ "$lines" == "" ]; then
-	###	echo "NOTFOUND"
-	#### shellcheck disable=SC2154
-	###elif [[ "$lines" =~ "$substring" ]]; then
-	###	echo "FOUND"; 
-	###else
-	###	echo "NOTFOUND";
-	###fi
-
 	local substring="$1"
 	shift
 	local lines=("$@")
@@ -99,6 +93,33 @@ lines_contain_string() {
 
 	if [ "$found_substring" == "NOTFOUND" ]; then
 		echo "NOTFOUND"
+	fi
+}
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+#######################################
+lines_contain_string_with_space() {
+	local substring="$1"
+	local lines="$@"
+	if [ "$lines" == "" ]; then
+		echo "NOTFOUND"
+	# shellcheck disable=SC2154
+	elif [[ "$lines" =~ "$substring" ]]; then
+		echo "FOUND"; 
+	else
+		echo "NOTFOUND";
 	fi
 }
 

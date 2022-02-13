@@ -59,6 +59,7 @@ source src/import.sh
 # TODO: write test that verifies this works on a new clean/empty repo.
 # TODO: make this run after the loop over github branches.
 @test "Test pushing GitHub commit build status to repo with build statusses is successful." {
+	skip
 	local github_username="a-t-0"
 	local github_repo_name="sponsor_example"
 	local github_branch_name="main"

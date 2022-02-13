@@ -6,7 +6,7 @@ load '../../libs/bats-assert/load'
 source src/import.sh
 #source src/boot_tor.sh
 
-example_lines=$(cat <<-END
+EXAMPLE_LINES=$(cat <<-END
 First line
 second line 
 third line 
@@ -25,23 +25,31 @@ END
 
 
 @test "Substring in first line is found in lines by lines_contain_string." {
-	lines=$(printf 'First line\nsecond line \nthird line \n')
-	
 	contained_substring="First line"
 	
-	actual_result=$(lines_contain_string "$contained_substring" "\${lines}")
+	actual_result=$(lines_contain_string "$contained_substring" "\${EXAMPLE_LINES}")
+	#actual_result=$(lines_contain_string_with_space "$contained_substring" "\${EXAMPLE_LINES}")
 	EXPECTED_OUTPUT="FOUND"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }
 
 @test "Substring in second line is found in lines by lines_contain_string." {
-	lines=$(printf 'First line\nsecond line \nthird line \n')
-	
 	contained_substring="second"
 	
-	actual_result=$(lines_contain_string "$contained_substring" "\${lines}")
+	#actual_result=$(lines_contain_string "$contained_substring" "\${EXAMPLE_LINES}")
+	actual_result=$(lines_contain_string_with_space "$contained_substring" "\${EXAMPLE_LINES}")
 	EXPECTED_OUTPUT="FOUND"
+		
+	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
+}
+
+@test "lines_contain_string returns NOTFOUND on non-existing substring." {
+	contained_substring="Non-existing-substring"
+	
+	#actual_result=$(lines_contain_string "$contained_substring" "\${EXAMPLE_LINES}")
+	actual_result=$(lines_contain_string_with_space "$contained_substring" "\${EXAMPLE_LINES}")
+	EXPECTED_OUTPUT="NOTFOUND"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
 }
@@ -195,7 +203,7 @@ END
 	# TODO: determine why this test does not work.
 	#lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
 	
-	actual_result=$(get_last_line_of_set_of_lines "\${example_lines}")
+	actual_result=$(get_last_line_of_set_of_lines "\${EXAMPLE_LINES}")
 	EXPECTED_OUTPUT="sometoken"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"

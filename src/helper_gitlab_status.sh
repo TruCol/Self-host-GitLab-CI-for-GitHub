@@ -120,6 +120,7 @@ get_project_list(){
 	
 	# TODO: identify why the response of the repositories command is inconsistent.
 	# shellcheck disable=2034
+	# TODO: silence this in the terminal output
 	readarray -t repo_arr <  <(echo "$repositories" | jq ".[].path")
 	#echo "repo_arr=$repo_arr"
 }
@@ -184,8 +185,8 @@ gitlab_mirror_repo_exists_in_gitlab() {
 # Structure:gitlab_status
 # TODO: find way to test this function (e.g. copy sponsor repo into GitLab as example.
 gitlab_branch_exists() {
-	gitlab_repo_name="$1"
-	gitlab_branch_name="$2"
+	local gitlab_repo_name="$1"
+	local gitlab_branch_name="$2"
 	
 	# Check if Gitlab repository exists locally.
 	if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
@@ -278,21 +279,21 @@ gitlab_server_is_running() {
 			actual_result=$(check_gitlab_server_status)
 			#echo "actual_result=$actual_result"
 			if
-			[  "$(lines_contain_string 'run: alertmanager: (pid ' "\${actual_result}")" == "FOUND" ] &&
-			[  "$(lines_contain_string 'run: gitaly: (pid ' "\${actual_result}")" == "FOUND" ] &&
-			[  "$(lines_contain_string 'run: gitlab-exporter: (pid ' "\${actual_result}")" == "FOUND" ] &&
-			[  "$(lines_contain_string 'run: gitlab-workhorse: (pid ' "\${actual_result}")" == "FOUND" ] &&
-			[  "$(lines_contain_string 'run: grafana: (pid ' "\${actual_result}")" == "FOUND" ] &&
-			[  "$(lines_contain_string 'run: logrotate: (pid ' "\${actual_result}")" == "FOUND" ] &&
-			[  "$(lines_contain_string 'run: nginx: (pid ' "\${actual_result}")" == "FOUND" ] &&
-			[  "$(lines_contain_string 'run: postgres-exporter: (pid ' "\${actual_result}")" == "FOUND" ] &&
-			[  "$(lines_contain_string 'run: postgresql: (pid ' "\${actual_result}")" == "FOUND" ] &&
-			[  "$(lines_contain_string 'run: prometheus: (pid ' "\${actual_result}")" == "FOUND" ] &&
-			[  "$(lines_contain_string 'run: puma: (pid ' "\${actual_result}")" == "FOUND" ] &&
-			[  "$(lines_contain_string 'run: redis: (pid ' "\${actual_result}")" == "FOUND" ] &&
-			[  "$(lines_contain_string 'run: redis-exporter: (pid ' "\${actual_result}")" == "FOUND" ] &&
-			[  "$(lines_contain_string 'run: sidekiq: (pid ' "\${actual_result}")" == "FOUND" ] &&
-			[  "$(lines_contain_string 'run: sshd: (pid ' "\${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: alertmanager: (pid ' "${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: gitaly: (pid ' "${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: gitlab-exporter: (pid ' "${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: gitlab-workhorse: (pid ' "${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: grafana: (pid ' "${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: logrotate: (pid ' "${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: nginx: (pid ' "${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: postgres-exporter: (pid ' "${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: postgresql: (pid ' "${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: prometheus: (pid ' "${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: puma: (pid ' "${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: redis: (pid ' "${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: redis-exporter: (pid ' "${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: sidekiq: (pid ' "${actual_result}")" == "FOUND" ] &&
+			[  "$(lines_contain_string 'run: sshd: (pid ' "${actual_result}")" == "FOUND" ] &&
 			[  "$actual_result" != "" ]
 			then
 				echo "RUNNING"
@@ -405,13 +406,13 @@ get_build_status() {
 	# Parse output to get build status
 	
 	allowed_substring='"status":"pending"'
-	while [  "$(lines_contain_string "$allowed_substring" "\${output}")" == "FOUND" ]; do
+	while [  "$(lines_contain_string "$allowed_substring" "${output}")" == "FOUND" ]; do
 		sleep 3
 		output=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name/pipelines")
 	done
 	
 	allowed_substring='"status":"running"'
-	while [  "$(lines_contain_string "$allowed_substring" "\${output}")" == "FOUND" ]; do
+	while [  "$(lines_contain_string "$allowed_substring" "${output}")" == "FOUND" ]; do
 		sleep 3
 		output=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name/pipelines")
 	done
@@ -420,11 +421,11 @@ get_build_status() {
 	# first one, which represents the latest build.
 	# TODO: parse the highest id from output, and find the accompanying latest build status
 	failed_build='"status":"failed"'
-	if [  "$(lines_contain_string "$failed_build" "\${output}")" == "FOUND" ]; then
+	if [  "$(lines_contain_string "$failed_build" "${output}")" == "FOUND" ]; then
 		echo "NOTFOUND"
 	else
 		expected_substring='"status":"success"'
-		actual_result=$(lines_contain_string "$expected_substring" "\${output}")
+		actual_result=$(lines_contain_string "$expected_substring" "${output}")
 		echo "$actual_result"
 	fi
 }
@@ -480,16 +481,17 @@ assert_current_gitlab_branch() {
 # 6.f.1.helper1
 # TODO: test
 get_current_gitlab_branch() {
-	gitlab_repo_name="$1"
-	gitlab_branch_name="$2"
-	company="$3"
+	local gitlab_repo_name="$1"
+	local gitlab_branch_name="$2"
+	local company="$3"
 	
 	if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
 
 		# Verify the branch exists
 		branch_check_result="$(gitlab_branch_exists "$gitlab_repo_name" "$gitlab_branch_name")"
-		#echo "branch_check_result=$branch_check_result"
-		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\"${branch_check_result}")
+		read -p " in error: branch_check_result=$branch_check_result"
+		last_line_branch_check_result=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${branch_check_result}")
+		read -p " in error: last_line_branch_check_result=$last_line_branch_check_result"
 		if [ "$last_line_branch_check_result" == "FOUND" ]; then
 			# Get the path before executing the command (to verify it is restored correctly after).
 			pwd_before="$PWD"
@@ -542,9 +544,9 @@ get_current_gitlab_branch() {
 # This is used in case a new branch is created (unborn=no commits) 
 #with checkout -b ...  to get the current GitLab branch name.
 get_current_unborn_gitlab_branch() {
-	gitlab_repo_name="$1"
-	gitlab_branch_name="$2"
-	company="$3"
+	local gitlab_repo_name="$1"
+	local gitlab_branch_name="$2"
+	local company="$3"
 	
 	if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
 		# Get the path before executing the command (to verify it is restored correctly after).
@@ -556,7 +558,7 @@ get_current_unborn_gitlab_branch() {
 			path_before_equals_path_after_command "$pwd_before" "$pwd_after"
 			
 			#current_unborn_gitlab_branch=$(parse_git_status_to_get_gitlab_branch "$git_status_output")
-			current_unborn_gitlab_branch=$(parse_git_status_to_get_gitlab_branch "\"${git_status_output}")
+			current_unborn_gitlab_branch=$(parse_git_status_to_get_gitlab_branch "${git_status_output}")
 			
 			echo "$current_unborn_gitlab_branch"
 	else 
@@ -586,8 +588,11 @@ parse_git_status_to_get_gitlab_branch() {
 	eval lines="$1"
 		
 	# get first line
-	line_nr=1 # lines start at index 1
-	first_line=$(get_line_by_nr_from_variable "$line_nr" "\${lines}")
+	local line_nr=1 # lines start at index 1
+	read -p "line_nr=$line_nr"
+	read -p "lines=$lines"
+	local first_line=$(get_line_by_nr_from_variable "$line_nr" "${lines}")
+	read -p "first_line=$first_line"
 	
 	if [ "${first_line:0:10}" == "On branch " ]; then
 		# TODO: get remainder of first line
@@ -625,11 +630,11 @@ parse_git_status_to_get_gitlab_branch() {
 #+ TODO: Verify the YES command is returned correctly when the GitLab runner is installed.
 gitlab_runner_service_is_installed() {
 	gitlab_runner_service_status=$( { sudo gitlab-runner status; } 2>&1 )
-	if [  "$(lines_contain_string "gitlab-runner: the service is not installed" "\"${gitlab_runner_service_status}")" == "FOUND" ]; then
+	if [  "$(lines_contain_string "gitlab-runner: the service is not installed" "${gitlab_runner_service_status}")" == "FOUND" ]; then
 		echo "NO"
-	elif [  "$(lines_contain_string "gitlab-runner: service in failed state" "\"${gitlab_runner_service_status}")" == "FOUND" ]; then
+	elif [  "$(lines_contain_string "gitlab-runner: service in failed state" "${gitlab_runner_service_status}")" == "FOUND" ]; then
 		echo "FAILED_STATE"
-	elif [  "$(lines_contain_string "gitlab-runner: service is installed" "\"${gitlab_runner_service_status}")" == "FOUND" ]; then
+	elif [  "$(lines_contain_string "gitlab-runner: service is installed" "${gitlab_runner_service_status}")" == "FOUND" ]; then
 		echo "YES"
 	else
 		printf "ERROR, the \n sudo gitlab-runner status\n was not as expected. Please run that command to see what its output is."

@@ -444,6 +444,14 @@ get_last_line_of_set_of_lines() {
 	echo "$last_line"
 }
 
+get_last_line_of_set_of_lines_without_evaluation_of_arg() {
+	#eval lines="$1"
+	lines="$@"
+	nr_of_lines=$(echo "$lines" | wc -l)
+	last_line=$(get_line_by_nr_from_variable "$nr_of_lines" "\${lines}")
+	echo "$last_line"
+}
+
 
 #######################################
 # 

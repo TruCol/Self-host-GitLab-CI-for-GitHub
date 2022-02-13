@@ -12,14 +12,14 @@
 # verify at: http://127.0.0.1/-/profile/personal_access_tokens
 create_gitlab_personal_access_token() {
 	local docker_container_id=$(get_docker_container_id_of_gitlab_server)
-	read -p "This method takes up to 2 minutes"
+	echo "This method takes up to 2 minutes"
 	# trim newlines
 	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	token_name=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL" | tr -d '\r')
-	echo "personal_access_token=$personal_access_token"
-	echo "gitlab_username=$gitlab_username"
-	echo "token_name=$token_name"
+	#echo "personal_access_token=$personal_access_token"
+	#echo "gitlab_username=$gitlab_username"
+	#echo "token_name=$token_name"
 	
 	# Source: https://gitlab.example.com/-/profile/personal_access_tokens?name=Example+Access+token&scopes=api,read_user,read_registry
 	# Create a personal access token
@@ -32,6 +32,7 @@ create_gitlab_personal_access_token() {
 	fi
 }
 
+
 gitlab_personal_access_token_exists() {
 	# shellcheck disable=SC2034
 	list_of_personal_access_tokens=$(get_personal_access_token_list "Filler")
@@ -41,6 +42,7 @@ gitlab_personal_access_token_exists() {
 		echo "FOUND"
 	fi
 }
+
 
 get_personal_access_token_list() {
 	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')

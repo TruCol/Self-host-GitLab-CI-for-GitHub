@@ -141,9 +141,8 @@ get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
   else
     if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "NOTFOUND" ]; then
       # shellcheck disable=SC2153
-	  clone_repository "$gitlab_repo_name" "$gitlab_username" "$GITLAB_SERVER_PASSWORD_GLOBAL" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
-      assert_equal "$(gitlab_repo_exists_locally "$gitlab_repo_name")" "FOUND"
-      echo "FOUND"
+	    clone_repository "$gitlab_repo_name" "$gitlab_username" "$GITLAB_SERVER_PASSWORD_GLOBAL" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
+      manual_assert_equal "$(gitlab_repo_exists_locally "$gitlab_repo_name")" "FOUND"
     elif [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
       echo "FOUND"
       # TODO(a-t-0): do a gitlab pull to get the latest version.
@@ -391,7 +390,7 @@ delete_existing_repository() {
   local output
   output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE "$GITLAB_SERVER_HTTP_URL"/api/v4/projects/"$repo_username"%2F"$repo_name")
 
-  if [  "$(lines_contain_string '{"message":"404 Project Not Found"}' "\${output}")" == "FOUND" ]; then
+  if [  "$(lines_contain_string '{"message":"404 Project Not Found"}' "${output}")" == "FOUND" ]; then
     echo "ERROR, you tried to delete a GitLab repository that does not exist."
     exit 183
   fi
@@ -476,7 +475,8 @@ checkout_branch_in_github_repo() {
 
     # Verify the branch exists
     branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
-    last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
+    read -p "branch_check_result=$branch_check_result"
+    last_line_branch_check_result=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${branch_check_result}")
     if [ "$last_line_branch_check_result" == "FOUND" ]; then
 
       # Get the path before executing the command (to verify it is restored correctly after).
@@ -552,8 +552,11 @@ checkout_branch_in_gitlab_repo() {
 
     # Verify the desired branch exists.
     branch_check_result="$(gitlab_branch_exists $gitlab_repo_name $gitlab_branch_name)"
-    last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
+    last_line_branch_check_result=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${branch_check_result}")
+    read -p "last_line_branch_check_result=$last_line_branch_check_result"
     found_branch_name="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name "GitLab")"
+    read -p "found_branch_name=$found_branch_name"
+
     if [ "$last_line_branch_check_result" == "FOUND" ]; then
 
       # Get the path before executing the command (to verify it is restored correctly after).
@@ -708,7 +711,7 @@ commit_changes_to_gitlab() {
     local github_branch_check_result
 	github_branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
     local last_line_branch_check_result
-	last_line_github_branch_check_result=$(get_last_line_of_set_of_lines "\${github_branch_check_result}")
+	last_line_github_branch_check_result=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${github_branch_check_result}")
     if [ "$last_line_github_branch_check_result" == "FOUND" ]; then
 
       # If the GitHub branch contains a gitlab yaml file
@@ -850,7 +853,7 @@ push_changes_to_gitlab() {
     local github_branch_check_result
 	github_branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
     local last_line_github_branch_check_result
-	last_line_github_branch_check_result=$(get_last_line_of_set_of_lines "\${github_branch_check_result}")
+	last_line_github_branch_check_result=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${github_branch_check_result}")
     if [ "$last_line_github_branch_check_result" == "FOUND" ]; then
 
       # If the GitHub branch contains a gitlab yaml file

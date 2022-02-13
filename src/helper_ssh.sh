@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 #######################################
 # Creates/generates a private ssh-key if it does not exist already. If one of 2
 # expected keys is found, the found key is deleted and a new keypair is 
@@ -31,7 +32,6 @@ generate_ssh_key_if_not_exists() {
 	local email="$1"
 	local identifier="$2"
 
-	
 	local public_key_filename="$identifier.pub"
 	local private_key_filename="$identifier"
 
@@ -69,6 +69,10 @@ generate_ssh_key_if_not_exists() {
 			ssh-keygen -t ed25519 -C "$email" -f ~/.ssh/"$identifier" -P ""
 		fi
 	fi
+
+	# Assert the ssh-keys exist.
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
 }
 
 
@@ -183,6 +187,7 @@ delete_ssh_key_from_agent_if_it_is_in_agent() {
 		manual_assert_file_does_not_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
 	fi
 }
+
 
 #######################################
 # Returns public sha of public ssh key file if the file exists. Throws error otherwise.
@@ -585,7 +590,6 @@ assert_ssh_access_to_repo() {
 }
 
 
-
 #######################################
 # Gets a new deploy key for the GitHub build status repository.
 # Local variables:
@@ -646,6 +650,7 @@ get_github_build_status_repo_deploy_key() {
 	# TODO: Verify path after running command.
 }
 
+
 #######################################
 # Verifies machine has push access to gitlab build status repository in GitHub.
 # This is done by first veriying the ssh-key is created and added to the 
@@ -668,16 +673,24 @@ get_github_build_status_repo_deploy_key() {
 #  
 # TODO(a-t-0): Write tests for this method.
 #######################################
-# Run with: source src/import.sh && verify_machine_has_push_access_to_gitlab_build_status_repo_in_github "id_github_deploy_key"
+# Run with: 
+# source src/import.sh && verify_machine_has_push_access_to_gitlab_build_status_repo_in_github "id_github_deploy_key"
 verify_machine_has_push_access_to_gitlab_build_status_repo_in_github() {
 	local identifier="$1"
+	local public_key_filename="$identifier.pub"
+	local private_key_filename="$identifier"
 
 	# Use the generation and activate functions as verifiers.
-	# TODO: only exctract the verification methods to prevent the functions 
-	# from satisfying missing requirements that should already have been 
-	# fullfilled.
-	generate_ssh_key_if_not_exists "$email" "$identifier"
-	activate_ssh_agent_and_add_ssh_key_to_ssh_agent "$identifier"
+	# Assert the ssh-keys exist.
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
+
+	# Verify the ssh-key is added to the ssh-agent.
+	public_key_sha=$(get_public_key_sha_from_key_filename $identifier)
+	if [ "$(check_if_public_key_sha_is_in_ssh_agent $public_key_sha)" != "FOUND" ]; then
+		echo "Error, the ssh-key should added to the ssh-agent (in ssh-add -l), however, they were not found in the ssh-agent."
+		exit 10
+	fi
 
 	# Delete the repository locally if it exists.
 	remove_dir "$GITHUB_STATUS_WEBSITE_GLOBAL"
@@ -688,7 +701,7 @@ verify_machine_has_push_access_to_gitlab_build_status_repo_in_github() {
 	# TODO: if this does not work, the ssh is not working (or repo/user doesn't exist). 
 	# Do a specific check if ssh deploy key works/has access to the repo, before trying to download.
 	download_repository_using_ssh "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
-	sleep 5
+	sleep 2
 	manual_assert_dir_exists "$GITHUB_STATUS_WEBSITE_GLOBAL"
 
 	# Check if some boolean checking file exists, if not create it.
@@ -733,6 +746,5 @@ verify_machine_has_push_access_to_gitlab_build_status_repo_in_github() {
 	manual_assert_dir_exists "$GITHUB_STATUS_WEBSITE_GLOBAL"
 
 	# Verify the boolean file exists and is flipped.
-	manual_assert_file_exists "$GITHUB_STATUS_WEBSITE_GLOBAL/$expected_filename"
-	
+	manual_assert_file_exists "$GITHUB_STATUS_WEBSITE_GLOBAL/$expected_filename"	
 }

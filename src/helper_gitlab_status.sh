@@ -509,6 +509,7 @@ get_current_gitlab_branch() {
 			# branches yet. So in this case, one can check if one is in the newly created branch
 			# by evaluating the output of git status.
 			current_branch="$(get_current_unborn_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name" "$company")"
+			read -p "current_branch=$current_branch"
 			if [ "$current_branch" == "$gitlab_branch_name" ]; then
 				echo "$current_branch"
 			else
@@ -585,15 +586,16 @@ get_current_unborn_gitlab_branch() {
 # Structure:gitlab_status
 # 6.f.1.helper3
 parse_git_status_to_get_gitlab_branch() {
-	eval lines="$1"
-		
+	#eval lines="$1"
+	local lines="$1"
+
 	# get first line
 	local line_nr=1 # lines start at index 1
 	read -p "line_nr=$line_nr"
-	read -p "lines=$lines"
+	
 	local first_line=$(get_line_by_nr_from_variable "$line_nr" "${lines}")
 	read -p "first_line=$first_line"
-	
+
 	if [ "${first_line:0:10}" == "On branch " ]; then
 		# TODO: get remainder of first line
 		# TODO: check if the line contains a space or newline character at the end.

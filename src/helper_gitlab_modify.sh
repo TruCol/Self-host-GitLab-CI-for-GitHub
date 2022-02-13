@@ -471,24 +471,24 @@ checkout_branch_in_github_repo() {
   local github_branch_name="$2"
   local company="$3"
 
-  if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
+  if [ "$(github_repo_exists_locally $github_repo_name)" == "FOUND" ]; then
 
     # Verify the branch exists
     branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
+    read -p ""
+    
     read -p "branch_check_result=$branch_check_result"
-    last_line_branch_check_result=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${branch_check_result}")
-    if [ "$last_line_branch_check_result" == "FOUND" ]; then
-
+    if [ "${branch_check_result:(-5)}" == "FOUND" ]; then
       # Get the path before executing the command (to verify it is restored correctly after).
       local pwd_before
-	  pwd_before="$PWD"
+	    pwd_before="$PWD"
 
       # Checkout the branch inside the repository.
       cd "$MIRROR_LOCATION/$company/$github_repo_name" && git checkout "$github_branch_name"
       cd ../../../..
       # Get the path after executing the command (to verify it is restored correctly after).
       local pwd_after
-	  pwd_after="$PWD"
+	    pwd_after="$PWD"
 
       # Test to verify the current branch in the GitHub repository is indeed
       # checked out.
@@ -503,9 +503,12 @@ checkout_branch_in_github_repo() {
         #echo "pwd_after=$pwd_after"
         exit 15
       fi
+    elif [ "$(github_repo_exists_locally $github_repo_name)" == "NOTFOUND" ]; then
+      read -p "ERROR, the GitHub branch:$github_branch_name does not exist locally."
+      exit 16 
     else
-      echo "ERROR, the GitHub branch does not exist locally."
-      exit 16
+      read -p "ERROR, function github_branch_exists did not return a valid branch name."
+      exit 17
     fi
   else
     echo "ERROR, the GitHub repository does not exist locally."
@@ -554,6 +557,7 @@ checkout_branch_in_gitlab_repo() {
     branch_check_result="$(gitlab_branch_exists $gitlab_repo_name $gitlab_branch_name)"
     last_line_branch_check_result=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${branch_check_result}")
     read -p "last_line_branch_check_result=$last_line_branch_check_result"
+
     found_branch_name="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name "GitLab")"
     read -p "found_branch_name=$found_branch_name"
 

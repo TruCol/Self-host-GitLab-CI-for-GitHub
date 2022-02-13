@@ -8,7 +8,9 @@ source src/helper_file_dir_related.sh
 } &> /dev/null
 
 # Install prerequisites
-yes | sudo apt install jq
+if [ $(jq --version) != "jq-1.6" ]; then
+	yes | sudo apt install jq
+fi
 
 if [ "$(file_exists "../personal_creds.txt")" == "FOUND" ]; then
 	source ../personal_creds.txt

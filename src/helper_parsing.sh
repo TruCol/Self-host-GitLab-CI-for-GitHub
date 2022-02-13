@@ -288,8 +288,8 @@ get_line_by_nr() {
 #######################################
 # Structure:Parsing
 get_line_by_nr_from_variable() {
-	local number=$1
-	eval lines="$2"
+	local number="$1"
+	local lines="$2"
 	
 	local count=0
 	while IFS= read -r line; do
@@ -452,6 +452,57 @@ get_last_line_of_set_of_lines_without_evaluation_of_arg() {
 	echo "$last_line"
 }
 
+
+ends_in_found_or_notfound(){
+	local lines="$@"
+	if [ "${lines:(-5)}" == "FOUND" ]; then
+		echo "TRUE"
+	elif [ "${lines:(-8)}" == "NOTFOUND" ]; then
+		echo "TRUE"
+	else
+		echo "FALSE"
+	fi
+}
+
+assert_ends_in_found_or_notfound() {
+	local lines="$@"
+	if [ "${lines:(-5)}" == "FOUND" ]; then
+		echo "TRUE"
+	elif [ "${lines:(-8)}" == "NOTFOUND" ]; then
+		echo "TRUE"
+	else
+		echo "ERROR, the end of ${lines} does not end in FOUND, nor in NOTFOUND."
+		exit 5
+	fi
+}
+
+ends_in_found_and_not_in_notfound() {
+	local lines="$@"
+	if [ "${lines:(-5)}" == "FOUND" ]; then
+		if [ "${lines:(-8)}" == "NOTFOUND" ]; then
+			echo "FALSE"
+		else
+			echo "TRUE"
+		fi
+	else
+		echo "FALSE"
+	fi
+}
+
+assert_ends_in_found_and_not_in_notfound() {
+	local lines="$@"
+	if [ "${lines:(-5)}" == "FOUND" ]; then
+		if [ "${lines:(-8)}" == "NOTFOUND" ]; then
+			echo "ERROR, the end of $lines ends in NOTFOUND, even though FOUND is expected"
+			exit 6
+		else
+			echo "TRUE"
+		fi
+	else
+		echo "ERROR, the end of $lines does not end in FOUND, nor in NOTFOUND."
+		exit 5
+	fi
+}
 
 #######################################
 # 

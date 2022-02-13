@@ -125,11 +125,12 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 		#echo "${github_branches[i]}"
 		
 		# Check if branch is found in local GitHub repo.
-		local actual_result="$(checkout_branch_in_github_repo "$github_repo_name" "${github_branches[i]}" "GitHub")"
+		local checkout_output="$(checkout_branch_in_github_repo "$github_repo_name" "${github_branches[i]}" "GitHub")"
 		# TODO: write some test to verify this.
 		
 		# Get SHA of commit of local GitHub branch.
 		local current_branch_github_commit_sha=$(get_current_github_branch_commit "$github_repo_name" "${github_branches[i]}" "GitHub")
+		echo "current_branch_github_commit_sha=$current_branch_github_commit_sha"
 		if [ "$current_branch_github_commit_sha" == "" ]; then
 			echo "github_repo_name=$github_repo_name, branch=${github_branches[i]} in folder GitHub, the commit is empty:$current_branch_github_commit_sha"
 			exit 4
@@ -144,18 +145,15 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 		
 			# TODO: check if github commit already has CI build status
 			# TODO: allow overriding this check to enforce the CI to run again on this commit.
-			local already_has_build_status_result="$(github_commit_already_has_gitlab_ci_build_status_result "$github_username" "$github_repo_name" "$github_branch_name" "$current_branch_github_commit_sha")"
-			#read -p "already_has_build_status_result=$already_has_build_status_result"
-
-			# Get last line of that check, because the git pull command also produces output.
-			local last_line_already_has_build_status_result=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${already_has_build_status_result}")
-			#read -p "last_line_already_has_build_status_result=$last_line_already_has_build_status_result"
+			local already_has_build_status_output="$(github_commit_already_has_gitlab_ci_build_status_result "$github_username" "$github_repo_name" "$github_branch_name" "$current_branch_github_commit_sha")"
+			read -p "already_has_build_status_output=$already_has_build_status_output"
 			
 			# TODO: determine why 
 			#  The commit:aeaaa57120f74a695ef4215e819a175296a3de10 does not yet have a build status, and it DOES have a GitLab yaml.
 			# even though the gitlab-ci-build-statuses repository does have that build status.
  
-			if [[ "$last_line_already_has_build_status_result" == "NOTFOUND" ]]; then
+			already_has_build_status=$(ends_in_found_and_not_in_notfound ${already_has_build_status_output})
+			if [ "$already_has_build_status_output" == "TRUE" ]; then
 				#echo "The commit:$current_branch_github_commit_sha does not yet have a build status."
 				if [[ "$branch_contains_yaml" == "FOUND" ]]; then
 					echo "The commit:$current_branch_github_commit_sha does not yet have a build status, and it DOES have a GitLab yaml."
@@ -163,7 +161,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 					echo "Copied GitHub branch with GitLab yaml to GitLab repository mirror."
 				fi
 			else
-				echo "Already has a build status:$github_repo_name / $github_branch_name / $current_branch_github_commit_sha"
+				echo "Already has build status in GitHub:$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha"
 			fi
 		fi
 	done

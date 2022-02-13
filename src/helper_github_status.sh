@@ -135,9 +135,10 @@ get_current_github_branch() {
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
 		# Verify the branch exists
-		branch_check_result="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
-		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
-		if [ "$last_line_branch_check_result" == "FOUND" ]; then
+		github_branch_exists_output="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
+		github_branch_is_found=$(assert_ends_in_found_and_not_in_notfound ${github_branch_exists_output})
+		
+		if [ "$github_branch_is_found" == "TRUE" ]; then
 		
 			# Get the path before executing the command (to verify it is restored correctly after).
 			pwd_before="$PWD"
@@ -167,16 +168,16 @@ get_current_github_branch() {
 # 6.f.1.helper
 # TODO: test
 get_current_github_branch_commit() {
-	github_repo_name="$1"
-	github_branch_name="$2"
-	company="$3"
+	local github_repo_name="$1"
+	local github_branch_name="$2"
+	local company="$3"
 	
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
 		# Verify the branch exists
-		branch_check_result="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
-		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
-		if [ "$last_line_branch_check_result" == "FOUND" ]; then
+		github_branch_exists_output="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
+		github_branch_is_found=$(assert_ends_in_found_and_not_in_notfound ${github_branch_exists_output})
+		if [ "$github_branch_is_found" == "TRUE" ]; then
 		
 			# Get the path before executing the command (to verify it is restored correctly after).
 			pwd_before="$PWD"
@@ -237,20 +238,20 @@ is_desirable_github_build_status_excluding_pending() {
 # Structure:gitlab_status
 # 6.g.0 Verify the GitHub mirror repository branch contains a gitlab yaml file.
 verify_github_branch_contains_gitlab_yaml() {
-	github_repo_name="$1"
-	github_branch_name="$2"
-	company="$3"
+	local github_repo_name="$1"
+	local github_branch_name="$2"
+	local company="$3"
 	
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
 		# Verify the branch exists.
 		# shellcheck disable=SC2034
-		branch_check_result="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
-		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
-		if [ "$last_line_branch_check_result" == "FOUND" ]; then
+		local github_branch_exists_output="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
+		local github_branch_is_found=$(assert_ends_in_found_and_not_in_notfound ${github_branch_exists_output})
+		if [ "$github_branch_is_found" == "TRUE" ]; then
 		
 			# Test if GitHub branch contains a GitLab yaml file.
-			filepath="$MIRROR_LOCATION/$company/$github_repo_name/.gitlab-ci.yml"
+			local filepath="$MIRROR_LOCATION/$company/$github_repo_name/.gitlab-ci.yml"
 			if [ "$(file_exists "$filepath")" == "FOUND" ]; then
 				echo "FOUND"
 			else

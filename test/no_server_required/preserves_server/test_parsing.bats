@@ -124,6 +124,49 @@ END
 	assert_output "ERROR, the end of $EXAMPLE_LINES does not end in FOUND, nor in NOTFOUND."
 }
 
+
+@test "Test ends_in_notfound_and_not_in_found ending in FOUND." {
+	local actual_result=$(ends_in_notfound_and_not_in_found $EXAMPLE_LINES_ENDING_IN_FOUND)
+	local expected_output="FALSE"
+	assert_equal "$actual_result" "$expected_output"
+}
+
+@test "Test ends_in_notfound_and_not_in_found ending in NOTFOUND." {
+	local actual_result=$(ends_in_notfound_and_not_in_found $EXAMPLE_LINES_ENDING_IN_NOTFOUND)
+	local expected_output="TRUE"
+	assert_equal "$actual_result" "$expected_output"
+}
+
+@test "Test ends_in_notfound_and_not_in_found ending in neither FOUND nor NOTFOUND.." {
+	local actual_result=$(ends_in_notfound_and_not_in_found $EXAMPLE_LINES)
+	local expected_output="FALSE"
+	assert_equal "$actual_result" "$expected_output"
+}
+
+
+@test "Test assert_ends_in_notfound_and_not_in_found ending in FOUND." {
+	run bash -c "source src/helper_parsing.sh && assert_ends_in_notfound_and_not_in_found $EXAMPLE_LINES_ENDING_IN_FOUND"
+	assert_failure
+	assert_output "ERROR, the end of $EXAMPLE_LINES does not end in FOUND, nor in NOTFOUND."
+	
+}
+
+@test "Test assert_ends_in_notfound_and_not_in_found ending in NOTFOUND." {
+	# TODO: determine why the output message fails to match. (Only first line is displayed.)
+	local actual_result=$(assert_ends_in_notfound_and_not_in_found $EXAMPLE_LINES_ENDING_IN_NOTFOUND)
+	local expected_output="TRUE"
+	assert_equal "$actual_result" "$expected_output"
+}
+
+@test "Test assert_ends_in_notfound_and_not_in_found ending in neither FOUND nor NOTFOUND.." {
+	# TODO: determine why the output message fails to match. (Only first line is displayed.)
+	run bash -c "source src/helper_parsing.sh && assert_ends_in_notfound_and_not_in_found $EXAMPLE_LINES"
+	assert_failure
+	assert_output "ERROR, the end of $EXAMPLE_LINES does not end in FOUND, nor in NOTFOUND."
+}
+
+
+
 @test "Checking get line containing substring." {
 	identification_str="second li"
 	#line=$(get_first_line_containing_substring "test/static_file_with_spaces.txt" "$identification_str")

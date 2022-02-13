@@ -504,6 +504,25 @@ assert_ends_in_found_and_not_in_notfound() {
 	fi
 }
 
+ends_in_notfound_and_not_in_found() {
+	local lines="$@"
+	if [ "${lines:(-8)}" == "NOTFOUND" ]; then
+		echo "TRUE"
+	else
+		echo "FALSE"
+	fi
+}
+
+assert_ends_in_notfound_and_not_in_found() {
+	local lines="$@"
+	if [ "${lines:(-8)}" == "NOTFOUND" ]; then
+		echo "TRUE"
+	else
+		echo "ERROR, the end of $lines does not end in FOUND, nor in NOTFOUND."
+		exit 5
+	fi
+}
+
 #######################################
 # 
 # Local variables:

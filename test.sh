@@ -34,7 +34,8 @@ source src/import.sh
 
 
 # 3/20 tests fail on lines contain string function:
-#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parsing.bats
+./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parsing.bats
+exit 4
 # Succeeding:
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_helper_ssh.bats
 #./test/libs/bats/bin/bats test/test_helper_asserts.bats

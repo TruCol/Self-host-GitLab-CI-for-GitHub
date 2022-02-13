@@ -26,12 +26,10 @@ END
 
 @test "Substring in first line is found in lines by lines_contain_string." {
 	contained_substring="First line"
-	
-	read -p "EXAMPLE_LINES=$EXAMPLE_LINES"
 
-	#actual_result=$(lines_contain_string "$contained_substring" "\${EXAMPLE_LINES}")
-	#actual_result=$(lines_contain_string_with_space "$contained_substring" "\${EXAMPLE_LINES}")
-	actual_result=$(string_in_lines "$contained_substring" "\${EXAMPLE_LINES}")
+	#actual_result=$(lines_contain_string "$contained_substring" "${EXAMPLE_LINES}")
+	#actual_result=$(lines_contain_string_with_space "$contained_substring" "${EXAMPLE_LINES}")
+	actual_result=$(string_in_lines "$contained_substring" "${EXAMPLE_LINES}")
 	EXPECTED_OUTPUT="FOUND"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
@@ -40,9 +38,9 @@ END
 @test "Substring in second line is found in lines by lines_contain_string." {
 	contained_substring="second"
 	
-	#actual_result=$(lines_contain_string "$contained_substring" "\${EXAMPLE_LINES}")
-	#actual_result=$(lines_contain_string_with_space "$contained_substring" "\${EXAMPLE_LINES}")
-	actual_result=$(string_in_lines "$contained_substring" "\${EXAMPLE_LINES}")
+	#actual_result=$(lines_contain_string "$contained_substring" "${EXAMPLE_LINES}")
+	#actual_result=$(lines_contain_string_with_space "$contained_substring" "${EXAMPLE_LINES}")
+	actual_result=$(string_in_lines "$contained_substring" "${EXAMPLE_LINES}")
 	EXPECTED_OUTPUT="FOUND"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
@@ -51,9 +49,9 @@ END
 @test "lines_contain_string returns NOTFOUND on non-existing substring." {
 	contained_substring="Non-existing-substring"
 	
-	#actual_result=$(lines_contain_string "$contained_substring" "\${EXAMPLE_LINES}")
-	#actual_result=$(lines_contain_string_with_space "$contained_substring" "\${EXAMPLE_LINES}")
-	actual_result=$(string_in_lines "$contained_substring" "\${EXAMPLE_LINES}")
+	#actual_result=$(lines_contain_string "$contained_substring" "${EXAMPLE_LINES}")
+	#actual_result=$(lines_contain_string_with_space "$contained_substring" "${EXAMPLE_LINES}")
+	actual_result=$(string_in_lines "$contained_substring" "${EXAMPLE_LINES}")
 	EXPECTED_OUTPUT="NOTFOUND"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
@@ -65,7 +63,7 @@ END
 	
 	contained_substring="third line "
 	
-	actual_result=$(lines_contain_string "$contained_substring" "\${lines}")
+	actual_result=$(lines_contain_string "$contained_substring" "${lines}")
 	EXPECTED_OUTPUT="FOUND"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
@@ -150,7 +148,7 @@ END
 @test "Line 1 is returned correctly." {
 	local lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
 	
-	local actual_result=$(get_line_by_nr_from_variable 1 "\${lines}")
+	local actual_result=$(get_line_by_nr_from_variable 1 "${lines}")
 	EXPECTED_OUTPUT="First line"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
@@ -159,7 +157,7 @@ END
 @test "Line 2 is returned correctly." {
 	lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
 	
-	actual_result=$(get_line_by_nr_from_variable 2 "\${lines}")
+	actual_result=$(get_line_by_nr_from_variable 2 "${lines}")
 	EXPECTED_OUTPUT="second line "
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
@@ -168,7 +166,7 @@ END
 @test "Line 3 is returned correctly." {
 	lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
 	
-	actual_result=$(get_line_by_nr_from_variable 3 "\${lines}")
+	actual_result=$(get_line_by_nr_from_variable 3 "${lines}")
 	EXPECTED_OUTPUT="third line "
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
@@ -177,7 +175,7 @@ END
 @test "Line 4 is returned correctly." {
 	lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
 	
-	actual_result=$(get_line_by_nr_from_variable 4 "\${lines}")
+	actual_result=$(get_line_by_nr_from_variable 4 "${lines}")
 	EXPECTED_OUTPUT="sometoken"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
@@ -188,7 +186,7 @@ END
 	
 	line_nr="4"
 	
-	actual_result=$(get_line_by_nr_from_variable "$line_nr" "\${lines}")
+	actual_result=$(get_line_by_nr_from_variable "$line_nr" "${lines}")
 	EXPECTED_OUTPUT="sometoken"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
@@ -197,7 +195,7 @@ END
 @test "Number of lines is returned correctly." {
 	lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
 	
-	actual_result=$(get_nr_of_lines_in_var "\${lines}")
+	actual_result=$(get_nr_of_lines_in_var "${lines}")
 	EXPECTED_OUTPUT="4"
 		
 	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
@@ -208,10 +206,11 @@ END
 	# TODO: determine why this test does not work.
 	#lines=$(printf 'First line\nsecond line \nthird line \nsometoken')
 	
-	actual_result=$(get_last_line_of_set_of_lines "\${EXAMPLE_LINES}")
-	EXPECTED_OUTPUT="sometoken"
+	#local actual_result=$(get_last_line_of_set_of_lines "${EXAMPLE_LINES}")
+	local actual_result=$(get_last_line_of_set_of_lines $EXAMPLE_LINES)
+	local expected_output="sometoken"
 		
-	assert_equal "$actual_result" "$EXPECTED_OUTPUT"
+	assert_equal "$actual_result" "$expected_output"
 }
 
 @test "Test file contains string with variable username that does exist." {

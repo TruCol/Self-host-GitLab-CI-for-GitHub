@@ -244,7 +244,7 @@ delete_file_if_it_exists() {
 	manual_assert_file_does_not_exists "$filepath"
 }
 
-TEST_FILENAME_TRUE
+
 #######################################
 # Checks if either of the two test boolean files exist in a repository.
 # Local variables:

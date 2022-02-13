@@ -146,14 +146,12 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 			# TODO: check if github commit already has CI build status
 			# TODO: allow overriding this check to enforce the CI to run again on this commit.
 			local already_has_build_status_output="$(github_commit_already_has_gitlab_ci_build_status_result "$github_username" "$github_repo_name" "$github_branch_name" "$current_branch_github_commit_sha")"
-			read -p "already_has_build_status_output=$already_has_build_status_output"
 			
 			# TODO: determine why 
 			#  The commit:aeaaa57120f74a695ef4215e819a175296a3de10 does not yet have a build status, and it DOES have a GitLab yaml.
 			# even though the gitlab-ci-build-statuses repository does have that build status.
  
 			does_not_yet_have_a_build_status=$(ends_in_notfound_and_not_in_found ${already_has_build_status_output})
-			read -p "does_not_yet_have_a_build_status=$does_not_yet_have_a_build_status"
 			if [ "$does_not_yet_have_a_build_status" == "TRUE" ]; then
 				#echo "The commit:$current_branch_github_commit_sha does not yet have a build status."
 				if [[ "$branch_contains_yaml" == "FOUND" ]]; then
@@ -211,7 +209,6 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	# Verify the get_current_gitlab_branch function returns the correct branch.
 	# shellcheck disable=SC2154
 	actual_result="$(get_current_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name" "$company")"
-	read -p "ERROR DONE"
 	manual_assert_equal "$actual_result" "$gitlab_branch_name"
 	
 	# 5.5 TODO: Check whether the GitLab branch already contains this
@@ -221,6 +218,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	
 	# 5.7 Copy the files from the GitHub branch into the GitLab branch.
 	result="$(copy_files_from_github_to_gitlab_branch "$github_repo_name" "$github_branch_name" "$gitlab_repo_name" "$gitlab_branch_name")"
+	# TODO: change this method to ommit getting last line!
 	read -p "RESULTRESULT=$result"
 	last_line_result=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${result}")
 	manual_assert_equal "$last_line_result" "IDENTICAL"
@@ -306,7 +304,7 @@ rebuild_get_gitlab_ci_build_status() {
 	#echo "job=$job"
 	#gitlab_ci_status="$(echo "$job" | jq ".[].status")" | tr -d '"')
 	gitlab_ci_status=$(echo "$(echo $job | jq ".[].status")" | tr -d '"')
-	read -p "gitlab_ci_status=$gitlab_ci_status"
+	#read -p "gitlab_ci_status=$gitlab_ci_status"
 	parsed_github_status="$(parse_gitlab_ci_status_to_github_build_status "$gitlab_ci_status")"
 	echo "$parsed_github_status"
 }

@@ -488,11 +488,9 @@ get_current_gitlab_branch() {
 	if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
 
 		# Verify the branch exists
-		branch_check_result="$(gitlab_branch_exists "$gitlab_repo_name" "$gitlab_branch_name")"
-		read -p " in error: branch_check_result=$branch_check_result"
-		last_line_branch_check_result=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${branch_check_result}")
-		read -p " in error: last_line_branch_check_result=$last_line_branch_check_result"
-		if [ "$last_line_branch_check_result" == "FOUND" ]; then
+		gitlab_branch_exists_output="$(gitlab_branch_exists "$gitlab_repo_name" "$gitlab_branch_name")"
+		gitlab_branch_is_found=$(assert_ends_in_found_and_not_in_notfound ${gitlab_branch_exists_output})
+		if [ "$gitlab_branch_is_found" == "TRUE" ]; then
 			# Get the path before executing the command (to verify it is restored correctly after).
 			pwd_before="$PWD"
 			
@@ -509,7 +507,6 @@ get_current_gitlab_branch() {
 			# branches yet. So in this case, one can check if one is in the newly created branch
 			# by evaluating the output of git status.
 			current_branch="$(get_current_unborn_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name" "$company")"
-			read -p "current_branch=$current_branch"
 			if [ "$current_branch" == "$gitlab_branch_name" ]; then
 				echo "$current_branch"
 			else
@@ -591,10 +588,8 @@ parse_git_status_to_get_gitlab_branch() {
 
 	# get first line
 	local line_nr=1 # lines start at index 1
-	read -p "line_nr=$line_nr"
 	
 	local first_line=$(get_line_by_nr_from_variable "$line_nr" "${lines}")
-	read -p "first_line=$first_line"
 
 	if [ "${first_line:0:10}" == "On branch " ]; then
 		# TODO: get remainder of first line

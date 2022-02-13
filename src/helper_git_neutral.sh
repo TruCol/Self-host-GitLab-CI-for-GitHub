@@ -46,7 +46,6 @@ copy_files_from_github_to_gitlab_branch() {
 	local gitlab_repo_name="$3"
 	local gitlab_branch_name="$4"
 	
-	read -p "Before check exists locally"
 	# If the GitHub repository exists
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 

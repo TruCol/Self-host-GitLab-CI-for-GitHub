@@ -150,7 +150,6 @@ setup() {
 	# Run method to (re)create both keys, and assert they exist.
 	output=$(generate_ssh_key_if_not_exists "$email" "$identifier")
 	public_key_sha=$(get_public_key_sha_from_key_filename $identifier)
-	read -p "public_key_sha=$public_key_sha"
 
 	activate_ssh_agent_and_add_ssh_key_to_ssh_agent "$identifier"
 	

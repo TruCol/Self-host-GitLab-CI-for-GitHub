@@ -147,14 +147,12 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 		
 			# TODO: check if github commit already has CI build status
 			# TODO: allow overriding this check to enforce the CI to run again on this commit.
-			local already_has_build_status_output="$(github_commit_already_has_gitlab_ci_build_status_result "$github_username" "$github_repo_name" "$github_branch_name" "$current_branch_github_commit_sha")"
-			
-			# TODO: determine why 
-			#  The commit:aeaaa57120f74a695ef4215e819a175296a3de10 does not yet have a build status, and it DOES have a GitLab yaml.
-			# even though the gitlab-ci-build-statuses repository does have that build status.
-			echo "already_has_build_status_output=$already_has_build_status_output"
-			does_not_yet_have_a_build_status=$(ends_in_notfound_and_not_in_found ${already_has_build_status_output})
-			if [ "$does_not_yet_have_a_build_status" == "TRUE" ]; then
+			commit_filename="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha.txt"
+			exists="$(file_exists $commit_filename)"
+			echo "commit_filename=$commit_filename"
+			echo "exists=$exists"
+			if [ "$(file_exists $commit_filename)" == "NOTFOUND" ]; then
+			#if [ "$does_not_yet_have_a_build_status" == "TRUE" ]; then
 				#echo "The commit:$current_branch_github_commit_sha does not yet have a build status."
 				if [[ "$branch_contains_yaml" == "FOUND" ]]; then
 					echo "The commit:$current_branch_github_commit_sha does not yet have a build status, and it DOES have a GitLab yaml."

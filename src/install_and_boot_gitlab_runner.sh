@@ -21,7 +21,6 @@ install_and_run_gitlab_runner() {
 		install_gitlab_runner_service
 		start_gitlab_runner_service
 		run_gitlab_runner_service
-		
 	if [ "$(gitlab_runner_is_running "$arch")" == "NOTRUNNING" ]; then
 		echo "The gitlab runner is not yet running"
 	else

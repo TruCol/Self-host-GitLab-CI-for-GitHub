@@ -225,7 +225,7 @@ assert_docker_is_installed() {
 	
 	
 	# Verify docker is installed by parsing the version response.
-	if [  "$(lines_contain_string "Docker version 2" "\${docker_version_response}")" == "NOTFOUND" ] || [ "$docker_version_response" == "" ]; then
+	if [  "$(lines_contain_string "Docker version 2" "${docker_version_response}")" == "NOTFOUND" ] || [ "$docker_version_response" == "" ]; then
 		echo "Docker is not correctly installed on this system. The docker --version response was:$docker_version_response"
 		exit 112
 	fi

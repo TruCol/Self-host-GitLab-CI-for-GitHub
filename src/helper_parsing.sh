@@ -523,6 +523,16 @@ assert_ends_in_notfound_and_not_in_found() {
 	fi
 }
 
+assert_ends_in_identical() {
+	local lines="$@"
+	if [ "${lines:(-9)}" == "IDENTICAL" ]; then
+		echo "TRUE"
+	else
+		echo "ERROR, the end of ${lines} does not end in IDENTICAL."
+		exit 5
+	fi
+}
+
 #######################################
 # 
 # Local variables:

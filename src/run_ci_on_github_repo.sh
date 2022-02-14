@@ -217,49 +217,54 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	# known. (skip branch if yes)
 	
 	# 5.7 Copy the files from the GitHub branch into the GitLab branch.
-	result="$(copy_files_from_github_to_gitlab_branch "$github_repo_name" "$github_branch_name" "$gitlab_repo_name" "$gitlab_branch_name")"
+	branch_content_identical_between_github_and_gitlab_output="$(copy_files_from_github_to_gitlab_branch "$github_repo_name" "$github_branch_name" "$gitlab_repo_name" "$gitlab_branch_name")"
 	# TODO: change this method to ommit getting last line!
-	read -p "RESULTRESULT=$result"
-	last_line_result=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${result}")
-	manual_assert_equal "$last_line_result" "IDENTICAL"
+	#read -p "RESULTRESULT=$result"
+	#last_line_result=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${result}")
+	#manual_assert_equal "$last_line_result" "IDENTICAL"
+	branch_content_identical_between_github_and_gitlab=$(assert_ends_in_identical ${branch_content_identical_between_github_and_gitlab_output})
+	if [ "$branch_content_identical_between_github_and_gitlab" == "TRUE" ]; then
 	
-	
-	# 5.8 Commit the changes to GitLab.
-	manual_assert_not_equal "" "$github_commit_sha"
-	commit_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
-	# TODO: verify the changes are committed correctly
-	
-	# 5.8. Push the results to GitLab, with the commit message of the GitHub commit sha.
-	# Perform the Push function.
-	push_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
-	# TODO: verify the changes are pushed correctly
+		# 5.8 Commit the changes to GitLab.
+		manual_assert_not_equal "" "$github_commit_sha"
+		commit_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
+		# TODO: verify the changes are committed correctly
 
-	# Get last commit of GitLab repo.
-	gitlab_commit_sha=$(get_commit_sha_of_branch "$github_branch_name" "$github_repo_name" "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL")
-	gitlab_commit_sha=$(echo "$gitlab_commit_sha" | tr -d '"') # removes double quotes at start and end.
-	#echo "gitlab_commit_sha=$gitlab_commit_sha"
-	
-	# 6. Get the GitLab CI build status for that GitLab commit.
-	build_status="$(manage_get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")"
-	echo "build_status=$build_status"
-	last_line_gitlab_ci_build_status=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${build_status}")
-	echo "last_line_gitlab_ci_build_status=$last_line_gitlab_ci_build_status"
-	
-	
-	
-	# 7. Once the build status is found, use github personal access token to
-	# set the build status in the GitHub commit.
-	output=$(set_build_status_of_github_commit "$github_username" "$github_repo_name" "$github_commit_sha" "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$gitlab_website_url" "$last_line_gitlab_ci_build_status")
-	echo "output=$output"
-	
-	
-	copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$last_line_gitlab_ci_build_status"
-	
-	push_commit_build_status_in_github_status_repo_to_github "$github_username"
-	
-	# TODO: delete this function
-	#get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha"
-}
+		# 5.8. Push the results to GitLab, with the commit message of the GitHub commit sha.
+		# Perform the Push function.
+		push_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
+		# TODO: verify the changes are pushed correctly
+
+		# Get last commit of GitLab repo.
+		gitlab_commit_sha=$(get_commit_sha_of_branch "$github_branch_name" "$github_repo_name" "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL")
+		gitlab_commit_sha=$(echo "$gitlab_commit_sha" | tr -d '"') # removes double quotes at start and end.
+		#echo "gitlab_commit_sha=$gitlab_commit_sha"
+
+		# 6. Get the GitLab CI build status for that GitLab commit.
+		build_status="$(manage_get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")"
+		echo "build_status=$build_status"
+		last_line_gitlab_ci_build_status=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${build_status}")
+		echo "last_line_gitlab_ci_build_status=$last_line_gitlab_ci_build_status"
+
+
+
+		# 7. Once the build status is found, use github personal access token to
+		# set the build status in the GitHub commit.
+		output=$(set_build_status_of_github_commit "$github_username" "$github_repo_name" "$github_commit_sha" "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$gitlab_website_url" "$last_line_gitlab_ci_build_status")
+		echo "output=$output"
+
+
+		copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$last_line_gitlab_ci_build_status"
+
+		push_commit_build_status_in_github_status_repo_to_github "$github_username"
+
+		# TODO: delete this function
+		#get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha"
+	else
+		echo "ERROR, the GitHub branch content was not copied correctly to the GitLab branch."
+		exit 77
+	fi
+}	
 
 # TODO: 5.9 Verify the CI is running for this commit.
 

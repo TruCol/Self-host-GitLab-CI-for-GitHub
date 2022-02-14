@@ -70,11 +70,49 @@ file_contains_string() {
 #  None.
 # TODO(a-t-0): Determine why it does not work in:
 #if [ "$(lines_contain_string "$CONDA_ENVIRONMENT_NAME" "\${conda_environments}")" == "FOUND" ]; then
+# TODO(a-t-0): Determine why it does not work in:
+# @test "Substring in first line is found in lines by lines_contain_string." {
+# In essence, determine why it does not work when the substring contains spaces, like:
+# First line
+# TODO(a-t-0): rename to: lines_contain_substring_without_spaces() {
+# TODO(a-t-0): create a working modified duplicate named: lines_contain_substring_with_spaces() {
 #######################################
-# Structure:Parsing
 lines_contain_string() {
 	local substring="$1"
-	lines="$@"
+	shift
+	local lines=("$@")
+	
+	local found_substring="NOTFOUND"
+
+	for i in "${lines[@]}"; do
+		if [[ $i == *"$substring"* ]]; then
+			echo "FOUND"
+			local found_substring="FOUND"
+		fi
+	done
+
+	if [ "$found_substring" == "NOTFOUND" ]; then
+		echo "NOTFOUND"
+	fi
+}
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+#######################################
+lines_contain_string_with_space() {
+	local substring="$1"
+	local lines="$@"
 	if [ "$lines" == "" ]; then
 		echo "NOTFOUND"
 	# shellcheck disable=SC2154
@@ -85,6 +123,17 @@ lines_contain_string() {
 	fi
 }
 
+
+string_in_lines() {
+    local substring=$1
+    shift
+    local lines=$1
+    if [[ $lines = *"$substring"* ]] ; then
+        echo FOUND
+    else
+        echo NOTFOUND
+    fi
+}
 
 #######################################
 # 
@@ -239,8 +288,8 @@ get_line_by_nr() {
 #######################################
 # Structure:Parsing
 get_line_by_nr_from_variable() {
-	local number=$1
-	eval lines="$2"
+	local number="$1"
+	local lines="$2"
 	
 	local count=0
 	while IFS= read -r line; do
@@ -388,12 +437,101 @@ get_nr_of_lines_in_var() {
 #######################################
 # Structure:Parsing
 get_last_line_of_set_of_lines() {
-	eval lines="$1"
+	#eval lines="$1"
+	eval lines="$@"
 	nr_of_lines=$(echo "$lines" | wc -l)
 	last_line=$(get_line_by_nr_from_variable "$nr_of_lines" "\${lines}")
 	echo "$last_line"
 }
 
+get_last_line_of_set_of_lines_without_evaluation_of_arg() {
+	#eval lines="$1"
+	lines="$@"
+	nr_of_lines=$(echo "$lines" | wc -l)
+	last_line=$(get_line_by_nr_from_variable "$nr_of_lines" "\${lines}")
+	echo "$last_line"
+}
+
+
+ends_in_found_or_notfound(){
+	local lines="$@"
+	if [ "${lines:(-5)}" == "FOUND" ]; then
+		echo "TRUE"
+	elif [ "${lines:(-8)}" == "NOTFOUND" ]; then
+		echo "TRUE"
+	else
+		echo "FALSE"
+	fi
+}
+
+assert_ends_in_found_or_notfound() {
+	local lines="$@"
+	if [ "${lines:(-5)}" == "FOUND" ]; then
+		echo "TRUE"
+	elif [ "${lines:(-8)}" == "NOTFOUND" ]; then
+		echo "TRUE"
+	else
+		echo "ERROR, the end of ${lines} does not end in FOUND, nor in NOTFOUND."
+		exit 5
+	fi
+}
+
+ends_in_found_and_not_in_notfound() {
+	local lines="$@"
+	if [ "${lines:(-5)}" == "FOUND" ]; then
+		if [ "${lines:(-8)}" == "NOTFOUND" ]; then
+			echo "FALSE"
+		else
+			echo "TRUE"
+		fi
+	else
+		echo "FALSE"
+	fi
+}
+
+assert_ends_in_found_and_not_in_notfound() {
+	local lines="$@"
+	if [ "${lines:(-5)}" == "FOUND" ]; then
+		if [ "${lines:(-8)}" == "NOTFOUND" ]; then
+			echo "ERROR, the end of $lines ends in NOTFOUND, even though FOUND is expected"
+			exit 6
+		else
+			echo "TRUE"
+		fi
+	else
+		echo "ERROR, the end of $lines does not end in FOUND, nor in NOTFOUND."
+		exit 5
+	fi
+}
+
+ends_in_notfound_and_not_in_found() {
+	local lines="$@"
+	if [ "${lines:(-8)}" == "NOTFOUND" ]; then
+		echo "TRUE"
+	else
+		echo "FALSE"
+	fi
+}
+
+assert_ends_in_notfound_and_not_in_found() {
+	local lines="$@"
+	if [ "${lines:(-8)}" == "NOTFOUND" ]; then
+		echo "TRUE"
+	else
+		echo "ERROR, the end of $lines does not end in FOUND, nor in NOTFOUND."
+		exit 5
+	fi
+}
+
+assert_ends_in_identical() {
+	local lines="$@"
+	if [ "${lines:(-9)}" == "IDENTICAL" ]; then
+		echo "TRUE"
+	else
+		echo "ERROR, the end of ${lines} does not end in IDENTICAL."
+		exit 5
+	fi
+}
 
 #######################################
 # 

@@ -7,6 +7,11 @@ source src/helper_file_dir_related.sh
   sudo echo "hi"
 } &> /dev/null
 
+# Install prerequisites
+if [ $(jq --version) != "jq-1.6" ]; then
+	yes | sudo apt install jq
+fi
+
 if [ "$(file_exists "../personal_creds.txt")" == "FOUND" ]; then
 	source ../personal_creds.txt
 elif [ "$(file_exists "src/creds.txt")" == "FOUND" ]; then
@@ -58,6 +63,8 @@ source src/helper_configuration.sh
 source src/install_support_programs.sh
 source src/helper_md5sum.sh
 
+# To get GitLab personal access token
+source src/create_personal_access_token.sh
 
 # For uninstallation
 source src/uninstall_gitlab_server.sh

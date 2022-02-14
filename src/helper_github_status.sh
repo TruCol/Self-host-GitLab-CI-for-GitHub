@@ -21,7 +21,7 @@ verify_github_repository_is_cloned() {
 		target_directory="$2"
 	fi
 	
-	found_repo=$(dir_exists "$target_directory")
+	local found_repo=$(dir_exists "$target_directory")
 	if [ "$found_repo" == "NOTFOUND" ]; then
 		# shellcheck disable=SC2059
 		printf "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
@@ -135,9 +135,10 @@ get_current_github_branch() {
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
 		# Verify the branch exists
-		branch_check_result="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
-		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
-		if [ "$last_line_branch_check_result" == "FOUND" ]; then
+		github_branch_exists_output="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
+		github_branch_is_found=$(assert_ends_in_found_and_not_in_notfound ${github_branch_exists_output})
+		
+		if [ "$github_branch_is_found" == "TRUE" ]; then
 		
 			# Get the path before executing the command (to verify it is restored correctly after).
 			pwd_before="$PWD"
@@ -167,16 +168,16 @@ get_current_github_branch() {
 # 6.f.1.helper
 # TODO: test
 get_current_github_branch_commit() {
-	github_repo_name="$1"
-	github_branch_name="$2"
-	company="$3"
+	local github_repo_name="$1"
+	local github_branch_name="$2"
+	local company="$3"
 	
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
 		# Verify the branch exists
-		branch_check_result="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
-		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
-		if [ "$last_line_branch_check_result" == "FOUND" ]; then
+		github_branch_exists_output="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
+		github_branch_is_found=$(assert_ends_in_found_and_not_in_notfound ${github_branch_exists_output})
+		if [ "$github_branch_is_found" == "TRUE" ]; then
 		
 			# Get the path before executing the command (to verify it is restored correctly after).
 			pwd_before="$PWD"
@@ -237,20 +238,20 @@ is_desirable_github_build_status_excluding_pending() {
 # Structure:gitlab_status
 # 6.g.0 Verify the GitHub mirror repository branch contains a gitlab yaml file.
 verify_github_branch_contains_gitlab_yaml() {
-	github_repo_name="$1"
-	github_branch_name="$2"
-	company="$3"
+	local github_repo_name="$1"
+	local github_branch_name="$2"
+	local company="$3"
 	
 	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
 		# Verify the branch exists.
 		# shellcheck disable=SC2034
-		branch_check_result="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
-		last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
-		if [ "$last_line_branch_check_result" == "FOUND" ]; then
+		local github_branch_exists_output="$(github_branch_exists "$github_repo_name" "$github_branch_name")"
+		local github_branch_is_found=$(assert_ends_in_found_and_not_in_notfound ${github_branch_exists_output})
+		if [ "$github_branch_is_found" == "TRUE" ]; then
 		
 			# Test if GitHub branch contains a GitLab yaml file.
-			filepath="$MIRROR_LOCATION/$company/$github_repo_name/.gitlab-ci.yml"
+			local filepath="$MIRROR_LOCATION/$company/$github_repo_name/.gitlab-ci.yml"
 			if [ "$(file_exists "$filepath")" == "FOUND" ]; then
 				echo "FOUND"
 			else
@@ -383,4 +384,73 @@ assert_public_github_repository_exists() {
 		echo "The repository www.github.com/${github_username}/${github_repo_name} is not a public GitHub repository/doesn't exist. Please create it/make it public, and try again."
 		exit 5
 	fi
+}
+
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0): refactor repository wide to download_repository_using_https.
+# TODO(a-t-0): write tests for method.
+#######################################
+# Downloads a repository into the root directory of this repository if the
+#+ destination folder does yet exist
+#+ TODO: write test for method
+download_repository() {
+	git_username=$1
+	reponame=$2
+	repo_url="https://github.com/"$git_username"/"$reponame".git"
+	#echo "repo_url=$repo_url"
+	if [ ! -d "$reponame" ]; then
+		git clone $repo_url &&
+		set +e
+	fi
+}
+
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0): refactor repository wide to download_repository_using_https.
+# TODO(a-t-0): write tests for method.
+#######################################
+# Downloads a repository into the root directory of this repository if the
+#+ destination folder does yet exist
+#+ TODO: write test for method
+download_and_overwrite_repository_using_ssh() {
+	local git_username="$1"
+	local reponame="$2"
+	local target_directory="$3"
+	local repo_url="git@github.com:"$git_username"/"$reponame".git"
+	
+	# Delete target directory if it exists.
+	remove_dir "$target_directory"
+	manual_assert_dir_not_exists "$target_directory"
+
+	if [ "$target_directory" != "" ]; then
+		git clone $repo_url $target_directory &&
+		set +e
+	else
+		git clone $repo_url &&
+		set +e
+	fi
+	manual_assert_dir_exists "$target_directory"
 }

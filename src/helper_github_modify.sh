@@ -75,20 +75,41 @@ push_to_github_repository() {
 	fi
 }
 
+# Run with:
+# bash -c "source src/import.sh && push_to_github_repository_with_ssh src/mirrors/GitHub/gitlab-ci-build-statuses"
+push_to_github_repository_with_ssh() {
+	local target_directory="$1"
+	# Verify has push access
+	
+
+	# Push
+	if [ "$target_directory" != "" ]; then
+		if [ -d "$target_directory" ]; then
+			output=$(cd "$target_directory" && git push)
+			echo "$output"
+		else
+			echo "The target directory:$target_directory was not found."
+			exit 4
+		fi
+	fi
+}
+
 # Structure:github_modify
 # TODO: make neutral
 commit_changes() {
-	target_directory=$1
+	local target_directory="$1"
+	local commit_message="$2"
 	#echo "$commit_changes"
 	#add_star_output=$(cd "$target_directory" && git add *)
 	#add_dot_star=$(cd "$target_directory" && git add .*)
 	# shellcheck disable=SC2034
-	add_output=$(cd "$target_directory" && git add -A)
+	local add_output=$(cd "$target_directory" && git add -A)
 	# TODO: include git status command to verify no files were not added/deleted.
 	
 	# TODO: write path before and after and verify it is correct.
 	# shellcheck disable=SC2034
-	commit_output=$(cd "$target_directory" && git commit -m "Uploaded files to trigger GitLab runner.")
+	#local commit_output=$(cd "$target_directory" && git commit -m "Uploaded files to trigger GitLab runner.")
+	local commit_output=$(cd "$target_directory" && git commit -m "$commit_message")
 	# TODO: verify no more files are changed, using Git status command.
 }
 

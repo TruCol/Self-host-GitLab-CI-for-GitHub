@@ -141,9 +141,8 @@ get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
   else
     if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "NOTFOUND" ]; then
       # shellcheck disable=SC2153
-	  clone_repository "$gitlab_repo_name" "$gitlab_username" "$GITLAB_SERVER_PASSWORD_GLOBAL" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
-      assert_equal "$(gitlab_repo_exists_locally "$gitlab_repo_name")" "FOUND"
-      echo "FOUND"
+	    clone_repository "$gitlab_repo_name" "$gitlab_username" "$GITLAB_SERVER_PASSWORD_GLOBAL" "$GITLAB_SERVER" "$MIRROR_LOCATION/GitLab/"
+      manual_assert_equal "$(gitlab_repo_exists_locally "$gitlab_repo_name")" "FOUND"
     elif [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
       echo "FOUND"
       # TODO(a-t-0): do a gitlab pull to get the latest version.
@@ -391,7 +390,7 @@ delete_existing_repository() {
   local output
   output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE "$GITLAB_SERVER_HTTP_URL"/api/v4/projects/"$repo_username"%2F"$repo_name")
 
-  if [  "$(lines_contain_string '{"message":"404 Project Not Found"}' "\${output}")" == "FOUND" ]; then
+  if [  "$(lines_contain_string '{"message":"404 Project Not Found"}' "${output}")" == "FOUND" ]; then
     echo "ERROR, you tried to delete a GitLab repository that does not exist."
     exit 183
   fi
@@ -472,23 +471,23 @@ checkout_branch_in_github_repo() {
   local github_branch_name="$2"
   local company="$3"
 
-  if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
+  if [ "$(github_repo_exists_locally $github_repo_name)" == "FOUND" ]; then
 
     # Verify the branch exists
     branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
-    last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
-    if [ "$last_line_branch_check_result" == "FOUND" ]; then
+    github_branch_is_found=$(assert_ends_in_found_and_not_in_notfound ${branch_check_result})
 
+    if [ "$github_branch_is_found" == "TRUE" ]; then
       # Get the path before executing the command (to verify it is restored correctly after).
       local pwd_before
-	  pwd_before="$PWD"
+	    pwd_before="$PWD"
 
       # Checkout the branch inside the repository.
       cd "$MIRROR_LOCATION/$company/$github_repo_name" && git checkout "$github_branch_name"
       cd ../../../..
       # Get the path after executing the command (to verify it is restored correctly after).
       local pwd_after
-	  pwd_after="$PWD"
+	    pwd_after="$PWD"
 
       # Test to verify the current branch in the GitHub repository is indeed
       # checked out.
@@ -503,9 +502,12 @@ checkout_branch_in_github_repo() {
         #echo "pwd_after=$pwd_after"
         exit 15
       fi
+    elif [ "$(github_repo_exists_locally $github_repo_name)" == "NOTFOUND" ]; then
+      read -p "ERROR, the GitHub branch:$github_branch_name does not exist locally."
+      exit 16 
     else
-      echo "ERROR, the GitHub branch does not exist locally."
-      exit 16
+      read -p "ERROR, function github_branch_exists did not return a valid branch name."
+      exit 17
     fi
   else
     echo "ERROR, the GitHub repository does not exist locally."
@@ -552,9 +554,9 @@ checkout_branch_in_gitlab_repo() {
 
     # Verify the desired branch exists.
     branch_check_result="$(gitlab_branch_exists $gitlab_repo_name $gitlab_branch_name)"
-    last_line_branch_check_result=$(get_last_line_of_set_of_lines "\${branch_check_result}")
-    found_branch_name="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name "GitLab")"
-    if [ "$last_line_branch_check_result" == "FOUND" ]; then
+    gitlab_branch_is_found=$(assert_ends_in_found_and_not_in_notfound ${branch_check_result})
+
+    if [ "$gitlab_branch_is_found" == "TRUE" ]; then
 
       # Get the path before executing the command (to verify it is restored correctly after).
       local pwd_before
@@ -705,15 +707,13 @@ commit_changes_to_gitlab() {
   if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
     # If the GitHub branch exists
-    local github_branch_check_result
-	github_branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
-    local last_line_branch_check_result
-	last_line_github_branch_check_result=$(get_last_line_of_set_of_lines "\${github_branch_check_result}")
-    if [ "$last_line_github_branch_check_result" == "FOUND" ]; then
+	  local github_branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
+    local github_branch_is_found=$(assert_ends_in_found_and_not_in_notfound ${github_branch_check_result})
+    if [ "$github_branch_is_found" == "TRUE" ]; then
 
       # If the GitHub branch contains a gitlab yaml file
       local filepath
-	  filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
+	    filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
       if [ "$(file_exists $filepath)" == "FOUND" ]; then
 
         # If the GitLab repository exists
@@ -847,15 +847,14 @@ push_changes_to_gitlab() {
   if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
     # If the GitHub branch exists
-    local github_branch_check_result
-	github_branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
-    local last_line_github_branch_check_result
-	last_line_github_branch_check_result=$(get_last_line_of_set_of_lines "\${github_branch_check_result}")
-    if [ "$last_line_github_branch_check_result" == "FOUND" ]; then
+    local github_branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
+    github_branch_is_found=$(assert_ends_in_found_and_not_in_notfound ${github_branch_check_result})
+    
+    if [ "$github_branch_is_found" == "TRUE" ]; then
 
       # If the GitHub branch contains a gitlab yaml file
       local filepath
-	  filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
+	    filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
       if [ "$(file_exists $filepath)" == "FOUND" ]; then
 
         # If the GitLab repository exists
@@ -864,7 +863,7 @@ push_changes_to_gitlab() {
           # If the GitLab branch exists
 
           local found_branch_name
-		  found_branch_name=$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name "GitLab")
+		      found_branch_name=$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name "GitLab")
           if [ "$found_branch_name" == "$gitlab_branch_name" ]; then
 
             # If there exist differences in the files or folders in the branch (excluding the .git directory)

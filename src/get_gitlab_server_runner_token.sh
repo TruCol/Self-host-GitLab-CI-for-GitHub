@@ -145,35 +145,6 @@ get_registration_token_with_python() {
 	# TODO: verify path
 }
 
-
-#######################################
-# 
-# Local variables:
-#  
-# Globals:
-#  
-# Arguments:
-#  
-# Returns:
-#  0 If function was evaluated succesfull.
-# Outputs:
-#  
-# TODO(a-t-0):
-#######################################
-# Downloads a repository into the root directory of this repository if the
-#+ destination folder does yet exist
-#+ TODO: write test for method
-download_repository() {
-	git_username=$1
-	reponame=$2
-	repo_url="https://github.com/"$git_username"/"$reponame".git"
-	#echo "repo_url=$repo_url"
-	if [ ! -d "$reponame" ]; then
-		git clone $repo_url &&
-		set +e
-	fi
-}
-
 get_gitlab_server_runner_tokenV2() {
 	GITURL="$GITLAB_SERVER_HTTP_URL"
 	GITUSER="$GITLAB_SERVER_ACCOUNT_GLOBAL"

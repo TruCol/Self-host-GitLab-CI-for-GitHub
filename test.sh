@@ -32,13 +32,16 @@ source src/import.sh
 # Check if mirror directories are created.
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_helper_dir_edit.bats
 
-# Succeeding:
-./test/libs/bats/bin/bats test/test_helper_asserts.bats
-./test/libs/bats/bin/bats test/test_helper_file_dir_related.bats
+
+# 3/20 tests fail on lines contain string function:
+./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parsing.bats
 exit 4
+# Succeeding:
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_helper_ssh.bats
+#./test/libs/bats/bin/bats test/test_helper_asserts.bats
+#./test/libs/bats/bin/bats test/test_helper_file_dir_related.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_logging.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_boot_tor.bats
-#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parsing.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_file_dir_related.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_support_programs.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_uninstall.bats
@@ -57,6 +60,7 @@ exit 4
 # TODO: move into right folder
 # TODO: (if needed) separate into: requires installation, does not require installation.
 ./test/libs/bats/bin/bats test/test_run_ci_on_github_repo.bats
+exit 4
 
 ### Partially working (requires installation)
 # TODO: separate into: requires installation, does not require installation.
@@ -84,7 +88,5 @@ exit 4
 ###./test/libs/bats/bin/bats test/test_helper_gitlab_status.bats
 #### Works # Test status unknown
 ###./test/libs/bats/bin/bats test/test_helper_git_neutral.bats
-##### Semi-works # Test status unknown
-####./test/libs/bats/bin/bats test/test_helper_ssh.bats
 #### Works # Test status unknown
 ###./test/libs/bats/bin/bats test/test_sha256_checksum.bats

@@ -435,13 +435,22 @@ download_repository() {
 # Downloads a repository into the root directory of this repository if the
 #+ destination folder does yet exist
 #+ TODO: write test for method
-download_repository_using_ssh() {
+download_and_overwrite_repository_using_ssh() {
 	local git_username="$1"
 	local reponame="$2"
+	local target_directory="$3"
 	local repo_url="git@github.com:"$git_username"/"$reponame".git"
-	#echo "repo_url=$repo_url"
-	if [ ! -d "$reponame" ]; then
+	
+	# Delete target directory if it exists.
+	remove_dir "$target_directory"
+	manual_assert_dir_not_exists "$target_directory"
+
+	if [ "$target_directory" != "" ]; then
+		git clone $repo_url $target_directory &&
+		set +e
+	else
 		git clone $repo_url &&
 		set +e
 	fi
+	manual_assert_dir_exists "$target_directory"
 }

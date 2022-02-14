@@ -75,11 +75,23 @@ push_to_github_repository() {
 	fi
 }
 
+# Run with:
+# bash -c "source src/import.sh && push_to_github_repository_with_ssh src/mirrors/GitHub/gitlab-ci-build-statuses"
 push_to_github_repository_with_ssh() {
 	local target_directory="$1"
+	# Verify has push access
 	
-	output=$(cd "$target_directory" && git push)
-	echo "$output"
+
+	# Push
+	if [ "$target_directory" != "" ]; then
+		if [ -d "$target_directory" ]; then
+			output=$(cd "$target_directory" && git push)
+			echo "$output"
+		else
+			echo "The target directory:$target_directory was not found."
+			exit 4
+		fi
+	fi
 }
 
 # Structure:github_modify

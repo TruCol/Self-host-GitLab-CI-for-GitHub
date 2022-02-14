@@ -63,7 +63,7 @@ manual_assert_file_does_not_exists() {
 manual_assert_dir_exists() {
 	local dirpath="$1"
 	if [ ! -d "$dirpath" ]; then
-		echo "The ssh key file: $dirpath does not exist, even though one would expect it does."
+		echo "The dir: $dirpath does not exist, even though one would expect it does."
 		exit 31
 	fi
 }

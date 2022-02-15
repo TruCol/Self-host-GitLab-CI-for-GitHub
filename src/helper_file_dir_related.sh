@@ -13,7 +13,7 @@
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0):
 #######################################
 # Structure:dir_edit
 dir_exists() {
@@ -35,7 +35,7 @@ dir_exists() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0):
 #######################################
 # Structure:dir_edit
 sudo_dir_exists() {
@@ -60,7 +60,7 @@ sudo_dir_exists() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0):
 #######################################
 # Structure:file_edit
 file_exists() {
@@ -87,7 +87,7 @@ file_exists() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0):
 #######################################
 # # Structure:file_edit
 sudo_file_exists() {
@@ -114,7 +114,7 @@ sudo_file_exists() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0):
 #######################################
 # Structure:dir_edit
 create_dir() {
@@ -138,7 +138,7 @@ create_dir() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0):
 #######################################
 # Structure:dir_edit
 remove_dir() {
@@ -161,7 +161,7 @@ remove_dir() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0):
 #######################################
 # Structure:dir_edit
 make_user_owner_of_dir() {
@@ -184,7 +184,7 @@ make_user_owner_of_dir() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0):
 #######################################
 # Structure:dir_edit
 is_owner_of_dir() {
@@ -208,7 +208,7 @@ is_owner_of_dir() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0):
 #######################################
 # Structure:dir_edit
 # Checks whether the path before and after a command that 
@@ -236,7 +236,7 @@ path_before_equals_path_after_command() {
 #  7 if 
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0):
 #######################################
 delete_file_if_it_exists() {
 	local filepath="$1"
@@ -259,7 +259,7 @@ delete_file_if_it_exists() {
 # Outputs:
 #  FOUND if either of the two files is found.
 #  NOTFOUND if neither of the two test boolean files are found.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0):
 #######################################
 dir_contains_at_least_one_test_boolean_file() {
 	local dir="$1"

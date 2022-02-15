@@ -591,7 +591,12 @@ assert_ssh_access_to_repo() {
 
 
 #######################################
-# Gets a new deploy key for the GitHub build status repository.
+# Gets a new deploy key for the GitHub build status repository. Assumes:
+# Generate ssh-key and add it to ssh-agent
+# generate_ssh_key_if_not_exists "$email" "$identifier"
+# And:
+# activate_ssh_agent_and_add_ssh_key_to_ssh_agent "$identifier"
+# Have been run before running this method, to create and .. the key
 # Local variables:
 #  github_username
 #  github_repo_name
@@ -609,14 +614,20 @@ assert_ssh_access_to_repo() {
 # TODO(a-t-0): delete, no token is created, using ssh deploy key instead.
 #######################################
 # run with:
+
 # source src/import.sh && get_github_build_status_repo_deploy_key "example@example.com" some_github_deploy_key
+# bash -c "source src/import.sh && get_github_build_status_repo_deploy_key example@example.com some_github_deploy_key"
 get_github_build_status_repo_deploy_key() {
 	local email="$1"
 	local identifier="$2"
 	local public_key_filename="$identifier.pub"
+	local private_key_filename="$identifier"
 
 	# Generate ssh-key and add it to ssh-agent
 	generate_ssh_key_if_not_exists "$email" "$identifier"
+	# Assert the ssh-keys exist.
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
+	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
 	activate_ssh_agent_and_add_ssh_key_to_ssh_agent "$identifier"
 	public_ssh_key_data=$(cat "$DEFAULT_SSH_LOCATION/$public_key_filename")
 
@@ -647,7 +658,7 @@ get_github_build_status_repo_deploy_key() {
 	fi
 	cd ..
 
-	# TODO: Verify path after running command.
+	# TODO: Verify path BEFORE and after running command.
 }
 
 
@@ -674,6 +685,7 @@ get_github_build_status_repo_deploy_key() {
 # TODO(a-t-0): Write tests for this method.
 #######################################
 # Run with: 
+# bash -c "source src/import.sh && verify_machine_has_push_access_to_gitlab_build_status_repo_in_github some_github_deploy_key"
 # source src/import.sh && verify_machine_has_push_access_to_gitlab_build_status_repo_in_github "id_github_deploy_key"
 verify_machine_has_push_access_to_gitlab_build_status_repo_in_github() {
 	local identifier="$1"
@@ -700,7 +712,7 @@ verify_machine_has_push_access_to_gitlab_build_status_repo_in_github() {
 	# Get the repository that can automatically get the GitHub deploy token.
 	# TODO: if this does not work, the ssh is not working (or repo/user doesn't exist). 
 	# Do a specific check if ssh deploy key works/has access to the repo, before trying to download.
-	download_repository_using_ssh "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
+	download_and_overwrite_repository_using_ssh "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
 	sleep 2
 	manual_assert_dir_exists "$GITHUB_STATUS_WEBSITE_GLOBAL"
 
@@ -742,9 +754,13 @@ verify_machine_has_push_access_to_gitlab_build_status_repo_in_github() {
 	manual_assert_dir_not_exists "$GITHUB_STATUS_WEBSITE_GLOBAL"
 
 	# Clone the repository again.
-	download_repository_using_ssh "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
+	download_and_overwrite_repository_using_ssh "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
 	manual_assert_dir_exists "$GITHUB_STATUS_WEBSITE_GLOBAL"
 
 	# Verify the boolean file exists and is flipped.
 	manual_assert_file_exists "$GITHUB_STATUS_WEBSITE_GLOBAL/$expected_filename"	
+	
+	# Delete the repository locally for cleaning up.
+	remove_dir "$GITHUB_STATUS_WEBSITE_GLOBAL"
+	manual_assert_dir_not_exists "$GITHUB_STATUS_WEBSITE_GLOBAL"
 }

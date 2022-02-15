@@ -448,9 +448,11 @@ download_and_overwrite_repository_using_ssh() {
 	if [ "$target_directory" != "" ]; then
 		git clone $repo_url $target_directory &&
 		set +e
+		manual_assert_dir_exists "$target_directory"
 	else
 		git clone $repo_url &&
 		set +e
+		manual_assert_dir_exists "$reponame"
 	fi
-	manual_assert_dir_exists "$target_directory"
+	
 }

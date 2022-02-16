@@ -189,6 +189,8 @@ print_usage() {
 	assert_success
 }
 
+# TODO: determine why the assert_string_only_contains_alphanumeric_chars does 
+# not throw an error on: answer-custom-question.
 @test "Verify valid arguments: --gitlab-personal-access-token is parsed correctly." {
 	local expected_output=$(print_usage)
 	run bash -c "answer-custom-question | ./parser.sh --gitlab-personal-access-token"

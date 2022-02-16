@@ -619,3 +619,20 @@ assert_is_non_empty_string(){
 		exit 70
 	fi
 }
+
+string_only_contains_alphanumeric_chars() {
+	local string="$1"
+	if `echo $string | egrep '[^A-Za-z0-9]'`; then
+		echo "TRUE"
+	else
+		echo "FALSE"
+	fi
+}
+
+assert_string_only_contains_alphanumeric_chars() {
+	local string="$1"
+	if echo $string | egrep '[^A-Za-z0-9]'; then
+		echo "Error, the incoming string:$string contained non-alphanumeric characters."
+		exit 71
+	fi
+}

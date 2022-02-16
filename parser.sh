@@ -174,6 +174,7 @@ if [ "$github_pwd_flag" == "true" ]; then
 	
   # Display password.
 	echo $password
+  assert_string_only_contains_alphanumeric_chars ${password}
 fi
 
 # Set GitHub personal_access_token without displaying it in terminal.
@@ -184,6 +185,7 @@ if [ "$commit_status_personal_access_token_flag" == "true" ]; then
 	
   # Display commit_status_personal_access_token.
 	echo $commit_status_personal_access_token
+  assert_string_only_contains_alphanumeric_chars ${commit_status_personal_access_token}
 fi
 
 
@@ -195,6 +197,7 @@ if [ "$gitlab_pwd_flag" == "true" ]; then
 	
   # Display commit_status_personal_access_token.
 	echo $gitlab_pwd
+  assert_string_only_contains_alphanumeric_chars ${gitlab_pwd}
 fi
 
 
@@ -206,13 +209,11 @@ if [ "$gitlab_personal_access_token_flag" == "true" ]; then
 	
   # Display commit_status_personal_access_token.
 	echo $gitlab_personal_access_token
+  assert_string_only_contains_alphanumeric_chars ${gitlab_personal_access_token}
 fi
 
 
-# TODO: include null check in eating "$2" in argument parsing.
-# TODO: a-z0-9 value check in passwords and personal access tokens.
-
-# Create method to set personal access token values. #80
+# Create method to set personal access token in GitHub. #80
 
 # Start gitlab server installation and gitlab runner installation.
 # Move the "has ssh access to github build status website to the start"

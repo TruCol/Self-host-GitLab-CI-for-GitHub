@@ -96,13 +96,13 @@ print_usage() {
 
 @test "Verify valid arguments: -hubcpat is parsed correctly." {
 	local expected_output=$(print_usage)
-	run bash -c "./parser.sh -hubcpat"
+	run bash -c "answer-custom-question | ./parser.sh -hubcpat"
 	assert_success
 }
 
 @test "Verify valid arguments: --github-commit-status-pat is parsed correctly." {
 	local expected_output=$(print_usage)
-	run bash -c "./parser.sh --github-commit-status-pat"
+	run bash -c "example-GitHub-personal-access-token | ./parser.sh --github-commit-status-pat"
 	assert_success
 }
 
@@ -134,13 +134,13 @@ print_usage() {
 
 @test "Verify valid arguments: -hubuser is parsed correctly." {
 	local expected_output=$(print_usage)
-	run bash -c "./parser.sh -hubuser"
+	run bash -c "./parser.sh -hubuser example-github-username"
 	assert_success
 }
 
 @test "Verify valid arguments: --github-username is parsed correctly." {
 	local expected_output=$(print_usage)
-	run bash -c "./parser.sh --github-username"
+	run bash -c "./parser.sh --github-username example-github-username"
 	assert_success
 }
 
@@ -159,39 +159,39 @@ print_usage() {
 
 @test "Verify valid arguments: -labuser is parsed correctly." {
 	local expected_output=$(print_usage)
-	run bash -c "./parser.sh -labuser"
+	run bash -c "./parser.sh -labuser some-gitlab-user"
 	assert_success
 }
 
 @test "Verify valid arguments: --gitlab-username is parsed correctly." {
 	local expected_output=$(print_usage)
-	run bash -c "./parser.sh --gitlab-username"
+	run bash -c "./parser.sh --gitlab-username some-gitlab-user"
 	assert_success
 }
 
 
 @test "Verify valid arguments: -labpwd is parsed correctly." {
 	local expected_output=$(print_usage)
-	run bash -c "./parser.sh -labpwd"
+	run bash -c "answer-custom-question | ./parser.sh -labpwd"
 	assert_success
 }
 
 @test "Verify valid arguments: --gitlab-password is parsed correctly." {
 	local expected_output=$(print_usage)
-	run bash -c "./parser.sh --gitlab-password"
+	run bash -c "answer-custom-question | ./parser.sh --gitlab-password"
 	assert_success
 }
 
 
 @test "Verify valid arguments: -labpat is parsed correctly." {
 	local expected_output=$(print_usage)
-	run bash -c "./parser.sh -labpat"
+	run bash -c "answer-custom-question | ./parser.sh -labpat"
 	assert_success
 }
 
 @test "Verify valid arguments: --gitlab-personal-access-token is parsed correctly." {
 	local expected_output=$(print_usage)
-	run bash -c "./parser.sh --gitlab-personal-access-token"
+	run bash -c "answer-custom-question | ./parser.sh --gitlab-personal-access-token"
 	assert_success
 }
 
@@ -211,12 +211,12 @@ print_usage() {
 
 @test "Verify valid arguments: -laburl is parsed correctly." {
 	local expected_output=$(print_usage)
-	run bash -c "./parser.sh -laburl"
+	run bash -c "./parser.sh -laburl some-gitlab-url"
 	assert_success
 }
 
 @test "Verify valid arguments: --gitlab-server-url is parsed correctly." {
 	local expected_output=$(print_usage)
-	run bash -c "./parser.sh --gitlab-server-url"
+	run bash -c "./parser.sh --gitlab-server-url some-gitlab-url"
 	assert_success
 }

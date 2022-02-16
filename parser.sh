@@ -1,6 +1,8 @@
 #!/bin/bash
 POSITIONAL_ARGS=()
 
+source src/helper_parsing.sh
+
 # Specify default argument values.
 commit_status_personal_access_token_flag='false'
 commit_status_ssh_flag='false'
@@ -91,8 +93,10 @@ while [[ $# -gt 0 ]]; do
     -hubuser|--github-username)
       github_username_flag='true'
       github_username="$2"
+      assert_is_non_empty_string ${github_username}
       shift # past argument
       shift
+
       ;;
     -hubpwd|--github-password)
       github_pwd_flag='true'
@@ -103,6 +107,7 @@ while [[ $# -gt 0 ]]; do
     -labuser|--gitlab-username)
       gitlab_username_flag='true'
       gitlab_username="$2"
+      assert_is_non_empty_string ${gitlab_username}
       shift # past argument
       shift
       ;;
@@ -124,6 +129,7 @@ while [[ $# -gt 0 ]]; do
     -laburl|--gitlab-server-url)
       gitlab_server_url_flag='true'
       gitlab_server_url="$2"
+      assert_is_non_empty_string ${gitlab_server_url}
       shift # past argument
       shift
       ;;
@@ -171,26 +177,53 @@ if [ "$github_pwd_flag" == "true" ]; then
 fi
 
 # Set GitHub personal_access_token without displaying it in terminal.
-if [ "$github_pwd_flag" == "true" ]; then
-	echo -n Password: 
-	read -s password
+if [ "$commit_status_personal_access_token_flag" == "true" ]; then
+	echo -n "GitHub personal access token, to set the GitHub commit statuses": 
+	read -s commit_status_personal_access_token
 	echo
 	
-  # Display password.
-	echo $password
+  # Display commit_status_personal_access_token.
+	echo $commit_status_personal_access_token
 fi
 
-if [ "$github_pwd_flag" == "true" ]; then
-	echo -n Password: 
-	read -s password
+
+# Set GitLab password without displaying it in terminal.
+if [ "$gitlab_pwd_flag" == "true" ]; then
+	echo -n "Your new GitLab password:": 
+	read -s gitlab_pwd
 	echo
 	
-  # Display password.
-	echo $password
+  # Display commit_status_personal_access_token.
+	echo $gitlab_pwd
 fi
 
-if [ "$github_username_flag" == "true" ]; then
-  echo "github_username=$github_username"
+
+# Set GitLab personal access token without displaying it in terminal.
+if [ "$gitlab_personal_access_token_flag" == "true" ]; then
+	echo -n "Your new personal access token:": 
+	read -s gitlab_personal_access_token
+	echo
+	
+  # Display commit_status_personal_access_token.
+	echo $gitlab_personal_access_token
 fi
+
+
+# TODO: include null check in eating "$2" in argument parsing.
+# TODO: a-z0-9 value check in passwords and personal access tokens.
+
+# Create method to set personal access token values. #80
+
+# Start gitlab server installation and gitlab runner installation.
+# Move the "has ssh access to github build status website to the start"
+# Move the "has commit status setting access to arbitrary repo of user, to the start."
+
+# Call setting the GitHub personal access token to set commit status
+# pass that commit status setting boolean to the ci runner method.
+# Call run CI on default repository.
+# Create method to run on particular user and particular repo
+
+
+
 #https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
 #https://stackoverflow.com/questions/3980668/how-to-get-a-password-from-a-shell-script-without-echoing

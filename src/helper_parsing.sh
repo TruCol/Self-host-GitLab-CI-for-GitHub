@@ -602,3 +602,20 @@ assert_first_four_chars_are_sshd() {
 		exit 7
 	fi
 }
+
+is_empty_string() {
+	local string="$1"
+	if [ "${string}" == "" ]; then
+		echo "TRUE"
+	else
+		echo "FALSE"
+	fi
+}
+
+assert_is_non_empty_string(){
+	local string="$1"
+	if [ "${string}" == "" ]; then
+		echo "Error, the incoming string was empty."
+		exit 70
+	fi
+}

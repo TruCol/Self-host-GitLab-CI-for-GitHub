@@ -641,15 +641,12 @@ get_github_build_status_repo_deploy_key() {
 	download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
 	manual_assert_dir_exists "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
 
-	# TODO: Verify repository is downloaded.
-
 	# TODO: verify path before running command.
 
 	# TODO: turn get_gitlab_generation_token into variable
 	# shellcheck disable=SC2034
 	if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
 		eval "$(conda shell.bash hook)"
-		# TODO: allow passing and parsing arguments in src/get_gitlab_server_runner_token.sh
 		cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --d --ssh "$public_ssh_key_data"
 	else
 		eval "$(conda shell.bash hook)"

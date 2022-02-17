@@ -65,7 +65,7 @@ source src/install_support_programs.sh
 source src/helper_md5sum.sh
 
 # To get GitLab personal access token
-source src/create_personal_access_token.sh
+source src/create_gitlab_personal_access_token.sh
 
 # For uninstallation
 source src/uninstall_gitlab_server.sh

@@ -48,6 +48,7 @@ GITLAB_SERVER_PASSWORD_GLOBAL=$(echo "$GITLAB_SERVER_PASSWORD_GLOBAL" | tr -d '\
 
 # For installation
 source src/helper_ci_management.sh
+source src/create_github_personal_access_token.sh
 source src/helper_dir_edit.sh
 source src/helper_github_modify.sh
 source src/helper_github_status.sh

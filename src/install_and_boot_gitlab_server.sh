@@ -9,8 +9,9 @@
 		# Install GitLab
 		# Run command to host GitLab server
 install_and_run_gitlab_server() {
-	# Verify if the GitLab Build Status repository exists.
-	assert_public_github_repository_exists "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
+
+	# Ensure prerequisites are satisfied.
+	establish_prerequisites "a-t-0" "sponsor_example"
 
 	gitlab_package=$(get_gitlab_package)
 	# TODO: verify if architecture is supported, raise error if not

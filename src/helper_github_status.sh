@@ -418,7 +418,7 @@ download_repository() {
 
 
 #######################################
-# 
+# Downloads a repository using ssh deploy key.
 # Local variables:
 #  
 # Globals:
@@ -429,12 +429,9 @@ download_repository() {
 #  0 If function was evaluated succesfull.
 # Outputs:
 #  
-# TODO(a-t-0): refactor repository wide to download_repository_using_https.
 # TODO(a-t-0): write tests for method.
+# TODO(a-t-0): rename to: download_and_locally_overwrite_repository_using_ssh
 #######################################
-# Downloads a repository into the root directory of this repository if the
-#+ destination folder does yet exist
-#+ TODO: write test for method
 download_and_overwrite_repository_using_ssh() {
 	local git_username="$1"
 	local reponame="$2"

@@ -43,3 +43,6 @@ PUBLIC_GITHUB_TEST_REPO_GLOBAL=sponsor_example
 MIRROR_LOCATION=src/mirrors
 TEST_FILENAME_TRUE=test_filename_true
 TEST_FILENAME_FALSE=test_filename_false
+
+# GitHub commit build status properties
+COMMIT_WHOSE_BUILD_STATUS_IS_SET_FOR_TESTING_PURPOSES=02c5fce3500d7b9e2d79cb5b7d886020a403cf58

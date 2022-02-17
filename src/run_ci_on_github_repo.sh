@@ -338,18 +338,34 @@ parse_gitlab_ci_status_to_github_build_status() {
 	fi
 }
 
-
+#######################################
+# Verifies the repository is able to set the build status of GitHub commits in 
+# the GitHub user/organisation.
 # 7. Once the build status is found, use github personal access token to
 # set the build status in the GitHub commit.
-# TODO: change the input arguments to remove GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0): Write tests for this method.
+# TODO(a-t-0): verify incoming commit build status is valid.
+# TODO(a-t-0): verify incoming redirect url is valid.
+#######################################
+# Run with:
+# bash -c 'source src/import.sh && set_build_status_of_github_commit a-t-0 sponsor_example 02c5fce3500d7b9e2d79cb5b7d886020a403cf58 http://127.0.0.1  pending'
 set_build_status_of_github_commit() {
-	github_username="$1"
-	github_repo_name="$2"
-	github_commit_sha="$3"
-	GITLAB_WEBSITE_URL_GLOBAL="$4"
-	commit_build_status="$5"
-	
-	
+	local github_username="$1"
+	local github_repo_name="$2"
+	local github_commit_sha="$3"
+	local redirect_to_ci_url="$4"
+	local commit_build_status="$5"
 
 	# Check if arguments are valid.
 	if [[ "$github_commit_sha" == "" ]]; then
@@ -361,19 +377,23 @@ set_build_status_of_github_commit() {
 	elif [[ "$commit_build_status" == "" ]]; then
 		echo "ERROR, the GitLab build status is empty, whereas it shouldn't be."
 		exit 115
-	elif [[ "$GITLAB_WEBSITE_URL_GLOBAL" == "" ]]; then
+	elif [[ "$redirect_to_ci_url" == "" ]]; then
 		echo "ERROR, the GitLab server website url is empty, whereas it shouldn't be."
 		exit 116
 	fi
+
+	# TODO: verify incoming commit build status is valid.
+	# TODO: verify incoming redirect url is valid.
+
 	
-	#echo "GITLAB_WEBSITE_URL_GLOBAL=$GITLAB_WEBSITE_URL_GLOBAL"
+	#echo "redirect_to_ci_url=$redirect_to_ci_url"
 	#echo "commit_build_status=$commit_build_status"
 	
 	# Create message in JSON format
 	JSON_FMT='{"state":"%s","description":"%s","target_url":"%s"}\n'
 	# shellcheck disable=SC2059
-	json_string=$(printf "$JSON_FMT" "$commit_build_status" "$commit_build_status" "$GITLAB_WEBSITE_URL_GLOBAL")
-	#echo "json_string=$json_string"
+	json_string=$(printf "$JSON_FMT" "$commit_build_status" "$commit_build_status" "$redirect_to_ci_url")
+	echo "json_string=$json_string"
 	
 	# Set the build status
 	setting_output=$(curl -H "Authorization: token $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" --request POST --data "$json_string" https://api.github.com/repos/"$github_username"/"$github_repo_name"/statuses/"$github_commit_sha")
@@ -402,6 +422,7 @@ set_build_status_of_github_commit() {
 		exit 120
 	fi
 }
+
 
 # Run with:
 # bash -c "source src/import.sh && copy_commit_build_status_to_github_status_repo a-t-0 sponsor_example main something failed"

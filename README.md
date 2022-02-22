@@ -1,5 +1,8 @@
 # Self-hosted GitLab CI on GitHub repos over Tor (for a Raspberry Pi 4b)
 
+WORK IN PROGRESS!
+
+
 This repository first sets up wifi on a Raspberry Pi 4b (with 4gb ram) and then it starts the following services:
  - A GitLab server over Tor such that you can host- and access it yourself, anywhere, for free, anonymously.
  - Applies GitLab CI to all the GitHub repositories you choose.

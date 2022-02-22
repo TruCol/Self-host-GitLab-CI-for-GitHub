@@ -12,6 +12,7 @@ if [ $(jq --version) != "jq-1.6" ]; then
 	yes | sudo apt install jq
 fi
 
+# TODO: replace with hardcoded PERSONAL_CREDENTIALS_PATH.
 if [ "$(file_exists "../personal_creds.txt")" == "FOUND" ]; then
 	source ../personal_creds.txt
 elif [ "$(file_exists "src/creds.txt")" == "FOUND" ]; then

@@ -22,7 +22,7 @@
 # run with:
 
 # source src/import.sh && get_github_personal_access_token a-t-0
-# bash -c "source src/import.sh && get_github_personal_access_token a-t-0
+# bash -c "source src/import.sh && get_github_personal_access_token a-t-0"
 get_github_personal_access_token() {
 	local github_username="$1"
 	

@@ -100,6 +100,28 @@ sudo_file_exists() {
 
 }
 
+#######################################
+# Creates file if it does not yet exist, and verifies the file exists 
+# afterwards.
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0):
+#######################################
+ensure_file_exists() {
+	filepath="$1"
+	touch "$filepath"
+
+	manual_assert_file_exists "$filepath"
+}
 
 #######################################
 # 

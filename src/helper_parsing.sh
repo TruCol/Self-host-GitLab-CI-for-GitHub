@@ -68,6 +68,36 @@ file_contains_string() {
 #  7 if 
 # Outputs:
 #  None.
+# TODO(a-t-0): Test function
+#######################################
+# Structure:Parsing
+# allows a string with spaces, hence allows a line
+assert_file_contains_string() {
+	STRING=$1
+	relative_filepath=$2
+	
+	if grep -q "$STRING" "$relative_filepath" ; then
+		echo "FOUND"; 
+	else
+		echo "Error, the string:$STRING is not found in:$relative_filepath";
+		exit 5
+	fi
+}
+
+
+#######################################
+# 
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
 # TODO(a-t-0): Determine why it does not work in:
 #if [ "$(lines_contain_string "$CONDA_ENVIRONMENT_NAME" "\${conda_environments}")" == "FOUND" ]; then
 # TODO(a-t-0): Determine why it does not work in:
@@ -634,5 +664,53 @@ assert_string_only_contains_alphanumeric_chars() {
 	if echo $string | egrep '[^A-Za-z0-9]'; then
 		echo "Error, the incoming string:$string contained non-alphanumeric characters."
 		exit 71
+	fi
+}
+
+escape_slashes() {
+    sed 's/\//\\\//g' 
+}
+
+change_line() {
+    local old_line_pattern=$1
+    local new_line=$2
+    local file=$3
+
+    local new=$(echo "${new_line}" | escape_slashes)
+    # FIX: No space after the option i.
+    sed -i.bak '/'"${old_line_pattern}"'/s/.*/'"${new}"'/' "${file}"
+    mv "${file}.bak" /tmp/
+}
+
+
+#######################################
+# Sets the an incoming value for a Global in file and verifies it is indeed in.
+# Globals:
+#  None.
+# Arguments:
+#  identifier - The string of the global variable name that is searched for in
+#  the incoming file.
+#  incoming_value - The value to which the global with name identifier, is set.
+#  filepath - The path to the file that is modified.
+# Returns:
+#  0 if the function is set correctly.
+# Outputs:
+#  Nothing
+#######################################
+ensure_global_is_in_file() {
+	local identifier="$1"
+	local incoming_value="$2"
+	local filepath="$3"
+
+	# If the filepath contains the $identifier:
+	local personal_credits_contain_global=$(file_contains_string "$identifier" "$filepath")
+	if [ "$personal_credits_contain_global" == "FOUND" ]; then
+		# Override the existing identifier and value in personal_creds.txt
+		change_line "$identifier" "$identifier=$incoming_value" "$filepath"
+		assert_file_contains_string "$identifier=$incoming_value" "$filepath"
+	else
+		# Append identifier and value to personal_creds.txt.
+		echo "$identifier=$incoming_value" >> "$filepath"
+		assert_file_contains_string "$identifier=$incoming_value" "$filepath"
 	fi
 }

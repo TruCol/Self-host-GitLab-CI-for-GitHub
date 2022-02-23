@@ -44,6 +44,7 @@ get_github_personal_access_token() {
 	cd ..
 
 	# TODO: Verify path BEFORE and after running command.
+	# TODO: Verify the token is in the PERSONAL_CREDENTIALS_PATH file.
 }
 
 #######################################
@@ -65,8 +66,8 @@ get_github_personal_access_token() {
 # TODO(a-t-0): verify incoming redirect url is valid.
 #######################################
 # Run with:
-# bash -c 'source src/import.sh && custom_set_build_status_of_github_commit a-t-0 sponsor_example 02c5fce3500d7b9e2d79cb5b7d886020a403cf58 http://127.0.0.1  pending'
-custom_set_build_status_of_github_commit() {
+# bash -c 'source src/import.sh && assert_set_build_status_of_github_commit_using_github_pat a-t-0 sponsor_example 02c5fce3500d7b9e2d79cb5b7d886020a403cf58 http://127.0.0.1  pending'
+assert_set_build_status_of_github_commit_using_github_pat() {
 	github_username="$1"
 	github_repo_name="$2"
 	github_commit_sha="$3"

@@ -52,8 +52,8 @@ assert_required_repositories_exist(){
 	local github_username="$1"
 	#$GITHUB_STATUS_WEBSITE_GLOBAL
 	#$PUBLIC_GITHUB_TEST_REPO_GLOBAL
-	if [ $(check_public_github_repository_exists $GITHUB_STATUS_WEBSITE_GLOBAL) == "FOUND" ]; then
-		if [ $(check_public_github_repository_exists $PUBLIC_GITHUB_TEST_REPO_GLOBAL) == "FOUND" ]; then
+	if [ $(check_public_github_repository_exists "$github_username" $GITHUB_STATUS_WEBSITE_GLOBAL) == "FOUND" ]; then
+		if [ $(check_public_github_repository_exists "$github_username" $PUBLIC_GITHUB_TEST_REPO_GLOBAL) == "FOUND" ]; then
 			echo "FOUND"
 		else
 			echo "Before installing GitLab, please ensure the repository:$PUBLIC_GITHUB_TEST_REPO_GLOBAL exists in your GitHub account:$github_username"
@@ -66,11 +66,11 @@ assert_required_repositories_exist(){
 }
 
 # Run with: 
-# bash -c "source src/import.sh && ensure_github_pat_can_be_used_to_set_commit_build_status a-t-0 sponsor_example "
+# bash -c "source src/import.sh && ensure_github_pat_can_be_used_to_set_commit_build_status a-t-0 sponsor_example http://127.0.0.1"
 ensure_github_pat_can_be_used_to_set_commit_build_status() {
 	local github_username="$1"
 	local github_reponame_to_set_commit_status_on="$2"
-	local github_pat="$3"
+	local gitlab_server_url="$3" # Needed to set commit redirect url to GitLab server.
 
 	# TODO(a-t-0): Ensure the github_reponame_to_set_commit_status_on repository is 
 	# created in GitHub.
@@ -78,35 +78,80 @@ ensure_github_pat_can_be_used_to_set_commit_build_status() {
 	# Verify github repository exists.
 	assert_public_github_repository_exists "$GITHUB_USERNAME_GLOBAL" "$github_reponame_to_set_commit_status_on"
 
-	# TODO: Get the latest commit of that repository.
-
+	# Get the latest commit of that repository.
+	latest_commit_on_default_branch=$(get_latest_commit_public_github_repo $github_username $github_reponame_to_set_commit_status_on)
+	echo "len=${#latest_commit_on_default_branch}"
 	
+	if [ ${#latest_commit_on_default_branch} -eq 40 ]; then 
+		echo "len=${#latest_commit_on_default_branch}"
+	else 
+		echo "Error, the commit sha:$latest_commit_on_default_branch is not of correct length"
+		exit 4
+	fi
+	
+	ensure_file_exists "$PERSONAL_CREDENTIALS_PATH"
+	
+	local personal_credits_contain_global=$(file_contains_string "GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$PERSONAL_CREDENTIALS_PATH")
 
-	# If GitHub pat is in personal_creds.txt:
+	if [ "$personal_credits_contain_global" == "FOUND" ]; then
+		echo "Found GitHub pat in personal_creds.txt"
+		set_pending=$(check_if_can_set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $gitlab_server_url "pending")
+		#echo "set_pending=$set_pending"
+		
 		# Safely check if it can be used to set the github commit status
-		# if yes, return FOUND
-	# else
-		# if github_pat is empty:
-			# raise error, saying, you don't want to be using the default token.
-		# else:
-			# write github pat to file.
-			# Safely check if it can be used to set the github commit status
-			# if yes, return FOUND
-			# if no, raise error, saying it did not work for unknown reason.
-		#fi
-	#fi
-
+		if [ "$set_pending" == "TRUE" ]; then
+			echo "Set status to pending"
+			set_succes=$(check_if_can_set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $gitlab_server_url "success")
+			echo "set_succes=$set_succes"
+			if [ "$set_succes" == "TRUE" ]; then
+				echo "Set status to success"
+			else
+				echo "Did not set status to success"
+				set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $gitlab_server_url $latest_commit_on_default_branch
+			fi
+		else
+			echo "Did not set status to pending"
+			set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $gitlab_server_url $latest_commit_on_default_branch
+		fi
+	else
+		echo "Did not find GitHub pat in personal_creds"
+		set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $gitlab_server_url $latest_commit_on_default_branch
+	fi
 }
 
+set_personal_github_pat_and_verify() {
+	local github_username="$1"
+	local github_reponame_to_set_commit_status_on="$2"
+	local gitlab_server_url="$3" # Needed to set commit redirect url to GitLab server.
+	local latest_commit_on_default_branch="$4"
+
+	
+	# Ensure the PERSONAL_CREDENTIALS_PATH file exists(create if not).
+	ensure_file_exists "$PERSONAL_CREDENTIALS_PATH"
+
+	# Get github pat and ensure it is in PERSONAL_CREDENTIALS_PATH.
+	get_github_personal_access_token $github_username
+	
+	# Reload personal credentials to load new GitHub token.
+	source "$PERSONAL_CREDENTIALS_PATH"
+	echo "GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL=$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL"
+
+	# Assert the GitHub pat can be used to set the github commit status.
+	set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $gitlab_server_url "pending"
+	set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $gitlab_server_url "success"
+
+	#ensure_global_is_in_file "GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$github_pat" 
+}
+
+
+# Run with: 
+# bash -c "source src/import.sh && ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status a-t-0
 ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status() {
 	local github_username="$1"
-	local github_pat="$2"
 
-	# TODO(a-t-0): Ensure the GITHUB_STATUS_WEBSITE_GLOBAL repository is 
-	# created in GitHub.
-
-	# Verify if the GitLab Build Status repository exists in GitHub.	
-	assert_public_github_repository_exists "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
+	# Assumes the GitLab build status repository exists in GitHub.
+	# Verify if the GitLab build status repository exists in GitHub.	
+	assert_public_github_repository_exists "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL"
 
 	# Get the GitHub ssh deploy key to push and pull the GitLab build status 
 	# icons to the GitHub build status repository.

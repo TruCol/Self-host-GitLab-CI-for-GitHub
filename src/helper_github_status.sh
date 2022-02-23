@@ -453,3 +453,26 @@ download_and_overwrite_repository_using_ssh() {
 	fi
 	
 }
+
+# Run with: 
+# bash -c "source src/import.sh && get_latest_commit_public_github_repo a-t-0 sponsor_example"
+# Uses GitHub api to get the latest commit of a GitHub repository (branch).
+get_latest_commit_public_github_repo() {
+	local github_username="$1"
+	local github_repo_name="$2"
+
+	# Assert repo exists.
+	assert_public_github_repository_exists "$github_username" "$github_repo_name"
+
+	# Get commits
+	commits_json=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$github_username/$github_repo_name/commits?per_page=1&page=1)
+	#echo "commits_json=$commits_json"
+	#echo ""
+
+	# Get the first commit.
+	readarray -t branch_commits_arr <  <(echo "$commits_json" | jq ".[].sha")
+	#echo "branch_commits_arr=$branch_commits_arr"
+	
+	# remove quotations
+	echo "$branch_commits_arr" | tr -d '"'
+}

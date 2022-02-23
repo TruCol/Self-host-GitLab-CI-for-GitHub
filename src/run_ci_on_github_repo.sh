@@ -252,7 +252,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 		# 7. Once the build status is found, use github personal access token to
 		# set the build status in the GitHub commit.
 		# TODO: ensure personal access token is created automatically to set build status.
-		# output=$(set_build_status_of_github_commit "$github_username" "$github_repo_name" "$github_commit_sha" "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$gitlab_website_url" "$last_line_gitlab_ci_build_status")
+		# output=$(set_build_status_of_github_commit_using_github_pat "$github_username" "$github_repo_name" "$github_commit_sha" "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$gitlab_website_url" "$last_line_gitlab_ci_build_status")
 		# echo "output=$output"
 
 		# 8. Copy the commit build status from GitLab into the GitHub build status repo.
@@ -359,8 +359,8 @@ parse_gitlab_ci_status_to_github_build_status() {
 # TODO(a-t-0): verify incoming redirect url is valid.
 #######################################
 # Run with:
-# bash -c 'source src/import.sh && set_build_status_of_github_commit a-t-0 sponsor_example 02c5fce3500d7b9e2d79cb5b7d886020a403cf58 http://127.0.0.1  pending'
-set_build_status_of_github_commit() {
+# bash -c 'source src/import.sh && set_build_status_of_github_commit_using_github_pat a-t-0 sponsor_example 02c5fce3500d7b9e2d79cb5b7d886020a403cf58 http://127.0.0.1  pending'
+set_build_status_of_github_commit_using_github_pat() {
 	local github_username="$1"
 	local github_repo_name="$2"
 	local github_commit_sha="$3"

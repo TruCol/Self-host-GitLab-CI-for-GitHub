@@ -615,9 +615,9 @@ assert_ssh_access_to_repo() {
 #######################################
 # run with:
 
-# source src/import.sh && get_github_build_status_repo_deploy_key "example@example.com" some_github_deploy_key
-# bash -c "source src/import.sh && get_github_build_status_repo_deploy_key example@example.com some_github_deploy_key"
-get_github_build_status_repo_deploy_key() {
+# source src/import.sh && get_github_build_status_repo_ssh_deploy_key "example@example.com" some_github_deploy_key
+# bash -c "source src/import.sh && get_github_build_status_repo_ssh_deploy_key example@example.com some_github_deploy_key"
+get_github_build_status_repo_ssh_deploy_key() {
 	local email="$1"
 	local identifier="$2"
 	local public_key_filename="$identifier.pub"

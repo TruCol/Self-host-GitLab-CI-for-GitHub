@@ -259,7 +259,7 @@ source src/import.sh
 	GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 	
 	# Get GitLab server url from credentials file.
-	GITLAB_WEBSITE_URL_GLOBAL=$(echo "$GITLAB_WEBSITE_URL_GLOBAL" | tr -d '\r')
+	GITLAB_SERVER_HTTP_URL=$(echo "$GITLAB_SERVER_HTTP_URL" | tr -d '\r')
 	
 	
 	# Get last commit of GitLab repo.
@@ -273,11 +273,11 @@ source src/import.sh
 	gitlab_ci_build_status=$(get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")
 	#echo "gitlab_ci_build_status=$gitlab_ci_build_status"
 	#echo "github_personal_access_code=$github_personal_access_code"
-	#echo "GITLAB_WEBSITE_URL_GLOBAL=$GITLAB_WEBSITE_URL_GLOBAL"
+	#echo "GITLAB_SERVER_HTTP_URL=$GITLAB_SERVER_HTTP_URL"
 	#assert_equal "success" "$gitlab_ci_build_status"
 	assert_equal "failure" "$gitlab_ci_build_status"
 	
-	output=$(set_build_status_of_github_commit_using_github_pat "$github_username" "$github_repo_name" "$github_commit_sha" "$github_personal_access_code" "$GITLAB_WEBSITE_URL_GLOBAL" "$gitlab_ci_build_status")
+	output=$(set_build_status_of_github_commit_using_github_pat "$github_username" "$github_repo_name" "$github_commit_sha" "$github_personal_access_code" "$GITLAB_SERVER_HTTP_URL" "$gitlab_ci_build_status")
 	#echo "output=$output"
 	assert_equal "something" "$output"
 }
@@ -301,7 +301,7 @@ source src/import.sh
 	GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 	
 	# Get GitLab server url from credentials file.
-	GITLAB_WEBSITE_URL_GLOBAL=$(echo "$GITLAB_WEBSITE_URL_GLOBAL" | tr -d '\r')
+	GITLAB_SERVER_HTTP_URL=$(echo "$GITLAB_SERVER_HTTP_URL" | tr -d '\r')
 	
 	
 	# Get last commit of GitLab repo.
@@ -315,11 +315,11 @@ source src/import.sh
 	gitlab_ci_build_status=$(get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")
 	#echo "gitlab_ci_build_status=$gitlab_ci_build_status"
 	#echo "github_personal_access_code=$github_personal_access_code"
-	#echo "GITLAB_WEBSITE_URL_GLOBAL=$GITLAB_WEBSITE_URL_GLOBAL"
+	#echo "GITLAB_SERVER_HTTP_URL=$GITLAB_SERVER_HTTP_URL"
 	#assert_equal "success" "$gitlab_ci_build_status"
 	assert_equal "failure" "$gitlab_ci_build_status"
 	
-	output=$(set_build_status_of_github_commit_using_github_pat "$github_username" "$github_repo_name" "$github_commit_sha" "$github_personal_access_code" "$GITLAB_WEBSITE_URL_GLOBAL" "$gitlab_ci_build_status")
+	output=$(set_build_status_of_github_commit_using_github_pat "$github_username" "$github_repo_name" "$github_commit_sha" "$github_personal_access_code" "$GITLAB_SERVER_HTTP_URL" "$gitlab_ci_build_status")
 	#echo "output=$output"
 	assert_equal "something" "$output"
 }

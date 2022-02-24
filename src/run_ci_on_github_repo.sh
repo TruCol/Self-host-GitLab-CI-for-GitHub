@@ -184,7 +184,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	
 	
 	# Get GitLab server url from credentials file.
-	local gitlab_website_url=$(echo "$GITLAB_WEBSITE_URL_GLOBAL" | tr -d '\r')
+	local gitlab_website_url=$(echo "$GITLAB_SERVER_HTTP_URL" | tr -d '\r')
 	
 	
 	# Verify the get_current_github_branch function returns the correct branch.

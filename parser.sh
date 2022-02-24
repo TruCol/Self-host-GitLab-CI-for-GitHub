@@ -15,14 +15,16 @@ setup_boot_script_flag='false'
 setup_tor_website_for_gitlab_server_flag='false'
 gitlab_username_flag='false'
 gitlab_pwd_flag='false'
-gitlab_personal_access_token_flag='false'
 gitlab_email_flag='false'
-gitlab_server_url_flag='false'
+
+# Specify variable defaults
+gitlab_username="root"
+gitlab_email="some@email.com"
+
 
 print_usage() {
   printf "\nDefault usage, write:"
-  printf "\n./install_gitlab.sh -s -r -ds -cpat to install GitLab CI and run it on your GitHub repositories."
-  printf "\n./install_gitlab.sh -s -r -ds -cpat -user <your GitHub username> -repo <your GitHub repository name> to install GitLab CI and run it on the repository of that user.\n"
+  printf "\n./install_gitlab.sh -s -r -hu <your GitHub username> -hp -lp\n                                       to install GitLab CI and run it on your GitHub repositories."
 
   printf "\nSupported options:"
   # TODO: verify if the user can set the value of the GitHub personal access
@@ -31,28 +33,27 @@ print_usage() {
   # that indicates whether or not the user will set the commit build statuses
   # on GitHub or not.
   
-  printf "\n./install_gitlab.sh -ds or: ./install_gitlab.sh --deploy-ssh to start by setting the ssh deploy key to the GitHub build status repository."
-  printf "\n./install_gitlab.sh -r or: ./install_gitlab.sh --runner to do an installation of the GitLab runner."
-  printf "\n./install_gitlab.sh -s or: ./install_gitlab.sh --server\n to do an installation of the GitLab server."
+  printf "\n-r | --runner                          to do an installation of the GitLab runner."
+  printf "\n-s | --server                          to do an installation of the GitLab server."
   
-  printf "\n./install_gitlab.sh -hubcpat or: ./install_gitlab.sh --github-commit-status-pat to enable the code to set the build status of GitHub commits using a personal acces token."
-  printf "\n./install_gitlab.sh -hubpwd or: ./install_gitlab.sh --github-password\n to pass your GitHub password, to prevent having to wait untill you can enter it in the website."
-  printf "\n./install_gitlab.sh -hubuser <your GitHub username> or: ./install_gitlab.sh --github-username <your GitHub username>\n to pass your GitHub username, to prevent having to wait untill you can enter it in the website."
+
+  printf "\n\n-hu <your GitHub username> | --github-username <your GitHub username>\n                                       to pass your GitHub username, to prevent having to wait untill you can                                          enter it in the website."
+  printf "\n-hp | --github-password                to get a prompt for your GitHub password, so you don't have to wait to enter it manually."
   
-  printf "\n./install_gitlab.sh -labemail <your email for GitLab> or: ./install_gitlab.sh --gitlab-email <your email for GitLab>\n to pass your the email address you use for GitLab, and store it in your ../personal_credentials.txt."
-  printf "\n./install_gitlab.sh -labpat <your new GitLab personal access token> or: ./install_gitlab.sh --gitlab-personal-access-token <your new GitLab personal access token>\n to pass your new GitLab personal access token, and store it in your ../personal_credentials.txt."
-  printf "\n./install_gitlab.sh -labpwd or: ./install_gitlab.sh --gitlab-password\n to pass your new GitLab password,pass your GitLab username, and store it in your ../personal_credentials.txt."
-  printf "\n./install_gitlab.sh -laburl <website for your GitLab server> or: ./install_gitlab.sh --gitlab-email <website for your GitLab server>\n to set a custom gitlab server website (default=http://127.0.0.1), and store it in your ../personal_credentials.txt."
-  printf "\n./install_gitlab.sh -labuser <your new GitLab username> or: ./install_gitlab.sh --gitlab-username <your GitLab username>\n to set a custom GitLab username(default=root), and store it in your ../personal_credentials.txt."
+  printf "\n\n-lu <your new GitLab username> | --gitlab-username <your GitLab username>\n                                       to set a custom GitLab username(default=root), and store it in your                                             ../personal_credentials.txt."
+  printf "\n-lp | --gitlab-password                to pass your new GitLab password,pass your GitLab username, and store it                                        in your ../personal_credentials.txt."  
+  printf "\n-labemail <your email for GitLab> | --gitlab-email <your email for GitLab>\n                                       to pass your the email address you use for GitLab, and store it in your                                         ../personal_credentials.txt."
+
+  
 
   printf "\n\nNot yet supported:"
-  printf "\n./install_gitlab.sh -hubcssh or: ./install_gitlab.sh --github-commit-status-ssh to enable the code to set the build status of GitHub commits using an ssh key."
-  printf "\n./install_gitlab.sh -b or: ./install_gitlab.sh --boot to set up a script/cronjob that runs the GitLab CI on your GitHub repositories in the background after reboots."
-  printf "\n./install_gitlab.sh -repo or: ./install_gitlab.sh --repo to run the GitLab CI on a particular GitHub repository."
-  printf "\n./install_gitlab.sh -tw or: ./install_gitlab.sh --tor-website to set up tor website for your GitLab server."
-  printf "\n./install_gitlab.sh -user or: ./install_gitlab.sh --user to run the GitLab CI on a particular GitHub user/organisation."
+  printf "\n-hubcssh | --github-commit-status-ssh  to enable the code to set the build status of GitHub commits using an                                           ssh-key."
+  printf "\n-b | --boot                            to set up a script/cronjob that runs the GitLab CI on your GitHub                                               repositories in the background after reboots."
+  printf "\n-repo | --repo                         to run the GitLab CI on a particular GitHub repository."
+  printf "\n-tw | --tor-website                    to set up tor website for your GitLab server."
+  printf "\n-user | --user                         to run the GitLab CI on a particular GitHub user/organisation."
   
-  printf "you can also combine the separate arguments in different orders, e.g. -r -s -w.\n\n"
+  printf "\n\nyou can also combine the separate arguments in different orders, e.g. -r -s -w.\n\n"
 }
 
 # print the usage if no arguments are given
@@ -98,7 +99,7 @@ while [[ $# -gt 0 ]]; do
       shift
 
       ;;
-    -hubpwd|--github-password)
+    -hp|--github-password)
       github_pwd_flag='true'
       #github_pwd="$2" # Don't allow vissibly typing pwd in command line.
       shift # past argument
@@ -126,10 +127,6 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       shift
       ;;
-    -laburl|--gitlab-server-url)
-      gitlab_server_url_flag='true'
-      gitlab_server_url="$2"
-      assert_is_non_empty_string ${gitlab_server_url}
       shift # past argument
       shift
       ;;
@@ -212,6 +209,12 @@ if [ "$gitlab_personal_access_token_flag" == "true" ]; then
   assert_string_only_contains_alphanumeric_chars ${gitlab_personal_access_token}
 fi
 
+
+### Verify prerequists
+if [ "$gitlab_server_url" != "" ]; then
+  set_default_personal_creds_if_empty $gitlab_username $gitlab_email
+  set_gitlab_pwd $gitlab_pwd
+fi
 
 # Create method to set personal access token in GitHub. #80
 

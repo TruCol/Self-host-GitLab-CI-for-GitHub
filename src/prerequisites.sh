@@ -23,11 +23,9 @@
 # Run with: 
 # bash -c "source src/import.sh && set_default_personal_creds_if_empty gitlab_urls gitlab_username gitlab@email.com"
 set_default_personal_creds_if_empty() {
-	local gitlab_url="$1"
-	local gitlab_root_username="$2"
-	local gitlab_email="$3"
+	local gitlab_root_username="$1"
+	local gitlab_email="$2"
 
-	set_default_personal_cred_if_empty "GITLAB_SERVER_HTTP_URL" $gitlab_url
 	set_default_personal_cred_if_empty "GITLAB_SERVER_ACCOUNT_GLOBAL" $gitlab_root_username
 	set_default_personal_cred_if_empty "GITLAB_ROOT_EMAIL_GLOBAL" "$gitlab_email"
 }
@@ -66,11 +64,10 @@ assert_required_repositories_exist(){
 }
 
 # Run with: 
-# bash -c "source src/import.sh && ensure_github_pat_can_be_used_to_set_commit_build_status a-t-0 sponsor_example http://127.0.0.1"
+# bash -c "source src/import.sh && ensure_github_pat_can_be_used_to_set_commit_build_status a-t-0 sponsor_example"
 ensure_github_pat_can_be_used_to_set_commit_build_status() {
 	local github_username="$1"
 	local github_reponame_to_set_commit_status_on="$2"
-	local gitlab_server_url="$3" # Needed to set commit redirect url to GitLab server.
 
 	# TODO(a-t-0): Ensure the github_reponame_to_set_commit_status_on repository is 
 	# created in GitHub.
@@ -95,35 +92,34 @@ ensure_github_pat_can_be_used_to_set_commit_build_status() {
 
 	if [ "$personal_credits_contain_global" == "FOUND" ]; then
 		echo "Found GitHub pat in personal_creds.txt"
-		set_pending=$(check_if_can_set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $gitlab_server_url "pending")
+		set_pending=$(check_if_can_set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $GITLAB_SERVER_HTTP_URL "pending")
 		#echo "set_pending=$set_pending"
 		
 		# Safely check if it can be used to set the github commit status
 		if [ "$set_pending" == "TRUE" ]; then
 			echo "Set status to pending"
-			set_succes=$(check_if_can_set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $gitlab_server_url "success")
+			set_succes=$(check_if_can_set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $GITLAB_SERVER_HTTP_URL "success")
 			echo "set_succes=$set_succes"
 			if [ "$set_succes" == "TRUE" ]; then
 				echo "Set status to success"
 			else
 				echo "Did not set status to success"
-				set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $gitlab_server_url $latest_commit_on_default_branch
+				set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch
 			fi
 		else
 			echo "Did not set status to pending"
-			set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $gitlab_server_url $latest_commit_on_default_branch
+			set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch
 		fi
 	else
 		echo "Did not find GitHub pat in personal_creds"
-		set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $gitlab_server_url $latest_commit_on_default_branch
+		set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch
 	fi
 }
 
 set_personal_github_pat_and_verify() {
 	local github_username="$1"
 	local github_reponame_to_set_commit_status_on="$2"
-	local gitlab_server_url="$3" # Needed to set commit redirect url to GitLab server.
-	local latest_commit_on_default_branch="$4"
+	local latest_commit_on_default_branch="$3"
 
 	
 	# Ensure the PERSONAL_CREDENTIALS_PATH file exists(create if not).
@@ -137,15 +133,15 @@ set_personal_github_pat_and_verify() {
 	echo "GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL=$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL"
 
 	# Assert the GitHub pat can be used to set the github commit status.
-	set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $gitlab_server_url "pending"
-	set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $gitlab_server_url "success"
+	set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $GITLAB_SERVER_HTTP_URL "pending"
+	set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $GITLAB_SERVER_HTTP_URL "success"
 
 	#ensure_global_is_in_file "GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$github_pat" 
 }
 
 
 # Run with: 
-# bash -c "source src/import.sh && ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status a-t-0
+# bash -c "source src/import.sh && ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status a-t-0"
 ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status() {
 	local github_username="$1"
 

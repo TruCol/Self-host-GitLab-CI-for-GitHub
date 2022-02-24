@@ -45,7 +45,7 @@ ensure_github_pat_can_be_used_to_set_commit_build_status() {
 	# created in GitHub.
 
 	# Verify github repository exists.
-	assert_public_github_repository_exists "$GITHUB_USERNAME_GLOBAL" "$github_reponame_to_set_commit_status_on"
+	assert_public_github_repository_exists "$github_username" "$github_reponame_to_set_commit_status_on"
 
 	# Get the latest commit of that repository.
 	latest_commit_on_default_branch=$(get_latest_commit_public_github_repo $github_username $github_reponame_to_set_commit_status_on)
@@ -263,7 +263,7 @@ verify_personal_creds_txt_contain_pacs() {
 		echo "Error, the GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
-	if [ "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" != "" ]; then
+	if [ "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" == "" ]; then
 		echo "Error, the GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
@@ -273,11 +273,8 @@ verify_personal_creds_txt_contain_pacs() {
 		echo "Error, the GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
-	if [ "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" != "" ]; then
+	if [ "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" == "" ]; then
 		echo "Error, the GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
 }
-
-
-

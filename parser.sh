@@ -184,7 +184,7 @@ fi
 
 
 
-### Verify prerequists
+### Verify prerequistes
 if [ "$github_username" != "" ]; then
   echo "Setting: github_username=$github_username"
   set_default_personal_cred_if_empty "GITHUB_USERNAME_GLOBAL" $github_username
@@ -210,8 +210,26 @@ fi
 # Reload personal_creds.txt
 source "$PERSONAL_CREDENTIALS_PATH"
 
+# Verify the personal credits are stored correctly.
 verify_prerequisite_personal_creds_txt_contain_required_data
 verify_prerequisite_personal_creds_txt_loaded
+
+# Verify the GitHub user has the required repositories.
+assert_required_repositories_exist $GITHUB_USERNAME_GLOBAL
+
+# Get the GitHub ssh-key
+# TODO: first check if ssh deploy key already exists and can be used to push
+# to GitHub, before creating a new one.
+#ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status $GITHUB_USERNAME_GLOBAL
+
+# Get the GitHub personal access code.
+ensure_github_pat_can_be_used_to_set_commit_build_status $GITHUB_USERNAME_GLOBAL $PUBLIC_GITHUB_TEST_REPO_GLOBAL
+
+# Get the GitLab personal access token
+create_gitlab_personal_access_token
+
+# Verify all required credentials are in personal_creds.txt
+verify_personal_creds_txt_contain_pacs
 
 
 # Raise sudo permission at the start, to prevent requiring user permission half way through tests.
@@ -224,6 +242,8 @@ if [ $(jq --version) != "jq-1.6" ]; then
 	yes | sudo apt install jq
 fi
 
+
+# Start gitlab server installation and gitlab runner installation.
 if [ "$server_flag" == "true" ]; then
   # TODO: verify required data is in personal_creds.txt 
 	# TODO: uncomment
@@ -232,14 +252,8 @@ if [ "$server_flag" == "true" ]; then
 fi
 
 
-# Create method to set personal access token in GitHub. #80
 
-# Start gitlab server installation and gitlab runner installation.
-# Move the "has ssh access to github build status website to the start"
-# Move the "has commit status setting access to arbitrary repo of user, to the start."
 
-# Call setting the GitHub personal access token to set commit status
-# pass that commit status setting boolean to the ci runner method.
 # Call run CI on default repository.
 # Create method to run on particular user and particular repo
 

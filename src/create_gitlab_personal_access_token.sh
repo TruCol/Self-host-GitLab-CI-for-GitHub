@@ -11,9 +11,15 @@
 # source src/import.sh && create_gitlab_personal_access_token
 # verify at: http://127.0.0.1/-/profile/personal_access_tokens
 create_gitlab_personal_access_token() {
+	# TODO: process the gitlab_personal_access_token input to set the token
+	# instead of reading it from the personal_creds.txt
+	local gitlab_personal_access_token="$1"
 	local docker_container_id=$(get_docker_container_id_of_gitlab_server)
-	echo "This method takes up to 2 minutes"
-	# trim newlines
+	echo "This method takes up to 2 minutes. Please wait, we will let you know when it's done."
+	echo ""
+	echo ""
+	
+	# Trim newlines of global variables.
 	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	token_name=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL" | tr -d '\r')
@@ -32,11 +38,13 @@ create_gitlab_personal_access_token() {
 	fi
 }
 
-
+# Run with:
+# bash -c "source src/import.sh && gitlab_personal_access_token_exists"
 gitlab_personal_access_token_exists() {
 	# shellcheck disable=SC2034
-	list_of_personal_access_tokens=$(get_personal_access_token_list "Filler")
-	if [  "$(lines_contain_string "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL" "\${list_of_personal_access_tokens}")" == "NOTFOUND" ]; then
+	#list_of_personal_access_tokens=$(get_personal_access_token_list "Filler")
+	list_of_personal_access_tokens=$(get_personal_access_token_list)
+	if [  "$(string_in_lines "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL" "${list_of_personal_access_tokens}")" == "NOTFOUND" ]; then
 		echo "NOTFOUND"
 	else
 		echo "FOUND"
@@ -44,11 +52,25 @@ gitlab_personal_access_token_exists() {
 }
 
 
+# Run with:
+# bash -c "source src/import.sh && get_personal_access_token_list"
 get_personal_access_token_list() {
 	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 	#command="curl --header \"PRIVATE-TOKEN:$personal_access_token\" ""$gitlab_host""/api/v4/personal_access_tokens"
 	#echo "Command=$command"
+
 	# TODO: Note used to be a space after the semicolon, check if it is required
 	token_list=$(curl --header "PRIVATE-TOKEN:$personal_access_token" "$GITLAB_SERVER_HTTP_URL""/api/v4/personal_access_tokens")
 	echo "$token_list"
+}
+
+
+## TODO: complete method
+check_if_personal_access_token_works() {
+	echo "hi"
+}
+
+## TODO: complete method
+assert_personal_access_token_works() {
+	echo "hi"
 }

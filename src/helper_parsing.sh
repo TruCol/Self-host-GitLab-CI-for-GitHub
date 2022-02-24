@@ -154,6 +154,7 @@ lines_contain_string_with_space() {
 }
 
 
+# Assumed working.
 string_in_lines() {
     local substring=$1
     shift

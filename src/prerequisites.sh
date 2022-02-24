@@ -1,35 +1,5 @@
 #!/bin/bash
 
-#######################################
-# Sets the default value for GitLab url, username and email in 
-# personal_creds.txt if the user does not manually specify these.
-# Globals:
-#  GITLAB_SERVER_HTTP_URL.
-#  GITLAB_SERVER_ACCOUNT_GLOBAL
-#  GITLAB_ROOT_EMAIL_GLOBAL
-# Arguments:
-#  gitlab -url The GitLab server that was originally passed as input argument to this 
-#  program by the user.
-#  gitlab_root_username  - 
-#  gitlab_email - 
-# Returns:
-#  0 if the function is set correctly.
-# Outputs:
-#  Nothing
-# TODO(a-t-0): Include verification on url format (Must have http:// (I think)).
-# TODO(a-t-0): Include verification on email format.
-# TODO(a-t-0): Include verification on GitLab username format (a-Z0-9).
-#######################################
-# Run with: 
-# bash -c "source src/import.sh && set_default_personal_creds_if_empty gitlab_urls gitlab_username gitlab@email.com"
-set_default_personal_creds_if_empty() {
-	local gitlab_root_username="$1"
-	local gitlab_email="$2"
-
-	set_default_personal_cred_if_empty "GITLAB_SERVER_ACCOUNT_GLOBAL" $gitlab_root_username
-	set_default_personal_cred_if_empty "GITLAB_ROOT_EMAIL_GLOBAL" "$gitlab_email"
-}
-
 # Run with: 
 # bash -c "source src/import.sh && set_gitlab_pwd gitlab_pwd"
 set_gitlab_pwd() {
@@ -236,4 +206,79 @@ set_default_personal_cred_if_empty(){
 
 	# Assert the PERSONAL_CREDENTIALS_PATH contains GITLAB_SERVER_HTTP_URL.
 	assert_file_contains_string "$identifier" "$PERSONAL_CREDENTIALS_PATH"
+}
+
+verify_prerequisite_personal_creds_txt_contain_required_data() {
+	if [ $(file_contains_string "GITHUB_USERNAME_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
+		echo "Error, the GITHUB_USERNAME_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
+		exit 5
+	fi
+
+	if [ $(file_contains_string "GITLAB_SERVER_ACCOUNT_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
+		echo "Error, the GITLAB_SERVER_ACCOUNT_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
+		exit 5
+	fi
+
+	if [ $(file_contains_string "GITLAB_SERVER_PASSWORD_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
+		echo "Error, the GITLAB_SERVER_PASSWORD_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
+		exit 5
+	fi
+
+	if [ $(file_contains_string "GITLAB_WEBSITE_URL_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
+		echo "Error, the GITLAB_WEBSITE_URL_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
+		exit 5
+	fi
+
+	if [ $(file_contains_string "GITLAB_ROOT_EMAIL_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
+		echo "Error, the GITLAB_ROOT_EMAIL_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
+		exit 5
+	fi
+}
+
+verify_prerequisite_personal_creds_txt_loaded() {
+	if [ "$GITHUB_USERNAME_GLOBAL" != "" ]; then
+		echo "Error, the GITHUB_USERNAME_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
+		exit 5
+	fi
+
+	if [ "$GITLAB_SERVER_ACCOUNT_GLOBAL" != "" ]; then
+		echo "Error, the GITLAB_SERVER_ACCOUNT_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
+		exit 5
+	fi
+
+	if [ "$GITLAB_SERVER_PASSWORD_GLOBAL" != "" ]; then
+		echo "Error, the GITLAB_SERVER_PASSWORD_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
+		exit 5
+	fi
+
+	if [ "$GITLAB_WEBSITE_URL_GLOBAL" != "" ]; then
+		echo "Error, the GITLAB_WEBSITE_URL_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
+		exit 5
+	fi
+
+	if [ "$GITLAB_ROOT_EMAIL_GLOBAL" != "" ]; then
+		echo "Error, the GITLAB_ROOT_EMAIL_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
+		exit 5
+	fi
+}
+
+verify_personal_creds_txt_contain_pacs() {
+	if [ $(file_contains_string "GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
+		echo "Error, the GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
+		exit 5
+	fi
+	if [ "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" != "" ]; then
+		echo "Error, the GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
+		exit 5
+	fi
+
+
+	if [ $(file_contains_string "GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
+		echo "Error, the GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
+		exit 5
+	fi
+	if [ "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" != "" ]; then
+		echo "Error, the GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
+		exit 5
+	fi
 }

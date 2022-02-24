@@ -1,7 +1,8 @@
 #!/bin/bash
 POSITIONAL_ARGS=()
 
-source src/helper_parsing.sh
+
+source src/import.sh
 
 # Specify default argument values.
 commit_status_personal_access_token_flag='false'
@@ -42,7 +43,7 @@ print_usage() {
   
   printf "\n\n-lu <your new GitLab username> | --gitlab-username <your GitLab username>\n                                       to set a custom GitLab username(default=root), and store it in your                                             ../personal_credentials.txt."
   printf "\n-lp | --gitlab-password                to pass your new GitLab password,pass your GitLab username, and store it                                        in your ../personal_credentials.txt."  
-  printf "\n-labemail <your email for GitLab> | --gitlab-email <your email for GitLab>\n                                       to pass your the email address you use for GitLab, and store it in your                                         ../personal_credentials.txt."
+  printf "\n-le <your email for GitLab> | --gitlab-email <your email for GitLab>\n                                       to pass your the email address you use for GitLab, and store it in your                                         ../personal_credentials.txt."
 
   
 
@@ -91,7 +92,7 @@ while [[ $# -gt 0 ]]; do
       setup_tor_website_for_gitlab_server_flag='true'
       shift # past argument
       ;;
-    -hubuser|--github-username)
+    -hu|--github-username)
       github_username_flag='true'
       github_username="$2"
       assert_is_non_empty_string ${github_username}
@@ -105,14 +106,14 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       ;;
     
-    -labuser|--gitlab-username)
+    -lu|--gitlab-username)
       gitlab_username_flag='true'
       gitlab_username="$2"
       assert_is_non_empty_string ${gitlab_username}
       shift # past argument
       shift
       ;;
-    -labpwd|--gitlab-password)
+    -lp|--gitlab-password)
       gitlab_pwd_flag='true'
       #gitlab_pwd="$2" # Don't allow vissibly typing pwd in command line.
       shift # past argument
@@ -121,15 +122,15 @@ while [[ $# -gt 0 ]]; do
       gitlab_personal_access_token_flag='true'
       shift # past argument
       ;;
-    -labemail|--gitlab-email)
+    -le|--gitlab-email)
       gitlab_email_flag='true'
       gitlab_email="$2"
       shift # past argument
       shift
       ;;
-      shift # past argument
-      shift
-      ;;
+      #shift # past argument
+      #shift
+      #;;
     -*|--*)
       echo "Unknown option $1"
       print_usage
@@ -157,11 +158,7 @@ if [[ -n $1 ]]; then
     tail -1 "$1"
 fi
 
-if [ "$server_flag" == "true" ]; then
-	# TODO: uncomment
-  #install_and_run_gitlab_server
-	echo "Installed gitlab server, should be up in a few minutes."
-fi
+
 
 # Set GitHub password without displaying it in terminal.
 if [ "$github_pwd_flag" == "true" ]; then
@@ -173,18 +170,6 @@ if [ "$github_pwd_flag" == "true" ]; then
 	echo $password
   assert_string_only_contains_alphanumeric_chars ${password}
 fi
-
-# Set GitHub personal_access_token without displaying it in terminal.
-if [ "$commit_status_personal_access_token_flag" == "true" ]; then
-	echo -n "GitHub personal access token, to set the GitHub commit statuses": 
-	read -s commit_status_personal_access_token
-	echo
-	
-  # Display commit_status_personal_access_token.
-	echo $commit_status_personal_access_token
-  assert_string_only_contains_alphanumeric_chars ${commit_status_personal_access_token}
-fi
-
 
 # Set GitLab password without displaying it in terminal.
 if [ "$gitlab_pwd_flag" == "true" ]; then
@@ -198,23 +183,59 @@ if [ "$gitlab_pwd_flag" == "true" ]; then
 fi
 
 
-# Set GitLab personal access token without displaying it in terminal.
-if [ "$gitlab_personal_access_token_flag" == "true" ]; then
-	echo -n "Your new personal access token:": 
-	read -s gitlab_personal_access_token
-	echo
-	
-  # Display commit_status_personal_access_token.
-	echo $gitlab_personal_access_token
-  assert_string_only_contains_alphanumeric_chars ${gitlab_personal_access_token}
-fi
-
 
 ### Verify prerequists
-if [ "$gitlab_server_url" != "" ]; then
-  set_default_personal_creds_if_empty $gitlab_username $gitlab_email
+if [ "$github_username" != "" ]; then
+  set_default_personal_cred_if_empty "GITHUB_USERNAME_GLOBAL" $github_username
+fi
+# GitHub password is not stored.
+
+if [ "$gitlab_username" != "" ]; then
+	set_default_personal_cred_if_empty "GITLAB_SERVER_ACCOUNT_GLOBAL" $gitlab_username
+fi
+if [ "$gitlab_pwd" != "" ]; then
   set_gitlab_pwd $gitlab_pwd
 fi
+if [ "$gitlab_email" != "" ]; then
+	set_default_personal_cred_if_empty "GITLAB_ROOT_EMAIL_GLOBAL" "$gitlab_email"
+fi
+
+# TODO: verify required data is in personal_creds.txt
+
+
+# Reload personal_creds.txt
+source "$PERSONAL_CREDENTIALS_PATH"
+if [ "$GITHUB_USERNAME_GLOBAL" != "" ]; then
+  assert_required_repositories_exist $GITHUB_USERNAME_GLOBAL
+else
+  echo "Error, was not able to succesfully set the GitHub username in $PERSONAL_CREDENTIALS_PATH."
+fi
+
+if [ "$GITHUB_USERNAME_GLOBAL" != "" ] && [ "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" != "" ]; then
+  ensure_github_pat_can_be_used_to_set_commit_build_status $GITHUB_USERNAME_GLOBAL $PUBLIC_GITHUB_TEST_REPO_GLOBAL
+fi
+
+verify_prerequisite_personal_creds_txt_contain_required_data
+verify_prerequisite_personal_creds_txt_loaded
+
+
+# Raise sudo permission at the start, to prevent requiring user permission half way through tests.
+{
+  sudo echo "hi"
+} &> /dev/null
+
+# Install prerequisites
+if [ $(jq --version) != "jq-1.6" ]; then
+	yes | sudo apt install jq
+fi
+
+if [ "$server_flag" == "true" ]; then
+  # TODO: verify required data is in personal_creds.txt 
+	# TODO: uncomment
+  #install_and_run_gitlab_server
+	echo "Installed gitlab server, should be up in a few minutes."
+fi
+
 
 # Create method to set personal access token in GitHub. #80
 

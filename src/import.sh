@@ -2,15 +2,7 @@
 source src/hardcoded_variables.txt
 source src/helper_file_dir_related.sh
 
-# Raise sudo permission at the start, to prevent requiring user permission half way through tests.
-{
-  sudo echo "hi"
-} &> /dev/null
 
-# Install prerequisites
-if [ $(jq --version) != "jq-1.6" ]; then
-	yes | sudo apt install jq
-fi
 
 # TODO: replace with hardcoded PERSONAL_CREDENTIALS_PATH.
 if [ "$(file_exists "../personal_creds.txt")" == "FOUND" ]; then

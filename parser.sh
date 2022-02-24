@@ -186,6 +186,7 @@ fi
 
 ### Verify prerequists
 if [ "$github_username" != "" ]; then
+  echo "Setting: github_username=$github_username"
   set_default_personal_cred_if_empty "GITHUB_USERNAME_GLOBAL" $github_username
 fi
 # GitHub password is not stored.
@@ -199,21 +200,15 @@ fi
 if [ "$gitlab_email" != "" ]; then
 	set_default_personal_cred_if_empty "GITLAB_ROOT_EMAIL_GLOBAL" "$gitlab_email"
 fi
+if [ "$gitlab_email" != "" ]; then
+	set_default_personal_cred_if_empty "GITLAB_ROOT_EMAIL_GLOBAL" "$gitlab_email"
+fi
 
 # TODO: verify required data is in personal_creds.txt
 
 
 # Reload personal_creds.txt
 source "$PERSONAL_CREDENTIALS_PATH"
-if [ "$GITHUB_USERNAME_GLOBAL" != "" ]; then
-  assert_required_repositories_exist $GITHUB_USERNAME_GLOBAL
-else
-  echo "Error, was not able to succesfully set the GitHub username in $PERSONAL_CREDENTIALS_PATH."
-fi
-
-if [ "$GITHUB_USERNAME_GLOBAL" != "" ] && [ "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" != "" ]; then
-  ensure_github_pat_can_be_used_to_set_commit_build_status $GITHUB_USERNAME_GLOBAL $PUBLIC_GITHUB_TEST_REPO_GLOBAL
-fi
 
 verify_prerequisite_personal_creds_txt_contain_required_data
 verify_prerequisite_personal_creds_txt_loaded

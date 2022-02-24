@@ -38,6 +38,8 @@ assert_required_repositories_exist(){
 ensure_github_pat_can_be_used_to_set_commit_build_status() {
 	local github_username="$1"
 	local github_reponame_to_set_commit_status_on="$2"
+	echo "github_username=$github_username"
+	echo "github_reponame_to_set_commit_status_on=$github_reponame_to_set_commit_status_on"
 
 	# TODO(a-t-0): Ensure the github_reponame_to_set_commit_status_on repository is 
 	# created in GitHub.
@@ -62,6 +64,10 @@ ensure_github_pat_can_be_used_to_set_commit_build_status() {
 
 	if [ "$personal_credits_contain_global" == "FOUND" ]; then
 		echo "Found GitHub pat in personal_creds.txt"
+		echo "github_username=$github_username"
+		echo "github_reponame_to_set_commit_status_on=$github_reponame_to_set_commit_status_on"
+		echo "latest_commit_on_default_branch=$latest_commit_on_default_branch"
+		echo "GITLAB_SERVER_HTTP_URL=$GITLAB_SERVER_HTTP_URL"
 		set_pending=$(check_if_can_set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $GITLAB_SERVER_HTTP_URL "pending")
 		#echo "set_pending=$set_pending"
 		
@@ -224,11 +230,6 @@ verify_prerequisite_personal_creds_txt_contain_required_data() {
 		exit 5
 	fi
 
-	if [ $(file_contains_string "GITLAB_WEBSITE_URL_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
-		echo "Error, the GITLAB_WEBSITE_URL_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
-		exit 5
-	fi
-
 	if [ $(file_contains_string "GITLAB_ROOT_EMAIL_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
 		echo "Error, the GITLAB_ROOT_EMAIL_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
 		exit 5
@@ -236,27 +237,22 @@ verify_prerequisite_personal_creds_txt_contain_required_data() {
 }
 
 verify_prerequisite_personal_creds_txt_loaded() {
-	if [ "$GITHUB_USERNAME_GLOBAL" != "" ]; then
-		echo "Error, the GITHUB_USERNAME_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
+	if [ "$GITHUB_USERNAME_GLOBAL" == "" ]; then
+		echo "Error, the GITHUB_USERNAME_GLOBAL:$GITHUB_USERNAME_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
 
-	if [ "$GITLAB_SERVER_ACCOUNT_GLOBAL" != "" ]; then
+	if [ "$GITLAB_SERVER_ACCOUNT_GLOBAL" == "" ]; then
 		echo "Error, the GITLAB_SERVER_ACCOUNT_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
 
-	if [ "$GITLAB_SERVER_PASSWORD_GLOBAL" != "" ]; then
+	if [ "$GITLAB_SERVER_PASSWORD_GLOBAL" == "" ]; then
 		echo "Error, the GITLAB_SERVER_PASSWORD_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
 
-	if [ "$GITLAB_WEBSITE_URL_GLOBAL" != "" ]; then
-		echo "Error, the GITLAB_WEBSITE_URL_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
-		exit 5
-	fi
-
-	if [ "$GITLAB_ROOT_EMAIL_GLOBAL" != "" ]; then
+	if [ "$GITLAB_ROOT_EMAIL_GLOBAL" == "" ]; then
 		echo "Error, the GITLAB_ROOT_EMAIL_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
@@ -282,3 +278,6 @@ verify_personal_creds_txt_contain_pacs() {
 		exit 5
 	fi
 }
+
+
+

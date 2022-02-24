@@ -703,7 +703,7 @@ ensure_global_is_in_file() {
 	local filepath="$3"
 
 	# If the filepath contains the $identifier:
-	local personal_credits_contain_global=$(file_contains_string "GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$filepath")
+	local personal_credits_contain_global=$(file_contains_string "$identifier" "$filepath")
 	if [ "$personal_credits_contain_global" == "FOUND" ]; then
 		# Override the existing identifier and value in personal_creds.txt
 		change_line "$identifier" "$identifier=$incoming_value" "$filepath"

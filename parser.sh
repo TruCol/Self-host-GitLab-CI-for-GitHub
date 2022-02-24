@@ -118,9 +118,16 @@ while [[ $# -gt 0 ]]; do
       #gitlab_pwd="$2" # Don't allow vissibly typing pwd in command line.
       shift # past argument
       ;;
-    -labpat|--gitlab-personal-access-token)
+    -lt |--gitlab-personal-access-token)
       gitlab_personal_access_token_flag='true'
+      gitlab_personal_access_token="$2"
+      # The token must be 20 characters long. 
+      # Source: https://forge.etsi.org/rep/help/user/profile/personal_access_tokens.md
+      # TODO: verify length.
+      assert_is_non_empty_string ${gitlab_personal_access_token}
+      assert_string_only_contains_alphanumeric_chars ${gitlab_personal_access_token}
       shift # past argument
+      shift
       ;;
     -le|--gitlab-email)
       gitlab_email_flag='true'
@@ -226,7 +233,17 @@ assert_required_repositories_exist $GITHUB_USERNAME_GLOBAL
 ensure_github_pat_can_be_used_to_set_commit_build_status $GITHUB_USERNAME_GLOBAL $PUBLIC_GITHUB_TEST_REPO_GLOBAL
 
 # Get the GitLab personal access token
-create_gitlab_personal_access_token
+
+
+# Set GitLab password without displaying it in terminal.
+if [ "$gitlab_personal_access_token_flag" == "true" ]; then
+
+  create_gitlab_personal_access_token $gitlab_personal_access_token
+ 
+  # Check if token, as loaded from  not "" otherwise throw error
+  # Reload personal_creds.txt
+  source "$PERSONAL_CREDENTIALS_PATH"
+fi
 
 # Verify all required credentials are in personal_creds.txt
 verify_personal_creds_txt_contain_pacs

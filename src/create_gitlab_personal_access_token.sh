@@ -38,6 +38,10 @@ create_gitlab_personal_access_token() {
 	fi
 }
 
+delete_token(){
+	sudo gitlab-rails runner "PersonalAccessToken.find_by_token('sometokenname').revoke!"
+}
+
 # Run with:
 # bash -c "source src/import.sh && gitlab_personal_access_token_exists"
 gitlab_personal_access_token_exists() {

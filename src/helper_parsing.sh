@@ -716,10 +716,22 @@ ensure_global_is_in_file() {
 	fi
 }
 
+# bash -c "source src/import.sh && remove_line_from_file_if_contains_substring '../personal_creds.txt' GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL"
 remove_line_from_file_if_contains_substring() { 
 	local filename="$1"
 	local substring="$2"
-	sed "/$substring/d" "$filename" |  cat -s
+	
+	sed -e "/$substring/d" $filename > tmp 
+	mv tmp $filename
 
 	# Assert substring is not in file anymore.
+	if [ "$(file_contains_string "$substring" "$filename")" == "NOTFOUND" ]; then
+		local do_nothing
+	elif [ "$(file_contains_string "$substring" "$filename")" == "FOUND" ]; then
+		echo "Error, the file:$filename still contains:$substring"
+		exit 5
+	else
+		echo "Error, unexpected response from file_contains_string."
+		exit 6
+	fi
 }

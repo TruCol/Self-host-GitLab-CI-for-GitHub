@@ -87,8 +87,6 @@ check_if_personal_access_token_works() {
 		echo "Error, the repositories response was unexpected:$repositories"
 		exit 5
 	fi
-
-
 }
 
 assert_personal_access_token_works() {
@@ -103,15 +101,17 @@ assert_personal_access_token_works() {
 # source src/import.sh && assert_personal_access_token_does_not_work $personal_access_token
 assert_personal_access_token_does_not_work() {
 	local personal_access_token="$1"
-
-	if [ $(check_if_personal_access_token_works $personal_access_token) != "FALSE" ]; then
-		echo "Error, the GitLab personal access token still works(after being revoked)."
-		exit 56
+	if [ "$personal_access_token" != "" ]; then
+		if [ "$(check_if_personal_access_token_works $personal_access_token)" != "FALSE" ]; then
+			echo "Error, the GitLab personal access token still works(after being revoked)."
+			exit 56
+		fi
 	fi
 }
 
 ############# Revoke GitLab personal access token ###################
 # source src/import.sh && revoke_token_in_personal_creds
+# bash -c "source src/import.sh && revoke_token_in_personal_creds"
 revoke_token_in_personal_creds() {
 	
 	# Load the GitLab personal access token from file, if it is in there.
@@ -122,6 +122,8 @@ revoke_token_in_personal_creds() {
 	if [ "$docker_container_id" != "" ]; then
       if [ "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" != "" ]; then
 	    revoke_token "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$docker_container_id"
+		
+		assert_personal_access_token_does_not_work $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL
 	  else
 		echo "The personal access token was not in the personal_creds.txt"
 	  fi
@@ -129,12 +131,15 @@ revoke_token_in_personal_creds() {
 	  echo "Error, docker_container_id=$docker_container_id is empty."
 	  exit 7
 	fi
-	echo "START ASSERT"
-	assert_personal_access_token_does_not_work $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL
 
 	# Remove $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL from personal_creds.
+	remove_line_from_file_if_contains_substring "$PERSONAL_CREDENTIALS_PATH" "GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL"
 
-	# Assert $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL is not in personal_creds
+	## Assert $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL is not in personal_creds
+	if [ "$(file_contains_string "GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$PERSONAL_CREDENTIALS_PATH")" == "FOUND" ]; then
+		echo "Error, the GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL is still in the PERSONAL_CREDENTIALS_PATH file."
+		exit 5
+	fi
 }
 
 #source src/import.sh && delete_token

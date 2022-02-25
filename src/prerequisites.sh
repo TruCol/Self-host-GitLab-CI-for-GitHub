@@ -38,9 +38,8 @@ assert_required_repositories_exist(){
 ensure_github_pat_can_be_used_to_set_commit_build_status() {
 	local github_username="$1"
 	local github_reponame_to_set_commit_status_on="$2"
-	echo "github_username=$github_username"
-	echo "github_reponame_to_set_commit_status_on=$github_reponame_to_set_commit_status_on"
-
+	local github_pwd="$3"
+	
 	# TODO(a-t-0): Ensure the github_reponame_to_set_commit_status_on repository is 
 	# created in GitHub.
 
@@ -49,7 +48,7 @@ ensure_github_pat_can_be_used_to_set_commit_build_status() {
 
 	# Get the latest commit of that repository.
 	latest_commit_on_default_branch=$(get_latest_commit_public_github_repo $github_username $github_reponame_to_set_commit_status_on)
-	echo "len=${#latest_commit_on_default_branch}"
+
 	
 	if [ ${#latest_commit_on_default_branch} -eq 40 ]; then 
 		echo "len=${#latest_commit_on_default_branch}"
@@ -80,15 +79,15 @@ ensure_github_pat_can_be_used_to_set_commit_build_status() {
 				echo "Set status to success"
 			else
 				echo "Did not set status to success"
-				set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch
+				set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $github_pwd
 			fi
 		else
 			echo "Did not set status to pending"
-			set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch
+			set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $github_pwd
 		fi
 	else
 		echo "Did not find GitHub pat in personal_creds"
-		set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch
+		set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $github_pwd
 	fi
 }
 
@@ -96,13 +95,14 @@ set_personal_github_pat_and_verify() {
 	local github_username="$1"
 	local github_reponame_to_set_commit_status_on="$2"
 	local latest_commit_on_default_branch="$3"
+	local github_pwd="$4"
 
 	
 	# Ensure the PERSONAL_CREDENTIALS_PATH file exists(create if not).
 	ensure_file_exists "$PERSONAL_CREDENTIALS_PATH"
 
 	# Get github pat and ensure it is in PERSONAL_CREDENTIALS_PATH.
-	get_github_personal_access_token $github_username
+	get_github_personal_access_token $github_username $github_pwd
 	
 	# Reload personal credentials to load new GitHub token.
 	source "$PERSONAL_CREDENTIALS_PATH"

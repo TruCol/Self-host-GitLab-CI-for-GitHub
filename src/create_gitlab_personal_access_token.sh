@@ -7,74 +7,149 @@
 #export SHARED_REGISTRATION_TOKEN="$(sudo docker exec -i 5303124d7b87 bash -c "gitlab-rails runner -e production \"puts Gitlab::CurrentSettings.current_application_settings.runners_registration_token\"")"
 #9r6sPoAx3BFqZnxfexLS
 
+# TODO: revoke previous personal_creds.txt  GitLab personal access token from 
+# GitLab (if it still works) before adding the new personal_access_token.
 
-# source src/import.sh && create_gitlab_personal_access_token
-# verify at: http://127.0.0.1/-/profile/personal_access_tokens
-create_gitlab_personal_access_token() {
-	# TODO: process the gitlab_personal_access_token input to set the token
-	# instead of reading it from the personal_creds.txt
-	local gitlab_personal_access_token="$1"
+ensure_new_gitlab_personal_access_token_works() {
+	export_random_gitlab_token_to_personal_creds_txt
+	add_gitlab_personal_access_token_from_personal_creds_txt_to_gitlab
+
+}
+
+# source src/import.sh && export_random_gitlab_token_to_personal_creds_txt
+export_random_gitlab_token_to_personal_creds_txt() {
+	random_token=$(generate_random_gitlab_personal_access_token)
+	echo "random_token=$random_token"
+	
+	# Ensure the PERSONAL_CREDENTIALS_PATH file exists(create if not).
+	ensure_file_exists "$PERSONAL_CREDENTIALS_PATH"
+	ensure_global_is_in_file "GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$random_token" "$PERSONAL_CREDENTIALS_PATH"
+}
+
+
+# source src/import.sh && generate_random_gitlab_personal_access_token
+generate_random_gitlab_personal_access_token() {
+	echo $RANDOM | md5sum | head -c 20; echo;
+}
+
+
+
+# bash -c "source src/import.sh && add_gitlab_personal_access_token_from_personal_creds_txt_to_gitlab"
+add_gitlab_personal_access_token_from_personal_creds_txt_to_gitlab() {
+	
+	# Load the GitLab personal access token from file, if it is in there.
+	source "$PERSONAL_CREDENTIALS_PATH"
 	local docker_container_id=$(get_docker_container_id_of_gitlab_server)
+	
+	
+	if [ "$docker_container_id" != "" ]; then
+	  if [ "$GITLAB_SERVER_ACCOUNT_GLOBAL" != "" ]; then
+	    if [ "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL" != "" ]; then
+		  if [ "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" != "" ]; then
+			# shellcheck disable=SC2034
+			output="$(sudo docker exec -i "$docker_container_id" bash -c "gitlab-rails runner \"token = User.find_by_username('$GITLAB_SERVER_ACCOUNT_GLOBAL').personal_access_tokens.create(scopes: [:api], name: '$GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL'); token.set_token('$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL'); token.save! \"")"
+			echo "output=$output"
+		  else
+		    echo "Error, GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL=$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL is empty."
+			exit 4
+		  fi
+		else
+		  echo "Error, GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL=$GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL is empty."
+		  exit 5
+        fi
+	  else
+	    echo "Error, GITLAB_SERVER_ACCOUNT_GLOBAL=$GITLAB_SERVER_ACCOUNT_GLOBAL is empty."
+		exit 6
+	  fi  
+	else
+	  echo "Error, docker_container_id=$docker_container_id is empty."
+	  exit 7
+	fi
+
+	# Verify the token works.
+	assert_personal_access_token_works "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL"
+}
+
+## TODO: complete method
+# bash -c "source src/import.sh && check_if_personal_access_token_works $personal_access_token"
+check_if_personal_access_token_works() {
+	local personal_access_token="$1"
+	
+	local repositories=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
+	#echo "repositories=$repositories"
+	if [ "${repositories:0:7}" == '[{"id":' ]; then
+		echo "TRUE"
+	elif [ "${repositories}" == '{"error":"invalid_token","error_description":"Token was revoked. You have to re-authorize from the user."}' ]; then
+		echo "FALSE"
+	elif [ "${repositories}" == '{"message":"401 Unauthorized"}' ]; then
+		echo "FALSE"
+	else
+		echo "Error, the repositories response was unexpected:$repositories"
+		exit 5
+	fi
+
+
+}
+
+assert_personal_access_token_works() {
+	local personal_access_token="$1"
+
+	if [ $(check_if_personal_access_token_works $personal_access_token) != "TRUE" ]; then
+		echo "Error, the GitLab personal access token does not work."
+		exit 56
+	fi
+}
+
+# source src/import.sh && assert_personal_access_token_does_not_work $personal_access_token
+assert_personal_access_token_does_not_work() {
+	local personal_access_token="$1"
+
+	if [ $(check_if_personal_access_token_works $personal_access_token) != "FALSE" ]; then
+		echo "Error, the GitLab personal access token still works(after being revoked)."
+		exit 56
+	fi
+}
+
+############# Revoke GitLab personal access token ###################
+# source src/import.sh && revoke_token_in_personal_creds
+revoke_token_in_personal_creds() {
+	
+	# Load the GitLab personal access token from file, if it is in there.
+	source "$PERSONAL_CREDENTIALS_PATH"
+	local docker_container_id=$(get_docker_container_id_of_gitlab_server)
+	
+	
+	if [ "$docker_container_id" != "" ]; then
+      if [ "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" != "" ]; then
+	    revoke_token "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$docker_container_id"
+	  else
+		echo "The personal access token was not in the personal_creds.txt"
+	  fi
+	else
+	  echo "Error, docker_container_id=$docker_container_id is empty."
+	  exit 7
+	fi
+	echo "START ASSERT"
+	assert_personal_access_token_does_not_work $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL
+
+	# Remove $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL from personal_creds.
+
+	# Assert $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL is not in personal_creds
+}
+
+#source src/import.sh && delete_token
+revoke_token(){
+	local personal_access_token="$1"
+	local docker_container_id="$2"
+
 	echo "This method takes up to 2 minutes. Please wait, we will let you know when it's done."
 	echo ""
 	echo ""
-	
-	# Trim newlines of global variables.
-	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
-	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
-	token_name=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL" | tr -d '\r')
-	#echo "personal_access_token=$personal_access_token"
-	#echo "gitlab_username=$gitlab_username"
-	#echo "token_name=$token_name"
-	
-	# Source: https://gitlab.example.com/-/profile/personal_access_tokens?name=Example+Access+token&scopes=api,read_user,read_registry
-	# Create a personal access token
-	# TODO: limit scope to only required scope
-	# https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html
-	# shellcheck disable=SC2154
-	if [ "$(gitlab_personal_access_token_exists)" == "NOTFOUND" ]; then
-		# shellcheck disable=SC2034
-		output="$(sudo docker exec -i "$docker_container_id" bash -c "gitlab-rails runner \"token = User.find_by_username('$gitlab_username').personal_access_tokens.create(scopes: [:api], name: '$token_name'); token.set_token('$personal_access_token'); token.save! \"")"
-	fi
-}
+	echo ""
+	echo ""
 
-delete_token(){
-	sudo gitlab-rails runner "PersonalAccessToken.find_by_token('sometokenname').revoke!"
-}
-
-# Run with:
-# bash -c "source src/import.sh && gitlab_personal_access_token_exists"
-gitlab_personal_access_token_exists() {
-	# shellcheck disable=SC2034
-	#list_of_personal_access_tokens=$(get_personal_access_token_list "Filler")
-	list_of_personal_access_tokens=$(get_personal_access_token_list)
-	if [  "$(string_in_lines "$GITLAB_PERSONAL_ACCESS_TOKEN_NAME_GLOBAL" "${list_of_personal_access_tokens}")" == "NOTFOUND" ]; then
-		echo "NOTFOUND"
-	else
-		echo "FOUND"
-	fi
-}
-
-
-# Run with:
-# bash -c "source src/import.sh && get_personal_access_token_list"
-get_personal_access_token_list() {
-	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
-	#command="curl --header \"PRIVATE-TOKEN:$personal_access_token\" ""$gitlab_host""/api/v4/personal_access_tokens"
-	#echo "Command=$command"
-
-	# TODO: Note used to be a space after the semicolon, check if it is required
-	token_list=$(curl --header "PRIVATE-TOKEN:$personal_access_token" "$GITLAB_SERVER_HTTP_URL""/api/v4/personal_access_tokens")
-	echo "$token_list"
-}
-
-
-## TODO: complete method
-check_if_personal_access_token_works() {
-	echo "hi"
-}
-
-## TODO: complete method
-assert_personal_access_token_works() {
-	echo "hi"
+	# Revoke token.
+	output="$(sudo docker exec -i "$docker_container_id" bash -c "gitlab-rails runner \"PersonalAccessToken.find_by_token('$personal_access_token').revoke! \"")"
+	echo "output=$output"
+	echo "DoneRevoke"
 }

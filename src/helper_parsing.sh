@@ -715,3 +715,11 @@ ensure_global_is_in_file() {
 		assert_file_contains_string "$identifier=$incoming_value" "$filepath"
 	fi
 }
+
+remove_line_from_file_if_contains_substring() { 
+	local filename="$1"
+	local substring="$2"
+	sed "/$substring/d" "$filename" |  cat -s
+
+	# Assert substring is not in file anymore.
+}

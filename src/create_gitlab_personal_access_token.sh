@@ -11,15 +11,14 @@
 # GitLab (if it still works) before adding the new personal_access_token.
 
 ensure_new_gitlab_personal_access_token_works() {
+	echo "This method takes up to 2 minutes. We will let you know when it is done."
 	export_random_gitlab_token_to_personal_creds_txt
 	add_gitlab_personal_access_token_from_personal_creds_txt_to_gitlab
-
 }
 
 # source src/import.sh && export_random_gitlab_token_to_personal_creds_txt
 export_random_gitlab_token_to_personal_creds_txt() {
 	random_token=$(generate_random_gitlab_personal_access_token)
-	echo "random_token=$random_token"
 	
 	# Ensure the PERSONAL_CREDENTIALS_PATH file exists(create if not).
 	ensure_file_exists "$PERSONAL_CREDENTIALS_PATH"

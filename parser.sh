@@ -169,13 +169,13 @@ fi
 
 # Set GitHub password without displaying it in terminal.
 if [ "$github_pwd_flag" == "true" ]; then
-	echo -n Password: 
-	read -s password
+	echo -n GitHub Password: 
+	read -s github_password
 	echo
 	
   # Display password.
-	echo $password
-  assert_string_only_contains_alphanumeric_chars ${password}
+	echo $github_password
+  assert_is_non_empty_string ${github_password}
 fi
 
 # Set GitLab password without displaying it in terminal.
@@ -224,16 +224,11 @@ verify_prerequisite_personal_creds_txt_loaded
 # Verify the GitHub user has the required repositories.
 assert_required_repositories_exist $GITHUB_USERNAME_GLOBAL
 
-# Get the GitHub ssh-key
-# TODO: first check if ssh deploy key already exists and can be used to push
-# to GitHub, before creating a new one.
-#ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status $GITHUB_USERNAME_GLOBAL
-
 # Get the GitHub personal access code.
 ensure_github_pat_can_be_used_to_set_commit_build_status $GITHUB_USERNAME_GLOBAL $PUBLIC_GITHUB_TEST_REPO_GLOBAL
 
 # Get the GitLab personal access token
-
+ensure_new_gitlab_personal_access_token_works
 
 # Set GitLab password without displaying it in terminal.
 if [ "$gitlab_personal_access_token_flag" == "true" ]; then
@@ -245,9 +240,22 @@ if [ "$gitlab_personal_access_token_flag" == "true" ]; then
   source "$PERSONAL_CREDENTIALS_PATH"
 fi
 
+# Check if ssh deploy key already exists and can be used to push
+# to GitHub, before creating a new one.
+has_ssh_push_access=$(check_if_machine_has_push_access_to_gitlab_build_status_repo_in_github $GITHUB_USERNAME_GLOBAL)
+if [ "$has_ssh_push_access" == "NOTFOUND" ]; then
+  # Get the GitHub ssh deploy key.
+  ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status $GITHUB_USERNAME_GLOBAL
+elif [ "$has_ssh_push_access" == "FOUND" ]; then
+  # Verify the GitHub ssh deploy key works.
+  verify_machine_has_push_access_to_gitlab_build_status_repo_in_github "$GITHUB_SSH_DEPLOY_KEY_NAME"
+else
+  echo "Error, the output of ssh_check_output did not end in FOUND, nor in NOTFOUND: $ssh_check_output"
+  exit 56
+fi
+
 # Verify all required credentials are in personal_creds.txt
 verify_personal_creds_txt_contain_pacs
-
 
 # Raise sudo permission at the start, to prevent requiring user permission half way through tests.
 {
@@ -267,7 +275,6 @@ if [ "$server_flag" == "true" ]; then
   #install_and_run_gitlab_server
 	echo "Installed gitlab server, should be up in a few minutes."
 fi
-
 
 
 

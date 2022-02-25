@@ -127,9 +127,8 @@ ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status() {
 
 	# Get the GitHub ssh deploy key to push and pull the GitLab build status 
 	# icons to the GitHub build status repository.
-	get_github_build_status_repo_ssh_deploy_key "example@example.com" "some_github_deploy_key"
-	verify_machine_has_push_access_to_gitlab_build_status_repo_in_github "some_github_deploy_key"
-	read -p "Got the personal access token"
+	get_github_build_status_repo_ssh_deploy_key "example@example.com" "$GITHUB_SSH_DEPLOY_KEY_NAME"
+	verify_machine_has_push_access_to_gitlab_build_status_repo_in_github "$GITHUB_SSH_DEPLOY_KEY_NAME"
 }
 
 #######################################

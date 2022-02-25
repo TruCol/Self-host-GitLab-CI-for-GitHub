@@ -451,7 +451,6 @@ download_and_overwrite_repository_using_ssh() {
 		set +e
 		manual_assert_dir_exists "$reponame"
 	fi
-	
 }
 
 # Run with: 

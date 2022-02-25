@@ -685,9 +685,9 @@ get_github_build_status_repo_ssh_deploy_key() {
 # bash -c "source src/import.sh && verify_machine_has_push_access_to_gitlab_build_status_repo_in_github some_github_deploy_key"
 # source src/import.sh && verify_machine_has_push_access_to_gitlab_build_status_repo_in_github "id_github_deploy_key"
 verify_machine_has_push_access_to_gitlab_build_status_repo_in_github() {
-	local identifier="$1"
-	local public_key_filename="$identifier.pub"
-	local private_key_filename="$identifier"
+	
+	local public_key_filename="$GITHUB_SSH_DEPLOY_KEY_NAME.pub"
+	local private_key_filename="$GITHUB_SSH_DEPLOY_KEY_NAME"
 
 	# Use the generation and activate functions as verifiers.
 	# Assert the ssh-keys exist.
@@ -695,7 +695,7 @@ verify_machine_has_push_access_to_gitlab_build_status_repo_in_github() {
 	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
 
 	# Verify the ssh-key is added to the ssh-agent.
-	public_key_sha=$(get_public_key_sha_from_key_filename $identifier)
+	public_key_sha=$(get_public_key_sha_from_key_filename $GITHUB_SSH_DEPLOY_KEY_NAME)
 	if [ "$(check_if_public_key_sha_is_in_ssh_agent $public_key_sha)" != "FOUND" ]; then
 		echo "Error, the ssh-key should added to the ssh-agent (in ssh-add -l), however, they were not found in the ssh-agent."
 		exit 10
@@ -760,4 +760,95 @@ verify_machine_has_push_access_to_gitlab_build_status_repo_in_github() {
 	# Delete the repository locally for cleaning up.
 	remove_dir "$GITHUB_STATUS_WEBSITE_GLOBAL"
 	manual_assert_dir_not_exists "$GITHUB_STATUS_WEBSITE_GLOBAL"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+#######################################
+# Verifies machine has push access to gitlab build status repository in GitHub.
+# This is done by first veriying the ssh-key is created and added to the 
+# ssh-agent. Next it downloads the build status repository to which the deploy
+# key should give access. Then it creates a file, if it does not exist, or it
+# flips the boolean name if it does exist. Then it pushes the changes, something
+# that should be possible if the ssh deploy key is correctly added to the repo-
+# sitory. Then it deletes the local copy of the repository and clones it again.
+# Then it verifies/asserts the boolean file is created/that the name is flipped.
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0): Write tests for this method.
+#######################################
+# Run with: 
+# bash -c "source src/import.sh && check_if_machine_has_push_access_to_gitlab_build_status_repo_in_github some_github_deploy_key" "a-t-0"
+# source src/import.sh && check_if_machine_has_push_access_to_gitlab_build_status_repo_in_github "a-t-0"
+check_if_machine_has_push_access_to_gitlab_build_status_repo_in_github() {
+	local github_user="$1"
+
+	local public_key_filename="$GITHUB_SSH_DEPLOY_KEY_NAME.pub"
+	local private_key_filename="$GITHUB_SSH_DEPLOY_KEY_NAME"
+
+	# Use the generation and activate functions as verifiers.
+	# Assert the ssh-keys exist.
+	if [ "$(file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename")" != "FOUND" ]; then
+		echo "NOTFOUND"
+		return 111
+	fi
+	if [ "$(file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename")" != "FOUND" ]; then
+		echo "NOTFOUND"
+		return 112
+	fi
+
+	# Verify the ssh-key is added to the ssh-agent.
+	public_key_sha=$(get_public_key_sha_from_key_filename $GITHUB_SSH_DEPLOY_KEY_NAME)
+	if [ "$(check_if_public_key_sha_is_in_ssh_agent $public_key_sha)" != "FOUND" ]; then
+		#echo "Error, the ssh-key should added to the ssh-agent (in ssh-add -l), however, they were not found in the ssh-agent."
+		echo "NOTFOUND"
+		return 113
+	fi
+
+	# Delete the repository locally if it exists.
+	remove_dir "$GITHUB_STATUS_WEBSITE_GLOBAL"
+	manual_assert_dir_not_exists "$GITHUB_STATUS_WEBSITE_GLOBAL"
+
+	# Try to manually verify ssh deploy key works:
+	#local output=$(ssh -T git@github.com)
+	local output=$(ssh -T git@github.com > temp.txt 2>&1)
+	local output="$(cat temp.txt)"
+	rm temp.txt
+	expected_output="Hi $github_user/$GITHUB_STATUS_WEBSITE_GLOBAL! You've successfully authenticated, but GitHub does not provide shell access."
+	
+	if [ "$output" == "$expected_output" ]; then
+		# Clone the repository.
+		# Get the repository that can automatically get the GitHub deploy token.
+		# TODO: if this does not work, the ssh is not working (or repo/user doesn't exist). 
+		# Do a specific check if ssh deploy key works/has access to the repo, before trying to download.
+		download_and_overwrite_repository_using_ssh "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
+		sleep 2
+		manual_assert_dir_exists "$GITHUB_STATUS_WEBSITE_GLOBAL"
+
+		# Delete the repository locally for cleaning up.
+		remove_dir "$GITHUB_STATUS_WEBSITE_GLOBAL"
+		manual_assert_dir_not_exists "$GITHUB_STATUS_WEBSITE_GLOBAL"
+		echo "FOUND"
+	else
+		echo "NOTFOUND"
+		return 114
+	fi	
 }

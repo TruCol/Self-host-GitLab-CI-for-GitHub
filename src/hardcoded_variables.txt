@@ -49,3 +49,4 @@ COMMIT_WHOSE_BUILD_STATUS_IS_SET_FOR_TESTING_PURPOSES=02c5fce3500d7b9e2d79cb5b7d
 # Specify location of personal credentials. (Stored outside repository to 
 # prevent accidental pushing of the personal credentials)
 PERSONAL_CREDENTIALS_PATH="../personal_creds.txt"
+GITHUB_SSH_DEPLOY_KEY_NAME=some_github_deploy_key

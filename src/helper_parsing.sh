@@ -706,11 +706,14 @@ ensure_global_is_in_file() {
 	# If the filepath contains the $identifier:
 	local personal_credits_contain_global=$(file_contains_string "$identifier" "$filepath")
 	if [ "$personal_credits_contain_global" == "FOUND" ]; then
+		echo "Found $identifier now changing the line."
 		# Override the existing identifier and value in personal_creds.txt
 		change_line "$identifier" "$identifier=$incoming_value" "$filepath"
 		assert_file_contains_string "$identifier=$incoming_value" "$filepath"
 	else
+		echo "Found $identifier now changing the line."
 		# Append identifier and value to personal_creds.txt.
+		echo "" >> "$filepath"
 		echo "$identifier=$incoming_value" >> "$filepath"
 		assert_file_contains_string "$identifier=$incoming_value" "$filepath"
 	fi

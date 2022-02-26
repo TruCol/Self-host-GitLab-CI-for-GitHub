@@ -16,6 +16,7 @@ set_gitlab_pwd() {
 
 # Run with: 
 # bash -c "source src/import.sh && assert_required_repositories_exist a-t-0"
+# TODO: include catch for: The requested URL returned error: 403 rate limit exceeded
 assert_required_repositories_exist(){
 	local github_username="$1"
 	#$GITHUB_STATUS_WEBSITE_GLOBAL
@@ -106,13 +107,15 @@ set_personal_github_pat_and_verify() {
 	
 	# Reload personal credentials to load new GitHub token.
 	source "$PERSONAL_CREDENTIALS_PATH"
-	echo "GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL=$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL"
+
 
 	# Assert the GitHub pat can be used to set the github commit status.
+	printf "\n\n\n Verifying the GitHub personal access token can be used to set a commit status to: Pending."
 	set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $GITLAB_SERVER_HTTP_URL "pending"
+	printf "\n\n\n Verifying the GitHub personal access token can be used to set a commit status to: Success."
 	set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $GITLAB_SERVER_HTTP_URL "success"
 
-	#ensure_global_is_in_file "GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$github_pat" 
+	#ensure_global_is_in_file "GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$github_pat"
 }
 
 
@@ -120,6 +123,7 @@ set_personal_github_pat_and_verify() {
 # bash -c "source src/import.sh && ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status a-t-0"
 ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status() {
 	local github_username="$1"
+	local github_pwd="$2"
 
 	# Assumes the GitLab build status repository exists in GitHub.
 	# Verify if the GitLab build status repository exists in GitHub.	
@@ -127,7 +131,9 @@ ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status() {
 
 	# Get the GitHub ssh deploy key to push and pull the GitLab build status 
 	# icons to the GitHub build status repository.
-	get_github_build_status_repo_ssh_deploy_key "example@example.com" "$GITHUB_SSH_DEPLOY_KEY_NAME"
+	printf "\n\n\n Ensuring a ssh deploy key is to GitHub to push build status icons to your build status repository.\n\n\n."
+	get_github_build_status_repo_ssh_deploy_key "example@example.com" "$GITHUB_SSH_DEPLOY_KEY_NAME" "$github_username" "$github_pwd"
+	printf "\n\n\n Verifying the GitHub ssh deploy token is able to push build status icons to your build status repository.\n\n\n."
 	verify_machine_has_push_access_to_gitlab_build_status_repo_in_github "$GITHUB_SSH_DEPLOY_KEY_NAME"
 }
 

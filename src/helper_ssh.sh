@@ -615,13 +615,18 @@ assert_ssh_access_to_repo() {
 #######################################
 # run with:
 
-# source src/import.sh && get_github_build_status_repo_ssh_deploy_key "example@example.com" some_github_deploy_key
-# bash -c "source src/import.sh && get_github_build_status_repo_ssh_deploy_key example@example.com some_github_deploy_key"
+# source src/import.sh && get_github_build_status_repo_ssh_deploy_key "example@example.com" some_github_deploy_key a-t-0 somepwd
+# bash -c "source src/import.sh && get_github_build_status_repo_ssh_deploy_key example@example.com some_github_deploy_key a-t-0 somepwd"
 get_github_build_status_repo_ssh_deploy_key() {
 	local email="$1"
 	local identifier="$2"
+	local github_username="$3"
+	local github_pwd="$4"
+
 	local public_key_filename="$identifier.pub"
 	local private_key_filename="$identifier"
+	
+	
 
 	# Generate ssh-key and add it to ssh-agent
 	generate_ssh_key_if_not_exists "$email" "$identifier"
@@ -643,14 +648,18 @@ get_github_build_status_repo_ssh_deploy_key() {
 
 	# TODO: verify path before running command.
 
-	# TODO: turn get_gitlab_generation_token into variable
+	printf "\n\n Now using a browser controller repository to add the generated ssh deploy key to GitHub.\n\n."
 	# shellcheck disable=SC2034
 	if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
 		eval "$(conda shell.bash hook)"
-		cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --d --ssh "$public_ssh_key_data"
+		export github_username=$github_username
+		export github_pwd=$github_pwd
+		cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --d --ssh "$public_ssh_key_data" -hu $github_username -hp $github_pwd
 	else
 		eval "$(conda shell.bash hook)"
-		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --d --ssh "$public_ssh_key_data"
+		export github_username=$github_username
+		export github_pwd=$github_pwd
+		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --d --ssh "$public_ssh_key_data" -hu $github_username -hp $github_pwd
 		
 	fi
 	cd ..

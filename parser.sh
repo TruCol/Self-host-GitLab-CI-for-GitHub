@@ -211,21 +211,33 @@ fi
 source "$PERSONAL_CREDENTIALS_PATH"
 
 # Verify the personal credits are stored correctly.
+printf "\n\n\n Verifying the $PERSONAL_CREDENTIALS_PATH contains the right data."
 verify_prerequisite_personal_creds_txt_contain_required_data
 verify_prerequisite_personal_creds_txt_loaded
 
+
+# Raise sudo permission at the start, to prevent requiring user permission half way through tests.
+printf "\n\n\n Now getting sudo permission to perform the GitLab installation."
+{
+  sudo echo "hi"
+} &> /dev/null
+
 # Verify the GitHub user has the required repositories.
-assert_required_repositories_exist $GITHUB_USERNAME_GLOBAL
+printf "\n\n\n Verifying the $GITHUB_STATUS_WEBSITE_GLOBAL and $PUBLIC_GITHUB_TEST_REPO_GLOBAL repositories exist in your GitHub account."
+# TODO: include catch for: The requested URL returned error: 403 rate limit exceeded
+#assert_required_repositories_exist $GITHUB_USERNAME_GLOBAL
 
 # Get the GitHub personal access code.
-ensure_github_pat_can_be_used_to_set_commit_build_status $GITHUB_USERNAME_GLOBAL $PUBLIC_GITHUB_TEST_REPO_GLOBAL
+printf "\n\n\n Setting and Getting the GitHub personal access token if it does not yet exist."
+ensure_github_pat_can_be_used_to_set_commit_build_status $GITHUB_USERNAME_GLOBAL $PUBLIC_GITHUB_TEST_REPO_GLOBAL $github_password
 
 # Get the GitLab personal access token
+printf "\n\n\n Verifying the GitHub personal access token works."
 ensure_new_gitlab_personal_access_token_works
 
 # Set GitLab password without displaying it in terminal.
 if [ "$gitlab_personal_access_token_flag" == "true" ]; then
-
+  printf "\n\n\n Creating and storing GitLab personal access token."
   create_gitlab_personal_access_token $gitlab_personal_access_token
  
   # Check if token, as loaded from  not "" otherwise throw error
@@ -233,14 +245,20 @@ if [ "$gitlab_personal_access_token_flag" == "true" ]; then
   source "$PERSONAL_CREDENTIALS_PATH"
 fi
 
+
+
+
 # Check if ssh deploy key already exists and can be used to push
 # to GitHub, before creating a new one.
+printf "\n\n\n Checking to see if you already have ssh push access to the $GITHUB_STATUS_WEBSITE_GLOBAL repository with your ssh-deploy key."
 has_ssh_push_access=$(check_if_machine_has_push_access_to_gitlab_build_status_repo_in_github $GITHUB_USERNAME_GLOBAL)
 if [ "$has_ssh_push_access" == "NOTFOUND" ]; then
   # Get the GitHub ssh deploy key.
-  ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status $GITHUB_USERNAME_GLOBAL
+  printf "\n\n\n Ssh access to $GITHUB_STATUS_WEBSITE_GLOBAL was not found. Now creating an ssh deploy key for you and adding it to GitHub."
+  ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status $GITHUB_USERNAME_GLOBAL $github_password
 elif [ "$has_ssh_push_access" == "FOUND" ]; then
   # Verify the GitHub ssh deploy key works.
+  printf "\n\n\n Verifying you indeed have ssh push access to $GITHUB_STATUS_WEBSITE_GLOBAL using your GitHub ssh-deploy key."
   verify_machine_has_push_access_to_gitlab_build_status_repo_in_github "$GITHUB_SSH_DEPLOY_KEY_NAME"
 else
   echo "Error, the output of ssh_check_output did not end in FOUND, nor in NOTFOUND: $ssh_check_output"
@@ -248,15 +266,13 @@ else
 fi
 
 # Verify all required credentials are in personal_creds.txt
+printf "\n\n\n Verifying the GitHub and GitLab personal access tokens are in the $PERSONAL_CREDENTIALS_PATH file."
 verify_personal_creds_txt_contain_pacs
 
-# Raise sudo permission at the start, to prevent requiring user permission half way through tests.
-{
-  sudo echo "hi"
-} &> /dev/null
-
 # Install prerequisites
+printf "\n\n\n Checking if jquery is installed."
 if [ $(jq --version) != "jq-1.6" ]; then
+  printf "\n\n\n Installing jquery."
 	yes | sudo apt install jq
 fi
 
@@ -265,11 +281,12 @@ fi
 if [ "$server_flag" == "true" ]; then
   # TODO: verify required data is in personal_creds.txt 
 	# TODO: uncomment
+  printf "\n\n\n Installing the GitLab server!"
   #install_and_run_gitlab_server
 	echo "Installed gitlab server, should be up in a few minutes."
 fi
 
-
+# TODO: Install GitLab runner.
 
 # Call run CI on default repository.
 # Create method to run on particular user and particular repo

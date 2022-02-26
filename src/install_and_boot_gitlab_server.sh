@@ -10,8 +10,6 @@
 		# Run command to host GitLab server
 install_and_run_gitlab_server() {
 
-	# Ensure prerequisites are satisfied.
-	establish_prerequisites "a-t-0" "sponsor_example"
 
 	gitlab_package=$(get_gitlab_package)
 	# TODO: verify if architecture is supported, raise error if not
@@ -54,8 +52,10 @@ install_and_run_gitlab_server() {
 		verify_gitlab_server_status "$SERVER_STARTUP_TIME_LIMIT"
 		# Also create personal access token
 		read -p "SETTING PERSONAL ACCESS TOKEN, check if it does not already exist."
-		create_gitlab_personal_access_token
+		ensure_new_gitlab_personal_access_token_works
 		read -p "Done setting PERSONAL ACCESS TOKEN."
+		printf "\n\n\n Verifying the GitHub and GitLab personal access tokens are in the $PERSONAL_CREDENTIALS_PATH file."
+		verify_personal_creds_txt_contain_pacs
 	elif [ "$gitlab_server_is_running" == "RUNNING" ]; then
 		echo "The GitLab server is already running."
 	else

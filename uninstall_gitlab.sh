@@ -9,6 +9,9 @@ runner_flag='false'
 #verbose='false'
 
 print_usage() {
+  printf "\nDefault usage, write:"
+  printf "\n./uninstall_gitlab.sh -y -h -r \nto completely remove GitLab and all related data."
+
   printf "\nUsage: write:"
   printf "\n\n ./uninstall -p\n to do an uninstall of the GitLab server that Preserves repositories etc."
   printf "\n./uninstall -h\n to do a Hard uninstallation and removal of the GitLab server (DELETES repositories, user accounts etc.)."

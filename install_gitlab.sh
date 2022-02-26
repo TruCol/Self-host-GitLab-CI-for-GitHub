@@ -228,21 +228,6 @@ printf "\n\n\n Verifying the $GITHUB_STATUS_WEBSITE_GLOBAL and $PUBLIC_GITHUB_TE
 printf "\n\n\n Setting and Getting the GitHub personal access token if it does not yet exist."
 ensure_github_pat_can_be_used_to_set_commit_build_status $GITHUB_USERNAME_GLOBAL $PUBLIC_GITHUB_TEST_REPO_GLOBAL $github_password
 
-# Get the GitLab personal access token
-printf "\n\n\n Verifying the GitHub personal access token works."
-ensure_new_gitlab_personal_access_token_works
-
-# Set GitLab password without displaying it in terminal.
-if [ "$gitlab_personal_access_token_flag" == "true" ]; then
-  printf "\n\n\n Creating and storing GitLab personal access token."
-  create_gitlab_personal_access_token $gitlab_personal_access_token
- 
-  # Check if token, as loaded from  not "" otherwise throw error
-  # Reload personal_creds.txt
-  source "$PERSONAL_CREDENTIALS_PATH"
-fi
-
-
 
 
 # Check if ssh deploy key already exists and can be used to push
@@ -262,9 +247,9 @@ else
   exit 56
 fi
 
-# Verify all required credentials are in personal_creds.txt
-printf "\n\n\n Verifying the GitHub and GitLab personal access tokens are in the $PERSONAL_CREDENTIALS_PATH file."
-verify_personal_creds_txt_contain_pacs
+
+# TODO: Verify the GitHub personal access token is in $PERSONAL_CREDENTIALS_PATH file."
+# verify_personal_creds_txt_contain_pacs
 
 # Install prerequisites
 printf "\n\n\n Checking if jquery is installed."
@@ -283,6 +268,28 @@ if [ "$server_flag" == "true" ]; then
 	echo "Installed gitlab server, should be up in a few minutes. You can visit it at:"
   echo "$GITLAB_SERVER_HTTP_URL"
 fi
+
+# TODO: Remove, this is done during the installation of the GitLab server.
+# Get the GitLab personal access token
+#printf "\n\n\n Verifying the GitLab personal access token works."
+#ensure_new_gitlab_personal_access_token_works
+
+# Verify all required credentials are in personal_creds.txt
+printf "\n\n\n Verifying the GitHub and GitLab personal access tokens are in the $PERSONAL_CREDENTIALS_PATH file."
+verify_personal_creds_txt_contain_pacs
+
+
+# Set GitLab password without displaying it in terminal.
+####if [ "$gitlab_personal_access_token_flag" == "true" ]; then
+####  printf "\n\n\n Creating and storing GitLab personal access token."
+####  create_gitlab_personal_access_token $gitlab_personal_access_token
+#### 
+####  # Check if token, as loaded from  not "" otherwise throw error
+####  # Reload personal_creds.txt
+####  source "$PERSONAL_CREDENTIALS_PATH"
+####fi
+####
+
 
 
 # Check if runner is being uninstalled:

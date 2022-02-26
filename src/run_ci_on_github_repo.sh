@@ -163,7 +163,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 			# TODO: check if github commit already has CI build status
 			# TODO: allow overriding this check to enforce the CI to run again on this commit.
 			printf "\n\n\n Check if the commit of the GitHub branch already has CI results."
-			commit_filename="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha.txt"
+			commit_filename="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$organisation/$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha.txt"
 			exists="$(file_exists $commit_filename)"
 			echo "commit_filename=$commit_filename"
 			echo "exists=$exists"

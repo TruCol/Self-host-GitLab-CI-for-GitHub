@@ -11,14 +11,15 @@ initialise_github_repositories_array() {
 
 # source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user "hiveminds"
 # source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user "a-t-0"
+# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user hiveminds"
 run_ci_on_all_repositories_of_user(){
 	local github_organisation_or_username="$1"
 	
 	initialise_github_repositories_array "$github_organisation_or_username"
-	
+	echo "github_repositories=${github_repositories[@]}"
 	for github_repository in "${github_repositories[@]}"; do
 		echo "$github_repository"
-		run_ci_on_github_repo "$github_organisation_or_username" "$github_repository"
+		run_ci_on_github_repo "$github_organisation_or_username" "$github_repository" "$github_organisation_or_username"
 	done
 }
 

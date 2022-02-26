@@ -54,6 +54,7 @@ source src/helper.sh
 source src/helper_docker.sh
 source src/helper_parsing.sh
 source src/helper_configuration.sh
+source src/install_and_boot_gitlab_runner.sh
 
 source src/install_support_programs.sh
 source src/helper_md5sum.sh

@@ -2,6 +2,7 @@
 
 Hi, thanks for checking out this repo! :) It runs your own self-hosted GitLab CI on all GitHub repositories of a GitHub user/organisation, in a single command. Tested on Ubuntu 20.04 LTS. 
 
+
 ## Setup GitLab server + GitLab runner CI
 To install your own GitLab server:
 ```
@@ -12,14 +13,14 @@ chmod +x *.sh
 ```
 (You can leave out `-hp` if you're not comfortable typing your GitHub pw in code, then you'll be manually prompted to login via the browser.)
 
-To uninstall and delete all the data of your local GitLab:
-```
-./uninstall_gitlab.sh -y -h -r
-```
 
 ## Run your GitLab CI on all repositories of an arbitrary GitHub User:
 ```
 bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user <some GitHub account/organisation>"
+```
+## Uninstall and delete all the data of your local GitLab server:
+```
+./uninstall_gitlab.sh -y -h -r
 ```
 
 ## Testing

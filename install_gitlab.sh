@@ -264,7 +264,7 @@ if [ "$server_flag" == "true" ]; then
   # TODO: verify required data is in personal_creds.txt 
 	# TODO: uncomment
   printf "\n\n\n Installing the GitLab server!"
-  install_and_run_gitlab_server
+  install_and_run_gitlab_server "$GITLAB_SERVER_PASSWORD_GLOBAL"
 	echo "Installed gitlab server, should be up in a few minutes. You can visit it at:"
   echo "$GITLAB_SERVER_HTTP_URL"
 fi

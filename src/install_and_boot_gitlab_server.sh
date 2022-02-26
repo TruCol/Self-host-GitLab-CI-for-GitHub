@@ -9,7 +9,7 @@
 		# Install GitLab
 		# Run command to host GitLab server
 install_and_run_gitlab_server() {
-
+	local gitlab_pwd="$1"
 
 	gitlab_package=$(get_gitlab_package)
 	# TODO: verify if architecture is supported, raise error if not
@@ -48,7 +48,7 @@ install_and_run_gitlab_server() {
 		stop_nginx_service
 		echo "stop_nginx_service"
 		#stop_nginx
-		run_gitlab_docker
+		run_gitlab_docker "$gitlab_pwd"
 		verify_gitlab_server_status "$SERVER_STARTUP_TIME_LIMIT"
 		# Also create personal access token
 		read -p "SETTING PERSONAL ACCESS TOKEN, check if it does not already exist."
@@ -95,6 +95,7 @@ create_gitlab_folder() {
 
 # Run docker installation command of gitlab
 run_gitlab_docker() {
+	local gitlab_pwd="$1"
 	gitlab_package=$(get_gitlab_package)
 	#read -p "Create command." >&2
 	# shellcheck disable=SC2154
@@ -133,14 +134,14 @@ run_gitlab_docker() {
 	  --volume "$GITLAB_HOME"/config:/etc/gitlab \
 	  --volume "$GITLAB_HOME"/logs:/var/log/gitlab \
 	  --volume "$GITLAB_HOME"/data:/var/opt/gitlab \
-	  -e GITLAB_ROOT_EMAIL="$GITLAB_ROOT_EMAIL_GLOBAL" -e GITLAB_ROOT_PASSWORD="yoursecretpassword" -e EXTERNAL_URL="http://127.0.0.1" \
+	  -e GITLAB_ROOT_EMAIL="$GITLAB_ROOT_EMAIL_GLOBAL" -e GITLAB_ROOT_PASSWORD="$gitlab_pwd" -e EXTERNAL_URL="http://127.0.0.1" \
 	  "$gitlab_package")
 	  #read -p "Ran command." >&2
 	  echo "$output"
 	  #-e GITLAB_ROOT_EMAIL="some_email@protonmail.com" -e GITLAB_ROOT_PASSWORD="$GITLAB_SERVER_PASSWORD_GLOBAL" -e EXTERNAL_URL="http://127.0.0.1" \
 	  #-e GITLAB_ROOT_EMAIL="some_email@protonmail.com" -e GITLAB_ROOT_PASSWORD=$GITLAB_SERVER_PASSWORD_GLOBAL -e EXTERNAL_URL="http://127.0.0.1" \
 	  #-e GITLAB_ROOT_EMAIL=$GITLAB_ROOT_EMAIL_GLOBAL -e GITLAB_ROOT_PASSWORD=yoursecretpassword -e EXTERNAL_URL="http://127.0.0.1" \
-	  
+	  #-e GITLAB_ROOT_EMAIL="$GITLAB_ROOT_EMAIL_GLOBAL" -e GITLAB_ROOT_PASSWORD="yoursecretpassword" -e EXTERNAL_URL="http://127.0.0.1" \ # Works
 }
 
 # TODO: 

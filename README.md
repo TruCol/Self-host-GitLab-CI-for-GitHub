@@ -1,6 +1,6 @@
-# Self-hosted GitLab CI on GitHub repos over Tor (for a Raspberry Pi 4b)
+# Self-hosted GitLab CI for all your GitHub repos
 
-This runs your own self-hosted GitLab CI on all GitHub repositories of a GitHub user/organisation, in a single command. Tested on Ubuntu 20.04 LTS. 
+Hi, thanks for checking out this repo! :) It runs your own self-hosted GitLab CI on all GitHub repositories of a GitHub user/organisation, in a single command. Tested on Ubuntu 20.04 LTS. 
 
 ## Setup GitLab server + GitLab runner CI
 To install your own GitLab server:
@@ -10,8 +10,7 @@ cd Self-host-GitLab-CI-for-GitHub
 chmod +x *.sh
 ./install_gitlab.sh -s -r -hu <your GitHub account> -le somegitlab@email.com -lp -hp
 ```
-Please let me know if this works, or if you get any error message.
-(Note you can also leave out `-hp` if you're not comfortable typing your GitHub pw in code, then you'll be manually prompted to login via the browser (2 times).)
+(You can leave out `-hp` if you're not comfortable typing your GitHub pw in code, then you'll be manually prompted to login via the browser.)
 
 To uninstall and delete all the data of your local GitLab:
 ```

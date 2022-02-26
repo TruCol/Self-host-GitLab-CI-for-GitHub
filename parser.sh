@@ -98,7 +98,6 @@ while [[ $# -gt 0 ]]; do
       assert_is_non_empty_string ${github_username}
       shift # past argument
       shift
-
       ;;
     -hp|--github-password)
       github_pwd_flag='true'
@@ -172,9 +171,6 @@ if [ "$github_pwd_flag" == "true" ]; then
 	echo -n GitHub Password: 
 	read -s github_password
 	echo
-	
-  # Display password.
-	echo $github_password
   assert_is_non_empty_string ${github_password}
 fi
 
@@ -183,9 +179,6 @@ if [ "$gitlab_pwd_flag" == "true" ]; then
 	echo -n "Your new GitLab password:": 
 	read -s gitlab_pwd
 	echo
-	
-  # Display commit_status_personal_access_token.
-	echo $gitlab_pwd
   assert_string_only_contains_alphanumeric_chars ${gitlab_pwd}
 fi
 

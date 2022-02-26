@@ -39,12 +39,14 @@ get_github_personal_access_token() {
 		eval "$(conda shell.bash hook)"
 		export repo_name=$REPONAME_GET_RUNNER_TOKEN_PYTHON
 		export github_pwd=$github_pwd
+		# TODO: include GITHUB_USERNAME_GLOBAL
 		#cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat
 		cd $repo_name && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat
 	else
 		eval "$(conda shell.bash hook)"
 		export repo_name=$REPONAME_GET_RUNNER_TOKEN_PYTHON
 		export github_pwd=$github_pwd
+		# TODO: GITHUB_USERNAME_GLOBAL
 		#cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat
 		cd $repo_name && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat
 	fi

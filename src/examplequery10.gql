@@ -1,0 +1,41 @@
+query {
+  repositoryOwner(login: "hiveminds") {
+    repositories(first: 3, after: "Y3Vyc29yOnYyOpHODH7CdA==") {
+      edges {
+        node {
+          name
+          ... on Repository {
+            refs(
+              refPrefix: "refs/heads/"
+              orderBy: { direction: DESC, field: TAG_COMMIT_DATE }
+              first: 4
+            ) {
+              edges {
+                node {
+                  ... on Ref {
+                    name
+                    target {
+                      ... on Commit {
+                        history(first: 10) {
+                          edges {
+                            node {
+                              ... on Commit {
+                                oid
+                              }
+                            }
+                            cursor
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        cursor
+      }
+    }
+  }
+}

@@ -54,24 +54,29 @@ get_repos_from_api_query_json() {
 # bash -c "source src/import.sh && loop_through_repos_in_api_query_json"
 loop_through_repos_in_api_query_json() {
 	# Specify max nr of repos in a query response.
-	max_repos=100 
+	local max_repos=100 
+	local max_commits=100
 	
 	# Load json to variable.
-	filepath="src/eg_query.json"
-	json=$(cat $filepath)
+	local filepath="src/eg_query.json"
+	local json=$(cat $filepath)
 	
 	# Remove unneeded json wrapper
-	eaten_wrapper="$(echo "$json" | jq ".[][][][]")"
+	local eaten_wrapper="$(echo "$json" | jq ".[][][][]")"
 	
 	# Loop 0 to 100 (including 100)
-	i=-1
+	local i=-1
 	while [ $max_repos -ge $i ]
 	do
-		i=$(($i+1))
+		local i=$(($i+1))
 		# Store the output of the json parsing function
-		some_value=$(evaluate_repo "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
-		repo_cursor=$(get_repo_cursor "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
-		repo_name=$(get_repo_name "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
+		local some_value=$(evaluate_repo "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
+		local repo_cursor=$(get_repo_cursor "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
+		local repo_name=$(get_repo_name "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
+
+		# Loop through commits
+		local commits=$(loop_through_commits_in_repo_json "$max_commits" "$(echo "$eaten_wrapper" | jq ".[$i]")")
+		echo "commits=$commits"
 
 		# Determine whether the entry was null or not.
 		evaluate_repo "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")"
@@ -83,7 +88,7 @@ loop_through_repos_in_api_query_json() {
 		# contain repository data.
 		if [ $i -ge $res ]; then
 			# Ensure while loop is broken numerically.
-			i=$(( $max_repos + $max_repos ))
+			local i=$(( $max_repos + $max_repos ))
 		fi
 	done
 }
@@ -122,36 +127,34 @@ get_repo_name() {
 }
 
 loop_through_commits_in_repo_json() {
-	# Specify max nr of repos in a query response.
-	max_repos=100 
+	local max_commits="$1"
+	local commits_json="$2"
 	
-	# Load json to variable.
-	filepath="src/eg_query.json"
-	json=$(cat $filepath)
-	
+	# Remove unneeded json wrapper
+	local eaten_wrapper="$(echo "$commits_json" | jq ".node")"
+	echo "eaten_wrapper=$eaten_wrapper"
 	# Loop 0 to 100 (including 100)
-	i=-1
-	while [ $max_repos -ge $i ]
-	do
-		i=$(($i+1))
-		# Store the output of the json parsing function
-		some_value=$(evaluate_repo "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")")
-		repo_cursor=$(get_repo_cursor "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")")
-		repo_name=$(get_repo_name "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")")
-
-		# Determine whether the entry was null or not.
-		evaluate_repo "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")"
-		local res=$? # Get the return value of the function.
-
-		# Check if the JSON contained null or if the next entry may still 
-		# contain repository data.
-		if [ $i -ge $res ]; then
-			# Ensure while loop is broken numerically.
-			i=$(( $max_repos + $max_repos ))
-		fi
-	done
-	#echo "somevalue=$some_value"
-	echo "repo_cursor=$repo_cursor"
-	echo "repo_name=$repo_name"
+	local i=-1
+	#while [ $max_repos -ge $i ]
+	#do
+	#	local i=$(($i+1))
+	#	# Store the output of the json parsing function
+	#	local some_value=$(evaluate_repo "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
+	#	#local repo_cursor=$(get_repo_cursor "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
+	#	#local repo_name=$(get_repo_name "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
+#
+	#	# Determine whether the entry was null or not.
+	#	evaluate_commit "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")"
+	#	local res=$? # Get the return value of the function.
+	#	#echo "i=$i, repo_cursor=$repo_cursor"
+	#	#echo "i=$i, repo_name=$repo_name"
+#
+	#	# Check if the JSON contained null or if the next entry may still 
+	#	# contain repository data.
+	#	if [ $i -ge $res ]; then
+	#		# Ensure while loop is broken numerically.
+	#		local i=$(( $max_repos + $max_repos ))
+	#	fi
+	#done
 
 }

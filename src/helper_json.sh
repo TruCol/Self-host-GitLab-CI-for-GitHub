@@ -60,33 +60,24 @@ loop_through_repos_in_api_query_json() {
 	filepath="src/eg_query.json"
 	json=$(cat $filepath)
 	
-	#eat="$(echo "$json" | jq ".[][][][]")"
-	# First repo
-	eat="$(echo "$json" | jq ".[][][][][0]")"
-	# Second repo
-	eat="$(echo "$json" | jq ".[][][][][1]")"
+	# Remove unneeded json wrapper
 	eaten_wrapper="$(echo "$json" | jq ".[][][][]")"
-	first_repo="$(echo "$eaten_wrapper" | jq ".[0]")"
-	second_repo="$(echo "$eaten_wrapper" | jq ".[1]")"
-	echo "first_repo=$first_repo"
-	echo "second_repo=$second_repo"
-	exit 4
-
+	
 	# Loop 0 to 100 (including 100)
 	i=-1
 	while [ $max_repos -ge $i ]
 	do
 		i=$(($i+1))
 		# Store the output of the json parsing function
-		some_value=$(evaluate_repo "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")")
-		repo_cursor=$(get_repo_cursor "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")")
-		repo_name=$(get_repo_name "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")")
+		some_value=$(evaluate_repo "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
+		repo_cursor=$(get_repo_cursor "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
+		repo_name=$(get_repo_name "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
 
 		# Determine whether the entry was null or not.
-		evaluate_repo "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")"
-		echo "repo_cursor=$repo_cursor"
-		echo "repo_name=$repo_name"
+		evaluate_repo "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")"
 		local res=$? # Get the return value of the function.
+		echo "i=$i, repo_cursor=$repo_cursor"
+		echo "i=$i, repo_name=$repo_name"
 
 		# Check if the JSON contained null or if the next entry may still 
 		# contain repository data.
@@ -95,20 +86,14 @@ loop_through_repos_in_api_query_json() {
 			i=$(( $max_repos + $max_repos ))
 		fi
 	done
-	#echo "somevalue=$some_value"
-	echo "repo_cursor=$repo_cursor"
-	echo "repo_name=$repo_name"
-
 }
 
 evaluate_repo() {
 	local max_repos="$1"
 	local repo_json="$2"
-	#echo "repo_json=$repo_json"
 	if [ "$repo_json" == "null" ]; then
 		return $max_repos
 	else
-		#echo "repo_json=$repo_json"
 		return 1
 	fi
 }
@@ -128,11 +113,10 @@ get_repo_cursor() {
 get_repo_name() {
 	local max_repos="$1"
 	local repo_json="$2"
-	#echo "repo_json=$repo_json"
 	if [ "$repo_json" == "null" ]; then
 		return $max_repos
 	else
-		echo "$(echo "$repo_json" | jq ".[].name")"
+		echo "$(echo "$repo_json" | jq ".node.name")"
 		return 1
 	fi
 }

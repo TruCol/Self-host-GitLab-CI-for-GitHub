@@ -34,8 +34,8 @@ run_ci_on_github_repo() {
 	# TODO: write test to verify whether the build status can be pushed to a branch. (access wise).
 	# TODO: Store log file output if a repo (and/or branch) have been skipped.
 	# TODO: In that log file, inlcude: time, which user, which repo, which branch, why.
-	printf "\n\n\n Downloading the GitHub repository on which to run GitLab CI"
-	download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
+	#printf "\n\n\n Downloading the GitHub repository on which to run GitLab CI"
+	#download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
 	printf "\n\n\n Exporting GitLab CI result back to a GitHub repository."
 	copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "$organisation"
 }
@@ -152,7 +152,11 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 			exit 4
 		fi
 		
-		# 4.b Export GitHub commit SHA to GitHub build status repo.
+		# 4.b Export the evaluated GitHub commit SHA to GitHub build 
+		# status repo.
+		copy_evaluated_commit_to_github_status_repo "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$organisation"
+		# 4.c Push the evaluated commit to the GitHub build status repo. 
+		push_commit_build_status_in_github_status_repo_to_github "$github_username"
 		
 		# 5. If the branch contains a gitlab yaml file then
 		# TODO: change to return a list of branches that contain GitLab 
@@ -423,8 +427,6 @@ set_build_status_of_github_commit_using_github_pat() {
 
 	# TODO: verify incoming commit build status is valid.
 	# TODO: verify incoming redirect url is valid.
-
-	
 	
 	#echo "redirect_to_ci_url=$redirect_to_ci_url"
 	#echo "commit_build_status=$commit_build_status"
@@ -621,6 +623,7 @@ copy_commit_build_status_to_github_status_repo() {
 	manual_assert_equal "$(cat "$build_status_icon_output_dir""/$github_commit_sha.txt")" "$status"
 }
 
+# bash -c "source src/import.sh && push_commit_build_status_in_github_status_repo_to_github a-t-0"
 push_commit_build_status_in_github_status_repo_to_github() {
 	local github_username="$1"
 	

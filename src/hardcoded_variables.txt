@@ -38,6 +38,7 @@ SOURCE_FOLDERPATH=src/$SOURCE_FOLDERNAME
 # Specify GitHub website settings.
 GITHUB_STATUS_WEBSITE_GLOBAL=gitlab-ci-build-statuses
 PUBLIC_GITHUB_TEST_REPO_GLOBAL=sponsor_example
+EVALUATED_COMMITS_LIST_FILENAME=evaluated_commits.txt
 
 # Specify Mirror folder
 MIRROR_LOCATION=src/mirrors

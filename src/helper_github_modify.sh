@@ -145,3 +145,48 @@ git_pull_github_repo() {
 		exit 12
 	fi
 }
+
+# Run with:
+# bash -c "source src/import.sh && copy_evaluated_commit_to_github_status_repo sponsor_example main somecommit_sha hiveminds"
+copy_evaluated_commit_to_github_status_repo() {
+	local github_repo_name="$1"
+	local github_branch_name="$2"
+	local github_commit_sha="$3"
+	local organisation="$4"
+
+	# Verify the mirror location exists
+	manual_assert_not_equal "$MIRROR_LOCATION" ""
+	manual_assert_dir_exists "$MIRROR_LOCATION"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitLab"
+	
+	# 8. Clone the GitHub build statusses repository.
+	download_and_overwrite_repository_using_ssh "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+	sleep 1
+	
+	# 9. Verify the Build status repository is cloned.
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+	
+	# 10. Copy the GitLab CI Build status icon to the build status repository.
+	# Create a folder of the repository on which a CI has been ran, inside the GitHub build status website repository, if it does not exist yet
+	# Also add a folder for the branch(es) of that GitLab CI repository, in that respective folder.
+	build_status_icon_output_dir="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$organisation/$github_repo_name/$github_branch_name"
+	mkdir -p "$build_status_icon_output_dir"
+	
+	
+	# TODO: 11. Include the build status and link to the GitHub commit in the repository in the SVG file.
+	# Create build status icon
+	touch "$build_status_icon_output_dir""/$github_commit_sha.txt"
+	
+	# Assert svg file is created correctly
+	manual_assert_equal "$(file_exists "$build_status_icon_output_dir""/$github_commit_sha.txt")" "FOUND"
+	
+	# Append commit to list of evaluated commits.
+	echo "$github_commit_sha" >> "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME"
+	
+	# manual_assert evaluated GitHub commit list file exists.
+	manual_assert_equal "$(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME")" "FOUND"
+	
+	# TODO: assert evaluated GitHub commit lists contains the GitHub commit
+	# sha.
+}

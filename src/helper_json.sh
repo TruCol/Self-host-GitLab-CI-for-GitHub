@@ -60,6 +60,18 @@ loop_through_repos_in_api_query_json() {
 	filepath="src/eg_query.json"
 	json=$(cat $filepath)
 	
+	#eat="$(echo "$json" | jq ".[][][][]")"
+	# First repo
+	eat="$(echo "$json" | jq ".[][][][][0]")"
+	# Second repo
+	eat="$(echo "$json" | jq ".[][][][][1]")"
+	eaten_wrapper="$(echo "$json" | jq ".[][][][]")"
+	first_repo="$(echo "$eaten_wrapper" | jq ".[0]")"
+	second_repo="$(echo "$eaten_wrapper" | jq ".[1]")"
+	echo "first_repo=$first_repo"
+	echo "second_repo=$second_repo"
+	exit 4
+
 	# Loop 0 to 100 (including 100)
 	i=-1
 	while [ $max_repos -ge $i ]
@@ -72,6 +84,8 @@ loop_through_repos_in_api_query_json() {
 
 		# Determine whether the entry was null or not.
 		evaluate_repo "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")"
+		echo "repo_cursor=$repo_cursor"
+		echo "repo_name=$repo_name"
 		local res=$? # Get the return value of the function.
 
 		# Check if the JSON contained null or if the next entry may still 
@@ -94,7 +108,7 @@ evaluate_repo() {
 	if [ "$repo_json" == "null" ]; then
 		return $max_repos
 	else
-		echo "repo_json=$repo_json"
+		#echo "repo_json=$repo_json"
 		return 1
 	fi
 }
@@ -121,4 +135,39 @@ get_repo_name() {
 		echo "$(echo "$repo_json" | jq ".[].name")"
 		return 1
 	fi
+}
+
+loop_through_commits_in_repo_json() {
+	# Specify max nr of repos in a query response.
+	max_repos=100 
+	
+	# Load json to variable.
+	filepath="src/eg_query.json"
+	json=$(cat $filepath)
+	
+	# Loop 0 to 100 (including 100)
+	i=-1
+	while [ $max_repos -ge $i ]
+	do
+		i=$(($i+1))
+		# Store the output of the json parsing function
+		some_value=$(evaluate_repo "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")")
+		repo_cursor=$(get_repo_cursor "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")")
+		repo_name=$(get_repo_name "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")")
+
+		# Determine whether the entry was null or not.
+		evaluate_repo "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")"
+		local res=$? # Get the return value of the function.
+
+		# Check if the JSON contained null or if the next entry may still 
+		# contain repository data.
+		if [ $i -ge $res ]; then
+			# Ensure while loop is broken numerically.
+			i=$(( $max_repos + $max_repos ))
+		fi
+	done
+	#echo "somevalue=$some_value"
+	echo "repo_cursor=$repo_cursor"
+	echo "repo_name=$repo_name"
+
 }

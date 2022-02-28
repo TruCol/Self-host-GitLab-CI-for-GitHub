@@ -152,6 +152,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 			exit 4
 		fi
 		
+		# 4.b Export GitHub commit SHA to GitHub build status repo.
 		
 		# 5. If the branch contains a gitlab yaml file then
 		# TODO: change to return a list of branches that contain GitLab 
@@ -272,7 +273,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 
 		# 6. Get the GitLab CI build status for that GitLab commit.
 		build_status="$(manage_get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")"
-		#echo "build_status=$build_status"
+		echo "build_status=$build_status"
 		#last_line_gitlab_ci_build_status=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${build_status}")
 		#echo "last_line_gitlab_ci_build_status=$last_line_gitlab_ci_build_status"
 
@@ -280,9 +281,11 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 
 		# 7. Once the build status is found, use github personal access token to
 		# set the build status in the GitHub commit.
+		printf "\n\n\n Set the build status of the GitHub commit using GitHub personal access token."
 		# TODO: ensure personal access token is created automatically to set build status.
-		# output=$(set_build_status_of_github_commit_using_github_pat "$github_username" "$github_repo_name" "$github_commit_sha" "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$gitlab_website_url" "$last_line_gitlab_ci_build_status")
-		# echo "output=$output"
+		#output=$(set_build_status_of_github_commit_using_github_pat "$github_username" "$github_repo_name" "$github_commit_sha" "$gitlab_website_url" "$last_line_gitlab_ci_build_status")
+		output=$(set_build_status_of_github_commit_using_github_pat "$github_username" "$github_repo_name" "$github_commit_sha" "$gitlab_website_url" "$build_status")
+		echo "output=$output"
 
 		# 8. Copy the commit build status from GitLab into the GitHub build status repo.
 		copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$build_status" "$organisation"
@@ -396,6 +399,13 @@ set_build_status_of_github_commit_using_github_pat() {
 	local redirect_to_ci_url="$4"
 	local commit_build_status="$5"
 
+	
+	#echo "github_username=$github_username"
+	#echo "github_repo_name=$github_repo_name"
+	#echo "github_commit_sha=$github_commit_sha"
+	#echo "commit_build_status=$commit_build_status"
+	#echo "redirect_to_ci_url=$redirect_to_ci_url"
+	
 	# Check if arguments are valid.
 	if [[ "$github_commit_sha" == "" ]]; then
 		echo "ERROR, the github commit sha is empty, whereas it shouldn't be."
@@ -415,11 +425,13 @@ set_build_status_of_github_commit_using_github_pat() {
 	# TODO: verify incoming redirect url is valid.
 
 	
+	
 	#echo "redirect_to_ci_url=$redirect_to_ci_url"
 	#echo "commit_build_status=$commit_build_status"
 	
 	# Create message in JSON format
 	JSON_FMT='{"state":"%s","description":"%s","target_url":"%s"}\n'
+	# TODO: replace second $commit_build_status with the actual build output or error message.
 	# shellcheck disable=SC2059
 	json_string=$(printf "$JSON_FMT" "$commit_build_status" "$commit_build_status" "$redirect_to_ci_url")
 	echo "json_string=$json_string"

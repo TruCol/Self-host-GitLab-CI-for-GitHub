@@ -68,6 +68,7 @@ loop_through_repos_in_api_query_json() {
 		# Store the output of the json parsing function
 		some_value=$(evaluate_repo "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")")
 		repo_cursor=$(get_repo_cursor "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")")
+		repo_name=$(get_repo_name "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")")
 
 		# Determine whether the entry was null or not.
 		evaluate_repo "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")"
@@ -82,6 +83,7 @@ loop_through_repos_in_api_query_json() {
 	done
 	#echo "somevalue=$some_value"
 	echo "repo_cursor=$repo_cursor"
+	echo "repo_name=$repo_name"
 
 }
 
@@ -116,7 +118,7 @@ get_repo_name() {
 	if [ "$repo_json" == "null" ]; then
 		return $max_repos
 	else
-		echo "$(echo "$repo_json" | jq ".name")"
+		echo "$(echo "$repo_json" | jq ".[].name")"
 		return 1
 	fi
 }

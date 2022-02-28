@@ -50,32 +50,73 @@ get_repos_from_api_query_json() {
 
 
 
-get_repos_from_api_query_json() {
+# Run with:
+# bash -c "source src/import.sh && loop_through_repos_in_api_query_json"
+loop_through_repos_in_api_query_json() {
+	# Specify max nr of repos in a query response.
+	max_repos=100 
+	
+	# Load json to variable.
 	filepath="src/eg_query.json"
-	
 	json=$(cat $filepath)
-	#echo "json=$json"
+	
+	# Loop 0 to 100 (including 100)
+	i=-1
+	while [ $max_repos -ge $i ]
+	do
+		i=$(($i+1))
+		# Store the output of the json parsing function
+		some_value=$(evaluate_repo "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")")
+		repo_cursor=$(get_repo_cursor "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")")
 
-	# First repo:
-	#echo "$(echo "$json" | jq ".[][].repositories[][0]")"
-	# Second repo
-	#echo "$(echo "$json" | jq ".[][].repositories[][1]")"
-	
-	echo "$(echo "$json" | jq ".[][].repositories[][55]")"
-	exit 4
-	readarray -t branch_names_arr <  <(echo "$json" | jq ".[][].repositories") # works
-	#readarray -t branch_names_arr <  <(echo "$json" | jq ".[][].repositories[][].nameWithOwner")
-	#readarray -t branch_names_arr <  <(echo "$json" | jq ".[][].repositories[][][].nameWithOwner") # Gets first repo
-	#readarray -t branch_names_arr <  <(echo "$json" | jq ".[][][][][][].nameWithOwner") # Gets first repo
-	
-	readarray -t branch_commits_arr <  <(echo "$json" | jq ".[].oid")
-	echo "branch_names_arr=${branch_names_arr[@]}"
-	echo "branch_commits_arr=${branch_commits_arr[@]}"
-	
-	# Loop through branches using a mutual index i.
-	#for i in "${!branch_names_arr[@]}"; do
-	#	echo "${branch_names_arr[i]}" 
-	#	echo "i=$i"
-	#done
-	 
+		# Determine whether the entry was null or not.
+		evaluate_repo "$max_repos" "$(echo "$json" | jq ".[][].repositories[][$i]")"
+		local res=$? # Get the return value of the function.
+
+		# Check if the JSON contained null or if the next entry may still 
+		# contain repository data.
+		if [ $i -ge $res ]; then
+			# Ensure while loop is broken numerically.
+			i=$(( $max_repos + $max_repos ))
+		fi
+	done
+	#echo "somevalue=$some_value"
+	echo "repo_cursor=$repo_cursor"
+
+}
+
+evaluate_repo() {
+	local max_repos="$1"
+	local repo_json="$2"
+	#echo "repo_json=$repo_json"
+	if [ "$repo_json" == "null" ]; then
+		return $max_repos
+	else
+		echo "repo_json=$repo_json"
+		return 1
+	fi
+}
+
+get_repo_cursor() {
+	local max_repos="$1"
+	local repo_json="$2"
+	#echo "repo_json=$repo_json"
+	if [ "$repo_json" == "null" ]; then
+		return $max_repos
+	else
+		echo "$(echo "$repo_json" | jq ".cursor")"
+		return 1
+	fi
+}
+
+get_repo_name() {
+	local max_repos="$1"
+	local repo_json="$2"
+	#echo "repo_json=$repo_json"
+	if [ "$repo_json" == "null" ]; then
+		return $max_repos
+	else
+		echo "$(echo "$repo_json" | jq ".name")"
+		return 1
+	fi
 }

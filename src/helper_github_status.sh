@@ -475,3 +475,31 @@ get_latest_commit_public_github_repo() {
 	# remove quotations
 	echo "$branch_commits_arr" | tr -d '"'
 }
+
+get_remote_github_list_of_repo_branches(){
+	local github_user="a-t-0"
+#	curl https://api.github.com/repos/joomla/joomla-cms/branches
+#	curl https://api.github.com/repos/joomla/repositories
+#	curl "https://api.github.com/users/$github_user/repos?per_page=100" | grep -o 'git@[^"]*'
+#	curl "https://api.github.com/users/a-t-0/repos?per_page=100" | grep -o 'git@[^"]*'
+#	curl "https://api.github.com/users/a-t-0/repos
+#	git for-each-ref --format='%(committerdate) %09 %(authoremail) %09 %(refname)' | sort -k5n -k2M -k3n -k4n | grep <author-email>
+#	https://github.com/:owner/:repo/commits.atom
+#	https://github.com/a-t-0/sponsor_example/commits.atom
+#	https://github.com/a-t-0/sponsor_example/branches.atom
+#	https://rsshub.app/github/repos/yanglr
+#	https://rsshub.app/github/repos/a-t-0
+#
+#
+#	# Source: https://www.maxivanov.io/make-graphql-requests-with-curl/
+#curl 'https://countries.trevorblades.com/' \
+ # -X POST \
+ # -H 'content-type: application/json' \
+ # --data '{
+ #   "query": "{ continents { code name } }"
+ # }'	
+#curl -i -H 'Content-Type: application/json' -H "Authorization: bearer myGithubAccessToken" -X POST -d '{"query": "query {repository(owner: \"wso2\", name: \"product-is\") {description}}"}' https://api.github.com/graphql
+#curl -i -H 'Content-Type: application/json' -H -X POST -d '{"query": "query {repository(owner: \"wso2\", name: \"product-is\") {description}}"}' https://api.github.com/graphql
+#curl -i -H 'Content-Type: application/json' -H -X POST -d '{"query": "query {repository(owner: \"a-t-0\") {description}}"}' https://api.github.com/graphql
+#	
+}

@@ -181,9 +181,16 @@ copy_evaluated_commit_to_github_status_repo() {
 	# Assert svg file is created correctly
 	manual_assert_equal "$(file_exists "$build_status_icon_output_dir""/$github_commit_sha.txt")" "FOUND"
 	
-	# Append commit to list of evaluated commits.
-	echo "$github_commit_sha" >> "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME"
-	
+	# Append commit to list of evaluated commits. 
+	# TODO: verify woks: if not in list already
+	lhs="$(grep $github_commit_sha "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME")"
+	read -p "CHECKING:,lhs=$lhs"
+	read -p "github_commit_sha=$github_commit_sha"
+	if [ "$(grep $github_commit_sha "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME")" != "$github_commit_sha" ]; then
+		echo "$github_commit_sha" >> "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME"
+		read -p "ADDED!"
+	fi
+
 	# manual_assert evaluated GitHub commit list file exists.
 	manual_assert_equal "$(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME")" "FOUND"
 	

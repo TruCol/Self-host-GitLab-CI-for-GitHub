@@ -515,6 +515,64 @@ checkout_branch_in_github_repo() {
   fi
 }
 
+#######################################
+# Checks if a GitHub repository exists locally. If so, the branch path is 
+# verified before and after the command has been executed to check if the
+# branch path has changed. if the path has changed, an error is shown.
+# Local variables:
+#  github_repo_name
+#  github_branch_name
+#  company
+#  pwd_before
+#  pwd_after
+# Globals:
+#  MIRROR_LOCATION
+# Arguments:
+#  The GitHub repository name.
+#  The GitHub branch name.
+#  The company.
+#  The path before the iniziation of a function.
+#  The path after the iniziation of a function.
+# Returns:
+#  0 if funciton was evaluated succesfull.
+#  15 if the current path was not returned to what it origally was before the function 
+#  was activated.
+#  16 if the GitHub branch did not exist locally before the function started.
+#  172 if the GitHub repository did not exist locally before the function started.
+# Outputs:
+#  None.
+#######################################
+checkout_commit_in_github_repo() {
+  local github_repo_name="$1"
+  local github_commit_sha="$2"
+  local company="$3"
+
+  if [ "$(github_repo_exists_locally $github_repo_name)" == "FOUND" ]; then
+
+    # Get the path before executing the command (to verify it is restored correctly after).
+    local pwd_before
+    pwd_before="$PWD"
+
+    # Checkout the branch inside the repository.
+    cd "$MIRROR_LOCATION/$company/$github_repo_name" && git checkout "$github_commit_sha"
+    cd ../../../..
+    # Get the path after executing the command (to verify it is restored correctly after).
+    local pwd_after
+    pwd_after="$PWD"
+
+    # Verify the current path is the same as it was when this function started.
+    if [ "$pwd_before" != "$pwd_after" ]; then
+      echo "The current path is not returned to what it originally was."
+      #echo "pwd_before=$pwd_before"
+      #echo "pwd_after=$pwd_after"
+      exit 15
+    fi
+  else
+    echo "ERROR, the GitHub repository does not exist locally."
+    exit 172
+  fi
+}
+
 
 # Structure:gitlab_modify
 # assumes you cloned the gitlab branch: 6.e.0 get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab
@@ -785,6 +843,85 @@ commit_changes_to_gitlab() {
 }
 
 
+commit_changes_to_gitlab_for_commit() {
+  local github_repo_name="$1"
+  local github_branch_name="$2"
+  local github_commit_sha="$3"
+  local gitlab_repo_name="$4"
+  local gitlab_branch_name="$5"
+
+  # If the GitHub repository exists
+  if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
+
+      # If the GitHub branch contains a gitlab yaml file
+      local filepath
+	    filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
+      if [ "$(file_exists $filepath)" == "FOUND" ]; then
+
+        # If the GitLab repository exists
+        if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
+
+          # If the GitLab branch exists
+          found_branch_name="$(get_current_gitlab_branch $gitlab_repo_name $gitlab_branch_name "GitLab")"
+          if [ "$found_branch_name" == "$gitlab_branch_name" ]; then
+
+            # If there exist differences in the files or folders in the branch (excluding the .git directory)
+
+            # Then copy the files and folders from the GitHub branch into the GitLab branch (excluding the .git directory)
+            # That also deletes the files that exist in the GitLab branch that do not exist in the GitHub branch (excluding the .git directory)
+            copy_github_files_and_folders_to_gitlab "$MIRROR_LOCATION/GitHub/$github_repo_name" "$MIRROR_LOCATION/GitLab/$github_repo_name"
+
+            # Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
+            comparison_result="$(two_folders_are_identical_excluding_subdir $MIRROR_LOCATION/GitHub/$github_repo_name $MIRROR_LOCATION/GitLab/$github_repo_name .git)"
+
+            # Verify the files were correctly copied from GitHub branch to GitLab branch.
+            if [ "$comparison_result" == "IDENTICAL" ]; then
+              #echo "IDENTICAL"
+
+              # Get the path before executing the command (to verify it is restored correctly after).
+              pwd_before="$PWD"
+
+              if [[ "$(git_has_changes "$MIRROR_LOCATION/GitLab/$github_repo_name")" == "FOUND" ]]; then
+
+                # Commit the changes to GitLab.
+                cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit -m \"$github_commit_sha\"
+                cd ../../../..
+              fi
+
+              # Get the path after executing the command (to verify it is restored correctly after).
+              pwd_after="$PWD"
+
+              # Verify the current path is the same as it was when this function started.
+              path_before_equals_path_after_command "$pwd_before" "$pwd_after"
+
+              # TODO: Verify the changes were committed to GitLab correctly. (There are no remaining files to be added)
+              #git status
+              # TODO: Verify the changes were committed to GitLab correctly. (There commit message equals the sha)
+              #git log
+
+            else
+              echo "ERROR, the content in the GitHub branch is not exactly copied into the GitLab branch, even when excluding the .git directory."
+              exit 11
+            fi
+
+          else
+            echo "ERROR, the GitLab branch does not exist locally."
+            exit 12
+          fi
+        else
+          echo "ERROR, the GitLab repository does not exist locally."
+          exit 13
+        fi
+      else
+        echo "ERROR, the GitHub branch does contain a yaml file."
+        exit 14
+      fi
+  else
+    echo "ERROR, the GitHub repository does not exist locally."
+    exit 25
+  fi
+}
+
 #######################################
 # Checks if a GitHub repository and branch exists. If the repository contains 
 # a GitLab  yaml file, the code checks if a GitLab repository and branch exist.
@@ -847,10 +984,10 @@ push_changes_to_gitlab() {
   if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
 
     # If the GitHub branch exists
-    local github_branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
-    github_branch_is_found=$(assert_ends_in_found_and_not_in_notfound ${github_branch_check_result})
+    #local github_branch_check_result="$(github_branch_exists $github_repo_name $github_branch_name)"
+    #github_branch_is_found=$(assert_ends_in_found_and_not_in_notfound ${github_branch_check_result})
     
-    if [ "$github_branch_is_found" == "TRUE" ]; then
+    #if [ "$github_branch_is_found" == "TRUE" ]; then
 
       # If the GitHub branch contains a gitlab yaml file
       local filepath
@@ -916,10 +1053,10 @@ push_changes_to_gitlab() {
           echo "ERROR, the GitLab repository does not exist locally."
           exit 13
         fi
-      else
-        echo "ERROR, the GitHub branch does contain a yaml file."
-        exit 14
-      fi
+      #else
+      #  echo "ERROR, the GitHub branch does contain a yaml file."
+      #  exit 14
+      #fi
     else
       echo "ERROR, the GitHub branch does not exist locally."
       exit 24

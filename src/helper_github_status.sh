@@ -267,6 +267,25 @@ verify_github_branch_contains_gitlab_yaml() {
 	fi
 }
 
+verify_github_commit_contains_gitlab_yaml() {
+	local github_repo_name="$1"
+	local company="$2"
+	
+	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
+
+		
+			# Test if GitHub branch contains a GitLab yaml file.
+			local filepath="$MIRROR_LOCATION/$company/$github_repo_name/.gitlab-ci.yml"
+			if [ "$(file_exists "$filepath")" == "FOUND" ]; then
+				echo "FOUND"
+			else
+				echo "NOTFOUND"
+			fi
+	else 
+		echo "ERROR, the GitHub repository does not exist locally."
+		exit 19
+	fi
+}
 
 # source src/import.sh src/helper_github_status.sh && get_org_repos "hiveminds"
 # source src/import.sh src/helper_github_status.sh && get_org_repos "a-t-0"

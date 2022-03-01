@@ -104,7 +104,7 @@ download_github_repo_on_which_to_run_ci() {
 # Run with: 
 # bash -c "source src/import.sh src/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example"
 # bash -c "source src/import.sh src/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo hiveminds renamed_test_repo"
-# source src/import.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example
+# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo hiveminds renamed_test_repo main hiveminds"
 copy_github_branches_with_yaml_to_gitlab_repo() {
 	local github_username="$1"
 	local github_repo_name="$2"
@@ -152,11 +152,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 			exit 4
 		fi
 		
-		# 4.b Export the evaluated GitHub commit SHA to GitHub build 
-		# status repo.
-		copy_evaluated_commit_to_github_status_repo "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$organisation"
-		# 4.c Push the evaluated commit to the GitHub build status repo. 
-		push_commit_build_status_in_github_status_repo_to_github "$github_username"
+		
 		
 		# 5. If the branch contains a gitlab yaml file then
 		# TODO: change to return a list of branches that contain GitLab 
@@ -186,6 +182,12 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 				echo "Already has build status in GitHub:$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha"
 			fi
 		fi
+		
+		# 4.b Export the evaluated GitHub commit SHA to GitHub build 
+		# status repo.
+		copy_evaluated_commit_to_github_status_repo "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$organisation"
+		# 4.c Push the evaluated commit to the GitHub build status repo. 
+		push_commit_build_status_in_github_status_repo_to_github "$github_username"
 	done
 	
 }

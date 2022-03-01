@@ -214,11 +214,21 @@ get_branch_name() {
 
 
 loop_through_commits_in_repo_json() {
-	local github_organisation="$1"
-	local repo_name="$2"
-	local branch_name="$3"
+	local with_quotations_github_organisation="$1"
+	local with_quotations_repo_name="$2"
+	local with_quotations_branch_name="$3"
 	local max_commits="$4"
 	local commits_json="$5"
+
+	github_organisation=$(echo "$with_quotations_github_organisation" | tr -d '"')
+	repo_name=$(echo "$with_quotations_repo_name" | tr -d '"')
+	branch_name=$(echo "$with_quotations_branch_name" | tr -d '"')
+	
+	#read -p "github_organisation=$github_organisation"
+	#read -p "repo_name=$repo_name"
+	#read -p "branch_name=$branch_name"
+	#read -p "max_commits=$max_commits"
+	#read -p "commits_json=$commits_json"
 	
 	if [ "$commits_json" != "null" ]; then
 		# Remove unneeded json wrapper

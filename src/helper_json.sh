@@ -207,7 +207,7 @@ get_branch_name() {
 		return $max_branches
 	else
 		branch_name="$(echo "$branch_json" | jq ".node.name")"
-		echo "branch_name=$branch_name"
+		echo "$branch_name"
 		return 1
 	fi
 }
@@ -241,7 +241,8 @@ loop_through_commits_in_repo_json() {
 #			# Store the output of the json parsing function
 			#local some_value=$(evaluate_commit "$max_commits" "$(echo "$eaten_commit_wrapper" | jq ".[$j]")")
 			local commit_cursor=$(get_commit_cursor "$max_commits" "$(echo "$eaten_commit_wrapper" | jq ".[$j]")")
-			local commit_name=$(get_commit_name "$max_commits" "$(echo "$eaten_commit_wrapper" | jq ".[$j]")")
+			local with_quotations_commit_name=$(get_commit_name "$max_commits" "$(echo "$eaten_commit_wrapper" | jq ".[$j]")")
+			commit_name=$(echo "$with_quotations_commit_name" | tr -d '"')
 			if [ "$commit_cursor" != "" ]; then
 				echo "repo_name=$repo_name, branch_name=$branch_name  commit_name=$commit_name"
 				echo "repo_name=$repo_name, branch_name=$branch_name commit_cursor=$commit_cursor"
@@ -299,7 +300,7 @@ get_commit_name() {
 		return $max_commits
 	else
 		commit_name="$(echo "$commit_json" | jq ".node.oid")"
-		echo "commit_name=$commit_name"
+		echo "$commit_name"
 		return 1
 	fi
 }

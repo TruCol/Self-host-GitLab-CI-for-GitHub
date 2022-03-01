@@ -184,11 +184,11 @@ copy_evaluated_commit_to_github_status_repo() {
 	# Append commit to list of evaluated commits. 
 	# TODO: verify woks: if not in list already
 	lhs="$(grep $github_commit_sha "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME")"
-	read -p "CHECKING:,lhs=$lhs"
-	read -p "github_commit_sha=$github_commit_sha"
+	#read -p "CHECKING:,lhs=$lhs"
+	#read -p "github_commit_sha=$github_commit_sha"
 	if [ "$(grep $github_commit_sha "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME")" != "$github_commit_sha" ]; then
 		echo "$github_commit_sha" >> "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME"
-		read -p "ADDED!"
+		#read -p "ADDED!"
 	fi
 
 	# manual_assert evaluated GitHub commit list file exists.

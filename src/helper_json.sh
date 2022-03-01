@@ -1,5 +1,32 @@
 #!/bin/bash
 
+# bash -c "source src/import.sh && get_query_results"
+get_query_results() {
+	
+	local graphql_filepath="src/examplequery12.gql"
+	
+	if [ ! -f $graphql_filepath ];then
+	    echo "usage of this script is incorrect."
+	    exit 1
+	fi
+	
+
+	# Form query JSON
+	QUERY=$(jq -n \
+	           --arg q "$(cat $graphql_filepath | tr -d '\n')" \
+	           '{ query: $q }')
+
+	
+	json=$(curl -s -X POST \
+	  -H "Content-Type: application/json" \
+	  -H "Authorization: bearer $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" \
+	  --data "$QUERY" \
+	  https://api.github.com/graphql)
+	
+	echo "json=$json"
+	loop_through_repos_in_api_query_json "$json"
+}
+
 #######################################
 # 
 # Local variables:
@@ -19,15 +46,18 @@
 # Run with:
 # bash -c "source src/import.sh && loop_through_repos_in_api_query_json"
 loop_through_repos_in_api_query_json() {
+	local json="$1"
+
 	# Specify max nr of repos in a query response.
 	local max_repos=100
 	local max_branches=100
 	local max_commits=100
 	
-	# Load json to variable.
-	local filepath="src/eg_query2.json"
-	local json=$(cat $filepath)
-	
+	if [ "$json" == "" ]; then
+		# Load json to variable.
+		local filepath="src/eg_query2.json"
+		local json=$(cat $filepath)
+	fi
 	# Remove unneeded json wrapper
 	local eaten_wrapper="$(echo "$json" | jq ".[][][][]")"
 	#echo "eaten_wrapper=$eaten_wrapper"

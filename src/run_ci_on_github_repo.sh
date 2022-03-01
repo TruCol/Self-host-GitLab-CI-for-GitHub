@@ -104,7 +104,6 @@ download_github_repo_on_which_to_run_ci() {
 # Run with: 
 # bash -c "source src/import.sh src/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example"
 # bash -c "source src/import.sh src/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo hiveminds renamed_test_repo"
-# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo hiveminds renamed_test_repo main hiveminds"
 copy_github_branches_with_yaml_to_gitlab_repo() {
 	local github_username="$1"
 	local github_repo_name="$2"
@@ -237,13 +236,13 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	# Checkout branch, if branch is found in local Gitlab repo.
 	printf "\n\n\n Checkout the (new) GitHub branch in the local GitLab repository."
 	actual_result="$(checkout_branch_in_gitlab_repo "$gitlab_repo_name" "$gitlab_branch_name" "GitLab")"
-	
+		
 	# Verify the get_current_gitlab_branch function returns the correct branch.
 	# shellcheck disable=SC2154
 	printf "\n\n\n Verify if the local GitLab branch returns the correct branch."
-	actual_result="$(get_current_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name" "$company")"
+	actual_result="$(get_current_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name" "GitLab")"
 	manual_assert_equal "$actual_result" "$gitlab_branch_name"
-	
+		
 	# 5.5 TODO: Check whether the GitLab branch already contains this
 	# GitHub commit sha in its commit messages. (skip branch if yes)
 	# 5.6 TODO: Verify whether the build status of this repository, branch, commit is not yet

@@ -52,7 +52,7 @@ copy_github_commits_with_yaml_to_gitlab_repo() {
 		# TODO: check if github commit already has CI build status
 		# TODO: allow overriding this check to enforce the CI to run again on this commit.
 		printf "\n\n\n Check if the commit of the GitHub branch already has CI results."
-		commit_filename="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$organisation/$github_repo_name/${github_branches[i]}/$github_commit_sha.txt"
+		commit_filename="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$organisation/$github_repo_name/$github_branch/$github_commit_sha.txt"
 		exists="$(file_exists $commit_filename)"
 		echo "commit_filename=$commit_filename"
 		echo "exists=$exists"
@@ -62,11 +62,11 @@ copy_github_commits_with_yaml_to_gitlab_repo() {
 			if [[ "$branch_contains_yaml" == "FOUND" ]]; then
 				echo "The commit:$github_commit_sha does not yet have a build status, and it DOES have a GitLab yaml."
 				printf "\n\n\n Copy GitHub branch content to a GItLab branch to run the GitLab CI on it."
-				copy_github_branch_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "${github_branches[i]}" "$github_commit_sha" "$organisation"
+				copy_github_commit_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "$github_branch" "$github_commit_sha" "$organisation"
 				echo "Copied GitHub branch with GitLab yaml to GitLab repository mirror."
 			fi
 		else
-			echo "Already has build status in GitHub:$github_repo_name/${github_branches[i]}/$github_commit_sha"
+			echo "Already has build status in GitHub:$github_repo_name/$github_branch/$github_commit_sha"
 		fi
 	fi
 		
@@ -117,7 +117,7 @@ copy_github_commit_with_yaml_to_gitlab_repo() {
 	# Verify the get_current_gitlab_branch function returns the correct branch.
 	# shellcheck disable=SC2154
 	printf "\n\n\n Verify if the local GitLab branch returns the correct branch."
-	actual_result="$(get_current_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name" "$company")"
+	actual_result="$(get_current_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name" "GitLab")"
 	manual_assert_equal "$actual_result" "$gitlab_branch_name"
 	
 	# 5.5 TODO: Check whether the GitLab branch already contains this

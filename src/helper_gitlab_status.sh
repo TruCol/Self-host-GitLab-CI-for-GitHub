@@ -484,7 +484,6 @@ get_current_gitlab_branch() {
 	local gitlab_repo_name="$1"
 	local gitlab_branch_name="$2"
 	local company="$3"
-	
 	if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
 
 		# Verify the branch exists

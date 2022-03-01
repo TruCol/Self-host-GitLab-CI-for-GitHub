@@ -156,13 +156,13 @@ lines_contain_string_with_space() {
 
 # Assumed working.
 string_in_lines() {
-    local substring=$1
+    local substring="$1"
     shift
-    local lines=$1
-    if [[ $lines = *"$substring"* ]] ; then
-        echo FOUND
+    local lines="$1"
+	if [[ $lines = *"$substring"* ]] ; then
+        echo "FOUND"
     else
-        echo NOTFOUND
+        echo "NOTFOUND"
     fi
 }
 

@@ -290,9 +290,11 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 		# TODO: ensure personal access token is created automatically to set build status.
 		#output=$(set_build_status_of_github_commit_using_github_pat "$github_username" "$github_repo_name" "$github_commit_sha" "$gitlab_website_url" "$last_line_gitlab_ci_build_status")
 		output=$(set_build_status_of_github_commit_using_github_pat "$github_username" "$github_repo_name" "$github_commit_sha" "$gitlab_website_url" "$build_status")
-		echo "output=$output"
+		printf "\n\n output=$output\n\n"
 
 		# 8. Copy the commit build status from GitLab into the GitHub build status repo.
+		printf "\n\n copy_commit_build_status_to_github_status_repot\n\n"
+		printf  "$github_username and $github_repo_name and $github_branch_name and $github_commit_sha and $build_status and $organisation"
 		copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$build_status" "$organisation"
 
 		# 9. Push the commit build status to the GitHub build status repo. 
@@ -461,14 +463,24 @@ set_build_status_of_github_commit_using_github_pat() {
 	fi
 	
 	# Verify the build status is set correctly
-	getting_output=$(GET https://api.github.com/repos/"$github_username"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
-	expected_url="\"url\":\"https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha\","
+	getting_output_json=$(GET https://api.github.com/repos/"$github_username"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
+	urls_in_json="$(echo "${getting_output_json[0]}" | jq ".[].url")"
+	
+	expected_url="https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha"
 	expected_state="\"state\":\"$commit_build_status\","
-	if [ "$(lines_contain_string "$expected_url" "${getting_output}")" == "NOTFOUND" ]; then
+	
+	
+	found_urls="$(string_in_lines "$expected_url" "${urls_in_json}")"
+	found_state="$(string_in_lines "$expected_state" "${getting_output_json}")"
+	
+	echo "found_urls=$found_urls"
+	echo "found_state=$found_state"
+	
+	if [ "$found_urls" == "NOTFOUND" ]; then
 		# shellcheck disable=SC2059
 		printf "Error, the status of the repo did not contain:$expected_url \n because the getting output was: $getting_output"
 		exit 119
-	elif [ "$(lines_contain_string "$expected_state" "${getting_output}")" == "NOTFOUND" ]; then
+	elif [ "$found_state" == "NOTFOUND" ]; then
 		echo "Error, the status of the repo did not contain:$expected_state"
 		exit 120
 	fi

@@ -2,8 +2,9 @@
 
 
 #######################################
-# Copies the GitHub branches that have a yaml file, to the local copy of the
-# GitLab repository.
+# Copies the GitHub commit if it has a yaml file, to the local copy of the
+# GitLab repository. And then proceeds to run the GitLab CI on it, and pushes
+# the results back GitHub.
 #
 # 
 # Local variables:

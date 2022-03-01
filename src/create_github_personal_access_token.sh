@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #######################################
-# Gets a new GitHub personal access token to set the build statuses of new 
+# Gets a new GitHub personal access token to set the build statuses of new
 # commits.
 # Local variables:
 #  github_username
@@ -26,7 +26,7 @@
 get_github_personal_access_token() {
 	local github_username="$1"
 	local github_pwd="$2"
-	
+
 	# Get the repository that can automatically get the GitHub deploy token.
 	download_repository "$github_username" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
 	manual_assert_dir_exists "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
@@ -59,19 +59,19 @@ get_github_personal_access_token() {
 }
 
 #######################################
-# Verifies the repository is able to set the build status of GitHub commits in 
+# Verifies the repository is able to set the build status of GitHub commits in
 # the GitHub user/organisation.
-# 
+#
 # Local variables:
-#  
+#
 # Globals:
-#  
+#
 # Arguments:
-#  
+#
 # Returns:
 #  0 If function was evaluated succesfull.
 # Outputs:
-#  
+#
 # TODO(a-t-0): Write tests for this method.
 # TODO(a-t-0): verify incoming commit build status is valid.
 # TODO(a-t-0): verify incoming redirect url is valid.
@@ -103,21 +103,20 @@ assert_set_build_status_of_github_commit_using_github_pat() {
 	# TODO: verify incoming commit build status is valid.
 	# TODO: verify incoming redirect url is valid.
 
-	
 	#echo "redirect_to_ci_url=$redirect_to_ci_url"
 	#echo "commit_build_status=$commit_build_status"
-	
+
 	# Create message in JSON format
 	JSON_FMT='{"state":"%s","description":"%s","target_url":"%s"}\n'
 	# shellcheck disable=SC2059
 	json_string=$(printf "$JSON_FMT" "$commit_build_status" "$commit_build_status" "$redirect_to_ci_url")
 	echo "json_string=$json_string"
-	
+
 	# Set the build status
 	setting_output=$(curl -H "Authorization: token $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" --request POST --data "$json_string" https://api.github.com/repos/"$github_username"/"$github_repo_name"/statuses/"$github_commit_sha")
-	
+
 	# Check if output is valid
-	#echo "setting_output=$setting_output"
+	echo "setting_output=$setting_output"
 	if [ "$(lines_contain_string '"message": "Bad credentials"' "${setting_output}")" == "FOUND" ]; then
 		# Remove the current GitHub personal access token from the $PERSONAL_CREDENTIALS_PATH file.
 		remove_line_from_file_if_contains_substring "$PERSONAL_CREDENTIALS_PATH" "GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL"
@@ -134,16 +133,22 @@ assert_set_build_status_of_github_commit_using_github_pat() {
 		echo "ERROR: $setting_output"
 		exit 118
 	fi
-	
+
 	# Verify the build status is set correctly
-	getting_output=$(GET https://api.github.com/repos/"$github_username"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
-	expected_url="\"url\":\"https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha\","
+	getting_output_json=$(GET https://api.github.com/repos/"$github_username"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
+	urls_in_json="$(echo "${getting_output_json[0]}" | jq ".[].url")"
+
+	expected_url="https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha"
 	expected_state="\"state\":\"$commit_build_status\","
-	if [ "$(lines_contain_string "$expected_url" "${getting_output}")" == "NOTFOUND" ]; then
+
+	found_urls="$(string_in_lines "$expected_url" "${urls_in_json}")"
+	found_state="$(string_in_lines "$expected_state" "${getting_output_json}")"
+
+	if [ "$found_urls" == "NOTFOUND" ]; then
 		# shellcheck disable=SC2059
 		printf "Error, the status of the repo did not contain:$expected_url \n because the getting output was: $getting_output"
 		exit 119
-	elif [ "$(lines_contain_string "$expected_state" "${getting_output}")" == "NOTFOUND" ]; then
+	elif [ "$found_state" == "NOTFOUND" ]; then
 		echo "Error, the status of the repo did not contain:$expected_state"
 		exit 120
 	fi

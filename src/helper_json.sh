@@ -2,8 +2,8 @@
 
 # bash -c "source src/import.sh && get_query_results"
 get_query_results() {
-	
-	local graphql_filepath="src/examplequery12.gql"
+	local github_organisation="hiveminds"
+	local graphql_filepath="src/examplequery13.gql"
 	
 	if [ ! -f $graphql_filepath ];then
 	    echo "usage of this script is incorrect."
@@ -24,7 +24,7 @@ get_query_results() {
 	  https://api.github.com/graphql)
 	
 	echo "json=$json"
-	loop_through_repos_in_api_query_json "$json"
+	loop_through_repos_in_api_query_json "$github_organisation" "$json"
 }
 
 #######################################
@@ -46,7 +46,8 @@ get_query_results() {
 # Run with:
 # bash -c "source src/import.sh && loop_through_repos_in_api_query_json"
 loop_through_repos_in_api_query_json() {
-	local json="$1"
+	local github_organisation="$1"
+	local json="$2"
 
 	# Specify max nr of repos in a query response.
 	local max_repos=100
@@ -72,7 +73,7 @@ loop_through_repos_in_api_query_json() {
 		local repo_name=$(get_repo_name "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
 
 		# Loop through branches.
-		local branches=$(loop_through_branches_in_repo_json "$repo_name" "$max_branches" "$max_commits" "$(echo "$eaten_wrapper" | jq ".[$i]")")
+		local branches=$(loop_through_branches_in_repo_json "$github_organisation" "$repo_name" "$max_branches" "$max_commits" "$(echo "$eaten_wrapper" | jq ".[$i]")")
 		echo "branches=$branches"
 		
 		# Loop through commits
@@ -129,10 +130,11 @@ get_repo_name() {
 }
 
 loop_through_branches_in_repo_json() {
-	local repo_name="$1"
-	local max_branches="$2"
-	local max_commits="$3"
-	local branches_json="$4"
+	local github_organisation="$1"
+	local repo_name="$2"
+	local max_branches="$3"
+	local max_commits="$4"
+	local branches_json="$5"
 	
 	if [ "$branches_json" != "null" ]; then
 		# Remove unneeded json wrapper
@@ -149,7 +151,7 @@ loop_through_branches_in_repo_json() {
 			local branch_cursor=$(get_branch_cursor "$max_branches" "$(echo "$eaten_branch_wrapper" | jq ".[$j]")")
 			local branch_name=$(get_branch_name "$max_branches" "$(echo "$eaten_branch_wrapper" | jq ".[$j]")")
 			
-			loop_through_commits_in_repo_json "$repo_name" "$branch_name" "$max_commits" "$(echo "$eaten_branch_wrapper" | jq ".[$j]")"
+			loop_through_commits_in_repo_json "$github_organisation" "$repo_name" "$branch_name" "$max_commits" "$(echo "$eaten_branch_wrapper" | jq ".[$j]")"
 
 
 			if [ "$branch_cursor" != "" ]; then
@@ -205,22 +207,33 @@ get_branch_name() {
 		return $max_branches
 	else
 		branch_name="$(echo "$branch_json" | jq ".node.name")"
-		echo "branch_name=$branch_name"
+		echo "$branch_name"
 		return 1
 	fi
 }
 
 
 loop_through_commits_in_repo_json() {
-	local repo_name="$1"
-	local branch_name="$2"
-	local max_commits="$3"
-	local commits_json="$4"
+	local with_quotations_github_organisation="$1"
+	local with_quotations_repo_name="$2"
+	local with_quotations_branch_name="$3"
+	local max_commits="$4"
+	local commits_json="$5"
+
+	github_organisation=$(echo "$with_quotations_github_organisation" | tr -d '"')
+	repo_name=$(echo "$with_quotations_repo_name" | tr -d '"')
+	branch_name=$(echo "$with_quotations_branch_name" | tr -d '"')
+	
+	#read -p "github_organisation=$github_organisation"
+	#read -p "repo_name=$repo_name"
+	#read -p "branch_name=$branch_name"
+	#read -p "max_commits=$max_commits"
+	#read -p "commits_json=$commits_json"
 	
 	if [ "$commits_json" != "null" ]; then
 		# Remove unneeded json wrapper
 		local eaten_commit_wrapper="$(echo "$commits_json" | jq ".node.target.history.edges")"
-		read -p "repo_name=$repo_name, branch_name=$branch_name eaten_commit_wrapper=$eaten_commit_wrapper"
+		echo "repo_name=$repo_name, branch_name=$branch_name eaten_commit_wrapper=$eaten_commit_wrapper"
 		local j=-1
 		while [ $max_commits -ge $j ]
 		do
@@ -228,10 +241,14 @@ loop_through_commits_in_repo_json() {
 #			# Store the output of the json parsing function
 			#local some_value=$(evaluate_commit "$max_commits" "$(echo "$eaten_commit_wrapper" | jq ".[$j]")")
 			local commit_cursor=$(get_commit_cursor "$max_commits" "$(echo "$eaten_commit_wrapper" | jq ".[$j]")")
-			local commit_name=$(get_commit_name "$max_commits" "$(echo "$eaten_commit_wrapper" | jq ".[$j]")")
+			local with_quotations_commit_name=$(get_commit_name "$max_commits" "$(echo "$eaten_commit_wrapper" | jq ".[$j]")")
+			commit_name=$(echo "$with_quotations_commit_name" | tr -d '"')
 			if [ "$commit_cursor" != "" ]; then
-				read -p "repo_name=$repo_name, branch_name=$branch_name  commit_name=$commit_name"
-				read -p "repo_name=$repo_name, branch_name=$branch_name commit_cursor=$commit_cursor"
+				echo "repo_name=$repo_name, branch_name=$branch_name  commit_name=$commit_name"
+				echo "repo_name=$repo_name, branch_name=$branch_name commit_cursor=$commit_cursor"
+				
+				# Run GitLab CI on GitHub commit and push results to GitHub
+				copy_github_commits_with_yaml_to_gitlab_repo $github_organisation $repo_name $branch_name $commit_name $github_organisation
 			fi
 			
 			# Determine whether the entry was null or not.
@@ -283,7 +300,7 @@ get_commit_name() {
 		return $max_commits
 	else
 		commit_name="$(echo "$commit_json" | jq ".node.oid")"
-		echo "commit_name=$commit_name"
+		echo "$commit_name"
 		return 1
 	fi
 }

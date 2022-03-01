@@ -77,6 +77,7 @@ source src/install_and_boot_gitlab_server.sh
 # Unsorted imports.
 source src/get_gitlab_server_runner_token.sh
 source src/run_ci_on_github_repo.sh
+source src/run_ci_on_commit.sh
 
 
 

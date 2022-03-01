@@ -1,6 +1,6 @@
 query {
   repositoryOwner(login: "hiveminds") {
-    repositories(first: 3, after: "Y3Vyc29yOnYyOpHODH7CdA==") {
+    repositories(first: 100, after: "Y3Vyc29yOnYyOpHODH7CdA==") {
       edges {
         node {
           name
@@ -8,7 +8,7 @@ query {
             refs(
               refPrefix: "refs/heads/"
               orderBy: { direction: DESC, field: TAG_COMMIT_DATE }
-              first: 4
+              first: 6
             ) {
               edges {
                 node {
@@ -16,7 +16,7 @@ query {
                     name
                     target {
                       ... on Commit {
-                        history(first: 5) {
+                        history(first: 100) {
                           edges {
                             node {
                               ... on Commit {
@@ -30,6 +30,7 @@ query {
                     }
                   }
                 }
+                cursor
               }
             }
           }

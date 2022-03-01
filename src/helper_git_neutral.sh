@@ -104,6 +104,63 @@ copy_files_from_github_to_gitlab_branch() {
 }
 
 
+copy_files_from_github_to_gitlab_commit() {
+	local github_repo_name="$1"
+	local github_branch_name="$2"
+	local gitlab_repo_name="$3"
+	local gitlab_branch_name="$4"
+	
+	# If the GitHub repository exists
+	if [ "$(github_repo_exists_locally "$github_repo_name")" == "FOUND" ]; then
+
+		# If the GitHub branch exists
+		
+			# If the GitHub branch contains a gitlab yaml file
+			filepath="$MIRROR_LOCATION/GitHub/$github_repo_name/.gitlab-ci.yml"
+			if [ "$(file_exists "$filepath")" == "FOUND" ]; then
+				
+				# If the GitLab repository exists
+				if [ "$(gitlab_repo_exists_locally "$gitlab_repo_name")" == "FOUND" ]; then
+					
+					# If the GitLab branch exists
+					found_branch_name="$(get_current_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name" "GitLab")"
+					if [ "$found_branch_name" == "$gitlab_branch_name" ]; then
+					
+						# If there exist differences in the files or folders in the branch (excluding the .git directory)
+						
+						# Then copy the files and folders from the GitHub branch into the GitLab branch (excluding the .git directory)
+						# That also deletes the files that exist in the GitLab branch that do not exist in the GitHub branch (excluding the .git directory)
+						copy_github_files_and_folders_to_gitlab "$MIRROR_LOCATION/GitHub/$github_repo_name" "$MIRROR_LOCATION/GitLab/$github_repo_name"
+						
+						# Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
+						comparison_result="$(two_folders_are_identical_excluding_subdir "$MIRROR_LOCATION"/GitHub/"$github_repo_name" "$MIRROR_LOCATION"/GitLab/"$github_repo_name" .git)"
+						
+						if [ "$comparison_result" == "IDENTICAL" ]; then
+							echo "IDENTICAL"
+						else
+							echo "ERROR, the content in the GitHub branch is not exactly copied into the GitLab branch, even when excluding the .git directory."
+							exit 11
+						fi
+						
+					else
+						echo "ERROR, the GitLab branch does not exist locally."
+						exit 12
+					fi
+				else
+					echo "ERROR, the GitLab repository does not exist locally."
+					exit 13
+				fi
+			else
+				echo "ERROR, the GitHub branch does contain a yaml file."
+				exit 14
+			fi
+	else 
+		echo "ERROR, the GitHub repository does not exist locally."
+		exit 25
+	fi
+}
+
+
 # Structure:gitlab_status
 # 6.i.0
 #source src/helper_git_neutral.sh && copy_github_files_and_folders_to_gitlab "src/mirrors/GitHub/sponsor_example" "src/mirrors/GitLab/sponsor_example"

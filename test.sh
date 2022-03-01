@@ -33,8 +33,8 @@ source src/import.sh
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_helper_dir_edit.bats
 
 
-./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parser.bats
-exit 4
+#./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parser.bats
+#exit 4
 # 7/38 tests fail on lines contain string function:
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parsing.bats
 #exit 4

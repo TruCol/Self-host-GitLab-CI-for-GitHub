@@ -223,7 +223,7 @@ loop_through_commits_in_repo_json() {
 	if [ "$commits_json" != "null" ]; then
 		# Remove unneeded json wrapper
 		local eaten_commit_wrapper="$(echo "$commits_json" | jq ".node.target.history.edges")"
-		read -p "repo_name=$repo_name, branch_name=$branch_name eaten_commit_wrapper=$eaten_commit_wrapper"
+		echo "repo_name=$repo_name, branch_name=$branch_name eaten_commit_wrapper=$eaten_commit_wrapper"
 		local j=-1
 		while [ $max_commits -ge $j ]
 		do
@@ -233,8 +233,8 @@ loop_through_commits_in_repo_json() {
 			local commit_cursor=$(get_commit_cursor "$max_commits" "$(echo "$eaten_commit_wrapper" | jq ".[$j]")")
 			local commit_name=$(get_commit_name "$max_commits" "$(echo "$eaten_commit_wrapper" | jq ".[$j]")")
 			if [ "$commit_cursor" != "" ]; then
-				read -p "repo_name=$repo_name, branch_name=$branch_name  commit_name=$commit_name"
-				read -p "repo_name=$repo_name, branch_name=$branch_name commit_cursor=$commit_cursor"
+				echo "repo_name=$repo_name, branch_name=$branch_name  commit_name=$commit_name"
+				echo "repo_name=$repo_name, branch_name=$branch_name commit_cursor=$commit_cursor"
 				
 				# Run GitLab CI on GitHub commit and push results to GitHub
 				copy_github_commits_with_yaml_to_gitlab_repo $github_organisation $repo_name $branch_name $commit_name $github_organisation

@@ -3,7 +3,7 @@
 # bash -c "source src/import.sh && get_query_results"
 get_query_results() {
 	local github_organisation="hiveminds"
-	local graphql_filepath="src/examplequery12.gql"
+	local graphql_filepath="src/examplequery13.gql"
 	
 	if [ ! -f $graphql_filepath ];then
 	    echo "usage of this script is incorrect."

@@ -458,18 +458,23 @@ download_and_overwrite_repository_using_ssh() {
 	local repo_url="git@github.com:"$git_username"/"$reponame".git"
 	
 	# Delete target directory if it exists.
+	printf "\n\n\n Remove target directory:$target_directory if exists \n\n\n"
 	remove_dir "$target_directory"
 	manual_assert_dir_not_exists "$target_directory"
+	
 
 	if [ "$target_directory" != "" ]; then
+		printf "\n\n\n git clone $repo_url \ninto directory:\n$target_directory \n\n\n"
 		git clone $repo_url $target_directory &&
 		set +e
-		manual_assert_dir_exists "$target_directory"
+		manual_assert_dir_exists "$target_directory/$repo_name"
 	else
+		printf "\n\n\n git clone $repo_url in PWD=$PWD \n\n\n"
 		git clone $repo_url &&
 		set +e
 		manual_assert_dir_exists "$reponame"
 	fi
+	printf "\n\n\n DONE CLONING REPOSITORY \n\n\n"
 }
 
 # Run with: 

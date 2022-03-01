@@ -1,8 +1,27 @@
 #!/bin/bash
 
-# source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "hiveminds"
-# source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "a-t-0"
+
+#######################################
 # Make a list of the repositories in the GitHub repository.
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0): Write tests for this method.
+# TODO(a-t-0): If only one of two files exists, generate or get the public key
+# sha, then delete the keypair with: ssh-agent d. (Currently it only does that 
+# if both files exist). Also remove the assert that both key files dont exist.
+#######################################
+# Run with: 
+# bash -c "source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "hiveminds"
+# bash -c "source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "a-t-0"
 initialise_github_repositories_array() {
 	local github_organisation_or_username="$1"
 	get_org_repos github_repositories "$github_organisation_or_username" # call function to populate the array
@@ -38,6 +57,7 @@ run_ci_on_github_repo() {
 	#download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
 	printf "\n\n\n Exporting GitLab CI result back to a GitHub repository."
 	copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "$organisation"
+	printf "DONE WITH run CI"
 }
 
 
@@ -73,7 +93,7 @@ download_github_repo_on_which_to_run_ci() {
 	has_access="$(check_ssh_access_to_repo "$github_username" "$github_repo_name")"
 
 	# Clone GitHub repo at start of test.
-	printf "\n\n\n Clone the GitHub repository."
+	printf "\n\n\n Clone the GitHub repository.\n\n\n"
 	clone_github_repository "$github_username" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
 	# TODO: determine why this downloads to: src/mirrors/GitHub/sponsor_example/sponsor_example (one too deep.)
 	#download_and_overwrite_repository_using_ssh "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/"
@@ -135,7 +155,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 	# 4. Loop over the GitHub branches by checking each branch out.
 	printf "\n\n\n Loop over each GitHub branch and run the GitLab CI on it."
 	for i in "${!github_branches[@]}"; do
-		#echo "${github_branches[i]}"
+		printf "NEXT BRANCH: ${github_branches[i]}"
 		
 		# Check if branch is found in local GitHub repo.
 		printf "\n\n\n Checkout a local GitHub branch."
@@ -175,7 +195,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 					echo "The commit:$current_branch_github_commit_sha does not yet have a build status, and it DOES have a GitLab yaml."
 					printf "\n\n\n Copy GitHub branch content to a GItLab branch to run the GitLab CI on it."
 					copy_github_branch_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$organisation"
-					echo "Copied GitHub branch with GitLab yaml to GitLab repository mirror."
+					echo "RUN_CI_ON_GITHUB_REPO Copied GitHub branch with GitLab yaml to GitLab repository mirror."
 				fi
 			else
 				echo "Already has build status in GitHub:$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha"
@@ -184,10 +204,15 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 		
 		# 4.b Export the evaluated GitHub commit SHA to GitHub build 
 		# status repo.
-		copy_evaluated_commit_to_github_status_repo "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$organisation"
+		printf "RUN_CI_ON_GITHUB_REPO copy_evaluated_commit_to_github_status_repo"
+		copy_evaluated_commit_to_github_status_repo "$github_repo_name" "$github_branch_name" "$current_branch_github_commit_sha" "$organisation"
+
+		printf "RUN_CI_ON_GITHUB_REPO push_commit_build_status_in_github_status_repo_to_github"
 		# 4.c Push the evaluated commit to the GitHub build status repo. 
 		push_commit_build_status_in_github_status_repo_to_github "$github_username"
+		printf "Next loop"
 	done
+	printf "DONE"
 	
 }
 
@@ -200,7 +225,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	local github_branch_name="$3"
 	local github_commit_sha="$4"
 	local organisation="$5"
-	
+
 	# Assume identical repository and branch names:
 	local gitlab_repo_name="$github_repo_name"
 	local gitlab_branch_name="$github_branch_name"
@@ -294,10 +319,11 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 
 		# 8. Copy the commit build status from GitLab into the GitHub build status repo.
 		printf "\n\n copy_commit_build_status_to_github_status_repot\n\n"
-		printf  "$github_username and $github_repo_name and $github_branch_name and $github_commit_sha and $build_status and $organisation"
+		printf  "github_username=$github_username and github_repo_name=$github_repo_name and github_branch_name=$github_branch_name and github_commit_sha=$github_commit_sha and build_status=$build_status and organisation=$organisation end.\n\n\n"
 		copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$build_status" "$organisation"
 
 		# 9. Push the commit build status to the GitHub build status repo. 
+		printf "\n\n push_commit_build_status_in_github_status_repo_to_github\n\n"
 		push_commit_build_status_in_github_status_repo_to_github "$github_username"
 		
 		# TODO: delete this function
@@ -595,6 +621,7 @@ copy_commit_build_status_to_github_status_repo() {
 	#has_access="$(check_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	# 8. Clone the GitHub build statusses repository.
+	printf " download_and_overwrite_repository_using_ssh"
 	download_and_overwrite_repository_using_ssh "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 	sleep 2
 	
@@ -641,11 +668,15 @@ push_commit_build_status_in_github_status_repo_to_github() {
 	local github_username="$1"
 	
 	# Verify the Build status repository is cloned.
+	printf "\n\n\n Cloning $GITHUB_STATUS_WEBSITE_GLOBAL repo\n\n\n\n"
 	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")
 	manual_assert_equal "$repo_was_cloned" "FOUND"
-	
+	printf "\n\n\n $GITHUB_STATUS_WEBSITE_GLOBAL repo was cloned\n\n\n\n"
+
 	# 12. Verify there have been changes made. Only push if changes are added."
+	printf "\n\n\n has changes=$(git_has_changes $MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL)"
 	if [[ "$(git_has_changes "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")" == "FOUND" ]]; then
+		printf "\n\n\n commit_changes from: $MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL."
 		commit_changes "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL" "New_build_status."
 		
 		# Verify ssh-access
@@ -653,8 +684,10 @@ push_commit_build_status_in_github_status_repo_to_github() {
 		
 		# 13. Push the changes to the GitHub build status repository.
 		#push_to_github_repository "$github_username" "$has_access" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+		printf "\n\n\n push_to_github_repository_with_ssh from: $MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL."
 		push_to_github_repository_with_ssh "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 	fi
 	
+	printf "DONE PUSHING"
 	# TODO 14. Verify the changes are pushed to the GitHub build status repository.
 }

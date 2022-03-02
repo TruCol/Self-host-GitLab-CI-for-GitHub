@@ -34,12 +34,18 @@ initialise_github_repositories_array() {
 run_ci_on_all_repositories_of_user(){
 	local github_organisation_or_username="$1"
 	
+	# Get the GitHub build status repository.
+	get_build_status_repository_from_github
+
 	initialise_github_repositories_array "$github_organisation_or_username"
 	echo "github_repositories=${github_repositories[@]}"
 	for github_repository in "${github_repositories[@]}"; do
 		echo "$github_repository"
 		run_ci_on_github_repo "$github_organisation_or_username" "$github_repository" "$github_organisation_or_username"
 	done
+
+	# push build status icons to GitHub build status repository.
+	push_commit_build_status_in_github_status_repo_to_github "$github_username"
 }
 
 # run with:
@@ -51,8 +57,8 @@ run_ci_on_github_repo() {
 	github_repo_name="$2"
 	local organisation="$3"
 	
-	# Get the GitHub build status repository.
-	get_build_status_repository_from_github
+	# 9. Verify the Build status repository is cloned.
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 
 	# TODO: change this method to download with https?
 	# Download the GitHub repo on which to run the GitLab CI:
@@ -70,8 +76,6 @@ run_ci_on_github_repo() {
 	copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "$organisation"
 	printf "DONE WITH run CI"
 
-	# push build status icons to GitHub build status repository.
-	push_commit_build_status_in_github_status_repo_to_github "$github_username"
 }
 
 

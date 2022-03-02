@@ -3,7 +3,7 @@
 # bash -c "source src/import.sh && get_query_results"
 get_query_results() {
 	local github_organisation="hiveminds"
-	local graphql_filepath="src/examplequery13.gql"
+	local graphql_filepath="src/examplequery14.gql"
 	
 	if [ ! -f $graphql_filepath ];then
 	    echo "usage of this script is incorrect."
@@ -76,15 +76,16 @@ loop_through_repos_in_api_query_json() {
 		local some_value=$(evaluate_repo "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
 		local repo_cursor=$(get_repo_cursor "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
 		local repo_name=$(get_repo_name "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
-
+		repo_name_without_quotations=$(echo "$repo_name" | tr -d '"')
 		# TODO: verify the GitHub repo exists
 		# TODO: change this method to download with https?
 		# Download the GitHub repo on which to run the GitLab CI:
 		printf "\n\n\n Download the GitHub repository on which to run GitLab CI."
-		read -p "Downloading GitHub repo on which to run GitLab CI for:$repo_name"
-		download_github_repo_on_which_to_run_ci "$github_organisation" "$repo_name"
+		download_github_repo_on_which_to_run_ci "$github_organisation" "$repo_name_without_quotations"
+		printf "Downloaded GitHub repo on which to run GitLab CI for:$repo_name_without_quotations"
 
 		# Loop through branches.
+		# TODO: modify function to work without quotations or be consistent in it.
 		local branches=$(loop_through_branches_in_repo_json "$github_organisation" "$repo_name" "$max_branches" "$max_commits" "$(echo "$eaten_wrapper" | jq ".[$i]")")
 		echo "branches=$branches"
 		
@@ -105,11 +106,10 @@ loop_through_repos_in_api_query_json() {
 			local i=$(( $max_repos + $max_repos ))
 		fi
 		
-		# TODO (now): Delete the GitHub repo on which CI is ran
-
-		# push build status icons to GitHub build status repository.
-		push_commit_build_status_in_github_status_repo_to_github "$github_organisation"
+		# TODO (now): Delete the GitHub repo on which CI is ran	
 	done
+	# push build status icons to GitHub build status repository.
+	push_commit_build_status_in_github_status_repo_to_github "$github_organisation"
 }
 
 

@@ -199,14 +199,14 @@ copy_evaluated_commit_to_github_status_repo() {
 
 	# Append commit to list of evaluated commits. 
 	# TODO: verify works: if not in list already
-	printf "\n\n\n Checking if the file at:$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME contains the github_commit_sha=$github_commit_sha \n\n\n"
-	lhs="$(grep $github_commit_sha "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME")"
-	#read -p "CHECKING:,lhs=$lhs"
-	#read -p "github_commit_sha=$github_commit_sha"
-	if [ "$(grep $github_commit_sha "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME")" != "$github_commit_sha" ]; then
+	matches_on_commit="$(grep $github_commit_sha "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME")"
+	printf "\n\n\n Checking if the file at:$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME contains the github_commit_sha=$github_commit_sha \n and matches_on_commit=$matches_on_commit\n\n"
+	contains_sha_already=$(string_in_lines "$github_commit_sha" "$matches_on_commit")
+	printf "contains_sha_already=$contains_sha_already"
+	if [ "$contains_sha_already" == "NOTFOUND" ]; then
 		printf "\n\n\n appending commit sha to the list \n\n\n"
 		echo "$github_commit_sha" >> "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME"
-		read -p "ADDED! Verify it is there, and verify the GitHub commit status of the repo."
+		#read -p "ADDED! Verify it is there, and verify the GitHub commit status of the repo."
 	fi
 
 	# manual_assert evaluated GitHub commit list file exists.

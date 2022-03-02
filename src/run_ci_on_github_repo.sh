@@ -650,7 +650,6 @@ copy_commit_build_status_to_github_status_repo() {
 
 # bash -c "source src/import.sh && push_commit_build_status_in_github_status_repo_to_github a-t-0"
 push_commit_build_status_in_github_status_repo_to_github() {
-	local github_username="$1"
 	
 	# Verify the Build status repository is cloned.
 	printf "\n\n\n Cloning $GITHUB_STATUS_WEBSITE_GLOBAL repo\n\n\n\n"

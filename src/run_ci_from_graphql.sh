@@ -59,6 +59,11 @@ loop_through_repos_in_api_query_json() {
 		local filepath="src/eg_query2.json"
 		local json=$(cat $filepath)
 	fi
+
+	# Get the GitHub build status repository.
+	get_build_status_repository_from_github
+
+
 	# Remove unneeded json wrapper
 	local eaten_wrapper="$(echo "$json" | jq ".[][][][]")"
 	#echo "eaten_wrapper=$eaten_wrapper"
@@ -71,6 +76,13 @@ loop_through_repos_in_api_query_json() {
 		local some_value=$(evaluate_repo "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
 		local repo_cursor=$(get_repo_cursor "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
 		local repo_name=$(get_repo_name "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
+
+		# TODO: verify the GitHub repo exists
+		# TODO: change this method to download with https?
+		# Download the GitHub repo on which to run the GitLab CI:
+		printf "\n\n\n Download the GitHub repository on which to run GitLab CI."
+		read -p "Downloading GitHub repo on which to run GitLab CI for:$repo_name"
+		download_github_repo_on_which_to_run_ci "$github_organisation" "$repo_name"
 
 		# Loop through branches.
 		local branches=$(loop_through_branches_in_repo_json "$github_organisation" "$repo_name" "$max_branches" "$max_commits" "$(echo "$eaten_wrapper" | jq ".[$i]")")
@@ -92,8 +104,23 @@ loop_through_repos_in_api_query_json() {
 			echo "i=$i"
 			local i=$(( $max_repos + $max_repos ))
 		fi
+		
+		# TODO (now): Delete the GitHub repo on which CI is ran
+
+		# push build status icons to GitHub build status repository.
+		push_commit_build_status_in_github_status_repo_to_github "$github_organisation"
 	done
 }
+
+
+#	# TODO: change this method to download with https?
+#	# Download the GitHub repo on which to run the GitLab CI:
+#	if [ "$(dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name")" == "NOTFOUND" ]; then
+#		printf "\n\n\n Download the GitHub repository on which to run GitLab CI."
+#		download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
+#		manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
+#	fi
+#}
 
 evaluate_repo() {
 	local max_repos="$1"

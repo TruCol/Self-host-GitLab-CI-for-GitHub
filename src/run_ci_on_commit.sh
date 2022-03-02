@@ -170,7 +170,7 @@ copy_github_commit_with_yaml_to_gitlab_repo() {
 		echo "output=$output"
 
 		# 8. Copy the commit build status from GitLab into the GitHub build status repo.
-		copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$build_status" "$organisation"
+		copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$build_status" "$organisation" "FALSE"
 
 		# 9. Push the commit build status to the GitHub build status repo. 
 		#push_commit_build_status_in_github_status_repo_to_github "$github_username"

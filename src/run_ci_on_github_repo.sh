@@ -612,6 +612,7 @@ copy_commit_build_status_to_github_status_repo() {
 	local github_commit_sha="$4"
 	local status="$5"
 	local organisation="$6"
+	local ran_per_commit="$7"
 
 	# 9. Verify the Build status repository is cloned.
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
@@ -625,18 +626,27 @@ copy_commit_build_status_to_github_status_repo() {
 	if [  "$status" == "pending" ] || [ "$status" == "running" ]; then
 		echo "ERROR, a pending or running build status should not reach this method."
 		exit 121
-	elif [  "$status" == "success" ]; then
-		cp "src/svgs/passed.svg" "$build_status_icon_output_dir""/build_status.svg"
-	elif [  "$status" == "failure" ]; then
-		cp "src/svgs/failed.svg" "$build_status_icon_output_dir""/build_status.svg"
-	elif [  "$status" == "error" ]; then
-		cp "src/svgs/error.svg" "$build_status_icon_output_dir""/build_status.svg"
-	elif [  "$status" == "unknown" ]; then
-		cp "src/svgs/unknown.svg" "$build_status_icon_output_dir""/build_status.svg"
+	fi
+
+	# When the code is ran per commit, the old commit build statuses would 
+	# overwrite the latest build status icons, so only export the build status
+	# icon when this function is called from run_ci_on_github_repo.sh.
+	if [ "$ran_per_commit" != "FALSE" ]; then
+		if [  "$status" == "success" ]; then
+			cp "src/svgs/passed.svg" "$build_status_icon_output_dir""/build_status.svg"
+		elif [  "$status" == "failure" ]; then
+			cp "src/svgs/failed.svg" "$build_status_icon_output_dir""/build_status.svg"
+		elif [  "$status" == "error" ]; then
+			cp "src/svgs/error.svg" "$build_status_icon_output_dir""/build_status.svg"
+		elif [  "$status" == "unknown" ]; then
+			cp "src/svgs/unknown.svg" "$build_status_icon_output_dir""/build_status.svg"
+		fi
+		
+		# Assert svg file is created correctly
+		manual_assert_equal "$(file_exists "$build_status_icon_output_dir""/build_status.svg")" "FOUND"
 	fi
 	
-	# Assert svg file is created correctly
-	manual_assert_equal "$(file_exists "$build_status_icon_output_dir""/build_status.svg")" "FOUND"
+	
 	
 	# Explicitly store build status per commit per branch per repo.
 	echo "$status" > "$build_status_icon_output_dir""/$github_commit_sha.txt"

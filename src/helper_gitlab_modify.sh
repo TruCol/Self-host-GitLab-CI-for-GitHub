@@ -1200,3 +1200,12 @@ copy_all_gitlab_folders() {
 	fi
 	done
 }
+
+remove_the_gitlab_repository_on_which_ci_is_ran() {
+# 1. Clone the GitLab repo.
+	printf "\n\n\n Removing GitLab repository if it still existed from a previous run."
+	
+	# Delete GitLab repo at start of test.
+	remove_dir "$MIRROR_LOCATION/GitLab"
+	manual_assert_dir_not_exists "$MIRROR_LOCATION/GitLab"
+}

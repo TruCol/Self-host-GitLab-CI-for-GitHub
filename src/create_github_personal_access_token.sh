@@ -137,6 +137,7 @@ assert_set_build_status_of_github_commit_using_github_pat() {
 	# Verify the build status is set correctly
 	getting_output_json=$(GET https://api.github.com/repos/"$github_username"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
 	urls_in_json="$(echo "${getting_output_json[0]}" | jq ".[].url")"
+	printf "\n\n\n getting_output_json is:$getting_output_json \n\n\n"
 
 	expected_url="https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha"
 	expected_state="\"state\":\"$commit_build_status\","

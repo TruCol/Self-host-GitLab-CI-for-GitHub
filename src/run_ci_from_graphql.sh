@@ -3,7 +3,7 @@
 # bash -c "source src/import.sh && get_query_results"
 get_query_results() {
 	local github_organisation="hiveminds"
-	local graphql_filepath="src/examplequery13.gql"
+	local graphql_filepath="src/examplequery14.gql"
 	
 	if [ ! -f $graphql_filepath ];then
 	    echo "usage of this script is incorrect."
@@ -59,6 +59,11 @@ loop_through_repos_in_api_query_json() {
 		local filepath="src/eg_query2.json"
 		local json=$(cat $filepath)
 	fi
+
+	# Get the GitHub build status repository.
+	get_build_status_repository_from_github
+
+
 	# Remove unneeded json wrapper
 	local eaten_wrapper="$(echo "$json" | jq ".[][][][]")"
 	#echo "eaten_wrapper=$eaten_wrapper"
@@ -71,8 +76,16 @@ loop_through_repos_in_api_query_json() {
 		local some_value=$(evaluate_repo "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
 		local repo_cursor=$(get_repo_cursor "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
 		local repo_name=$(get_repo_name "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
+		repo_name_without_quotations=$(echo "$repo_name" | tr -d '"')
+		# TODO: verify the GitHub repo exists
+		# TODO: change this method to download with https?
+		# Download the GitHub repo on which to run the GitLab CI:
+		printf "\n\n\n Download the GitHub repository on which to run GitLab CI."
+		download_github_repo_on_which_to_run_ci "$github_organisation" "$repo_name_without_quotations"
+		printf "Downloaded GitHub repo on which to run GitLab CI for:$repo_name_without_quotations"
 
 		# Loop through branches.
+		# TODO: modify function to work without quotations or be consistent in it.
 		local branches=$(loop_through_branches_in_repo_json "$github_organisation" "$repo_name" "$max_branches" "$max_commits" "$(echo "$eaten_wrapper" | jq ".[$i]")")
 		echo "branches=$branches"
 		
@@ -92,8 +105,24 @@ loop_through_repos_in_api_query_json() {
 			echo "i=$i"
 			local i=$(( $max_repos + $max_repos ))
 		fi
+		
+		# TODO (now): Delete the GitHub repo on which CI is ran	
 	done
+	# push build status icons to GitHub build status repository.
+	push_commit_build_status_in_github_status_repo_to_github "$github_organisation"
+
+	echo "repo_cursor=$repo_cursor"
 }
+
+
+#	# TODO: change this method to download with https?
+#	# Download the GitHub repo on which to run the GitLab CI:
+#	if [ "$(dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name")" == "NOTFOUND" ]; then
+#		printf "\n\n\n Download the GitHub repository on which to run GitLab CI."
+#		download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
+#		manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
+#	fi
+#}
 
 evaluate_repo() {
 	local max_repos="$1"
@@ -174,6 +203,7 @@ loop_through_branches_in_repo_json() {
 		echo "ERROR null incoming"
 		exit 4
 	fi
+	echo "branch_cursor=$branch_cursor"
 }
 
 evaluate_branch() {
@@ -247,8 +277,13 @@ loop_through_commits_in_repo_json() {
 				echo "repo_name=$repo_name, branch_name=$branch_name  commit_name=$commit_name"
 				echo "repo_name=$repo_name, branch_name=$branch_name commit_cursor=$commit_cursor"
 				
-				# Run GitLab CI on GitHub commit and push results to GitHub
-				copy_github_commits_with_yaml_to_gitlab_repo $github_organisation $repo_name $branch_name $commit_name $github_organisation
+				# Don't run ci on $GITHUB_STATUS_WEBSITE_GLOBAL because that will create commits
+				# stating an evaluation of a commit has occured, which in turn results in commits
+				# for the next run etc. Which keeps on going, + it does not contain any CI yaml.
+				if [ "$repo_name" != "$GITHUB_STATUS_WEBSITE_GLOBAL" ]; then
+					# Run GitLab CI on GitHub commit and push results to GitHub
+					copy_github_commits_with_yaml_to_gitlab_repo $github_organisation $repo_name $branch_name $commit_name $github_organisation
+				fi
 			fi
 			
 			# Determine whether the entry was null or not.
@@ -266,6 +301,7 @@ loop_through_commits_in_repo_json() {
 		echo "ERROR null incoming"
 		exit 4
 	fi
+	echo "commit_cursor=$commit_cursor"
 }
 
 evaluate_commit() {

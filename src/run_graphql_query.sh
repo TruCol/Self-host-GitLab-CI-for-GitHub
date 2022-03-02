@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Runs graphql query on GitHub. Execute with:
-# src/./run_graphql_query.sh src/examplequery12.gql
+# src/./run_graphql_query.sh src/examplequery14.gql
 
 source src/import.sh
 

@@ -28,13 +28,14 @@ copy_github_commits_with_yaml_to_gitlab_repo() {
 	local github_commit_sha="$4"
 	local organisation="$5"
 	
-	# TODO: change this method to download with https?
-	# Download the GitHub repo on which to run the GitLab CI:
-	if [ "$(dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name")" == "NOTFOUND" ]; then
-		printf "\n\n\n Download the GitHub repository on which to run GitLab CI."
-		download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
-		manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
-	fi
+	# Verify GitHub repository on which the CI is ran, exists locally.
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	# TODO: Assert GitHub build status repository exists.
+
+	# Remove the GitLab repository. # TODO: move this to each branch
+	# Similarly for each commit
+	remove_the_gitlab_repository_on_which_ci_is_ran
+
 	
 	# Check if branch is found in local GitHub repo.
 	printf "\n\n\n Checkout a local GitHub branch."
@@ -71,12 +72,10 @@ copy_github_commits_with_yaml_to_gitlab_repo() {
 		fi
 	fi
 		
-		# 4.b Export the evaluated GitHub commit SHA to GitHub build 
-		# status repo.
-		copy_evaluated_commit_to_github_status_repo "$github_repo_name" "$github_branch" "$github_commit_sha" "$organisation"
-		# 4.c Push the evaluated commit to the GitHub build status repo. 
-		push_commit_build_status_in_github_status_repo_to_github "$github_username"
-
+	# 4.b Export the evaluated GitHub commit SHA to GitHub build 
+	# status repo.
+	copy_evaluated_commit_to_github_status_repo "$github_repo_name" "$github_branch" "$github_commit_sha" "$organisation"
+		
 }
 
 
@@ -174,7 +173,7 @@ copy_github_commit_with_yaml_to_gitlab_repo() {
 		copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$build_status" "$organisation"
 
 		# 9. Push the commit build status to the GitHub build status repo. 
-		push_commit_build_status_in_github_status_repo_to_github "$github_username"
+		#push_commit_build_status_in_github_status_repo_to_github "$github_username"
 		
 		# TODO: delete this function
 		#get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha"

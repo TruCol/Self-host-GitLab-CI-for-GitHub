@@ -75,6 +75,12 @@ remove_mirror_directories() {
 	remove_dir "$MIRROR_LOCATION"
 	remove_dir "$MIRROR_LOCATION/GitHub"
 	remove_dir "$MIRROR_LOCATION/GitLab"
+
+	# Verify the directories are removed.
+	manual_assert_not_equal "$MIRROR_LOCATION" ""
+	manual_assert_dir_not_exists "$MIRROR_LOCATION"
+	manual_assert_dir_not_exists "$MIRROR_LOCATION/GitHub"
+	manual_assert_dir_not_exists "$MIRROR_LOCATION/GitLab"
 }
 
 

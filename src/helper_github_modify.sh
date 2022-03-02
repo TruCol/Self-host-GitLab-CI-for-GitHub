@@ -156,22 +156,24 @@ copy_evaluated_commit_to_github_status_repo() {
 	local organisation="$4"
 
 	# Verify the mirror location exists
-	printf "Assert mirror locations exist"
+	printf "Assert mirror location not null"
 	manual_assert_not_equal "$MIRROR_LOCATION" ""
+	printf "Assert mirror location exist"
 	manual_assert_dir_exists "$MIRROR_LOCATION"
+	printf "Assert mirror location/GitHub exist"
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub"
-	manual_assert_dir_exists "$MIRROR_LOCATION/GitLab"
 	
-	# 8. Clone the GitHub build statusses repository.
-	printf "\n\n\n download_and_overwrite_repository_using_ssh \n\n\n"
-	download_and_overwrite_repository_using_ssh "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
-	sleep 1
+	## 8. Clone the GitHub build statusses repository.
+	#printf "\n\n\n download_and_overwrite_repository_using_ssh \n\n\n"
+	#download_and_overwrite_repository_using_ssh "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+	#sleep 1
 	
 	# 9. Verify the Build status repository is cloned.
 	printf "\n\n\n assert $MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL exists \n\n\n"
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 	printf "\n\n\n Asserted it exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL" exists \n\n\n"
 
+	printf "\n\n\n github_branch_name=$github_branch_name"
 	# 10. Copy the GitLab CI Build status icon to the build status repository.
 	# Create a folder of the repository on which a CI has been ran, inside the GitHub build status website repository, if it does not exist yet
 	# Also add a folder for the branch(es) of that GitLab CI repository, in that respective folder.
@@ -204,7 +206,7 @@ copy_evaluated_commit_to_github_status_repo() {
 	if [ "$(grep $github_commit_sha "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME")" != "$github_commit_sha" ]; then
 		printf "\n\n\n appending commit sha to the list \n\n\n"
 		echo "$github_commit_sha" >> "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME"
-		#read -p "ADDED!"
+		read -p "ADDED! Verify it is there, and verify the GitHub commit status of the repo."
 	fi
 
 	# manual_assert evaluated GitHub commit list file exists.
@@ -213,4 +215,30 @@ copy_evaluated_commit_to_github_status_repo() {
 	
 	# TODO: assert evaluated GitHub commit lists contains the GitHub commit
 	# sha.
+}
+
+get_build_status_repository_from_github() {
+
+	# Ensure the mirror directories are created.
+	create_mirror_directories
+
+	# Verify the mirror location exists
+	manual_assert_not_equal "$MIRROR_LOCATION" ""
+	manual_assert_dir_exists "$MIRROR_LOCATION"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitLab"
+	
+	# Verify ssh-access
+	#has_access="$(check_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+	
+	# 8. Clone the GitHub build statusses repository.
+	printf " download_and_overwrite_repository_using_ssh"
+	download_and_overwrite_repository_using_ssh "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+	sleep 2
+	
+	# 9. Verify the Build status repository is cloned.
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+	# 10. Copy the GitLab CI Build status icon to the build status repository.
+	# Create a folder of the repository on which a CI has been ran, inside the GitHub build status website repository, if it does not exist yet
+	# Also add a folder for the branch(es) of that GitLab CI repository, in that respective folder.
 }

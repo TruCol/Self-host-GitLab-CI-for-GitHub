@@ -45,19 +45,33 @@ run_ci_on_all_repositories_of_user(){
 # run with:
 # bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo a-t-0 sponsor_example a-t-0"
 # bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds sponsor_example hiveminds"
+# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds renamed_test_repo hiveminds"
 run_ci_on_github_repo() {
 	github_username="$1"
 	github_repo_name="$2"
 	local organisation="$3"
 	
+	# Get the GitHub build status repository.
+	get_build_status_repository_from_github
+
+	# TODO: change this method to download with https?
+	# Download the GitHub repo on which to run the GitLab CI:
+	printf "\n\n\n Download the GitHub repository on which to run GitLab CI."
+	download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
+
+	# Remove the GitLab repository. # TODO: move this to each branch
+	# Similarly for each commit
+	remove_the_gitlab_repository_on_which_ci_is_ran
+
 	# TODO: write test to verify whether the build status can be pushed to a branch. (access wise).
 	# TODO: Store log file output if a repo (and/or branch) have been skipped.
 	# TODO: In that log file, inlcude: time, which user, which repo, which branch, why.
-	#printf "\n\n\n Downloading the GitHub repository on which to run GitLab CI"
-	#download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
 	printf "\n\n\n Exporting GitLab CI result back to a GitHub repository."
 	copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "$organisation"
 	printf "DONE WITH run CI"
+
+	# push build status icons to GitHub build status repository.
+	push_commit_build_status_in_github_status_repo_to_github "$github_username"
 }
 
 
@@ -67,16 +81,7 @@ download_github_repo_on_which_to_run_ci() {
 	local github_username="$1"
 	local github_repo_name="$2"
 	
-	# 1. Clone the GitHub repo.
-	printf "\n\n\n Removing GitHub repository if it still existed from a previous run."
-	# Delete GitHub repo at start of test.
-	remove_mirror_directories
-	manual_assert_not_equal "$MIRROR_LOCATION" ""
-	manual_assert_dir_not_exists "$MIRROR_LOCATION"
-	manual_assert_dir_not_exists "$MIRROR_LOCATION/GitHub"
-	manual_assert_dir_not_exists "$MIRROR_LOCATION/GitLab"
-	
-	# Create mmirror directories
+	# Create mirror directories
 	printf "\n\n\n Creating Mirror Directories."
 	create_mirror_directories
 	# TODO: replace asserts with functions
@@ -104,6 +109,7 @@ download_github_repo_on_which_to_run_ci() {
 }
 
 
+
 #######################################
 # Copies the GitHub branches that have a yaml file, to the local copy of the
 # GitLab repository.
@@ -129,15 +135,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 	local github_repo_name="$2"
 	local organisation="$3"
 	
-	# Delete the repository locally if it exists.
-	printf "\n\n\n Remove the GitHub locally, if it existed."
-	remove_dir "$MIRROR_LOCATION/GitHub/$github_repo_name"
-	manual_assert_dir_not_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
-
-	# TODO: change this method to download with https?
-	# Download the GitHub repo on which to run the GitLab CI:
-	printf "\n\n\n Download the GitHub repository on which to run GitLab CI."
-	download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
+	# Verify GitHub repository on which the CI is ran, exists locally.
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
 
 	# 3. Get the GitHub branches
@@ -204,13 +202,13 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 		
 		# 4.b Export the evaluated GitHub commit SHA to GitHub build 
 		# status repo.
-		printf "RUN_CI_ON_GITHUB_REPO copy_evaluated_commit_to_github_status_repo"
-		copy_evaluated_commit_to_github_status_repo "$github_repo_name" "$github_branch_name" "$current_branch_github_commit_sha" "$organisation"
+		printf "RUN_CI_ON_GITHUB_REPO copy_evaluated_commit_to_github_status_repo, with {github_branches[i]}=${github_branches[i]}"
+		copy_evaluated_commit_to_github_status_repo "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$organisation"
 
 		printf "RUN_CI_ON_GITHUB_REPO push_commit_build_status_in_github_status_repo_to_github"
-		# 4.c Push the evaluated commit to the GitHub build status repo. 
-		push_commit_build_status_in_github_status_repo_to_github "$github_username"
-		printf "Next loop"
+		## 4.c Push the evaluated commit to the GitHub build status repo. 
+		#push_commit_build_status_in_github_status_repo_to_github "$github_username"
+		#printf "Next loop"
 	done
 	printf "DONE"
 	
@@ -322,9 +320,9 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 		printf  "github_username=$github_username and github_repo_name=$github_repo_name and github_branch_name=$github_branch_name and github_commit_sha=$github_commit_sha and build_status=$build_status and organisation=$organisation end.\n\n\n"
 		copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$build_status" "$organisation"
 
-		# 9. Push the commit build status to the GitHub build status repo. 
-		printf "\n\n push_commit_build_status_in_github_status_repo_to_github\n\n"
-		push_commit_build_status_in_github_status_repo_to_github "$github_username"
+		## 9. Push the commit build status to the GitHub build status repo. 
+		#printf "\n\n push_commit_build_status_in_github_status_repo_to_github\n\n"
+		#push_commit_build_status_in_github_status_repo_to_github "$github_username"
 		
 		# TODO: delete this function
 		#get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha"
@@ -611,25 +609,8 @@ copy_commit_build_status_to_github_status_repo() {
 	local status="$5"
 	local organisation="$6"
 
-	# Verify the mirror location exists
-	manual_assert_not_equal "$MIRROR_LOCATION" ""
-	manual_assert_dir_exists "$MIRROR_LOCATION"
-	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub"
-	manual_assert_dir_exists "$MIRROR_LOCATION/GitLab"
-	
-	# Verify ssh-access
-	#has_access="$(check_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
-	
-	# 8. Clone the GitHub build statusses repository.
-	printf " download_and_overwrite_repository_using_ssh"
-	download_and_overwrite_repository_using_ssh "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
-	sleep 2
-	
 	# 9. Verify the Build status repository is cloned.
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
-	# 10. Copy the GitLab CI Build status icon to the build status repository.
-	# Create a folder of the repository on which a CI has been ran, inside the GitHub build status website repository, if it does not exist yet
-	# Also add a folder for the branch(es) of that GitLab CI repository, in that respective folder.
 	
 	build_status_icon_output_dir="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$organisation/$github_repo_name/$github_branch_name"
 	mkdir -p "$build_status_icon_output_dir"
@@ -658,6 +639,10 @@ copy_commit_build_status_to_github_status_repo() {
 	
 	# manual_assert GitHub commit build status txt file is created correctly
 	manual_assert_equal "$(file_exists "$build_status_icon_output_dir""/$github_commit_sha.txt")" "FOUND"
+	
+	read -p "status=$status"
+	read -p "build_status_icon_output_dir=$build_status_icon_output_dir"
+	read -p "github_commit_sha=$github_commit_sha"
 	
 	# manual_assert GitHub commit build status txt file contains the right data.
 	manual_assert_equal "$(cat "$build_status_icon_output_dir""/$github_commit_sha.txt")" "$status"

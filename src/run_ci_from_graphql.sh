@@ -110,6 +110,8 @@ loop_through_repos_in_api_query_json() {
 	done
 	# push build status icons to GitHub build status repository.
 	push_commit_build_status_in_github_status_repo_to_github "$github_organisation"
+
+	echo "repo_cursor=$repo_cursor"
 }
 
 
@@ -201,6 +203,7 @@ loop_through_branches_in_repo_json() {
 		echo "ERROR null incoming"
 		exit 4
 	fi
+	echo "branch_cursor=$branch_cursor"
 }
 
 evaluate_branch() {
@@ -274,8 +277,13 @@ loop_through_commits_in_repo_json() {
 				echo "repo_name=$repo_name, branch_name=$branch_name  commit_name=$commit_name"
 				echo "repo_name=$repo_name, branch_name=$branch_name commit_cursor=$commit_cursor"
 				
-				# Run GitLab CI on GitHub commit and push results to GitHub
-				copy_github_commits_with_yaml_to_gitlab_repo $github_organisation $repo_name $branch_name $commit_name $github_organisation
+				# Don't run ci on $GITHUB_STATUS_WEBSITE_GLOBAL because that will create commits
+				# stating an evaluation of a commit has occured, which in turn results in commits
+				# for the next run etc. Which keeps on going, + it does not contain any CI yaml.
+				if [ "$repo_name" != "$GITHUB_STATUS_WEBSITE_GLOBAL" ]; then
+					# Run GitLab CI on GitHub commit and push results to GitHub
+					copy_github_commits_with_yaml_to_gitlab_repo $github_organisation $repo_name $branch_name $commit_name $github_organisation
+				fi
 			fi
 			
 			# Determine whether the entry was null or not.
@@ -293,6 +301,7 @@ loop_through_commits_in_repo_json() {
 		echo "ERROR null incoming"
 		exit 4
 	fi
+	echo "commit_cursor=$commit_cursor"
 }
 
 evaluate_commit() {

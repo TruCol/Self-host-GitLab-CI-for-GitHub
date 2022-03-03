@@ -1,0 +1,19 @@
+
+
+ getting pipelines via curl and gitlab pac. 
+
+
+
+ get job from pipeline json using jq 
+
+
+
+ get gitlab_ci_status from job json from jq.  
+
+
+
+ get parsed github status unparsed gitlab_ci_status=.  
+
+
+
+ get parsed_github_status .  

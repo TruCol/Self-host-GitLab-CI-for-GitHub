@@ -41,6 +41,8 @@ run_ci_on_all_repositories_of_user(){
 	echo "github_repositories=${github_repositories[@]}"
 	for github_repository in "${github_repositories[@]}"; do
 		echo "$github_repository"
+
+		# TODO: redo with timeout.
 		run_ci_on_github_repo "$github_organisation_or_username" "$github_repository" "$github_organisation_or_username"
 	done
 
@@ -294,8 +296,10 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 		# 5.8. Push the results to GitLab, with the commit message of the GitHub commit sha.
 		# Perform the Push function.
 		printf "\n\n\n Push the commit to GitLab."
+		read -p "PUSHED"
 		push_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
 		# TODO: verify the changes are pushed correctly
+		read -p "DONE PUSHING, getting commit sha"
 
 		# Get last commit of GitLab repo.
 		printf "\n\n\n Push the commit to GitLab."
@@ -304,8 +308,10 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 		#echo "gitlab_commit_sha=$gitlab_commit_sha"
 
 		# 6. Get the GitLab CI build status for that GitLab commit.
+		read -p "STARTING MANAGE"
 		build_status="$(manage_get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")"
 		echo "build_status=$build_status"
+		read -p "DONE MANAGE build_status=$build_status"
 		#last_line_gitlab_ci_build_status=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${build_status}")
 		#echo "last_line_gitlab_ci_build_status=$last_line_gitlab_ci_build_status"
 
@@ -344,20 +350,23 @@ manage_get_gitlab_ci_build_status() {
 	gitlab_commit_sha="$3"
 	count=0
 	
+	# Set default built status to unknown for starters
+	echo "unknown" > "$TMP_GITLAB_BUILD_STATUS_FILEPATH"
+
+	# Get raw build status from GitLab
+	# TODO: THIS METHOD HANGS!
 	parsed_github_build_status="$(rebuild_get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")"
+	echo "$parsed_github_build_status" > "$TMP_GITLAB_BUILD_STATUS_FILEPATH"
+	#read -p "\n\n initiate while loop that checks if github build status is desirable. \n\n"
 	while [[ "$(is_desirable_github_build_status_excluding_pending "$parsed_github_build_status")" == "NOTFOUND" ]]; do
-	
+
+		# Pause for 10 seconds before trying to get the build status again.
 		sleep 10
-		count=$((count+1))
-		if [[ "$count" -gt 20 ]]; then
-			echo "Waiting on the GitLab CI build status took too long. Raising error. The last known status was:$parsed_github_build_status"
-			#exit 111
-		else
-			parsed_github_build_status="$(rebuild_get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")"
-			
+		if [ "$parsed_github_build_status" != "" ]; then
+			echo "$parsed_github_build_status" > "$TMP_GITLAB_BUILD_STATUS_FILEPATH"
+			#read -p "GOT BUILD STATUS: for github_repo_name=$github_repo_name,github_branch_name=$github_branch_name,gitlab_commit_sha=$gitlab_commit_sha . It is: $parsed_github_build_status"
 		fi
 	done
-	echo "$parsed_github_build_status"
 }
 
 rebuild_get_gitlab_ci_build_status() {
@@ -370,17 +379,22 @@ rebuild_get_gitlab_ci_build_status() {
 	gitlab_branch_name="$github_branch_name"
 
 	
+	printf "\n\n getting pipelines via curl and gitlab pac. \n\n"
 	
 	# curl --header "PRIVATE-TOKEN: <your_access_token>" "http://127.0.0.1/api/v4/projects/1/pipelines"
 	pipelines=$(curl --header "PRIVATE-TOKEN: $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "http://127.0.0.1/api/v4/projects/$GITLAB_SERVER_ACCOUNT_GLOBAL%2F$gitlab_repo_name/pipelines")
 	
 	# get build status from pipelines
+	printf "\n\n get job from pipeline json using jq \n\n"
 	job=$(echo "$pipelines" | jq -r 'map(select(.sha == "'"$gitlab_commit_sha"'"))')
 	#echo "job=$job"
 	#gitlab_ci_status="$(echo "$job" | jq ".[].status")" | tr -d '"')
+	printf "\n\n get gitlab_ci_status from job json from jq.  \n\n"
 	gitlab_ci_status=$(echo "$(echo $job | jq ".[].status")" | tr -d '"')
 	#read -p "gitlab_ci_status=$gitlab_ci_status"
+	printf "\n\n get parsed github status unparsed gitlab_ci_status=$gitlab_ci_status.  \n\n"
 	parsed_github_status="$(parse_gitlab_ci_status_to_github_build_status "$gitlab_ci_status")"
+	printf "\n\n get parsed_github_status $parsed_github_status.  \n\n"
 	echo "$parsed_github_status"
 }
 

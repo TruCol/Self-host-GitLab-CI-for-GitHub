@@ -77,38 +77,44 @@ loop_through_repos_in_api_query_json() {
 		local repo_cursor=$(get_repo_cursor "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
 		local repo_name=$(get_repo_name "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
 		repo_name_without_quotations=$(echo "$repo_name" | tr -d '"')
-		# TODO: verify the GitHub repo exists
-		# TODO: change this method to download with https?
-		# Download the GitHub repo on which to run the GitLab CI:
-		printf "\n\n\n Download the GitHub repository on which to run GitLab CI."
-		download_github_repo_on_which_to_run_ci "$github_organisation" "$repo_name_without_quotations"
-		printf "Downloaded GitHub repo on which to run GitLab CI for:$repo_name_without_quotations"
-
-		# Loop through branches.
-		# TODO: modify function to work without quotations or be consistent in it.
-		local branches=$(loop_through_branches_in_repo_json "$github_organisation" "$repo_name" "$max_branches" "$max_commits" "$(echo "$eaten_wrapper" | jq ".[$i]")")
-		echo "branches=$branches"
-		
-		# Loop through commits
-		#local commits=$(loop_through_commits_in_repo_json "$max_commits" "$(echo "$eaten_wrapper" | jq ".[$i]")")
-
-		# Determine whether the entry was null or not.
-		evaluate_repo "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")"
-		local res=$? # Get the return value of the function.
-		echo "i=$i, repo_cursor=$repo_cursor"
-		echo "i=$i, repo_name=$repo_name"
-
-		# Check if the JSON contained null or if the next entry may still 
-		# contain repository data.
-		if [ $res -ge $max_repos ]; then
-			# Ensure while loop is broken numerically.
-			echo "i=$i"
-			local i=$(( $max_repos + $max_repos ))
+		echo "repo_name_without_quotations=$repo_name_without_quotations"
+		if [ "$repo_name_without_quotations" == "tw-install" ]; then
+			# TODO: verify the GitHub repo exists
+			# TODO: change this method to download with https?
+			# Download the GitHub repo on which to run the GitLab CI:
+			printf "\n\n\n Download the GitHub repository on which to run GitLab CI."
+			download_github_repo_on_which_to_run_ci "$github_organisation" "$repo_name_without_quotations"
+			printf "Downloaded GitHub repo on which to run GitLab CI for:$repo_name_without_quotations"
+	
+			# Loop through branches.
+			# TODO: modify function to work without quotations or be consistent in it.
+			local branches=$(loop_through_branches_in_repo_json "$github_organisation" "$repo_name" "$max_branches" "$max_commits" "$(echo "$eaten_wrapper" | jq ".[$i]")")
+			echo "branches=$branches"
+			printf "Got branches=$branches Now evaluate repo"
+			# Loop through commits
+			#local commits=$(loop_through_commits_in_repo_json "$max_commits" "$(echo "$eaten_wrapper" | jq ".[$i]")")
+	
+			# Determine whether the entry was null or not.
+			evaluate_repo "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")"
+			printf "evaluated repo"
+			local res=$? # Get the return value of the function.
+			echo "i=$i, repo_cursor=$repo_cursor"
+			echo "i=$i, repo_name=$repo_name"
+	
+			# Check if the JSON contained null or if the next entry may still 
+			# contain repository data.
+			if [ $res -ge $max_repos ]; then
+				# Ensure while loop is broken numerically.
+				printf "i=$i"
+				echo "i=$i"
+				local i=$(( $max_repos + $max_repos ))
+			fi
+			
+			# TODO (now): Delete the GitHub repo on which CI is ran	
 		fi
-		
-		# TODO (now): Delete the GitHub repo on which CI is ran	
 	done
 	# push build status icons to GitHub build status repository.
+	printf "Push commit."
 	push_commit_build_status_in_github_status_repo_to_github "$github_organisation"
 
 	echo "repo_cursor=$repo_cursor"
@@ -179,9 +185,7 @@ loop_through_branches_in_repo_json() {
 			
 			local branch_cursor=$(get_branch_cursor "$max_branches" "$(echo "$eaten_branch_wrapper" | jq ".[$j]")")
 			local branch_name=$(get_branch_name "$max_branches" "$(echo "$eaten_branch_wrapper" | jq ".[$j]")")
-			
 			loop_through_commits_in_repo_json "$github_organisation" "$repo_name" "$branch_name" "$max_commits" "$(echo "$eaten_branch_wrapper" | jq ".[$j]")"
-
 
 			if [ "$branch_cursor" != "" ]; then
 				echo "branch_cursor=$branch_cursor"
@@ -281,8 +285,12 @@ loop_through_commits_in_repo_json() {
 				# stating an evaluation of a commit has occured, which in turn results in commits
 				# for the next run etc. Which keeps on going, + it does not contain any CI yaml.
 				if [ "$repo_name" != "$GITHUB_STATUS_WEBSITE_GLOBAL" ]; then
-					# Run GitLab CI on GitHub commit and push results to GitHub
-					copy_github_commits_with_yaml_to_gitlab_repo $github_organisation $repo_name $branch_name $commit_name $github_organisation
+
+					if [ "$repo_name" == "tw-install" ]; then
+						
+						# Run GitLab CI on GitHub commit and push results to GitHub
+						copy_github_commits_with_yaml_to_gitlab_repo $github_organisation $repo_name $branch_name $commit_name $github_organisation
+					fi
 				fi
 			fi
 			

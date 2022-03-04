@@ -381,7 +381,7 @@ manage_get_gitlab_ci_build_status() {
 	sleep 20
 	#read -p "parsed_github_build_status=$parsed_github_build_status.end"
 	# wait 11 * 10 = 110 seconds to get build satus, otherwise it will be stored at pending. 
-	for i in {0..11..1}; do
+	for i in {0..$WAIT_ON_CI_TO_FINISH..1}; do
 		
 		# Pause for 10 seconds before trying to get the build status again.
 		sleep 10
@@ -693,25 +693,28 @@ copy_commit_build_status_to_github_status_repo() {
 			cp "src/svgs/error.svg" "$build_status_icon_output_dir""/build_status.svg"
 		elif [  "$status" == "unknown" ]; then
 			cp "src/svgs/unknown.svg" "$build_status_icon_output_dir""/build_status.svg"
+		# TODO: change to pending badge.
+		elif [  "$status" == "pending" ]; then
+			cp "src/svgs/unknown.svg" "$build_status_icon_output_dir""/build_status.svg"
 		fi
 
 		# Assert svg file is created correctly
 		manual_assert_equal "$(file_exists "$build_status_icon_output_dir""/build_status.svg")" "FOUND"
 		#fi
-
-
-
-		# Explicitly store build status per commit per branch per repo.
-		echo "$status" > "$build_status_icon_output_dir""/$github_commit_sha.txt"
-
-		# manual_assert GitHub commit build status txt file is created correctly
-		manual_assert_equal "$(file_exists "$build_status_icon_output_dir""/$github_commit_sha.txt")" "FOUND"
-
-		# manual_assert GitHub commit build status txt file contains the right data.
-		manual_assert_equal "$(cat "$build_status_icon_output_dir""/$github_commit_sha.txt")" "$status"
 	else
 		echo "The head github_commit_sha=$github_commit_sha does not equal: head_commit_sha=$head_commit_sha"
 	fi
+
+
+	# Explicitly store build status per commit per branch per repo.
+	echo "$status" > "$build_status_icon_output_dir""/$github_commit_sha.txt"
+
+	# manual_assert GitHub commit build status txt file is created correctly
+	manual_assert_equal "$(file_exists "$build_status_icon_output_dir""/$github_commit_sha.txt")" "FOUND"
+
+	# manual_assert GitHub commit build status txt file contains the right data.
+	manual_assert_equal "$(cat "$build_status_icon_output_dir""/$github_commit_sha.txt")" "$status"
+	
 }
 
 # bash -c "source src/import.sh && push_commit_build_status_in_github_status_repo_to_github a-t-0"

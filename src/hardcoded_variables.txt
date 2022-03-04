@@ -54,3 +54,5 @@ PERSONAL_CREDENTIALS_PATH="../personal_creds.txt"
 GITHUB_SSH_DEPLOY_KEY_NAME=some_github_deploy_key
 
 TMP_GITLAB_BUILD_STATUS_FILEPATH=src/tmp_gitlab_build_status.txt
+
+WAIT_ON_CI_TO_FINISH=11 # Multiplied with 10 seconds, so 11=110 seconds.

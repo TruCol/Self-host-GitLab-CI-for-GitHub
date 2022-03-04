@@ -25,6 +25,13 @@ get_query_results() {
 	
 	echo "json=$json"
 	loop_through_repos_in_api_query_json "$github_organisation" "$json"
+
+	# Push gitlab build status
+	push_commit_build_status_in_github_status_repo_to_github
+
+	# Remove mirror directory with all downloaded repositories.
+	remove_mirror_directories
+	
 }
 
 #######################################
@@ -56,7 +63,8 @@ loop_through_repos_in_api_query_json() {
 	
 	if [ "$json" == "" ]; then
 		# Load json to variable.
-		local filepath="src/eg_query2.json"
+		read -p "JSON EMPTY"
+		local filepath="src/eg_query14.json"
 		local json=$(cat $filepath)
 	fi
 
@@ -78,7 +86,7 @@ loop_through_repos_in_api_query_json() {
 		local repo_name=$(get_repo_name "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
 		repo_name_without_quotations=$(echo "$repo_name" | tr -d '"')
 		echo "repo_name_without_quotations=$repo_name_without_quotations"
-		if [ "$repo_name_without_quotations" == "renamed_test_repo" ]; then
+		#if [ "$repo_name_without_quotations" == "tw-install" ]; then
 			# TODO: verify the GitHub repo exists
 			# TODO: change this method to download with https?
 			# Download the GitHub repo on which to run the GitLab CI:
@@ -111,11 +119,11 @@ loop_through_repos_in_api_query_json() {
 			fi
 			
 			# TODO (now): Delete the GitHub repo on which CI is ran	
-		fi
+		#fi
 	done
 	# push build status icons to GitHub build status repository.
 	printf "Push commit."
-	push_commit_build_status_in_github_status_repo_to_github "$github_organisation"
+	push_commit_build_status_in_github_status_repo_to_github
 
 	echo "repo_cursor=$repo_cursor"
 }
@@ -286,8 +294,7 @@ loop_through_commits_in_repo_json() {
 				# for the next run etc. Which keeps on going, + it does not contain any CI yaml.
 				if [ "$repo_name" != "$GITHUB_STATUS_WEBSITE_GLOBAL" ]; then
 
-					if [ "$repo_name" == "renamed_test_repo" ]; then
-						
+					if [ "$repo_name" == "tw-install" ]; then
 						# Run GitLab CI on GitHub commit and push results to GitHub
 						#if [ "$commit_name" == "712442931415fd65d9de8509e3e857da4ffa4992" ]; then
 						copy_github_commits_with_yaml_to_gitlab_repo $github_organisation $repo_name $branch_name $commit_name $github_organisation

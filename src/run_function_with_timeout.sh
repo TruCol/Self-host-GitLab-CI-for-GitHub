@@ -27,3 +27,14 @@ eg_func() {
         echo "ERROR, TMP_GITLAB_BUILD_STATUS_FILEPATH is empty."
     fi
 }
+
+# bash -c "source src/run_function_with_timeout.sh && some_func"
+some_func() {
+ echo "Bash version ${BASH_VERSION}..."
+ for i in {0..10..1}; do
+        echo "Welcome $i times"
+        if test $i -ge 3; then
+            break
+        fi
+ done
+}

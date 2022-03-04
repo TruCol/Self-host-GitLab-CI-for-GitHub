@@ -39,6 +39,7 @@ run_ci_on_all_repositories_of_user(){
 
 	initialise_github_repositories_array "$github_organisation_or_username"
 	echo "github_repositories=${github_repositories[@]}"
+
 	for github_repository in "${github_repositories[@]}"; do
 		echo "$github_repository"
 
@@ -281,7 +282,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	printf "\n\n\n Verify if the content between the local GitHub and GitLab branch is identical."
 	branch_content_identical_between_github_and_gitlab_output="$(copy_files_from_github_to_gitlab_branch "$github_repo_name" "$github_branch_name" "$gitlab_repo_name" "$gitlab_branch_name")"
 	# TODO: change this method to ommit getting last line!
-	#read -p "RESULTRESULT=$result"
+	#printf "RESULTRESULT=$result"
 	#last_line_result=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${result}")
 	#manual_assert_equal "$last_line_result" "IDENTICAL"
 	branch_content_identical_between_github_and_gitlab=$(assert_ends_in_identical ${branch_content_identical_between_github_and_gitlab_output})
@@ -296,10 +297,10 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 		# 5.8. Push the results to GitLab, with the commit message of the GitHub commit sha.
 		# Perform the Push function.
 		printf "\n\n\n Push the commit to GitLab."
-		read -p "PUSHED"
+		printf "PUSHED"
 		push_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
 		# TODO: verify the changes are pushed correctly
-		read -p "DONE PUSHING, getting commit sha"
+		printf "DONE PUSHING, getting commit sha"
 
 		# Get last commit of GitLab repo.
 		printf "\n\n\n Push the commit to GitLab."
@@ -308,10 +309,28 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 		#echo "gitlab_commit_sha=$gitlab_commit_sha"
 
 		# 6. Get the GitLab CI build status for that GitLab commit.
-		read -p "STARTING MANAGE"
-		build_status="$(manage_get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")"
-		echo "build_status=$build_status"
-		read -p "DONE MANAGE build_status=$build_status"
+		#read -p "STARTING MANAGE"
+		#build_status="$(manage_get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")"
+		
+		# Remove build status output file if it exists.
+		#delete_file_if_it_exists $TMP_GITLAB_BUILD_STATUS_FILEPATH
+		# assert status file is deleted
+		#manual_assert_file_does_not_exists $TMP_GITLAB_BUILD_STATUS_FILEPATH
+
+		manage_get_gitlab_ci_build_status $github_repo_name $github_branch_name $gitlab_commit_sha
+		#read -p "Got Build status, check what it is in file. MANAGE"
+		if [ "$(file_exists $TMP_GITLAB_BUILD_STATUS_FILEPATH)" == "FOUND" ]; then
+		
+			# yes: read status into variable
+			local build_status=$(cat $TMP_GITLAB_BUILD_STATUS_FILEPATH)
+			delete_file_if_it_exists $TMP_GITLAB_BUILD_STATUS_FILEPATH
+		else
+			echo "ERROR, the $TMP_GITLAB_BUILD_STATUS_FILEPATH file is neither found nor not found."
+			exit 4
+		fi
+		
+		#read -p "build_status=$build_status.end"
+		printf "DONE MANAGE build_status=$build_status"
 		#last_line_gitlab_ci_build_status=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${build_status}")
 		#echo "last_line_gitlab_ci_build_status=$last_line_gitlab_ci_build_status"
 
@@ -356,45 +375,61 @@ manage_get_gitlab_ci_build_status() {
 	# Get raw build status from GitLab
 	# TODO: THIS METHOD HANGS!
 	parsed_github_build_status="$(rebuild_get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")"
+	#parsed_github_build_status=$(some_func_to_get_build_status_response)
 	echo "$parsed_github_build_status" > "$TMP_GITLAB_BUILD_STATUS_FILEPATH"
-	#read -p "\n\n initiate while loop that checks if github build status is desirable. \n\n"
-	while [[ "$(is_desirable_github_build_status_excluding_pending "$parsed_github_build_status")" == "NOTFOUND" ]]; do
-
+	#printf "\n\n initiate while loop that checks if github build status is desirable. \n\n"
+	sleep 20
+	#read -p "parsed_github_build_status=$parsed_github_build_status.end"
+	# wait 11 * 10 = 110 seconds to get build satus, otherwise it will be stored at pending. 
+	for i in {0..11..1}; do
+		
 		# Pause for 10 seconds before trying to get the build status again.
 		sleep 10
+
+		# Get updated parsed_github_build_status from GitLab. 
+		parsed_github_build_status="$(rebuild_get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")"
 		if [ "$parsed_github_build_status" != "" ]; then
 			echo "$parsed_github_build_status" > "$TMP_GITLAB_BUILD_STATUS_FILEPATH"
-			#read -p "GOT BUILD STATUS: for github_repo_name=$github_repo_name,github_branch_name=$github_branch_name,gitlab_commit_sha=$gitlab_commit_sha . It is: $parsed_github_build_status"
 		fi
+
+		# If the code is already done, break for loop and move on.
+		if [ "$(is_desirable_github_build_status_excluding_pending $parsed_github_build_status)" == "FOUND" ]; then
+			break
+		fi
+		echo "in loop parsed_github_build_status=$parsed_github_build_status"
 	done
+}
+
+some_func_to_get_build_status_response() {
+	printf "IN OTHER FUNCTION!"
+	echo "hi"
 }
 
 rebuild_get_gitlab_ci_build_status() {
 	local github_repo_name="$1"
 	local github_branch_name="$2"
 	local gitlab_commit_sha="$3"
-	
+
 	# Assume identical repository and branch names:
-	gitlab_repo_name="$github_repo_name"
-	gitlab_branch_name="$github_branch_name"
+	local gitlab_repo_name="$github_repo_name"
+	local gitlab_branch_name="$github_branch_name"
 
 	
-	printf "\n\n getting pipelines via curl and gitlab pac. \n\n"
-	
+	#printf "\n\n getting pipelines via curl and gitlab pac. \n\n"
 	# curl --header "PRIVATE-TOKEN: <your_access_token>" "http://127.0.0.1/api/v4/projects/1/pipelines"
 	pipelines=$(curl --header "PRIVATE-TOKEN: $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "http://127.0.0.1/api/v4/projects/$GITLAB_SERVER_ACCOUNT_GLOBAL%2F$gitlab_repo_name/pipelines")
-	
+	#printf "pipelines=$pipelines"
 	# get build status from pipelines
-	printf "\n\n get job from pipeline json using jq \n\n"
+	#printf "\n\n get job from pipeline json using jq \n\n"
 	job=$(echo "$pipelines" | jq -r 'map(select(.sha == "'"$gitlab_commit_sha"'"))')
-	#echo "job=$job"
+	#printf "job=$job"
 	#gitlab_ci_status="$(echo "$job" | jq ".[].status")" | tr -d '"')
-	printf "\n\n get gitlab_ci_status from job json from jq.  \n\n"
+	#printf "\n\n get gitlab_ci_status from job json from jq.  \n\n"
 	gitlab_ci_status=$(echo "$(echo $job | jq ".[].status")" | tr -d '"')
-	#read -p "gitlab_ci_status=$gitlab_ci_status"
-	printf "\n\n get parsed github status unparsed gitlab_ci_status=$gitlab_ci_status.  \n\n"
+	#printf "gitlab_ci_status=$gitlab_ci_status"
+	#printf "\n\n get parsed github status unparsed gitlab_ci_status=$gitlab_ci_status.  \n\n"
 	parsed_github_status="$(parse_gitlab_ci_status_to_github_build_status "$gitlab_ci_status")"
-	printf "\n\n get parsed_github_status $parsed_github_status.  \n\n"
+	#printf "\n\n get parsed_github_status $parsed_github_status.  \n\n"
 	echo "$parsed_github_status"
 }
 
@@ -631,21 +666,25 @@ copy_commit_build_status_to_github_status_repo() {
 	# 9. Verify the Build status repository is cloned.
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 	
-	build_status_icon_output_dir="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$organisation/$github_repo_name/$github_branch_name"
-	mkdir -p "$build_status_icon_output_dir"
-	
-	
-	# TODO: 11. Include the build status and link to the GitHub commit in the repository in the SVG file.
-	# Create build status icon
-	if [  "$status" == "pending" ] || [ "$status" == "running" ]; then
-		echo "ERROR, a pending or running build status should not reach this method."
-		exit 121
-	fi
+	# Check to see if the commit that is evaluated, is the latest commit of the branch.
+	# Such that the build icon can be exported if it is.
+	head_commit_sha=$(locally_get_head_commit_sha_of_branch "$github_repo_name" "$github_branch_name")
+	# read -p "head_commit_sha=$head_commit_sha"
+	# read -p "github_commit_sha=$github_commit_sha"
+	# read -p "status=$status.end"
 
-	# When the code is ran per commit, the old commit build statuses would 
-	# overwrite the latest build status icons, so only export the build status
-	# icon when this function is called from run_ci_on_github_repo.sh.
-	if [ "$ran_per_commit" != "FALSE" ]; then
+
+	if [ "$github_commit_sha" == "$head_commit_sha" ]; then
+		build_status_icon_output_dir="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$organisation/$github_repo_name/$github_branch_name"
+		mkdir -p "$build_status_icon_output_dir"
+
+	
+		# TODO: 11. Include the build status and link to the GitHub commit in the repository in the SVG file.
+
+		# When the code is ran per commit, the old commit build statuses would 
+		# overwrite the latest build status icons, so only export the build status
+		# icon when this function is called from run_ci_on_github_repo.sh.
+		#if [ "$ran_per_commit" != "FALSE" ]; then
 		if [  "$status" == "success" ]; then
 			cp "src/svgs/passed.svg" "$build_status_icon_output_dir""/build_status.svg"
 		elif [  "$status" == "failure" ]; then
@@ -655,25 +694,24 @@ copy_commit_build_status_to_github_status_repo() {
 		elif [  "$status" == "unknown" ]; then
 			cp "src/svgs/unknown.svg" "$build_status_icon_output_dir""/build_status.svg"
 		fi
-		
+
 		# Assert svg file is created correctly
 		manual_assert_equal "$(file_exists "$build_status_icon_output_dir""/build_status.svg")" "FOUND"
+		#fi
+
+
+
+		# Explicitly store build status per commit per branch per repo.
+		echo "$status" > "$build_status_icon_output_dir""/$github_commit_sha.txt"
+
+		# manual_assert GitHub commit build status txt file is created correctly
+		manual_assert_equal "$(file_exists "$build_status_icon_output_dir""/$github_commit_sha.txt")" "FOUND"
+
+		# manual_assert GitHub commit build status txt file contains the right data.
+		manual_assert_equal "$(cat "$build_status_icon_output_dir""/$github_commit_sha.txt")" "$status"
+	else
+		echo "The head github_commit_sha=$github_commit_sha does not equal: head_commit_sha=$head_commit_sha"
 	fi
-	
-	
-	
-	# Explicitly store build status per commit per branch per repo.
-	echo "$status" > "$build_status_icon_output_dir""/$github_commit_sha.txt"
-	
-	# manual_assert GitHub commit build status txt file is created correctly
-	manual_assert_equal "$(file_exists "$build_status_icon_output_dir""/$github_commit_sha.txt")" "FOUND"
-	
-	read -p "status=$status"
-	read -p "build_status_icon_output_dir=$build_status_icon_output_dir"
-	read -p "github_commit_sha=$github_commit_sha"
-	
-	# manual_assert GitHub commit build status txt file contains the right data.
-	manual_assert_equal "$(cat "$build_status_icon_output_dir""/$github_commit_sha.txt")" "$status"
 }
 
 # bash -c "source src/import.sh && push_commit_build_status_in_github_status_repo_to_github a-t-0"

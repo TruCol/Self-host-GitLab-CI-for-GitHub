@@ -48,7 +48,7 @@ source src/import.sh
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_support_programs.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_uninstall.bats
 #./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_install_and_boot_gitlab_server.bats
-
+./test/libs/bats/bin/bats test/no_server_required/preserves_server/test_parsing.bats
 
 ############### no_server_required - breaks_server##########################
 # Works (Takes 45 sec)
@@ -61,8 +61,7 @@ source src/import.sh
 # New test
 # TODO: move into right folder
 # TODO: (if needed) separate into: requires installation, does not require installation.
-./test/libs/bats/bin/bats test/test_run_ci_on_github_repo.bats
-exit 4
+#./test/libs/bats/bin/bats test/test_run_ci_on_github_repo.bats
 
 ### Partially working (requires installation)
 # TODO: separate into: requires installation, does not require installation.

@@ -33,6 +33,19 @@ END
 )
 
 
+@test "Last head commit is returned correctly." {
+	# Assumes github.com/hiveminds/tw-install repository is cloned.
+	# TODO: automatically clone and delete it for this test.
+	# TODO: change to test repo without new commits.
+
+	head_commit_sha=$(locally_get_head_commit_sha_of_branch "tw-install" "develop")
+
+	local expected_output="7070185e19f48b8ad966cc107a84f113f22ddf47"
+		
+	assert_equal "$head_commit_sha" "$expected_output"
+}
+
+
 @test "Last line is returned correctly." {
 	# TODO: determine why this test does not work.
 	#lines=$(printf 'First line\nsecond line \nthird line \nsometoken')

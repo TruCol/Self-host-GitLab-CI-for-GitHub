@@ -738,3 +738,29 @@ remove_line_from_file_if_contains_substring() {
 		exit 6
 	fi
 }
+
+locally_get_head_commit_sha_of_branch() {
+	local github_repo_name="$1"
+	local github_branch_name="$2"
+
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	# Get the path before executing the command (to verify it is restored correctly after).
+	pwd_before="$PWD"
+	
+	# Do a git pull inside the gitlab repository.
+	#head_commit_sha=$(cd "$MIRROR_LOCATION/GitHub/$github_repo_name" && git log -n 1 $github_branch_name)
+	head_commit_sha_output=$(cd "$MIRROR_LOCATION/GitHub/$github_repo_name" && git log -n 1 remotes/origin/$github_branch_name)
+	head_commit_sha=${head_commit_sha_output:7:40}
+
+	
+	# Get the path after executing the command (to verify it is restored correctly after).
+	pwd_after="$PWD"
+	
+	# Verify the current path is the same as it was when this function started.
+	if [ "$pwd_before" != "$pwd_after" ]; then
+		echo "The current path is not returned to what it originally was:pwd_before=$pwd_before"
+		echo "pwd_after=$pwd_after"
+		exit 111
+	fi
+	echo "$head_commit_sha"
+}

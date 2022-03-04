@@ -150,9 +150,9 @@ copy_github_commit_with_yaml_to_gitlab_repo() {
 
 		# 6. Get the GitLab CI build status for that GitLab commit.
 		#read -p "\n\n\n GETTING BUILD STATUS from managing GItLab CI build status."
-		read -p "MANAGE IN PER COMMIT"
+		#read -p "MANAGE IN PER COMMIT"
 		manage_get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha"
-		read -p "Got Build status, check what it is in file. MANAGE"
+		#read -p "Got Build status, check what it is in file. MANAGE"
 		if [ "$(file_exists $TMP_GITLAB_BUILD_STATUS_FILEPATH)" == "FOUND" ]; then
 		
 			# yes: read status into variable
@@ -163,7 +163,7 @@ copy_github_commit_with_yaml_to_gitlab_repo() {
 			exit 4
 		fi
 		
-		read -p "PER COMMITbuild_status=$build_status.end"
+		#read -p "PER COMMITbuild_status=$build_status.end"
 
 		#build_status="$(call_eg_function_with_timeout "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")"
 		echo "build_status=$build_status"

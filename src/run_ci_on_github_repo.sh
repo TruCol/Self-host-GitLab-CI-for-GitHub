@@ -2,7 +2,7 @@
 
 
 #######################################
-# Make a list of the repositories in the GitHub repository.
+# Make a liThis branch is 45 commits ahead, 3 commits behind v-bosch:main.st of the repositories in the GitHub repository.
 # 
 # Local variables:
 #  
@@ -22,6 +22,7 @@
 # Run with: 
 # bash -c "source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "hiveminds"
 # bash -c "source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "a-t-0"
+# bash -c "source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "trucol"
 initialise_github_repositories_array() {
 	local github_organisation_or_username="$1"
 	get_org_repos github_repositories "$github_organisation_or_username" # call function to populate the array
@@ -55,6 +56,7 @@ run_ci_on_all_repositories_of_user(){
 # bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo a-t-0 sponsor_example a-t-0"
 # bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds sponsor_example hiveminds"
 # bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds renamed_test_repo hiveminds"
+# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo trucol trucol trucol"
 run_ci_on_github_repo() {
 	github_username="$1"
 	github_repo_name="$2"
@@ -235,8 +237,6 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	local gitlab_repo_name="$github_repo_name"
 	local gitlab_branch_name="$github_branch_name"
 	
-	
-	
 	# Get GitLab server url from credentials file.
 	local gitlab_website_url=$(echo "$GITLAB_SERVER_HTTP_URL" | tr -d '\r')
 	
@@ -297,7 +297,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 		# 5.8. Push the results to GitLab, with the commit message of the GitHub commit sha.
 		# Perform the Push function.
 		printf "\n\n\n Push the commit to GitLab."
-		printf "PUSHED"
+		
 		push_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
 		# TODO: verify the changes are pushed correctly
 		printf "DONE PUSHING, getting commit sha"
@@ -381,8 +381,10 @@ manage_get_gitlab_ci_build_status() {
 	sleep 20
 	#read -p "parsed_github_build_status=$parsed_github_build_status.end"
 	# wait 11 * 10 = 110 seconds to get build satus, otherwise it will be stored at pending. 
-	for i in {0..$WAIT_ON_CI_TO_FINISH..1}; do
-		
+	#for i in {0..$WAIT_ON_CI_TO_FINISH..1}; do
+	#for ((i=1;i<=WAIT_ON_CI_TO_FINISH;i++)); do
+	END=$WAIT_ON_CI_TO_FINISH
+	for ((i=1;i<=END;i++)); do
 		# Pause for 10 seconds before trying to get the build status again.
 		sleep 10
 

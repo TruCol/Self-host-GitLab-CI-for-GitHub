@@ -1,5 +1,35 @@
 #!/bin/bash
 
+#######################################
+# Performs a GraphQL API call to get a json with the first 100 public GitHub 
+# repositories in a GitHub organisation. That Json also contains the first 100
+# branches per repository as well as the first 100 commits per branch. Then it 
+# loops over each of these commits, and runs the GitLab CI on that commit. If 
+# the GitLab CI result is returned in time, the commit build status will be set
+# accordingly in GitHub. Additionally, a GitHub build status badge for that 
+# GitHub branch is exported to GitHub, if the GitHub commit is the most recent
+# commit in that branch.
+# Local variables:
+#  github_organisation
+# graphql_filepath
+# graphql_query
+# Globals:
+# GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL 
+# Arguments:
+#  github_organisation - The GitHub username or organisation on which the query is performed.
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0): Separate getting the query from running the GitLab CI on the 
+# json.
+# TODO(a-t-0): Ideally, get a list of repositories with that contain a list of 
+# branches, that contain a list of commits, before running the CI on that 
+# object. This can be resolved by creating a list with comma separated values
+# of format <repo><branch><commit>, and looping through that list.
+# TODO(a-t-0): Change this repo to return that list in format 
+# <repo><branch><commit> and run tests on it using a testing repository.
+#######################################
 # bash -c "source src/import.sh && get_query_results"
 get_query_results() {
 	local github_organisation="hiveminds"
@@ -12,7 +42,7 @@ get_query_results() {
 	
 
 	# Form query JSON
-	QUERY=$(jq -n \
+	graphql_query=$(jq -n \
 	           --arg q "$(cat $graphql_filepath | tr -d '\n')" \
 	           '{ query: $q }')
 
@@ -20,7 +50,7 @@ get_query_results() {
 	json=$(curl -s -X POST \
 	  -H "Content-Type: application/json" \
 	  -H "Authorization: bearer $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" \
-	  --data "$QUERY" \
+	  --data "$graphql_query" \
 	  https://api.github.com/graphql)
 	
 	echo "json=$json"
@@ -34,24 +64,29 @@ get_query_results() {
 	
 }
 
+
 #######################################
-# 
+# Extracts the repositories from the incoming json that was formed by the GraphQL
+# query. Then it removes irrelevant segments from the json before passing it on
+# to the next function that gets the branch, which then gets the commit.
 # Local variables:
-# 
+#  github_organisation
+#  json
+#  max_repos
 # Globals:
 #  None.
 # Arguments:
-#   
+#  github_organisation - The GitHub username or organisation on which the query is performed.
+#  json - The raw json that was formed by the GitHub GraphQL query.
 # Returns:
-#  0 if 
-#  7 if 
+#  0 if T.B.D.
 # Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# TODO(a-t-0): Implement method to allow looping beyond 100 repositories, using the
+# cursor that is given to the last repository. Optionally include a counter to not run on the 
+# query again if less then 100 repositroies were returned. (Perhaps also check
+# if the query can indicate if there are exactly 100 or more.)
 #######################################
-# Structure:Parsing
-# Run with:
-# bash -c "source src/import.sh && loop_through_repos_in_api_query_json"
 loop_through_repos_in_api_query_json() {
 	local github_organisation="$1"
 	local json="$2"
@@ -129,26 +164,59 @@ loop_through_repos_in_api_query_json() {
 }
 
 
-#	# TODO: change this method to download with https?
-#	# Download the GitHub repo on which to run the GitLab CI:
-#	if [ "$(dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name")" == "NOTFOUND" ]; then
-#		printf "\n\n\n Download the GitHub repository on which to run GitLab CI."
-#		download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
-#		manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
-#	fi
-#}
-
+#######################################
+# Not quite clear what purpose this function serves. It appears to perform a 
+# check to see if the json remainder still contains a repository, or whether
+# all repositories in the JSON have been evaluated.
+# Local variables:
+#  max_repos
+#  repo_json
+# Globals:
+#  None.
+# Arguments:
+#  max_repos - The maximum number of repositories that the query returns.
+#  repo_json - The json that contains the query results with repositories.
+# Returns:
+#  $max_repos If the json does not contain any more repositories.
+#  1 if there still is a repository that can be evaluated, in the JSON string.
+# Outputs:
+#  None.
+# TODO(a-t-0): Determine what the exact purpose is of this function and 
+# document it.
+#######################################
 evaluate_repo() {
 	local max_repos="$1"
 	local repo_json="$2"
+	
+	# Check if the repo json still contains a repository or not.
 	if [ "$repo_json" == "null" ]; then
+		# Return the maximum nr of repos, such that the for loop can be
+		# terminated in the (parent) function that calls this function.
 		return $max_repos
 	else
-		#echo "repo_json=$repo_json"
+		# The JSON still contains some repository that can be evaluated.
 		return 1
 	fi
 }
 
+
+#######################################
+# Gets the cursor=some identifier string that refers to a repository. This 
+# cursor can later be used to run the GraphQL query on the next 100 repos.
+# Local variables:
+#  max_repos
+#  repo_json
+# Globals:
+#  None.
+# Arguments:
+#  max_repos - The maximum number of repositories that the query returns.
+#  repo_json - The json that contains the query results with repositories.
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 get_repo_cursor() {
 	local max_repos="$1"
 	local repo_json="$2"
@@ -161,6 +229,22 @@ get_repo_cursor() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  max_repos - The maximum number of repositories that the query returns.
+#  repo_json - The json that contains the query results with repositories.
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 get_repo_name() {
 	local max_repos="$1"
 	local repo_json="$2"
@@ -172,6 +256,21 @@ get_repo_name() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 loop_through_branches_in_repo_json() {
 	local github_organisation="$1"
 	local repo_name="$2"
@@ -218,6 +317,23 @@ loop_through_branches_in_repo_json() {
 	echo "branch_cursor=$branch_cursor"
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  max_branches - The maximum number of branches that the query returns.
+#  branches_json - The json that contains the query results with branches of 
+#  the repositories.
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 evaluate_branch() {
 	local max_branches="$1"
 	local branch_json="$2"
@@ -229,6 +345,23 @@ evaluate_branch() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  max_branches - The maximum number of branches that the query returns.
+#  branches_json - The json that contains the query results with branches of 
+#  the repositories.
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 get_branch_cursor() {
 	local max_branches="$1"
 	local branch_json="$2"
@@ -241,10 +374,27 @@ get_branch_cursor() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  max_branches - The maximum number of branches that the query returns.
+#  branches_json - The json that contains the query results with branches of 
+#  the repositories.
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 get_branch_name() {
 	local max_branches="$1"
 	local branch_json="$2"
-	#echo "branch_json=$branch_json"
+	
 	if [ "$branch_json" == "null" ]; then
 		return $max_branches
 	else
@@ -255,6 +405,22 @@ get_branch_name() {
 }
 
 
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  max_commits - The maximum number of commits that the query returns.
+#  commits_json - The json that contains the query results with commits of 
+#  the branch of the repository.
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 loop_through_commits_in_repo_json() {
 	local with_quotations_github_organisation="$1"
 	local with_quotations_repo_name="$2"
@@ -321,6 +487,23 @@ loop_through_commits_in_repo_json() {
 	echo "commit_cursor=$commit_cursor"
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  max_commits - The maximum number of commits that the query returns.
+#  commits_json - The json that contains the query results with commits of 
+#  the branch of the repository.
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 evaluate_commit() {
 	local max_commits="$1"
 	local commit_json="$2"
@@ -333,6 +516,23 @@ evaluate_commit() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  max_commits - The maximum number of commits that the query returns.
+#  commits_json - The json that contains the query results with commits of 
+#  the branch of the repository.
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 get_commit_cursor() {
 	local max_commits="$1"
 	local commit_json="$2"
@@ -345,6 +545,23 @@ get_commit_cursor() {
 	fi
 }
 
+
+#######################################
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  max_commits - The maximum number of commits that the query returns.
+#  commits_json - The json that contains the query results with commits of 
+#  the branch of the repository.
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+# TODO(a-t-0):
+#######################################
 get_commit_name() {
 	local max_commits="$1"
 	local commit_json="$2"

@@ -18,6 +18,57 @@ chmod +x *.sh
 ```
 bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user <some GitHub account/organisation>"
 ```
+## Run your GitLab CI on a particular commit
+## Ensure GitHub Personal Access Token is valid
+After installation of the GitLab CI, (and re-using it after a month+), first get your GitHub personal access token:
+```
+bash -c "source src/import.sh && get_github_personal_access_token <your GitHub username> <your GitHub password>"
+```
+e.g. for me it could be:
+```
+bash -c "source src/import.sh && get_github_personal_access_token a-t-0 'examplepassword'"
+```
+
+## Run CI on custom GitHub repository (temporary instructions)
+In file: `src/run_ci_from_graphql.sh`, change the line:
+```
+local github_organisation="trucol"
+```
+to:
+```
+local github_organisation="<the GitHub username/organisation on which you want to run a CI job>"
+```
+Also change the line:
+```
+if [ "$repo_name" == "checkstyle-for-bash" ]; then
+```
+to:
+```
+if [ "$repo_name" == "<the repository you want to run your ci on>" ]; then
+```
+Also change the line:
+```
+if [ "$repo_name_without_quotations" == "checkstyle-for-bash" ]; then
+```
+to:
+```
+if [ "$repo_name_without_quotations" == "<the repository you want to run your ci on>" ]; then
+```
+
+in `src/examplequery14.gql` change the line:
+```
+repositoryOwner(login: "trucol") {
+```
+to:
+```
+repositoryOwner(login: "<the GitHub username/organisation on which you want to run a CI job>") {
+```
+Then run the GitLab CI:
+```
+bash -c "source src/import.sh && get_query_results"
+```
+
+
 ## Uninstall and delete all the data of your local GitLab server:
 ```
 ./uninstall_gitlab.sh -y -h -r

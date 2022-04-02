@@ -49,7 +49,7 @@ copy_github_commits_with_yaml_to_gitlab_repo() {
 	printf "\n\n\n Check if the local GitHub branch contains a GitLab yaml."
 	#read -p "verify_github_commit_contains_gitlab_yaml\n\n"
 	local branch_contains_yaml="$(verify_github_commit_contains_gitlab_yaml "$github_repo_name" "GitHub")"
-
+	read -p "branch_contains_yaml=$branch_contains_yaml"
 	if [[ "$branch_contains_yaml" == "FOUND" ]]; then
 	
 		# TODO: check if github commit already has CI build status
@@ -58,12 +58,13 @@ copy_github_commits_with_yaml_to_gitlab_repo() {
 		commit_filename="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$organisation/$github_repo_name/$github_branch/$github_commit_sha.txt"
 		exists="$(file_exists $commit_filename)"
 		echo "commit_filename=$commit_filename"
-		echo "exists=$exists"
+		read -p "exists=$exists"
 		if [ "$(file_exists $commit_filename)" == "NOTFOUND" ]; then
 		#if [ "$does_not_yet_have_a_build_status" == "TRUE" ]; then
 			#echo "The commit:$github_commit_sha does not yet have a build status."
+			read -p "commit filename does not yet exist"
 			if [[ "$branch_contains_yaml" == "FOUND" ]]; then
-				echo "The commit:$github_commit_sha does not yet have a build status, and it DOES have a GitLab yaml."
+				read -p "The commit:$github_commit_sha does not yet have a build status, and it DOES have a GitLab yaml."
 				printf "\n\n\n Copy GitHub branch content to a GItLab branch to run the GitLab CI on it."
 				copy_github_commit_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "$github_branch" "$github_commit_sha" "$organisation"
 				echo "Copied GitHub branch with GitLab yaml to GitLab repository mirror."
@@ -71,6 +72,8 @@ copy_github_commits_with_yaml_to_gitlab_repo() {
 		else
 			echo "Already has build status in GitHub:$github_repo_name/$github_branch/$github_commit_sha"
 		fi
+	else
+		printf "Repo:$github_repo_name/$github_branch/$github_commit_sha did not contain a GitLab-ci.yaml file."
 	fi
 		
 	# 4.b Export the evaluated GitHub commit SHA to GitHub build 
@@ -97,7 +100,7 @@ copy_github_commit_with_yaml_to_gitlab_repo() {
 	
 	# Get GitLab server url from credentials file.
 	local gitlab_website_url=$(echo "$GITLAB_SERVER_HTTP_URL" | tr -d '\r')
-		
+	read -p "IN copy_github_commit_with_yaml_to_gitlab_repo"
 
 	# 5.1 Create the empty GitLab repo.
 	# Create the empty GitLab repository (deletes any existing GitLab repos with same name).

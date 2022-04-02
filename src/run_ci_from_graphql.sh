@@ -32,7 +32,7 @@
 #######################################
 # bash -c "source src/import.sh && get_query_results"
 get_query_results() {
-	local github_organisation="hiveminds"
+	local github_organisation="trucol"
 	local graphql_filepath="src/examplequery14.gql"
 	
 	if [ ! -f $graphql_filepath ];then
@@ -121,7 +121,7 @@ loop_through_repos_in_api_query_json() {
 		local repo_name=$(get_repo_name "$max_repos" "$(echo "$eaten_wrapper" | jq ".[$i]")")
 		repo_name_without_quotations=$(echo "$repo_name" | tr -d '"')
 		echo "repo_name_without_quotations=$repo_name_without_quotations"
-		#if [ "$repo_name_without_quotations" == "tw-install" ]; then
+		if [ "$repo_name_without_quotations" == "checkstyle-for-bash" ]; then
 			# TODO: verify the GitHub repo exists
 			# TODO: change this method to download with https?
 			# Download the GitHub repo on which to run the GitLab CI:
@@ -154,7 +154,7 @@ loop_through_repos_in_api_query_json() {
 			fi
 			
 			# TODO (now): Delete the GitHub repo on which CI is ran	
-		#fi
+		fi
 	done
 	# push build status icons to GitHub build status repository.
 	printf "Push commit."
@@ -441,7 +441,7 @@ loop_through_commits_in_repo_json() {
 	if [ "$commits_json" != "null" ]; then
 		# Remove unneeded json wrapper
 		local eaten_commit_wrapper="$(echo "$commits_json" | jq ".node.target.history.edges")"
-		echo "repo_name=$repo_name, branch_name=$branch_name eaten_commit_wrapper=$eaten_commit_wrapper"
+		#echo "repo_name=$repo_name, branch_name=$branch_name eaten_commit_wrapper=$eaten_commit_wrapper"
 		local j=-1
 		while [ $max_commits -ge $j ]
 		do
@@ -460,11 +460,16 @@ loop_through_commits_in_repo_json() {
 				# for the next run etc. Which keeps on going, + it does not contain any CI yaml.
 				if [ "$repo_name" != "$GITHUB_STATUS_WEBSITE_GLOBAL" ]; then
 
-					if [ "$repo_name" == "tw-install" ]; then
+					# TODO: allow cli args to run on specific repo from cli
+					if [ "$repo_name" == "checkstyle-for-bash" ]; then
+						#read -p "Starting copy."
 						# Run GitLab CI on GitHub commit and push results to GitHub
-						#if [ "$commit_name" == "712442931415fd65d9de8509e3e857da4ffa4992" ]; then
-						copy_github_commits_with_yaml_to_gitlab_repo $github_organisation $repo_name $branch_name $commit_name $github_organisation
-						#fi
+						# TODO: allow cli args to run on specific commit sha from cli.
+						if [ "$commit_name" == "649970dfda7ae446998b753e4dd649e1d8530c38" ]; then
+							read -p "starting copy_github_commits_with_yaml_to_gitlab_repo"
+							copy_github_commits_with_yaml_to_gitlab_repo $github_organisation $repo_name $branch_name $commit_name $github_organisation
+							read -p "DOne with commit"
+						fi
 					fi
 				fi
 			fi
@@ -507,7 +512,7 @@ loop_through_commits_in_repo_json() {
 evaluate_commit() {
 	local max_commits="$1"
 	local commit_json="$2"
-	echo "commit_json=$commit_json"
+	#echo "commit_json=$commit_json"
 	if [ "$commit_json" == "null" ]; then
 		return $max_commits
 	else

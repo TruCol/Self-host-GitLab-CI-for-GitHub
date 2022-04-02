@@ -1,5 +1,5 @@
 query {
-  repositoryOwner(login: "hiveminds") {
+  repositoryOwner(login: "trucol") {
     repositories(privacy: PUBLIC, first: 100, after: "Y3Vyc29yOnYyOpHODH7CdA==") {
       edges {
         node {

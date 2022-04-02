@@ -465,11 +465,9 @@ loop_through_commits_in_repo_json() {
 						#read -p "Starting copy."
 						# Run GitLab CI on GitHub commit and push results to GitHub
 						# TODO: allow cli args to run on specific commit sha from cli.
-						if [ "$commit_name" == "649970dfda7ae446998b753e4dd649e1d8530c38" ]; then
-							read -p "starting copy_github_commits_with_yaml_to_gitlab_repo"
+						#if [ "$commit_name" == "65c7f754a2774f2a37a680dc84bddc9e53c0a85e" ]; then
 							copy_github_commits_with_yaml_to_gitlab_repo $github_organisation $repo_name $branch_name $commit_name $github_organisation
-							read -p "DOne with commit"
-						fi
+						#fi
 					fi
 				fi
 			fi

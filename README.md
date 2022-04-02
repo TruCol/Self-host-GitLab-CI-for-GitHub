@@ -19,8 +19,12 @@ chmod +x *.sh
 bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user <some GitHub account/organisation>"
 ```
 ## Run your GitLab CI on a particular commit
-## Ensure GitHub Personal Access Token is valid
-After installation of the GitLab CI, (and re-using it after a month+), first get your GitHub personal access token:
+```
+bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds renamed_test_repo hiveminds"
+```
+
+## Run your GitLab CI on a particular commit using GraphQL
+First, ensure GitHub Personal Access Token is valid. After installation of the GitLab CI, (and re-using it after a month+), first get your GitHub personal access token:
 ```
 bash -c "source src/import.sh && get_github_personal_access_token <your GitHub username> <your GitHub password>"
 ```
@@ -29,7 +33,7 @@ e.g. for me it could be:
 bash -c "source src/import.sh && get_github_personal_access_token a-t-0 'examplepassword'"
 ```
 
-## Run CI on custom GitHub repository (temporary instructions)
+Then run GitLab CI on custom GitHub repository (temporary instructions)
 In file: `src/run_ci_from_graphql.sh`, change the line:
 ```
 local github_organisation="trucol"

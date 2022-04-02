@@ -27,6 +27,13 @@ get_github_personal_access_token() {
 	local github_username="$1"
 	local github_pwd="$2"
 
+	# TODO: support not passing github pwd such that the Python code asks it
+	# during runtime.
+	if [ "$github_pwd" == "" ]; then
+		echo "Error, GitHub password was not specified. Please include it in this function."
+		exit 4
+	fi
+
 	# Get the repository that can automatically get the GitHub deploy token.
 	download_repository "$github_username" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
 	manual_assert_dir_exists "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
@@ -54,6 +61,8 @@ get_github_personal_access_token() {
 	fi
 	cd ..
 
+	# Overwrite GitHub password export to filler.
+	export github_pwd="filler"
 	# TODO: Verify path BEFORE and after running command.
 	# TODO: Verify the token is in the PERSONAL_CREDENTIALS_PATH file.
 }
@@ -139,6 +148,8 @@ assert_set_build_status_of_github_commit_using_github_pat() {
 	urls_in_json="$(echo "${getting_output_json[0]}" | jq ".[].url")"
 	printf "\n\n\n getting_output_json is:$getting_output_json \n\n\n"
 
+	# TODO also make it work for: expected_url=
+	#json_string={"state":"failure","description":"failure","target_url":"http://127.0.0.1"}
 	expected_url="https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha"
 	expected_state="\"state\":\"$commit_build_status\","
 
@@ -147,7 +158,7 @@ assert_set_build_status_of_github_commit_using_github_pat() {
 
 	if [ "$found_urls" == "NOTFOUND" ]; then
 		# shellcheck disable=SC2059
-		printf "Error, the status of the repo did not contain:$expected_url \n because the getting output was: $getting_output"
+		printf "Error, the status of the repo did not contain:$expected_url \n because the getting output was: $getting_output_json"
 		exit 119
 	elif [ "$found_state" == "NOTFOUND" ]; then
 		echo "Error, the status of the repo did not contain:$expected_state"

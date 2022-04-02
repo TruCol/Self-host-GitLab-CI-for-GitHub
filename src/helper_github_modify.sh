@@ -197,7 +197,10 @@ copy_evaluated_commit_to_github_status_repo() {
 		exit 4
 	fi
 
-	# Append commit to list of evaluated commits. 
+	# Ensure evaluated commit list exists.
+	touch "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME"
+
+	# Append commit to list of evaluated commits.
 	# TODO: verify works: if not in list already
 	matches_on_commit="$(grep $github_commit_sha "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME")"
 	printf "\n\n\n Checking if the file at:$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME contains the github_commit_sha=$github_commit_sha \n and matches_on_commit=$matches_on_commit\n\n"
@@ -217,6 +220,9 @@ copy_evaluated_commit_to_github_status_repo() {
 	# sha.
 }
 
+
+# Run width:
+# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && get_build_status_repository_from_github"
 get_build_status_repository_from_github() {
 
 	# Ensure the mirror directories are created.

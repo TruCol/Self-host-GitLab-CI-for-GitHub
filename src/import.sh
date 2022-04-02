@@ -56,6 +56,7 @@ source src/helper_parsing.sh
 source src/helper_configuration.sh
 source src/install_and_boot_gitlab_runner.sh
 
+
 source src/install_support_programs.sh
 source src/helper_md5sum.sh
 
@@ -78,6 +79,7 @@ source src/get_gitlab_server_runner_token.sh
 source src/run_ci_on_github_repo.sh
 source src/run_ci_on_commit.sh
 source src/run_ci_from_graphql.sh
+source src/call_run_function_with_timeout.sh
 
 
 

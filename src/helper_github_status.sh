@@ -276,7 +276,13 @@ verify_github_commit_contains_gitlab_yaml() {
 		
 			# Test if GitHub branch contains a GitLab yaml file.
 			local filepath="$MIRROR_LOCATION/$company/$github_repo_name/.gitlab-ci.yml"
+			local partial_capitalised_filepath="$MIRROR_LOCATION/$company/$github_repo_name/.GitLab-ci.yml"
+			local capitalised_filepath="$MIRROR_LOCATION/$company/$github_repo_name/.GitLab-CI.yml"
 			if [ "$(file_exists "$filepath")" == "FOUND" ]; then
+				echo "FOUND"
+			elif [ "$(file_exists "$partial_capitalised_filepath")" == "FOUND" ]; then
+				echo "FOUND"
+			elif [ "$(file_exists "$capitalised_filepath")" == "FOUND" ]; then
 				echo "FOUND"
 			else
 				echo "NOTFOUND"

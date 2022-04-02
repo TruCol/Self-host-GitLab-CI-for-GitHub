@@ -53,10 +53,14 @@ run_ci_on_all_repositories_of_user(){
 }
 
 # run with:
+# First:
+# bash -c "source src/import.sh helper_github_modify.sh && get_build_status_repository_from_github"
+# Then:
 # bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo a-t-0 sponsor_example a-t-0"
 # bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds sponsor_example hiveminds"
 # bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds renamed_test_repo hiveminds"
 # bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo trucol trucol trucol"
+# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo trucol checkstyle-for-bash trucol"
 run_ci_on_github_repo() {
 	github_username="$1"
 	github_repo_name="$2"

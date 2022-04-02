@@ -18,8 +18,9 @@ chmod +x *.sh
 ```
 bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user <some GitHub account/organisation>"
 ```
-## Run your GitLab CI on a particular commit
+## Run your GitLab CI on a particular repository
 ```
+bash -c "source src/import.sh helper_github_modify.sh && get_build_status_repository_from_github"
 bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds renamed_test_repo hiveminds"
 ```
 

@@ -3,7 +3,8 @@
 Hi, thanks for checking out this repo! :) It runs your own self-hosted GitLab CI on all GitHub repositories of a GitHub user/organisation, in a single command. Tested on Ubuntu 20.04 LTS. 
 
 ### Disclaimer
-This is still WIP, we do not yet dog-feed, this CI does not yet CI this CI deployment. For that, we [need to switch the ~~flux capcitor~~ runner/executor from shell to docker/virtual machine](https://github.com/TruCol/Self-host-GitLab-CI-for-GitHub/issues/100), such that the CI deployment tests do not interfere with the CI deployment.
+This is still WIP, we do not yet dog-feed; this CI does not yet CI this CI deployment. For that, we [need to switch the ~~flux capcitor~~ runner/executor from shell to docker/virtual machine](https://github.com/TruCol/Self-host-GitLab-CI-for-GitHub/issues/100), such that the CI deployment tests do not interfere with the CI deployment.
+
 ![image](https://user-images.githubusercontent.com/34750068/188695430-f8fc4c8e-cf66-48ff-b9cb-7934cfdfeee5.png)
 
 

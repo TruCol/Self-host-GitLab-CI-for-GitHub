@@ -70,71 +70,75 @@ manual_assert_dir_exists() {
 
 
 #######################################
-# 
+# Asserts a directory does not exist. Throws an error if it does.
 # Local variables:
-#  
+#  dirpath
 # Globals:
-#  
+#  None.
 # Arguments:
-#  
+#  Relative folderpath of folder whose existance is verified.
 # Returns:
-#  0 If function was evaluated succesfull.
+#  0 If folder was found.
+#  29 If the folder was not found.
 # Outputs:
-#  
-# TODO(a-t-0):
+#  Nothing
 #######################################
 manual_assert_dir_not_exists() {
-	dirpath=$1
+	local dirpath=$1
 	if [ -d "$dirpath" ]; then
-		echo "The ssh key file: $dirpath exists, even though the directory should have been deleted."
+		echo "The dir: $dirpath exists, even though the directory should have been deleted."
 		exit 29
 	fi
 }
 
 
 #######################################
-# 
+# Asserts the left and right strings are equal to eachother. Throws error if
+# they are not equal.
 # Local variables:
-#  
+#  left
+#  right
 # Globals:
-#  
+#  None.
 # Arguments:
-#  
+#  Relative folderpath of folder whose existance is verified.
 # Returns:
-#  0 If function was evaluated succesfull.
+#  0 If the two values are equal.
+#  32 If the two values are different.
 # Outputs:
-#  
-# TODO(a-t-0):
+#  Nothing
 #######################################
 manual_assert_equal() {
-	left="$1"
-	right="$2"
+	local left="$1"
+	local right="$2"
 	if [ "$left" != "$right" ]; then
 		echo "Error, $left does not equal: $right"
-		exit 29
+		exit 32
 	fi
 }
 
 
 #######################################
-# 
+# Asserts the left and right strings are not equal to eachother. Throws error
+# if they are equal.
 # Local variables:
-#  
+#  left
+#  right
 # Globals:
-#  
+#  None.
 # Arguments:
-#  
+#  Relative folderpath of folder whose existance is verified.
 # Returns:
-#  0 If function was evaluated succesfull.
+#  0 If the two values are different.
+#  33 If the two values are equal.
 # Outputs:
-#  
-# TODO(a-t-0):
+#  Nothing
 #######################################
 manual_assert_not_equal() {
-	left="$1"
-	right="$2"
+	local left="$1"
+	local right="$2"
 	if [ "$left" == "$right" ]; then
 		echo "Error, $left equals: $right"
-		exit 29
+		exit 33
 	fi
 }

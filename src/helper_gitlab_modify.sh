@@ -3,27 +3,31 @@
 # repositories.
 
 #######################################
-# 
+# Structure:Configuration
+# Returns the GitLab installation package name that matches the architecture
+# of the device on which it is installed. Not every package/GitLab source 
+# repository works on each computer/architecture. Currently working GitLab
+# installation packages have only been found for the amd64 architecture and
+# the RaspberryPi 4b architectures have been verified.
 # Local variables:
-# 
+#  architecture
 # Globals:
 #  None.
 # Arguments:
-#   
-# Returns:
-#  0 if 
-#  7 if 
-# Outputs:
 #  None.
-# TODO(a-t-0): change root with Global variable.
+# Returns:
+#  0 if the GitLab release was found correctly.
+#  7 if  
+# Outputs:
+#  The GitLab release name for the architecture of this device.
 #######################################
-# Structure:Configuration
-# Returns the GitLab installation package name that matches the architecture of the device 
-# on which it is installed. Not every package/GitLab source repository works on each computer/architecture.
-# Currently working GitLab installation packages have only been found for the amd64 architecture and 
-# the RaspberryPi 4b architectures have been verified.
+# TODO: verify if architecture is supported, raise error if not
+# TODO: Mention that support for the architecture can be gained by
+# downloading the right GitLab Runner installation package and adding
+# its verified md5sum into hardcoded_variables.txt (possibly adding an if statement 
+# to get_architecture().)
 get_gitlab_package() {
-	architecture=$(dpkg --print-architecture)
+	local architecture=$(dpkg --print-architecture)
 	if [ "$architecture" == "amd64" ]; then
 		echo "$GITLAB_DEFAULT_PACKAGE"
 	elif [ "$architecture" == "armhf" ]; then

@@ -11,18 +11,27 @@
 install_and_run_gitlab_server() {
 	local gitlab_pwd="$1"
 
+	# Get the name of the GitLab release depending on the architecture of this
+	# device.
 	gitlab_package=$(get_gitlab_package)
-	# TODO: verify if architecture is supported, raise error if not
-	# TODO: Mention that support for the architecture can be gained by
-	# downloading the right GitLab Runner installation package and adding
-	# its verified md5sum into hardcoded_variables.txt (possibly adding an if statement 
-	# to get_architecture().)
+	
+	# Check if the GitLab server is already running.
 	gitlab_server_is_running="$(gitlab_server_is_running "$gitlab_package")"
 	read -p "gitlab_server_is_running=$gitlab_server_is_running"
+	
 	if [ "$gitlab_server_is_running" == "NOTRUNNING" ]; then
+
+		# This ensures the docker containers are not running on the *:22 port.
 		remove_sshd 22
+		remove_sshd 23
+		remove_sshd 23
+		remove_sshd 80
+		remove_sshd 80
+		# This ensures the docker containers are not running on the *:443 port.
 		remove_sshd 443
 		remove_sshd 443
+		
+		# Ensures docker is installed
 		install_docker
 		echo "install_docker"
 		create_log_folder
@@ -101,6 +110,7 @@ run_gitlab_docker() {
 	gitlab_package=$(get_gitlab_package)
 	read -p "Create command." >&2
 	# shellcheck disable=SC2154
+	read -p "lsof output:$(sudo lsof -i -P -n | grep *:443)"
 
 	command="sudo docker run --detach --hostname $GITLAB_SERVER --publish $GITLAB_PORT_1 --publish $GITLAB_PORT_2 --publish $GITLAB_PORT_3 --name $GITLAB_NAME --restart always --volume $GITLAB_HOME/config:/etc/gitlab --volume $GITLAB_HOME/logs:/var/log/gitlab --volume $GITLAB_HOME/data:/var/opt/gitlab -e GITLAB_ROOT_EMAIL=$GITLAB_ROOT_EMAIL_GLOBAL -e GITLAB_ROOT_PASSWORD=$GITLAB_SERVER_PASSWORD_GLOBAL $gitlab_package"
 

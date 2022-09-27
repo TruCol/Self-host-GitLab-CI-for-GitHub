@@ -250,7 +250,6 @@ check_gitlab_runner_status() {
 check_gitlab_server_status() {
 	
 	container_id=$(get_docker_container_id_of_gitlab_server)
-	read -p "container_id=$container_id"
 	status=$(sudo docker exec -i "$container_id" bash -c "gitlab-ctl status")
 	echo "$status"
 }
@@ -272,12 +271,8 @@ check_gitlab_server_status() {
 #######################################
 # Structure:gitlab_status
 gitlab_server_is_running() {
-	
-	
 	if [ $(safely_check_if_program_is_installed "docker") == "FOUND" ]; then
-		read -p "docker is installed"
 		if [ $(docker_is_running) == "FOUND" ]; then
-			read -p "docker is running"
 			actual_result=$(check_gitlab_server_status)
 			read -p "actual_result=$actual_result"
 			if
@@ -303,11 +298,13 @@ gitlab_server_is_running() {
 				echo "NOTRUNNING"
 			fi
 		else
-			read -p "docker is not running"
+			# Depending from which position in the installation script this
+			# function is called, throw error here.
 			echo "NOTRUNNING"
 		fi
 	else
-		read -p "docker is not installed"
+		# Depending from which position in the installation script this
+		# function is called, throw error here.
 		echo "NOTRUNNING"
 	fi
 }

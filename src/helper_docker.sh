@@ -33,9 +33,9 @@ install_docker() {
 
 
 #######################################
-# 
+# Checks whether a program is installed on Ubuntu.
 # Local variables:
-#  
+#  program_name
 # Globals:
 #  
 # Arguments:
@@ -48,7 +48,7 @@ install_docker() {
 #######################################
 # run with: source src/helper_docker.sh && safely_check_if_program_is_installed docker
 safely_check_if_program_is_installed() {
-	program_name="$1"
+	local program_name="$1"
 	if ! foobar_loc="$(type -p "$program_name")" || [[ -z $foobar_loc ]]; then
 		echo "NOTFOUND"
 	else
@@ -374,17 +374,15 @@ get_docker_container_id_of_gitlab_server() {
 	
 	# TODO: select gitlab_package substring rhs up to / (the sed command does not handle this well)
 	# TODO: OR replace / with \/ (that works)
+	# Specify the a substring that identifies the GitLab docker container line
+	# in the "sudo docker ps -a" output.
 	local identification_str=$(get_rhs_of_line_till_character "$gitlab_package" "/")
-	
-	# write output to file
+	# Write the output of the container list to a file.
 	local output=$(sudo docker ps -a | sudo tee "$log_filepath")
 	# Get line with "gitlab/gitlab-ce:latest" (package name depending on architecture).
 	local line=$(get_first_line_containing_substring "$log_filepath" "\${identification_str}")
-	#echo "line=$line"
-	
-	# Get container id of the line containing the id.
+	# Get container id of the GitLab docker container.
 	local container_id=$(get_lhs_of_line_till_character "$line" "$space")
-	#read -p "CONFIRM BELOW in, container_id=$container_id"
 
 	# delete the file as cleanup if it exist
 	if [ -f "$log_filepath" ] ; then
@@ -575,7 +573,7 @@ start_docker() {
 # 0. First clear all relevant containres using their NAMES:
 list_all_docker_containers() {
 	output=$(sudo docker ps -a)
-	echo "$output"
+	read -p "$output"
 }
 
 #######################################
@@ -602,6 +600,38 @@ stop_gitlab_package_docker() {
 		# Stop Gitlab Docker container
 		# shellcheck disable=SC2034
 		stopped=$(sudo docker stop "$docker_container_id")
+	fi
+}
+
+#######################################
+# UNUSED FUNCTION. TODO: delete this. Was temporarily created because the 
+# docker container had status "created" instead of "running", which caused me
+# to think it needed to be started. However, that starting is done in some 
+# other/the main start gitlab server docker command. All I had to do was stop
+# the processes running at the port that threw error: bind already in use...
+# https://github.com/TruCol/Self-host-GitLab-CI-for-GitHub/issues/13
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): 
+#######################################
+# Structure:gitlab_docker
+start_gitlab_package_docker() {
+	# Get Docker container id
+	docker_container_id=$(get_docker_container_id_of_gitlab_server)
+	# Remove container if it is running
+	if [ -n "$docker_container_id" ]; then		
+		# Stop Gitlab Docker container
+		# shellcheck disable=SC2034
+		started=$(sudo docker start "$docker_container_id")
 	fi
 }
 

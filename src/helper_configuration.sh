@@ -42,7 +42,7 @@ get_architecture() {
 # Kills the sshd process to prevent the:
 # Error starting userland proxy: listen tcp4 0.0.0.0:23 bind: address already 
 # in use.
-# error.
+# error. This error also occurs on port 443 on the docker-pr service.
 # Source: https://github.com/Simple-Setup/Self-host-GitLab-Server-and-Runner-CI/issues/13
 # run with: source src/import.sh && remove_sshd
 # Local variables:
@@ -63,24 +63,41 @@ get_architecture() {
 # mapped. 
 #######################################
 remove_sshd() {
-	local response_lines=$(sudo lsof -i -P -n | grep *:22)
+	local target_port=$1
+	local response_lines=$(sudo lsof -i -P -n | grep *:$target_port)
 	
 	# Assert the first 4 characters of the response are:sshd
 	echo "${response_lines:0:4}"
 	
-	if [ "${response_lines:0:4}" == "sshd" ]; then
+	#if [ "${response_lines:0:4}" == "sshd" ]; then
+	if [ "${response_lines:0:4}" == "sshd" ] || [ "${response_lines:0:4}" == "dock" ]; then
 		IFS="$(sudo whoami)"
 		set $response_lines
-		left_of_root_user=$1
-		echo "left_of_root_user=$left_of_root_user"
+		local left_of_root_user=$1
+		read -p "left_of_root_user=$left_of_root_user"
 		if [ "${left_of_root_user:0:4}" == "sshd" ]; then
 			local port_str=$(stringStripNCharsFromStart "$left_of_root_user" 4)
-			echo "port_str=$port_str"
+			read -p "port_str=$port_str"
 			local port_nr=$(echo "$port_str" | tr -dc '0-9')
-			echo "port_nr=$port_nr"
+			read -p "port_nr=$port_nr"
 			sudo kill "$port_nr"
 		else
 			echo "The response to the lsof command does not start with:sshd"
+			#exit 7
+		fi
+	elif [ "${response_lines:0:9}" == "docker-pr" ]; then
+		IFS="$(sudo whoami)"
+		set $response_lines
+		local left_of_root_user=$1
+		read -p  "left_of_root_user=$left_of_root_user"
+		if [ "${left_of_root_user:0:9}" == "docker-pr" ]; then
+			local port_str=$(stringStripNCharsFromStart "$left_of_root_user" 9)
+			read -p "port_str=$port_str"
+			local port_nr=$(echo "$port_str" | tr -dc '0-9')
+			read -p "port_nr=$port_nr"
+			sudo kill "$port_nr"
+		else
+			echo "The response to the lsof command does not start with:docker-pr"
 			#exit 7
 		fi
 	elif [ "$response_lines" == "" ]; then
@@ -89,10 +106,10 @@ remove_sshd() {
 		echo "The response to the lsof command does not start with:sshd"
 		#exit 7
 	fi
-	
 	# Assert the process is not running anymore
 	assert_sshd_process_is_not_running_anymore
 }
+
 
 
 #######################################

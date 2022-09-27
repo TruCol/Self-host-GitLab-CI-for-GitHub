@@ -40,7 +40,7 @@ get_github_personal_access_token() {
 
 	# TODO: verify path before running command.
 
-	printf "\n\n Now using a browser controller repository to create a GitHub personal access token and store it locally.\n\n."
+	printf "\n\n Now using a browser controller repository to create a GitHub personal access token and store it localy.\n\n."
 	# shellcheck disable=SC2034
 	if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
 		eval "$(conda shell.bash hook)"

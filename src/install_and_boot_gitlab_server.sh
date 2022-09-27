@@ -18,9 +18,11 @@ install_and_run_gitlab_server() {
 	# its verified md5sum into hardcoded_variables.txt (possibly adding an if statement 
 	# to get_architecture().)
 	gitlab_server_is_running="$(gitlab_server_is_running "$gitlab_package")"
-	echo "gitlab_server_is_running=$gitlab_server_is_running"
+	read -p "gitlab_server_is_running=$gitlab_server_is_running"
 	if [ "$gitlab_server_is_running" == "NOTRUNNING" ]; then
-		remove_sshd
+		remove_sshd 22
+		remove_sshd 443
+		remove_sshd 443
 		install_docker
 		echo "install_docker"
 		create_log_folder
@@ -36,13 +38,13 @@ install_and_run_gitlab_server() {
 		start_docker
 		echo "start_docker"
 		list_all_docker_containers
-		echo "list_all_docker_containers"
+		read -p "list_all_docker_containers"
 		stop_gitlab_package_docker "$gitlab_package"
-		echo "stop_gitlab_package_docker"
+		read -p "stop_gitlab_package_docker"
 		remove_gitlab_package_docker "$gitlab_package"
-		echo "remove_gitlab_package_docker"
+		read -p "remove_gitlab_package_docker"
 		remove_gitlab_docker_containers
-		echo "remove_gitlab_docker_containers"
+		read -p "remove_gitlab_docker_containers"
 		stop_apache_service
 		echo "stop_apache_service"
 		stop_nginx_service
@@ -97,9 +99,12 @@ create_gitlab_folder() {
 run_gitlab_docker() {
 	local gitlab_pwd="$1"
 	gitlab_package=$(get_gitlab_package)
-	#read -p "Create command." >&2
+	read -p "Create command." >&2
 	# shellcheck disable=SC2154
+
 	command="sudo docker run --detach --hostname $GITLAB_SERVER --publish $GITLAB_PORT_1 --publish $GITLAB_PORT_2 --publish $GITLAB_PORT_3 --name $GITLAB_NAME --restart always --volume $GITLAB_HOME/config:/etc/gitlab --volume $GITLAB_HOME/logs:/var/log/gitlab --volume $GITLAB_HOME/data:/var/opt/gitlab -e GITLAB_ROOT_EMAIL=$GITLAB_ROOT_EMAIL_GLOBAL -e GITLAB_ROOT_PASSWORD=$GITLAB_SERVER_PASSWORD_GLOBAL $gitlab_package"
+
+	read -p "command=$command." >&2
 	#read -p "Created command." >&2
 	echo "command=$command" > "$LOG_LOCATION""run_gitlab.txt"
 	#read -p "Exportedcommand." >&2
@@ -126,7 +131,8 @@ run_gitlab_docker() {
 #	  -e GITLAB_ROOT_EMAIL="some_email@protonmail.com" -e GITLAB_ROOT_PASSWORD="gitlab_root_password" -e EXTERNAL_URL="http://127.0.0.1" \
 #	  $gitlab_package)
 	  
-	  output=$(sudo docker run --detach \
+	read -p "Ignored command, now running something else."
+	output=$(sudo docker run --detach \
 	  --hostname "$GITLAB_SERVER" \
 	  --publish "$GITLAB_PORT_1" --publish "$GITLAB_PORT_2" --publish "$GITLAB_PORT_3" \
 	  --name "$GITLAB_NAME" \

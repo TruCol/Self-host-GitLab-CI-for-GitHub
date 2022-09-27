@@ -250,7 +250,7 @@ check_gitlab_runner_status() {
 check_gitlab_server_status() {
 	
 	container_id=$(get_docker_container_id_of_gitlab_server)
-	#echo "container_id=$container_id"
+	read -p "container_id=$container_id"
 	status=$(sudo docker exec -i "$container_id" bash -c "gitlab-ctl status")
 	echo "$status"
 }
@@ -275,9 +275,11 @@ gitlab_server_is_running() {
 	
 	
 	if [ $(safely_check_if_program_is_installed "docker") == "FOUND" ]; then
+		read -p "docker is installed"
 		if [ $(docker_is_running) == "FOUND" ]; then
+			read -p "docker is running"
 			actual_result=$(check_gitlab_server_status)
-			#echo "actual_result=$actual_result"
+			read -p "actual_result=$actual_result"
 			if
 			[  "$(lines_contain_string 'run: alertmanager: (pid ' "${actual_result}")" == "FOUND" ] &&
 			[  "$(lines_contain_string 'run: gitaly: (pid ' "${actual_result}")" == "FOUND" ] &&
@@ -301,9 +303,11 @@ gitlab_server_is_running() {
 				echo "NOTRUNNING"
 			fi
 		else
+			read -p "docker is not running"
 			echo "NOTRUNNING"
 		fi
 	else
+		read -p "docker is not installed"
 		echo "NOTRUNNING"
 	fi
 }

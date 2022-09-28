@@ -227,7 +227,7 @@ printf "\n\n\n Verifying the $GITHUB_STATUS_WEBSITE_GLOBAL and $PUBLIC_GITHUB_TE
 # Get the GitHub personal access code.
 printf "\n\n\n Setting and Getting the GitHub personal access token if it does not yet exist."
 # TODO: RE-enable, only disabled to speed up debugging.!
-#ensure_github_pat_can_be_used_to_set_commit_build_status $GITHUB_USERNAME_GLOBAL $PUBLIC_GITHUB_TEST_REPO_GLOBAL $github_password
+ensure_github_pat_can_be_used_to_set_commit_build_status $GITHUB_USERNAME_GLOBAL $PUBLIC_GITHUB_TEST_REPO_GLOBAL $github_password
 
 
 

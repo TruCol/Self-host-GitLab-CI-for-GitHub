@@ -4,7 +4,10 @@
 # And to control a Firefox browser, it needs to be installed using apt instead
 # of snap. https://stackoverflow.com/questions/72405117
 # https://www.omgubuntu.co.uk/2022/04/how-to-install-firefox-deb-apt-ubuntu-22-04
+# https://askubuntu.com/questions/1399383/
 
+# Run with:
+# bash -c "source src/import.sh && src/prerequisites/firefox_version.sh"
 source src/import.sh
 
 #######################################
@@ -22,15 +25,14 @@ source src/import.sh
 #  FOUND if firefox is installed using snap.
 #  NOTFOUND if firefox is not installed using snap.
 #######################################
-# Run with:
-# bash -c "source src/import.sh && src/prerequisites/firefox_version.sh firefox_via_snap"
 firefox_via_snap(){
 	local respons_lines="$(snap list)"
 	local found_firefox=$(command_output_contains "firefox" "${respons_lines}")
 	echo $found_firefox
 }
+
 #######################################
-# Checks if firefox is added as ppa or not.
+# Checks if firefox is installed using ppa and apt or not.
 # Locals:
 #  respones_lines
 #  found_firefox
@@ -41,14 +43,36 @@ firefox_via_snap(){
 # Returns:
 #  0 If command was evaluated successfully.
 # Outputs:
+#  FOUND if firefox is installed using ppa and apt.
+#  NOTFOUND if firefox is not installed using ppa and apt.
+#######################################
+firefox_via_apt(){
+	local respons_lines="$(apt list --installed)"
+	local found_firefox=$(command_output_contains "firefox" "${respons_lines}")
+	echo $found_firefox
+}
+
+#######################################
+# Checks if firefox is added as ppa or not.
+# Locals:
+#  respones_lines
+#  ppa_indicator
+#  found_firefox_ppa
+# Globals:
+#  None
+# Arguments:
+#  None
+# Returns:
+#  0 If command was evaluated successfully.
+# Outputs:
 #  FOUND if firefox is added as ppa.
 #  NOTFOUND if firefox is not added as ppa.
 #######################################
-# Run with:
-# bash -c "source src/import.sh && src/prerequisites/firefox_version.sh firefox_via_snap"
 firefox_ppa_is_added(){
+	# Get list of ppa packages added for apt usage.
 	local respons_lines="$(apt policy)"
-	ppa_indicator="https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu"
+	# Specify identifier for firefox ppa presence.
+	local ppa_indicator="https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu"
 	local found_firefox_ppa=$(command_output_contains "$ppa_indicator" "${respons_lines}")
 	echo $found_firefox_ppa
 }
@@ -69,15 +93,16 @@ firefox_ppa_is_added(){
 #  FOUND if firefox is installed using snap.
 #  NOTFOUND if firefox is not installed using snap.
 #######################################
-# Run with:
-# bash -c "source src/import.sh && src/prerequisites/firefox_version.sh remove_snap_install_firefox_if_existant"
 remove_snap_install_firefox_if_existant(){
 	if [ "$(firefox_via_snap)" == "FOUND" ]; then
+		
 		# Prompt user for permission.
 		ask_user_swapping_firefox_install_is_ok
+		
+		# User permission is granted here, remove firefox snap installation.
 		yes | sudo snap remove firefox 2>&1
 		assert_firefox_is_not_installed_using_snap
-		echo "Firefox is removed."
+		echo "Firefox is removed." > /dev/tty
 	fi
 	assert_firefox_is_not_installed_using_snap
 }
@@ -96,8 +121,6 @@ remove_snap_install_firefox_if_existant(){
 # Outputs:
 #  Mesage indicating Firefox will be uninstalled.
 #######################################
-# Run with:
-# bash -c "source src/import.sh && src/prerequisites/firefox_version.sh remove_snap_install_firefox_if_existant"
 ask_user_swapping_firefox_install_is_ok(){
 	echo "" > /dev/tty
 	echo "Hi, firefox is installed using snap. To automatically add your " > /dev/tty
@@ -138,6 +161,12 @@ assert_firefox_is_not_installed_using_snap(){
 		exit 2
 	fi
 }
+assert_firefox_is_installed_using_ppa(){
+	if [ "$(firefox_via_apt)" != "FOUND" ]; then
+		echo "Error, Firefox installation was not performed using ppa and apt." > /dev/tty
+		exit 2
+	fi
+}
 
 #######################################
 # Asserts Firefox ppa is added to apt.
@@ -148,10 +177,10 @@ assert_firefox_is_not_installed_using_snap(){
 # Arguments:
 #  None
 # Returns:
-#  0 If Firefox is not installed using snap.
-#  1 If Firefox is still isntalled using snap.
+#  0 If Firefox ppa is added to apt.
+#  4 Otherwise.
 # Outputs:
-#  Nothing
+#  Error message indicating firefox ppa is not added correctly.
 #######################################
 # Run with:
 assert_firefox_ppa_is_added_to_apt(){
@@ -168,7 +197,7 @@ assert_firefox_ppa_is_removed_from_apt(){
 }
 
 #######################################
-# Adds firefox ppa to install using apt.
+# Adds firefox ppa to install using apt if it is not added yet.
 # Locals:
 #  None
 # Globals:
@@ -181,10 +210,9 @@ assert_firefox_ppa_is_removed_from_apt(){
 # Outputs:
 #  Nothing
 #######################################
-# Run with:
 add_firefox_ppa_if_not_in_yet(){
 	if [ "$(firefox_ppa_is_added)" == "NOTFOUND" ]; then
-		echo "Now adding Firefox ppa to apt."  > /dev/tty
+		echo "Now adding Firefox ppa to apt." > /dev/tty
 		echo "" > /dev/tty
 		yes | sudo add-apt-repository ppa:mozillateam/ppa
 	fi
@@ -192,28 +220,58 @@ add_firefox_ppa_if_not_in_yet(){
 }
 remove_firefox_ppa(){
 	if [ "$(firefox_ppa_is_added)" == "FOUND" ]; then
-		echo "Now removing Firefox ppa to apt."  > /dev/tty
+		echo "Now removing Firefox ppa to apt." > /dev/tty
 		echo "" > /dev/tty
 		yes | sudo add-apt-repository --remove ppa:mozillateam/ppa
 	fi
 	assert_firefox_ppa_is_removed_from_apt
 }
 
+
+#######################################
+# Asserts the Firefox installation package preference is set to ppa/apt. Does
+# this by verifying the file content is as expected using hardcoded MD5Sum.
+# Locals:
+#  None
+# Globals:
+#  None
+# Arguments:
+#  None
+# Returns:
+#  0 If Firefox is not installed using snap.
+#  1 If Firefox is still isntalled using snap.
+# Outputs:
+#  Nothing
+#######################################
 assert_firefox_installation_package_preference_file_content(){
-	local md5_output=$(md5sum /etc/apt/preferences.d/mozilla-firefox)
-	local expected_md5_output="8539b3cc62d743683e5a17c228d1660c  /etc/apt/preferences.d/mozilla-firefox"
+	local preferences_path="$1"
+	local md5_output=$(md5sum $preferences_path)
+	local expected_md5_output="961023613b10ce4ae8150f78d698a53e  $preferences_path"
 	if [ "$md5_output" != "$expected_md5_output" ]; then
-		echo "Error, the md5 output of: /etc/apt/preferences.d/mozilla-firefox is not as expected." > /dev/tty
+		echo "Error, the md5 output of: $preferences_path is not as expected." > /dev/tty
 		echo "md5_output=         $md5_output" > /dev/tty
 		echo "expected_md5_output=$expected_md5_output" > /dev/tty
 		exit 5
 	fi
 }
 
+assert_firefox_auto_update_file_content(){
+	local preferences_path="$1"
+	local md5_output=$(md5sum $preferences_path)
+	local expected_md5_output="ffd6e239ef98a236741f4ba5c84ab20e  $preferences_path"
+	if [ "$md5_output" != "$expected_md5_output" ]; then
+		echo "Error, the md5 output of: $preferences_path is not as expected." > /dev/tty
+		echo "md5_output=         $md5_output" > /dev/tty
+		echo "expected_md5_output=$expected_md5_output" > /dev/tty
+		exit 5
+	fi
+}
+
+
 #######################################
-# Ensures the firefox installation is done from apt instead of snap.
+# Sets the Firefox installation package preference from snap to ppa/apt.
 # Locals:
-#  None
+#  preferences_path
 # Globals:
 #  None
 # Arguments:
@@ -226,17 +284,65 @@ assert_firefox_installation_package_preference_file_content(){
 #######################################
 # Run with:
 change_firefox_package_priority(){
+	local preferences_path="/etc/apt/preferences.d/mozilla-firefox"
+
 	# Set the installation package preference in firefox.
-	echo '
-	Package: *
-	Pin: release o=LP-PPA-mozillateam
-	Pin-Priority: 1001
-	' | sudo tee /etc/apt/preferences.d/mozilla-firefox
+	echo 'Package: *
+Pin: release o=LP-PPA-mozillateam
+Pin-Priority: 1001' | sudo tee "$preferences_path"
 
 	# Verify the installation package preference is set correctly in firefox.
-	assert_firefox_installation_package_preference_file_content
+	assert_firefox_installation_package_preference_file_content "$preferences_path"
 }
 
+#######################################
+# Ensures the firefox installation is updated automatically.
+# Locals:
+#  update_filepath
+# Globals:
+#  None
+# Arguments:
+#  None
+# Returns:
+#  0 If Firefox is not installed using snap.
+#  1 If Firefox is still isntalled using snap.
+# Outputs:
+#  Nothing
+#######################################
+ensure_firefox_is_updated_automatically(){
+	local update_filepath="/etc/apt/apt.conf.d/51unattended-upgrades-firefox"
+	# Set the installation package preference in firefox.
+	echo 'Unattended-Upgrade::Allowed-Origins:: "LP-PPA-mozillateam:${distro_codename}";' | sudo tee "$update_filepath"
+
+	# Verify the installation package preference is set correctly in firefox.
+	assert_firefox_auto_update_file_content "$update_filepath"
+}
+
+
+#######################################
+# Installs firefox using ppa and apt.
+# Locals:
+#  None
+# Globals:
+#  None
+# Arguments:
+#  None
+# Returns:
+#  0 If Firefox is installed using ppa and apt.
+#  1 If Firefox is mpt installed using ppa and apt.
+# Outputs:
+#  Nothing
+#######################################
+install_firefox_using_ppa(){
+	if [ "$(firefox_via_apt)" == "NOTFOUND" ]; then
+		yes | sudo apt install firefox 2>&1
+	fi
+	assert_firefox_is_installed_using_ppa
+	echo "Firefox is installed succesfully using ppa and apt." > /dev/tty
+}
+
+
+# Swap Firefox installation from snap to ppa/apt using functions above.
 # 0. Detect how firefox is installed.
 # 1. If firefox installed with snap:
 # 1.a Ask user for permission to swap out Firefox installation.
@@ -245,24 +351,20 @@ change_firefox_package_priority(){
 # 1.d Verify snap firefox is removed.
 remove_snap_install_firefox_if_existant
 
-# 1.e Add firefox ppa to apt if not yet in.
-# 1.f Verify firefox ppa is added (successfully).
+# 2.a Add firefox ppa to apt if not yet in.
+# 2.b Verify firefox ppa is added (successfully).
 add_firefox_ppa_if_not_in_yet
 #remove_firefox_ppa
 
-# 1.g Change Firefox package priority to ensure it is installed from PPA/deb/apt
+# 3.a Change Firefox package priority to ensure it is installed from PPA/deb/apt
 # instead of snap.
-##echo '
-##Package: *
-##Pin: release o=LP-PPA-mozillateam
-##Pin-Priority: 1001
-##' | sudo tee /etc/apt/preferences.d/mozilla-firefox
-# 1.g. Verify Firefox installation priority was set correctly.
+# 3.b Verify Firefox installation priority was set correctly.
 change_firefox_package_priority
 
-# 1.h. Ensure the Firefox installation is automatically updated.
-##echo 'Unattended-Upgrade::Allowed-Origins:: "LP-PPA-mozillateam:${distro_codename}";' | sudo tee /etc/apt/apt.conf.d/51unattended-upgrades-firefox
-# 1.i Verify the auto update command is completed succesfully.
-# 1.h Install Firefox using apt.
-# 1.j Verify firefox is installed succesfully, and only once, using apt/PPA.
+# 4.a Ensure the Firefox installation is automatically updated.
+# 4.b Verify the auto update command is completed succesfully.
+ensure_firefox_is_updated_automatically
 
+# 5.a Install Firefox using apt.
+# 5.v Verify firefox is installed succesfully, and only once, using apt/PPA.
+install_firefox_using_ppa

@@ -103,7 +103,7 @@ setup() {
 	assert_equal "$COMMAND_OUTPUT" "$EXPECTED_OUTPUT"
 }
 
-@test "Checking if hello and ttwo input arguments are returned." {
+@test "Checking if hello and two input arguments are returned." {
 	COMMAND_OUTPUT=$(echo_hello_input "hi" "test/samplefile.txt")
 	EXPECTED_OUTPUT="hellohitest/samplefile.txt"
 		

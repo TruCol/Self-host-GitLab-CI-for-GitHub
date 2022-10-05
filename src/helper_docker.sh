@@ -569,8 +569,6 @@ start_docker() {
 # TODO(a-t-0): change root with Global variable.
 #######################################
 # Structure:gitlab_docker
-# Delete all existing gitlab containers
-# 0. First clear all relevant containres using their NAMES:
 list_all_docker_containers() {
 	output=$(sudo docker ps -a)
 	read -p "$output"

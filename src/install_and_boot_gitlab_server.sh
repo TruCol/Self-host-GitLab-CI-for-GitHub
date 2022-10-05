@@ -33,19 +33,19 @@ install_and_run_gitlab_server() {
 		
 		# Ensures docker is installed
 		install_docker
-		echo "install_docker"
+		read -p "install_docker"
 		create_log_folder
-		echo "create_log_folder"
+		read -p "create_log_folder"
 		create_gitlab_folder
-		echo "create_gitlab_folder"
+		read -p "create_gitlab_folder"
 		install_docker
-		echo "install_docker"
+		read -p "install_docker"
 		install_docker_compose
-		echo "install_docker_compose"
+		read -p "install_docker_compose"
 		stop_docker
-		echo "stop_docker"
+		read -p "stop_docker"
 		start_docker
-		echo "start_docker"
+		read -p "start_docker"
 		list_all_docker_containers
 		read -p "list_all_docker_containers"
 		stop_gitlab_package_docker "$gitlab_package"
@@ -55,9 +55,9 @@ install_and_run_gitlab_server() {
 		remove_gitlab_docker_containers
 		read -p "remove_gitlab_docker_containers"
 		stop_apache_service
-		echo "stop_apache_service"
+		read -p "stop_apache_service"
 		stop_nginx_service
-		echo "stop_nginx_service"
+		read -p "stop_nginx_service"
 		#stop_nginx
 		run_gitlab_docker "$gitlab_pwd"
 		verify_gitlab_server_status "$SERVER_STARTUP_TIME_LIMIT"
@@ -114,9 +114,11 @@ run_gitlab_docker() {
 
 	command="sudo docker run --detach --hostname $GITLAB_SERVER --publish $GITLAB_PORT_1 --publish $GITLAB_PORT_2 --publish $GITLAB_PORT_3 --name $GITLAB_NAME --restart always --volume $GITLAB_HOME/config:/etc/gitlab --volume $GITLAB_HOME/logs:/var/log/gitlab --volume $GITLAB_HOME/data:/var/opt/gitlab -e GITLAB_ROOT_EMAIL=$GITLAB_ROOT_EMAIL_GLOBAL -e GITLAB_ROOT_PASSWORD=$GITLAB_SERVER_PASSWORD_GLOBAL $gitlab_package"
 
+
 	read -p "command=$command." >&2
 	#read -p "Created command." >&2
 	echo "command=$command" > "$LOG_LOCATION""run_gitlab.txt"
+	#$($command)
 	#read -p "Exportedcommand." >&2
 #	output=$(sudo docker run --detach \
 #	  --hostname $GITLAB_SERVER \
@@ -142,6 +144,7 @@ run_gitlab_docker() {
 #	  $gitlab_package)
 	  
 	read -p "Ignored command, now running something else."
+	
 	output=$(sudo docker run --detach \
 	  --hostname "$GITLAB_SERVER" \
 	  --publish "$GITLAB_PORT_1" --publish "$GITLAB_PORT_2" --publish "$GITLAB_PORT_3" \

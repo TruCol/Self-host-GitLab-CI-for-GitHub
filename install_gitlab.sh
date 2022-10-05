@@ -218,6 +218,12 @@ printf "\n\n\n Now getting sudo permission to perform the GitLab installation."
 {
   sudo echo "hi"
 } &> /dev/null
+# Ensuring the Firefox installation is performed with ppa/apt instead of snap.
+# This is such that the browser can be controlled automatically.
+swap_snap_firefox_with_ppa_apt_firefox_installation
+
+# Ensure jq is installed correctly.
+install_jquery_using_apt
 
 # Verify the GitHub user has the required repositories.
 printf "\n\n\n Verifying the $GITHUB_STATUS_WEBSITE_GLOBAL and $PUBLIC_GITHUB_TEST_REPO_GLOBAL repositories exist in your GitHub account."

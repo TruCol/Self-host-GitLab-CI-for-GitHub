@@ -7,8 +7,7 @@
 # https://askubuntu.com/questions/1399383/
 
 # Run with:
-# bash -c "source src/import.sh && src/prerequisites/firefox_version.sh"
-source src/import.sh
+# bash -c "source src/import.sh && src/prerequisites/firefox_version.sh swap_snap_firefox_with_ppa_apt_firefox_installation"
 
 #######################################
 # Checks if firefox is installed using snap or not.
@@ -342,29 +341,31 @@ install_firefox_using_ppa(){
 }
 
 
-# Swap Firefox installation from snap to ppa/apt using functions above.
-# 0. Detect how firefox is installed.
-# 1. If firefox installed with snap:
-# 1.a Ask user for permission to swap out Firefox installation.
-# 1.b. Verify and mention the bookmarks, addons and history are not removed.
-# 1.c Remove snap firefox if it exists.
-# 1.d Verify snap firefox is removed.
-remove_snap_install_firefox_if_existant
+swap_snap_firefox_with_ppa_apt_firefox_installation(){
+	# Swap Firefox installation from snap to ppa/apt using functions above.
+	# 0. Detect how firefox is installed.
+	# 1. If firefox installed with snap:
+	# 1.a Ask user for permission to swap out Firefox installation.
+	# 1.b. Verify and mention the bookmarks, addons and history are not removed.
+	# 1.c Remove snap firefox if it exists.
+	# 1.d Verify snap firefox is removed.
+	remove_snap_install_firefox_if_existant
 
-# 2.a Add firefox ppa to apt if not yet in.
-# 2.b Verify firefox ppa is added (successfully).
-add_firefox_ppa_if_not_in_yet
-#remove_firefox_ppa
+	# 2.a Add firefox ppa to apt if not yet in.
+	# 2.b Verify firefox ppa is added (successfully).
+	add_firefox_ppa_if_not_in_yet
+	#remove_firefox_ppa
 
-# 3.a Change Firefox package priority to ensure it is installed from PPA/deb/apt
-# instead of snap.
-# 3.b Verify Firefox installation priority was set correctly.
-change_firefox_package_priority
+	# 3.a Change Firefox package priority to ensure it is installed from PPA/deb/apt
+	# instead of snap.
+	# 3.b Verify Firefox installation priority was set correctly.
+	change_firefox_package_priority
 
-# 4.a Ensure the Firefox installation is automatically updated.
-# 4.b Verify the auto update command is completed succesfully.
-ensure_firefox_is_updated_automatically
+	# 4.a Ensure the Firefox installation is automatically updated.
+	# 4.b Verify the auto update command is completed succesfully.
+	ensure_firefox_is_updated_automatically
 
-# 5.a Install Firefox using apt.
-# 5.v Verify firefox is installed succesfully, and only once, using apt/PPA.
-install_firefox_using_ppa
+	# 5.a Install Firefox using apt.
+	# 5.v Verify firefox is installed succesfully, and only once, using apt/PPA.
+	install_firefox_using_ppa
+}

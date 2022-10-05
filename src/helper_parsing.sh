@@ -166,7 +166,9 @@ string_in_lines() {
     fi
 }
 
-command_output_contains(){
+
+# Works
+command_output_contains() {
 	local substring="$1"
 	shift
 	local command_output="$@"

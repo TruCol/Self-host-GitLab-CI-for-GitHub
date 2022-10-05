@@ -198,6 +198,45 @@ remove_firefox_ppa(){
 	fi
 	assert_firefox_ppa_is_removed_from_apt
 }
+
+assert_firefox_installation_package_preference_file_content(){
+	local md5_output=$(md5sum /etc/apt/preferences.d/mozilla-firefox)
+	local expected_md5_output="8539b3cc62d743683e5a17c228d1660c  /etc/apt/preferences.d/mozilla-firefox"
+	if [ "$md5_output" != "$expected_md5_output" ]; then
+		echo "Error, the md5 output of: /etc/apt/preferences.d/mozilla-firefox is not as expected." > /dev/tty
+		echo "md5_output=         $md5_output" > /dev/tty
+		echo "expected_md5_output=$expected_md5_output" > /dev/tty
+		exit 5
+	fi
+}
+
+#######################################
+# Ensures the firefox installation is done from apt instead of snap.
+# Locals:
+#  None
+# Globals:
+#  None
+# Arguments:
+#  None
+# Returns:
+#  0 If Firefox is not installed using snap.
+#  1 If Firefox is still isntalled using snap.
+# Outputs:
+#  Nothing
+#######################################
+# Run with:
+change_firefox_package_priority(){
+	# Set the installation package preference in firefox.
+	echo '
+	Package: *
+	Pin: release o=LP-PPA-mozillateam
+	Pin-Priority: 1001
+	' | sudo tee /etc/apt/preferences.d/mozilla-firefox
+
+	# Verify the installation package preference is set correctly in firefox.
+	assert_firefox_installation_package_preference_file_content
+}
+
 # 0. Detect how firefox is installed.
 # 1. If firefox installed with snap:
 # 1.a Ask user for permission to swap out Firefox installation.
@@ -219,6 +258,8 @@ add_firefox_ppa_if_not_in_yet
 ##Pin-Priority: 1001
 ##' | sudo tee /etc/apt/preferences.d/mozilla-firefox
 # 1.g. Verify Firefox installation priority was set correctly.
+change_firefox_package_priority
+
 # 1.h. Ensure the Firefox installation is automatically updated.
 ##echo 'Unattended-Upgrade::Allowed-Origins:: "LP-PPA-mozillateam:${distro_codename}";' | sudo tee /etc/apt/apt.conf.d/51unattended-upgrades-firefox
 # 1.i Verify the auto update command is completed succesfully.

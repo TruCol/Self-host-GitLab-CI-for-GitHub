@@ -166,6 +166,18 @@ string_in_lines() {
     fi
 }
 
+command_output_contains(){
+	local substring="$1"
+	shift
+	local command_output="$@"
+	if grep -q "$substring" <<< "$command_output"; then
+	#if "$command" | grep -q "$substring"; then
+   		echo "FOUND"
+	else
+		echo "NOTFOUND"
+	fi
+}
+
 #######################################
 # 
 # Local variables:

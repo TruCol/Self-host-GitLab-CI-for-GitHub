@@ -1,5 +1,22 @@
 #!/bin/bash
+# This script contains code that is called by the install_gitlab.sh script to
+# verify the installation prerequisites/requirements are met.
 
+#######################################
+# Checks if firefox is installed using snap or not.
+# Locals:
+#  respones_lines
+#  found_firefox
+# Globals:
+#  None
+# Arguments:
+#  None
+# Returns:
+#  0 If command was evaluated successfully.
+# Outputs:
+#  FOUND if firefox is installed using snap.
+#  NOTFOUND if firefox is not installed using snap.
+#######################################
 # Run with: 
 # bash -c "source src/import.sh && set_gitlab_pwd gitlab_pwd"
 set_gitlab_pwd() {

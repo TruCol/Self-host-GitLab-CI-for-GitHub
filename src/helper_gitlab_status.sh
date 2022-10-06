@@ -280,7 +280,7 @@ gitlab_server_is_running() {
 			[  "$(lines_contain_string 'run: gitaly: (pid ' "${actual_result}")" == "FOUND" ] &&
 			[  "$(lines_contain_string 'run: gitlab-exporter: (pid ' "${actual_result}")" == "FOUND" ] &&
 			[  "$(lines_contain_string 'run: gitlab-workhorse: (pid ' "${actual_result}")" == "FOUND" ] &&
-			[  "$(lines_contain_string 'run: grafana: (pid ' "${actual_result}")" == "FOUND" ] &&
+			#[  "$(lines_contain_string 'run: grafana: (pid ' "${actual_result}")" == "FOUND" ] &&
 			[  "$(lines_contain_string 'run: logrotate: (pid ' "${actual_result}")" == "FOUND" ] &&
 			[  "$(lines_contain_string 'run: nginx: (pid ' "${actual_result}")" == "FOUND" ] &&
 			[  "$(lines_contain_string 'run: postgres-exporter: (pid ' "${actual_result}")" == "FOUND" ] &&

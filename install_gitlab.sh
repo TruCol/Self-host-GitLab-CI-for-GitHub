@@ -208,18 +208,21 @@ fi
 source "$PERSONAL_CREDENTIALS_PATH"
 
 # Verify the personal credits are stored correctly.
-printf "\n\n\n Verifying the $PERSONAL_CREDENTIALS_PATH contains the right data."
+printf "\n\n 0. Verifying the $PERSONAL_CREDENTIALS_PATH contains the right"
+printf " data."
 verify_prerequisite_personal_creds_txt_contain_required_data
 verify_prerequisite_personal_creds_txt_loaded
 
 
 # Raise sudo permission at the start, to prevent requiring user permission half way through tests.
-printf "\n\n\n Now getting sudo permission to perform the GitLab installation."
+printf "\n\n 1. Now getting sudo permission to perform the GitLab installation."
 {
   sudo echo "hi"
 } &> /dev/null
 # Ensuring the Firefox installation is performed with ppa/apt instead of snap.
 # This is such that the browser can be controlled automatically.
+printf "\n\n 2. Now ensuring the firefox is installed with ppa and apt instead."
+printf "of snap."
 swap_snap_firefox_with_ppa_apt_firefox_installation
 
 # Ensure jq is installed correctly.

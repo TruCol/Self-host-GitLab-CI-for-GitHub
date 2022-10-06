@@ -17,7 +17,7 @@ install_and_run_gitlab_server() {
 	
 	# Check if the GitLab server is already running.
 	gitlab_server_is_running="$(gitlab_server_is_running "$gitlab_package")"
-	read -p "gitlab_server_is_running=$gitlab_server_is_running"
+	#read -p "gitlab_server_is_running=$gitlab_server_is_running"
 	
 	if [ "$gitlab_server_is_running" == "NOTRUNNING" ]; then
 
@@ -60,7 +60,9 @@ install_and_run_gitlab_server() {
 		read -p "stop_nginx_service"
 		#stop_nginx
 		run_gitlab_docker "$gitlab_pwd"
+		read -p "run_gitlab_docker"
 		verify_gitlab_server_status "$SERVER_STARTUP_TIME_LIMIT"
+		read -p "Done: verify_gitlab_server_status"
 		# Also create personal access token
 		read -p "SETTING PERSONAL ACCESS TOKEN, check if it does not already exist."
 		ensure_new_gitlab_personal_access_token_works

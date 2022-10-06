@@ -238,44 +238,52 @@ set_default_personal_cred_if_empty(){
 
 verify_prerequisite_personal_creds_txt_contain_required_data() {
 	if [ $(file_contains_string "GITHUB_USERNAME_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
-		echo "Error, the GITHUB_USERNAME_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
+		echo "Error, the GITHUB_USERNAME_GLOBAL is not in "
+		echo "$PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
 
 	if [ $(file_contains_string "GITLAB_SERVER_ACCOUNT_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
-		echo "Error, the GITLAB_SERVER_ACCOUNT_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
+		echo "Error, the GITLAB_SERVER_ACCOUNT_GLOBAL is not in "
+		echo "$PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
 
 	if [ $(file_contains_string "GITLAB_SERVER_PASSWORD_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
-		echo "Error, the GITLAB_SERVER_PASSWORD_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
+		echo "Error, the GITLAB_SERVER_PASSWORD_GLOBAL is not in "
+		echo "$PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
 
 	if [ $(file_contains_string "GITLAB_ROOT_EMAIL_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
-		echo "Error, the GITLAB_ROOT_EMAIL_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
+		echo "Error, the GITLAB_ROOT_EMAIL_GLOBAL is not in "
+		echo "$PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
 }
 
 verify_prerequisite_personal_creds_txt_loaded() {
 	if [ "$GITHUB_USERNAME_GLOBAL" == "" ]; then
-		echo "Error, the GITHUB_USERNAME_GLOBAL:$GITHUB_USERNAME_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
+		echo "Error, the GITHUB_USERNAME_GLOBAL:$GITHUB_USERNAME_GLOBAL is not"
+		echo " loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
 
 	if [ "$GITLAB_SERVER_ACCOUNT_GLOBAL" == "" ]; then
-		echo "Error, the GITLAB_SERVER_ACCOUNT_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
+		echo "Error, the GITLAB_SERVER_ACCOUNT_GLOBAL is not loaded correctly "
+		echo "from: $PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
 
 	if [ "$GITLAB_SERVER_PASSWORD_GLOBAL" == "" ]; then
-		echo "Error, the GITLAB_SERVER_PASSWORD_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
+		echo "Error, the GITLAB_SERVER_PASSWORD_GLOBAL is not loaded correctly"
+		echo " from: $PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
 
 	if [ "$GITLAB_ROOT_EMAIL_GLOBAL" == "" ]; then
-		echo "Error, the GITLAB_ROOT_EMAIL_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
+		echo "Error, the GITLAB_ROOT_EMAIL_GLOBAL is not loaded correctly from"
+		echo ": $PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
 }

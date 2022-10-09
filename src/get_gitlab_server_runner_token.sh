@@ -112,6 +112,8 @@ get_gitlab_server_runner_tokenV0() {
 #######################################
 # source src/get_gitlab_server_runner_token.sh && get_registration_token_with_python
 get_registration_token_with_python() {
+	sudo rm -r "get-gitlab-runner-registration-token"
+	
 	# delete the runner registration token file if it exist
 	if [ -f "$RUNNER_REGISTRATION_TOKEN_FILEPATH" ] ; then
 	    rm "$RUNNER_REGISTRATION_TOKEN_FILEPATH"
@@ -128,17 +130,13 @@ get_registration_token_with_python() {
 	#read -p "conda_environments=$conda_environments"
 	#if [ "$(lines_contain_string "$CONDA_ENVIRONMENT_NAME" "\${conda_environments}")" == "FOUND" ]; then
 	if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
-		#cd get-gitlab-runner-registration-token && conda activate get_gitlab_generation_token && python -m code.project1.src
-		#cd get-gitlab-runner-registration-token && conda activate "get_gitlab_generation_token" && python -m code.project1.src
-		#cd get-gitlab-runner-registration-token && conda activate base && conda activate get_gitlab_generation_token && python -m code.project1.src
 		eval "$(conda shell.bash hook)"
-		cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src
+		cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --glr
 		#cd get-gitlab-runner-registration-token && conda init get_gitlab_generation_token && python -m code.project1.src
 		# eval $(conda shell.bash hook)
 	else
 		eval "$(conda shell.bash hook)"
-		#cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate "$CONDA_ENVIRONMENT_NAME" && python -m code.project1.src
-		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src
+		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --glr
 		
 	fi
 	cd ..

@@ -57,5 +57,5 @@ install_jquery_using_apt(){
          2>&1
 	fi
 	assert_jquery_is_installed_using_ppa
-	echo "jquery is installed succesfully using ppa and apt." > /dev/tty
+	echo "3.a jquery is installed succesfully using ppa and apt." > /dev/tty
 }

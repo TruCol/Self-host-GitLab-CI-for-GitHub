@@ -1,8 +1,14 @@
 #!/bin/bash
 
 #######################################
-# Gets a new GitHub personal access token to set the build statuses of new
-# commits.
+# Gets a new GitHub personal access token (PAT), using the Python repository:
+# get-gitlab-runner-registration-token. This repository is downloaded.
+# Next, the conda environment of this repository is created if it does not
+# exist, and then the environment is activated. Once activated, the Python
+# code is activated, and it downloads a Firefox browser controller for 
+# Selenium. This then logs into GitHub and removes the pre-existing GitHub
+# PATs if they exist, then creates a new GitHub PAT, and adds it to GitHub.
+# The Python module does not verify whether the GitHub PAT works.
 # Local variables:
 #  github_username
 #  github_repo_name

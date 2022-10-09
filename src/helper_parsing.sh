@@ -723,13 +723,13 @@ ensure_global_is_in_file() {
 		echo "Found $identifier now changing the line."
 		# Override the existing identifier and value in personal_creds.txt
 		change_line "$identifier" "$identifier=$incoming_value" "$filepath"
-		assert_file_contains_string "$identifier=$incoming_value" "$filepath"
+		assert_file_contains_string "$identifier=$incoming_value" "$filepath" > /dev/null 2>&1 &
 	else
 		echo "Found $identifier now changing the line."
 		# Append identifier and value to personal_creds.txt.
 		echo "" >> "$filepath"
 		echo "$identifier=$incoming_value" >> "$filepath"
-		assert_file_contains_string "$identifier=$incoming_value" "$filepath"
+		assert_file_contains_string "$identifier=$incoming_value" "$filepath" > /dev/null 2>&1 &
 	fi
 }
 

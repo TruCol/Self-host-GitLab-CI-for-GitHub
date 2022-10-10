@@ -4,7 +4,7 @@ load '../../libs/bats-support/load'
 load '../../libs/bats-assert/load'
 
 source src/import.sh
-#source src/boot_tor.sh
+#source src/Tor_support/boot_tor.sh
 
 EXAMPLE_LINES=$(cat <<-END
 First line
@@ -92,7 +92,7 @@ END
 
 @test "Test assert_ends_in_found_or_notfound ending in neither FOUND nor NOTFOUND." {
 	# TODO: determine why the output message fails to match. (Only first line is displayed.)
-	run bash -c "source src/helper_parsing.sh && assert_ends_in_found_or_notfound $EXAMPLE_LINES"
+	run bash -c "source src/helper/helper_parsing.sh && assert_ends_in_found_or_notfound $EXAMPLE_LINES"
 	assert_failure
 	assert_output "ERROR, the end of $EXAMPLE_LINES does not end in FOUND, nor in NOTFOUND."
 }
@@ -125,14 +125,14 @@ END
 
 @test "Test assert_ends_in_found_and_not_in_notfound ending in NOTFOUND." {
 	# TODO: determine why the output message fails to match. (Only first line is displayed.)
-	run bash -c "source src/helper_parsing.sh && assert_ends_in_found_and_not_in_notfound $EXAMPLE_LINES_ENDING_IN_NOTFOUND"
+	run bash -c "source src/helper/helper_parsing.sh && assert_ends_in_found_and_not_in_notfound $EXAMPLE_LINES_ENDING_IN_NOTFOUND"
 	assert_failure
 	assert_output "ERROR, the end of $EXAMPLE_LINES does not end in FOUND, nor in NOTFOUND."
 }
 
 @test "Test assert_ends_in_found_and_not_in_notfound ending in neither FOUND nor NOTFOUND.." {
 	# TODO: determine why the output message fails to match. (Only first line is displayed.)
-	run bash -c "source src/helper_parsing.sh && assert_ends_in_found_and_not_in_notfound $EXAMPLE_LINES"
+	run bash -c "source src/helper/helper_parsing.sh && assert_ends_in_found_and_not_in_notfound $EXAMPLE_LINES"
 	assert_failure
 	assert_output "ERROR, the end of $EXAMPLE_LINES does not end in FOUND, nor in NOTFOUND."
 }
@@ -158,7 +158,7 @@ END
 
 
 @test "Test assert_ends_in_notfound_and_not_in_found ending in FOUND." {
-	run bash -c "source src/helper_parsing.sh && assert_ends_in_notfound_and_not_in_found $EXAMPLE_LINES_ENDING_IN_FOUND"
+	run bash -c "source src/helper/helper_parsing.sh && assert_ends_in_notfound_and_not_in_found $EXAMPLE_LINES_ENDING_IN_FOUND"
 	assert_failure
 	assert_output "ERROR, the end of $EXAMPLE_LINES does not end in FOUND, nor in NOTFOUND."
 	
@@ -173,7 +173,7 @@ END
 
 @test "Test assert_ends_in_notfound_and_not_in_found ending in neither FOUND nor NOTFOUND.." {
 	# TODO: determine why the output message fails to match. (Only first line is displayed.)
-	run bash -c "source src/helper_parsing.sh && assert_ends_in_notfound_and_not_in_found $EXAMPLE_LINES"
+	run bash -c "source src/helper/helper_parsing.sh && assert_ends_in_notfound_and_not_in_found $EXAMPLE_LINES"
 	assert_failure
 	assert_output "ERROR, the end of $EXAMPLE_LINES does not end in FOUND, nor in NOTFOUND."
 }

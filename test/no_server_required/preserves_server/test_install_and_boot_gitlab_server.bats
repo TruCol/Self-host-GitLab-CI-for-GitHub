@@ -4,7 +4,7 @@ load '../../libs/bats-support/load'
 load '../../libs/bats-assert/load'
 
 # TODO: move to import
-#source src/install_and_boot_gitlab_server.sh
+#source src/GitLab_server/install_and_boot_gitlab_server.sh
 source src/import.sh
 
 # Method that executes all tested main code before running tests.

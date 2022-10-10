@@ -21,12 +21,12 @@ chmod +x *.sh
 
 ## Run your GitLab CI on all repositories of an arbitrary GitHub User:
 ```
-bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user <some GitHub account/organisation>"
+bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user <some GitHub account/organisation>"
 ```
 ## Run your GitLab CI on a particular repository
 ```
 bash -c "source src/import.sh helper_github_modify.sh && get_build_status_repository_from_github"
-bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds renamed_test_repo hiveminds"
+bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds renamed_test_repo hiveminds"
 ```
 
 ## Run your GitLab CI on a particular commit using GraphQL
@@ -40,7 +40,7 @@ bash -c "source src/import.sh && get_github_personal_access_token a-t-0 'example
 ```
 
 Then run GitLab CI on custom GitHub repository (temporary instructions)
-In file: `src/run_ci_from_graphql.sh`, change the line:
+In file: `src/CI/call_CI/run_ci_from_graphql.sh`, change the line:
 ```
 local github_organisation="trucol"
 ```
@@ -94,5 +94,5 @@ chmod +x *.sh
 ```
 Alternatively to running all tests with `./test.sh`, you can run a single testfile with:
 ```
-./test/libs/bats/bin/bats test/test_helper_gitlab_modify.bats
+./test/libs/bats/bin/bats test/helper/GitLab/test_helper_gitlab_modify.bats
 ```

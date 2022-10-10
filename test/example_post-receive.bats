@@ -1,4 +1,5 @@
 #!/bin/bash
+# TODO: determine what this file does.
 
 load 'libs/bats-support/load'
 load 'libs/bats-assert/load'

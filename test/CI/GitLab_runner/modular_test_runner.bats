@@ -47,7 +47,7 @@ setup() {
 
 # WORKS
 #@test "Verify that the GitLab server is running within 300." {
-#	#source src/helper.sh && check_for_n_seconds_if_gitlab_server_is_running "300"
+#	#source src/helper/helper.sh && check_for_n_seconds_if_gitlab_server_is_running "300"
 #	is_running=$(check_for_n_seconds_if_gitlab_server_is_running "300")
 #	assert_equal "$is_running" "RUNNING"
 #}

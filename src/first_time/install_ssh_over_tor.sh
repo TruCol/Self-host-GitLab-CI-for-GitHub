@@ -2,7 +2,7 @@
 # Sets up SSH over tor and helps you copy the onion address 
 # at which you can ssh into this RPI to your host device/pc. 
 
-source src/helper.sh
+source src/helper/helper.sh
 
 echo_hello() {
 	echo "hello"

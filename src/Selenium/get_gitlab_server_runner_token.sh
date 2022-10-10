@@ -110,7 +110,7 @@ get_gitlab_server_runner_tokenV0() {
 #  
 # TODO(a-t-0):
 #######################################
-# source src/get_gitlab_server_runner_token.sh && get_registration_token_with_python
+# source src/Selenium/get_gitlab_server_runner_token.sh && get_registration_token_with_python
 get_registration_token_with_python() {
 	sudo rm -r "get-gitlab-runner-registration-token"
 	

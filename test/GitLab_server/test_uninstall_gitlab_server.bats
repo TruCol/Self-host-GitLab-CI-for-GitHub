@@ -5,7 +5,7 @@ load 'libs/bats-assert/load'
 
 # TODO: move to import
 # TODO: before moving, verify the function names do not collide.
-source test/helper.sh
+source test/helper/helper.sh
 source test/hardcoded_testdata.txt
 
 # Method that executes all tested main code before running tests.

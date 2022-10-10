@@ -14,7 +14,7 @@ load 'libs/bats-file/load'
 	duration=4
 		
 	# run the tested method
-	run bash -c "source src/helper.sh && check_for_n_seconds_if_gitlab_server_is_running $duration"
+	run bash -c "source src/helper/helper.sh && check_for_n_seconds_if_gitlab_server_is_running $duration"
 	assert_failure 
 	#check_for_n_seconds_if_gitlab_server_is_running
 	assert_output --partial "ERROR, did not find the GitLab server running within $duration seconds!"
@@ -31,7 +31,7 @@ load 'libs/bats-file/load'
 	duration=300
 		
 	# run the tested method
-	run bash -c "source src/helper.sh && check_for_n_seconds_if_gitlab_server_is_running $duration"
+	run bash -c "source src/helper/helper.sh && check_for_n_seconds_if_gitlab_server_is_running $duration"
 	
 	actual_output=$(gitlab_server_is_running | tail -1) 
 	expected_output="RUNNING"

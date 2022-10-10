@@ -16,7 +16,7 @@ load 'assert_utils'
 	assert_equal "$left" "$right"
 	
 	
-	run bash -c "source src/import.sh src/helper_asserts.sh && manual_assert_equal $left $right"
+	run bash -c "source src/import.sh src/helper/verification/helper_asserts.sh && manual_assert_equal $left $right"
 	assert_success
 }
 
@@ -27,7 +27,7 @@ load 'assert_utils'
 	assert_not_equal "$left" "$right"
 	
 	
-	run bash -c "source src/import.sh src/helper_asserts.sh && manual_assert_equal $left $right"
+	run bash -c "source src/import.sh src/helper/verification/helper_asserts.sh && manual_assert_equal $left $right"
 	assert_failure
 	assert_output --partial "Error, same does not equal: different"
 	
@@ -40,7 +40,7 @@ load 'assert_utils'
 	assert_not_equal "$left" "$right"
 	
 	
-	run bash -c "source src/import.sh src/helper_asserts.sh && manual_assert_not_equal $left $right"
+	run bash -c "source src/import.sh src/helper/verification/helper_asserts.sh && manual_assert_not_equal $left $right"
 	assert_success
 }
 
@@ -52,7 +52,7 @@ load 'assert_utils'
 	assert_equal "$left" "$right"
 	
 	
-	run bash -c "source src/import.sh src/helper_asserts.sh && manual_assert_not_equal $left $right"
+	run bash -c "source src/import.sh src/helper/verification/helper_asserts.sh && manual_assert_not_equal $left $right"
 	assert_failure
 	assert_output --partial "Error, same equals: same"
 }
@@ -63,7 +63,7 @@ load 'assert_utils'
 @test "Verify manual_assert_file_does_not_exists throws error on existing file." {
 	local existing_filepath="src/hardcoded_variables.txt"
 	
-	run bash -c "source src/helper_asserts.sh && manual_assert_file_does_not_exists $existing_filepath"
+	run bash -c "source src/helper/verification/helper_asserts.sh && manual_assert_file_does_not_exists $existing_filepath"
 	assert_failure
 	assert_output "The file: $existing_filepath exists, even though it shouldn't."
 }
@@ -71,6 +71,6 @@ load 'assert_utils'
 @test "Verify manual_assert_file_does_not_exists succeeds on non-existing file." {
 	local existing_filepath="src/some_non_existing_file.txt"
 	
-	run bash -c "source src/helper_asserts.sh && manual_assert_file_does_not_exists $existing_filepath"
+	run bash -c "source src/helper/verification/helper_asserts.sh && manual_assert_file_does_not_exists $existing_filepath"
 	assert_success
 }

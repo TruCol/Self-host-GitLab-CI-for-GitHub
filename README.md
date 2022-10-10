@@ -94,5 +94,5 @@ chmod +x *.sh
 ```
 Alternatively to running all tests with `./test.sh`, you can run a single testfile with:
 ```
-./test/libs/bats/bin/bats test/test_helper_gitlab_modify.bats
+./test/libs/bats/bin/bats test/helper/GitLab/test_helper_gitlab_modify.bats
 ```

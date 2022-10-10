@@ -29,6 +29,7 @@ and the repository exists.
 END
 )
 
+# TODO: update or remove, the push_repo_to_gitlab.sh file does not exist anymore.
 # Specify expected error message:
 expected_error_message_with_ssh=$(cat <<-END
 Cloning into 'src/mirrors/GitHub/NON_EXISTANT_REPOSITORY'...
@@ -79,6 +80,7 @@ END
 	some_function
 }
 
+# TODO: update or remove, the push_repo_to_gitlab.sh file does not exist anymore.
 # 3.a Verify invalid repository is not cloned
 @test "Verify an error is thrown, if non-existant repository cloning is attempted LATEST." {
 	non_existant_repository="NON_EXISTANT_REPOSITORY"
@@ -106,6 +108,7 @@ END
 	assert_output "$expected_error_message_with_ssh"
 }
 
+
 # 3.b Verify not cloning a repo correctly is detected with an error.
 @test "Test whether repository download verifcation function identifies it if no repository is cloned." {
 	non_existant_repository="NON_EXISTANT_REPOSITORY"
@@ -120,7 +123,7 @@ END
 	target_directory="$MIRROR_LOCATION/GitHub/$non_existant_repository"
 	
 	export github_repository target_directory
-	run bash -c '# source src/import.sh src/mirror_github_to_gitlab.sh &&  verify_github_repository_is_cloned'
+	run bash -c '# source src/import.sh src/helper/GitHub/helper_github_status.sh &&  verify_github_repository_is_cloned'
 	assert_failure
 	assert_output "The following GitHub repository: $github_repository \n was not cloned correctly into the path:$MIRROR_LOCATION/GitHub/$github_repository"
 }

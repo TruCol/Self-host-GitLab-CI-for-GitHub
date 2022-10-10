@@ -21,7 +21,7 @@ source src/import.sh
 	#run bash -c "./uninstall_gitlab.sh -h -r -y"
 	
 	# install the gitlab runner using the gitlab deploy script
-	run bash -c "source src/boot_tor.sh && run_deployment_script_for_n_seconds 3600"
+	run bash -c "source src/Tor_support/boot_tor.sh && run_deployment_script_for_n_seconds 3600"
 	
 	actual_output=$(gitlab_server_is_running | tail -1) 
 	expected_output="RUNNING"

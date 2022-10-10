@@ -387,7 +387,7 @@ check_for_n_seconds_if_gitlab_server_is_running() {
 # TODO(a-t-0): change root with Global variable.
 #######################################
 # Structure:gitlab_status
-#source src/helper.sh && get_build_status
+#source src/helper/helper.sh && get_build_status
 get_build_status() {
 	# load personal_access_token, gitlab username, repository name
 	personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')

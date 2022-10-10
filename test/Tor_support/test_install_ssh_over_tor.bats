@@ -8,7 +8,7 @@ load 'libs/bats-assert/load'
 
 # TODO: move to import
 # TODO: verify there are no function name collisons.
-#source test/helper.sh
+#source test/helper/helper.sh
 #source test/hardcoded_testdata.txt
 
 # Method that executes all tested main code before running tests.

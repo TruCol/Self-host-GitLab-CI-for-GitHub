@@ -48,7 +48,7 @@ source src/helper/GitLab/helper_gitlab_status.sh
 source src/helper/git_neutral/helper_git_neutral.sh
 source src/helper/helper.sh
 
-source src/helper_asserts.sh # Loads assert abilities into code
+source src/helper/verification/helper_asserts.sh # Loads assert abilities into code
 source src/helper/helper_configuration.sh
 source src/helper/helper_dir_edit.sh
 source src/helper/helper_docker.sh
@@ -87,4 +87,4 @@ source src/GitLab_server/install_and_boot_gitlab_server.sh
 
 # Load test files
 source test/hardcoded_testdata.txt
-source test/helper.sh
+source test/helper/helper.sh

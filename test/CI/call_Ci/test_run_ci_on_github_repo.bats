@@ -7,7 +7,6 @@ load 'libs/bats-file/load'
 # https://github.com/bats-core/bats-assert#usage
 load 'assert_utils'
 
-# source src/import.sh
 source src/import.sh
 #source src/run_ci_on_github_repo.sh
 

@@ -114,7 +114,7 @@ stop_apache_service() {
 # TODO(a-t-0): include throwing warning if nginx was not found (but removed).
 #######################################
 # Structure:status
-#source src/helper.sh && stop_nginx_service
+#source src/helper/helper.sh && stop_nginx_service
 stop_nginx_service() {
 	local services_list=$(systemctl list-units --type=service)
 	if [  "$(lines_contain_string "nginx" "${services_list}")" == "FOUND" ]; then

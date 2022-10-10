@@ -20,18 +20,18 @@
 # if both files exist). Also remove the assert that both key files dont exist.
 #######################################
 # Run with: 
-# bash -c "source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "hiveminds"
-# bash -c "source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "a-t-0"
-# bash -c "source src/import.sh src/helper_github_status.sh && initialise_github_repositories_array "trucol"
+# bash -c "source src/import.sh src/helper/GitHub/helper_github_status.sh && initialise_github_repositories_array "hiveminds"
+# bash -c "source src/import.sh src/helper/GitHub/helper_github_status.sh && initialise_github_repositories_array "a-t-0"
+# bash -c "source src/import.sh src/helper/GitHub/helper_github_status.sh && initialise_github_repositories_array "trucol"
 initialise_github_repositories_array() {
 	local github_organisation_or_username="$1"
 	get_org_repos github_repositories "$github_organisation_or_username" # call function to populate the array
 	declare -p github_repositories
 }
 
-# source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user "hiveminds"
-# source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user "a-t-0"
-# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user hiveminds"
+# source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user "hiveminds"
+# source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user "a-t-0"
+# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user hiveminds"
 run_ci_on_all_repositories_of_user(){
 	local github_organisation_or_username="$1"
 	
@@ -56,11 +56,11 @@ run_ci_on_all_repositories_of_user(){
 # First:
 # bash -c "source src/import.sh helper_github_modify.sh && get_build_status_repository_from_github"
 # Then:
-# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo a-t-0 sponsor_example a-t-0"
-# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds sponsor_example hiveminds"
-# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds renamed_test_repo hiveminds"
-# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo trucol trucol trucol"
-# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && run_ci_on_github_repo trucol checkstyle-for-bash trucol"
+# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo a-t-0 sponsor_example a-t-0"
+# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds sponsor_example hiveminds"
+# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds renamed_test_repo hiveminds"
+# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo trucol trucol trucol"
+# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo trucol checkstyle-for-bash trucol"
 run_ci_on_github_repo() {
 	github_username="$1"
 	github_repo_name="$2"
@@ -141,8 +141,8 @@ download_github_repo_on_which_to_run_ci() {
 # TODO(a-t-0): Write tests for this method.
 #######################################
 # Run with: 
-# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example"
-# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo hiveminds renamed_test_repo"
+# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example"
+# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo hiveminds renamed_test_repo"
 copy_github_branches_with_yaml_to_gitlab_repo() {
 	local github_username="$1"
 	local github_repo_name="$2"

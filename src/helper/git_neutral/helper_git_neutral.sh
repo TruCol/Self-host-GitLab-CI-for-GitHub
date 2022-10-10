@@ -163,7 +163,7 @@ copy_files_from_github_to_gitlab_commit() {
 
 # Structure:gitlab_status
 # 6.i.0
-#source src/helper_git_neutral.sh && copy_github_files_and_folders_to_gitlab "src/mirrors/GitHub/sponsor_example" "src/mirrors/GitLab/sponsor_example"
+#source src/helper/git_neutral/helper_git_neutral.sh && copy_github_files_and_folders_to_gitlab "src/mirrors/GitHub/sponsor_example" "src/mirrors/GitLab/sponsor_example"
 copy_github_files_and_folders_to_gitlab() {
 	github_dir="$1"
 	gitlab_dir="$2"

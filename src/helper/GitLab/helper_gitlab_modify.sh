@@ -208,13 +208,13 @@ git_pull_gitlab_repo() {
 
 # Structure:gitlab_status
 #6.d.1 If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
-# source src/import.sh src/helper_gitlab_modify.sh && create_empty_repository_v0 "sponsor_example" "root"
-##run bash -c "source src/import.sh src/helper_gitlab_modify.sh && create_empty_repository_v0 sponsor_example root"
+# source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && create_empty_repository_v0 "sponsor_example" "root"
+##run bash -c "source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && create_empty_repository_v0 sponsor_example root"
 #######################################
 # Checks for a repository in the GitLab server and deletes it if it exists.
 # Afterwards, a new empty repository is created.
 # How to run:
-#  source src/import.sh src/helper_gitlab_modify.sh && create_empty_repository_v0 "sponsor_example" "root"
+#  source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && create_empty_repository_v0 "sponsor_example" "root"
 # Local variables:
 #  gitlab_repo_name
 #  gitlab_username
@@ -365,7 +365,7 @@ delete_gitlab_repository_if_it_exists() {
 # Checks if repository exists in the GitLab server and deletes it. Otherwise, an  
 # error is shown.
 # How to run:
-#  source src/import.sh src/helper_gitlab_modify.sh && delete_existing_repository 
+#  source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && delete_existing_repository 
 #  "sponsor_example" "root"
 # Local variables:
 #  gitlab_repo_name

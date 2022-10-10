@@ -28,7 +28,7 @@ eg_func() {
     fi
 }
 
-# bash -c "source src/run_function_with_timeout.sh && some_func"
+# bash -c "source src/Dashboard/run_function_with_timeout.sh && some_func"
 some_func() {
  echo "Bash version ${BASH_VERSION}..."
  for i in {0..10..1}; do

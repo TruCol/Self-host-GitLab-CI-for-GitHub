@@ -39,8 +39,8 @@ done
 #echo "server_hard_yes_flag=$server_hard_yes_flag";
 #echo "runner_flag=$runner_flag";
 
-#source src/uninstall_gitlab_server.sh
-#source src/uninstall_gitlab_runner.sh
+#source src/GitLab_server/uninstall_gitlab_server.sh
+#source src/CI/GitLab_runner/uninstall_gitlab_runner.sh
 #source src/hardcoded_variables.txt
 
 ## argument parsing logic:

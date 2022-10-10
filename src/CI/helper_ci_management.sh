@@ -17,7 +17,7 @@
 #######################################
 # Run with:
 # bash -c "source src/import.sh && github_commit_already_has_gitlab_ci_build_status_result a-t-0 sponsor_example attack_in_new_file aeaaa57120f74a695ef4215e819a175296a3de10"
-# source src/import.sh src/helper_ci_management.sh && github_commit_already_has_gitlab_ci_build_status_result "a-t-0" "sponsor_example" "no_attack_in_filecontent" "0dee4abdc50ccd7683eb4326678d8c9dde4ea05d"
+# source src/import.sh src/CI/helper_ci_management.sh && github_commit_already_has_gitlab_ci_build_status_result "a-t-0" "sponsor_example" "no_attack_in_filecontent" "0dee4abdc50ccd7683eb4326678d8c9dde4ea05d"
 github_commit_already_has_gitlab_ci_build_status_result() {
 	local github_username="$1"
 	local github_repo_name="$2"

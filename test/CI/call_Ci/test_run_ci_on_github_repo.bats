@@ -8,7 +8,7 @@ load 'libs/bats-file/load'
 load 'assert_utils'
 
 source src/import.sh
-#source src/run_ci_on_github_repo.sh
+#source src/CI/call_CI/run_ci_on_github_repo.sh
 
 # Method that executes all tested main code before running tests.
 ###setup() {

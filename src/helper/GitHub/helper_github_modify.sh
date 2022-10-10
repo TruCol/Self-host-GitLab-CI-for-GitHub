@@ -222,7 +222,7 @@ copy_evaluated_commit_to_github_status_repo() {
 
 
 # Run width:
-# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && get_build_status_repository_from_github"
+# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && get_build_status_repository_from_github"
 get_build_status_repository_from_github() {
 
 	# Ensure the mirror directories are created.

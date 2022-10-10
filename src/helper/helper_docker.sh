@@ -46,7 +46,7 @@ install_docker() {
 #  
 # TODO(a-t-0):
 #######################################
-# run with: source src/helper_docker.sh && safely_check_if_program_is_installed docker
+# run with: source src/helper/helper_docker.sh && safely_check_if_program_is_installed docker
 safely_check_if_program_is_installed() {
 	local program_name="$1"
 	if ! foobar_loc="$(type -p "$program_name")" || [[ -z $foobar_loc ]]; then
@@ -136,7 +136,7 @@ completely_remove_docker() {
 #  
 # TODO(a-t-0):
 #######################################
-# run with: source src/helper_docker.sh && safely_remove_docker
+# run with: source src/helper/helper_docker.sh && safely_remove_docker
 safely_remove_docker() {
 	if [ $(safely_check_if_program_is_installed "docker") == "FOUND" ]; then
 		remove_docker

@@ -270,7 +270,7 @@ setup() {
 	fi
 	
 	# If it already exists, delete the repository
-	run bash -c "# source src/import.sh src/helper_gitlab_modify.sh && delete_existing_repository sponsor_example root"
+	run bash -c "# source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && delete_existing_repository sponsor_example root"
 	assert_failure
 	assert_output --partial "ERROR, you tried to delete a GitLab repository that does not exist."
 }

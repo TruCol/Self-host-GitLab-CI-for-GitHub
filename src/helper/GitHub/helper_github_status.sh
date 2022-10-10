@@ -293,8 +293,8 @@ verify_github_commit_contains_gitlab_yaml() {
 	fi
 }
 
-# source src/import.sh src/helper_github_status.sh && get_org_repos "hiveminds"
-# source src/import.sh src/helper_github_status.sh && get_org_repos "a-t-0"
+# source src/import.sh src/helper/GitHub/helper_github_status.sh && get_org_repos "hiveminds"
+# source src/import.sh src/helper/GitHub/helper_github_status.sh && get_org_repos "a-t-0"
 get_org_repos() {
 	# shellcheck disable=SC2178
 	local -n arr=$1 # use nameref for indirection
@@ -366,9 +366,9 @@ assert_current_github_branch() {
 # TODO(a-t-0): Write test for function.
 #######################################
 # run with:
-#source src/helper_github_status.sh && check_public_github_repository_exists "a-t-0" "some_non_existing_repository"
-#source src/helper_github_status.sh && check_public_github_repository_exists "a-t-0" "gitlab-ci-build-statuses"
-#source src/helper_github_status.sh && check_public_github_repository_exists "ocaml" "ocaml"
+#source src/helper/GitHub/helper_github_status.sh && check_public_github_repository_exists "a-t-0" "some_non_existing_repository"
+#source src/helper/GitHub/helper_github_status.sh && check_public_github_repository_exists "a-t-0" "gitlab-ci-build-statuses"
+#source src/helper/GitHub/helper_github_status.sh && check_public_github_repository_exists "ocaml" "ocaml"
 check_public_github_repository_exists() {
 	local github_username="$1"
 	local github_repo_name="$2"
@@ -399,8 +399,8 @@ check_public_github_repository_exists() {
 # TODO(a-t-0): Write test for function.
 #######################################
 # run with:
-#source src/helper_github_status.sh && assert_public_github_repository_exists "a-t-0" "some_non_existing_repository"
-#source src/helper_github_status.sh && assert_public_github_repository_exists "a-t-0" "gitlab-ci-build-statuses"
+#source src/helper/GitHub/helper_github_status.sh && assert_public_github_repository_exists "a-t-0" "some_non_existing_repository"
+#source src/helper/GitHub/helper_github_status.sh && assert_public_github_repository_exists "a-t-0" "gitlab-ci-build-statuses"
 assert_public_github_repository_exists() {
 	local github_username="$1"
 	local github_repo_name="$2"

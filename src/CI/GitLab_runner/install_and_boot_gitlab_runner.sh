@@ -86,7 +86,7 @@ install_package() {
 }
 
 
-# source src/install_and_boot_gitlab_runner.sh && register_gitlab_runner
+# source src/CI/GitLab_runner/install_and_boot_gitlab_runner.sh && register_gitlab_runner
 # Register GitLab Runner
 register_gitlab_runner() {
 
@@ -139,7 +139,7 @@ register_gitlab_runner() {
 }
 
 
-#source src/install_and_boot_gitlab_runner.sh && create_gitlab_ci_user
+#source src/CI/GitLab_runner/install_and_boot_gitlab_runner.sh && create_gitlab_ci_user
 # Create a GitLab CI user
 create_gitlab_ci_user() {
 	# TODO: write check to see if user is already existent. Only add if it is not.
@@ -161,7 +161,7 @@ create_gitlab_ci_user() {
 }
 
 
-# source src/install_and_boot_gitlab_runner.sh && install_gitlab_runner_service
+# source src/CI/GitLab_runner/install_and_boot_gitlab_runner.sh && install_gitlab_runner_service
 # Install GitLab runner service
 install_gitlab_runner_service() {
 	
@@ -200,13 +200,13 @@ start_gitlab_runner_service() {
 
 
 # Run GitLab runner service
-#source src/install_and_boot_gitlab_runner.sh && run_gitlab_runner_service
+#source src/CI/GitLab_runner/install_and_boot_gitlab_runner.sh && run_gitlab_runner_service
 run_gitlab_runner_service() {
 	#output=$(nohup sudo gitlab-runner run &>/dev/null &) # causes tests to hang.
 	#run bash -c "src/./run_gitlab_runner.sh"
-	#run bash -c "./src/run_gitlab_runner.sh"
-	#"./src/run_gitlab_runner.sh"
-	"./src/run_gitlab_runner.sh" & disown
+	#run bash -c "./src/CI/GitLab_runner/run_gitlab_runner.sh"
+	#"./src/CI/GitLab_runner/run_gitlab_runner.sh"
+	"./src/CI/GitLab_runner/run_gitlab_runner.sh" & disown
 }
 
 #https://stackoverflow.com/questions/64257998/gitlab-ci-pipeline-fails-to-run

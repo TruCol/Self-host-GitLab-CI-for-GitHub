@@ -20,7 +20,7 @@
 # TODO(a-t-0): Write tests for this method.
 #######################################
 # Run with: 
-# bash -c "source src/import.sh src/run_ci_on_github_repo.sh && copy_github_commits_with_yaml_to_gitlab_repo hiveminds renamed_test_repo main b0964a97eb82a3ff533548202b6eecc477039dbb hiveminds"
+# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && copy_github_commits_with_yaml_to_gitlab_repo hiveminds renamed_test_repo main b0964a97eb82a3ff533548202b6eecc477039dbb hiveminds"
 copy_github_commits_with_yaml_to_gitlab_repo() {
 	local github_username="$1"
 	local github_repo_name="$2"

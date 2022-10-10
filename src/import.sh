@@ -1,7 +1,6 @@
 # No shebang because that breaks the tests.
 source src/hardcoded_variables.txt
-source src/helper_file_dir_related.sh
-
+source src/helper/helper_file_dir_related.sh
 
 
 # TODO: replace with hardcoded PERSONAL_CREDENTIALS_PATH.
@@ -15,12 +14,8 @@ else
 	exit 7
 fi
 
-
-
-
-filler="Filler"
-# TODO: differentiate between GLOBAL and HARDCODED with:
-#GITLAB_SERVER_ACCOUNT_GLOBAL=$(echo "$GITLAB_SERVER_ACCOUNT_HARDCODED" | tr -d '\r')
+# Remove the trailing edge characters from the global variables read from
+# hardcoded_variables.txt and personal_creds.txt
 GITLAB_SERVER_ACCOUNT_GLOBAL=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 GITLAB_SERVER_PASSWORD_GLOBAL=$(echo "$GITLAB_SERVER_PASSWORD_GLOBAL" | tr -d '\r')
 GITLAB_ROOT_EMAIL_GLOBAL=$(echo "$GITLAB_ROOT_EMAIL_GLOBAL" | tr -d '\r')
@@ -29,6 +24,9 @@ GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL
 GITLAB_SERVER_HTTP_URL=$(echo "$GITLAB_SERVER_HTTP_URL" | tr -d '\r')
 GITLAB_SERVER_PASSWORD_GLOBAL=$(echo "$GITLAB_SERVER_PASSWORD_GLOBAL" | tr -d '\r')
 GITLAB_SERVER_PASSWORD_GLOBAL=$(echo "$GITLAB_SERVER_PASSWORD_GLOBAL" | tr -d '\r')
+
+# TODO: determine how the "filler" can be deleted.
+filler="Filler"
 #echo "$GITLAB_SERVER_ACCOUNT_GLOBAL$filler"
 #echo "$GITLAB_SERVER_PASSWORD_GLOBAL$filler"
 #echo "$GITLAB_ROOT_EMAIL_GLOBAL$filler"
@@ -40,55 +38,52 @@ GITLAB_SERVER_PASSWORD_GLOBAL=$(echo "$GITLAB_SERVER_PASSWORD_GLOBAL" | tr -d '\
 
 
 # For installation
-source src/helper_ci_management.sh
-source src/prerequisites.sh
-source src/create_github_personal_access_token.sh
-source src/helper_dir_edit.sh
-source src/helper_github_modify.sh
-source src/helper_github_status.sh
-source src/helper_gitlab_modify.sh
-source src/helper_gitlab_status.sh
-source src/helper_git_neutral.sh
-source src/helper_ssh.sh
-source src/helper.sh
-source src/helper_docker.sh
-source src/helper_parsing.sh
-source src/helper_configuration.sh
-source src/install_and_boot_gitlab_runner.sh
+source src/CI/helper_ci_management.sh
+source src/CI/GitLab_runner/install_and_boot_gitlab_runner.sh
+
+source src/helper/GitHub/helper_github_modify.sh
+source src/helper/GitHub/helper_github_status.sh
+source src/helper/GitLab/helper_gitlab_modify.sh
+source src/helper/GitLab/helper_gitlab_status.sh
+source src/helper/git_neutral/helper_git_neutral.sh
+source src/helper/helper.sh
+
+source src/helper_asserts.sh # Loads assert abilities into code
+source src/helper/helper_configuration.sh
+source src/helper/helper_dir_edit.sh
+source src/helper/helper_docker.sh
+source src/helper/helper_parsing.sh
+source src/helper/helper_ssh.sh
+source src/helper/verification/helper_md5sum.sh
+source src/helper/verification/sha256_computing.sh
+
 source src/prerequisites/firefox_version.sh
 source src/prerequisites/jquery.sh
-
-source src/install_support_programs.sh
-source src/helper_md5sum.sh
+source src/prerequisites/prerequisites.sh
+source src/prerequisites/install_support_programs.sh
 
 # To get GitLab personal access token
-source src/create_gitlab_personal_access_token.sh
+source src/Selenium/create_gitlab_personal_access_token.sh # TODO: verify its naming.
+source src/Selenium/create_github_personal_access_token.sh
+source src/Selenium/get_gitlab_server_runner_token.sh
 
 # For uninstallation
-source src/uninstall_gitlab_server.sh
-source src/uninstall_gitlab_runner.sh
+source src//GitLab_server/uninstall_gitlab_server.sh
+source src/CI/GitLab_runner/uninstall_gitlab_runner.sh
+
+# For CI usage
+source src/CI/call_CI/run_ci_on_github_repo.sh
+source src/CI/call_CI/run_ci_on_commit.sh
+source src/CI/call_CI/run_ci_from_graphql.sh
+
+# A dashboard/list of arguments to allow user to modify GitLab on the fly.
+source src/Dashboard/call_run_function_with_timeout.sh
 
 # For tests
-# TODO: salvage the used functions of this file and move it into src.
-source src/boot_tor.sh
-source src/helper_dir_edit.sh
-source src/install_and_boot_gitlab_server.sh
-
-
-# Unsorted imports.
-source src/get_gitlab_server_runner_token.sh
-source src/run_ci_on_github_repo.sh
-source src/run_ci_on_commit.sh
-source src/run_ci_from_graphql.sh
-source src/call_run_function_with_timeout.sh
-
-
-
-source src/sha256_computing.sh
-
-
-# Load assert abilities into code:
-source src/helper_asserts.sh
+# TODO: salvage the used functions of boot_tor and move it into src.
+source src/Tor_support/boot_tor.sh
+source src/helper/helper_dir_edit.sh
+source src/GitLab_server/install_and_boot_gitlab_server.sh
 
 # Load test files
 source test/hardcoded_testdata.txt

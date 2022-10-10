@@ -33,7 +33,7 @@
 # bash -c "source src/import.sh && get_query_results"
 get_query_results() {
 	local github_organisation="trucol"
-	local graphql_filepath="src/examplequery14.gql"
+	local graphql_filepath="src/helper/queries/examplequery14.gql"
 	
 	if [ ! -f $graphql_filepath ];then
 	    echo "usage of this script is incorrect."

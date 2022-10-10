@@ -208,30 +208,37 @@ fi
 source "$PERSONAL_CREDENTIALS_PATH"
 
 # Verify the personal credits are stored correctly.
-printf "\n\n\n Verifying the $PERSONAL_CREDENTIALS_PATH contains the right data."
+printf "\n\n 0. Verifying the $PERSONAL_CREDENTIALS_PATH contains the right"
+printf " data."
 verify_prerequisite_personal_creds_txt_contain_required_data
 verify_prerequisite_personal_creds_txt_loaded
 
 
 # Raise sudo permission at the start, to prevent requiring user permission half way through tests.
-printf "\n\n\n Now getting sudo permission to perform the GitLab installation."
+printf "\n\n 1. Now getting sudo permission to perform the GitLab installation."
 {
   sudo echo "hi"
 } &> /dev/null
 # Ensuring the Firefox installation is performed with ppa/apt instead of snap.
 # This is such that the browser can be controlled automatically.
+printf "\n\n 2. Now ensuring the firefox is installed with ppa and apt instead."
+printf "of snap."
 swap_snap_firefox_with_ppa_apt_firefox_installation
 
 # Ensure jq is installed correctly.
+printf "\n\n 3. Now ensuring jquery is installed."
 install_jquery_using_apt
 
 # Verify the GitHub user has the required repositories.
-printf "\n\n\n Verifying the $GITHUB_STATUS_WEBSITE_GLOBAL and $PUBLIC_GITHUB_TEST_REPO_GLOBAL repositories exist in your GitHub account."
+printf "\n\n 4. Verifying the $GITHUB_STATUS_WEBSITE_GLOBAL and "
+printf "$PUBLIC_GITHUB_TEST_REPO_GLOBAL repositories exist in your GitHub"
+printf " account."
 # TODO: include catch for: The requested URL returned error: 403 rate limit exceeded
 #assert_required_repositories_exist $GITHUB_USERNAME_GLOBAL
 
 # Get the GitHub personal access code.
-printf "\n\n\n Setting and Getting the GitHub personal access token if it does not yet exist."
+printf "\n\n 5. Setting and Getting the GitHub personal access token if it "
+printf "does not yet exist."
 # TODO: RE-enable, only disabled to speed up debugging.!
 ensure_github_pat_can_be_used_to_set_commit_build_status $GITHUB_USERNAME_GLOBAL $PUBLIC_GITHUB_TEST_REPO_GLOBAL $github_password
 
@@ -239,7 +246,8 @@ ensure_github_pat_can_be_used_to_set_commit_build_status $GITHUB_USERNAME_GLOBAL
 
 # Check if ssh deploy key already exists and can be used to push
 # to GitHub, before creating a new one.
-printf "\n\n\n Checking to see if you already have ssh push access to the $GITHUB_STATUS_WEBSITE_GLOBAL repository with your ssh-deploy key."
+printf "\n\n 6. Checking to see if you already have ssh push access to the "
+printf "$GITHUB_STATUS_WEBSITE_GLOBAL repository with your ssh-deploy key."
 has_ssh_push_access=$(check_if_machine_has_push_access_to_gitlab_build_status_repo_in_github $GITHUB_USERNAME_GLOBAL)
 if [ "$has_ssh_push_access" == "NOTFOUND" ]; then
   # Get the GitHub ssh deploy key.

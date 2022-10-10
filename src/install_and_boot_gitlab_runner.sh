@@ -15,10 +15,15 @@ install_and_run_gitlab_runner() {
 	
 	# Install GitLab Runner regardless of whether the runner service is already running or not.
 		get_runner_package "$arch"
+		read -p "Got runner package"
 		install_package "$arch"
+		read -p "Installed runner"
 		register_gitlab_runner
+		read -p "Registered runner"
 		create_gitlab_ci_user
+		read -p "create_gitlab_ci_user"
 		install_gitlab_runner_service
+		read -p "install_gitlab_runner_service"
 		start_gitlab_runner_service
 		run_gitlab_runner_service
 	if [ "$(gitlab_runner_is_running "$arch")" == "NOTRUNNING" ]; then
@@ -33,16 +38,16 @@ install_and_run_gitlab_runner() {
 # Download the gitlab runner package
 # Available architectures: https://gitlab-runner-downloads.s3.amazonaws.com/latest/index.html
 get_runner_package() {
-	arch=$1
+	local arch="$1"
 	
 	# Get the hardcoded/expected checksum and verify if the file already is downloaded.
-	expected_checksum=$(get_expected_md5sum_of_gitlab_runner_installer_for_architecture "$arch")
+	local expected_checksum=$(get_expected_md5sum_of_gitlab_runner_installer_for_architecture "$arch")
 	
 	# Download GitLab runner installer package if it is not yet found
 	if [ "$(check_md5_sum "$expected_checksum" "gitlab-runner_${arch}.deb")" != "EQUAL" ]; then
 		# install curl
 		# shellcheck disable=SC2034
-		install_curl=$(yes | sudo apt install curl)
+		local install_curl=$(yes | sudo apt install curl)
 		# TODO: write test to verifiy output install curl command.
 		
 		left="https://gitlab-runner-downloads.s3.amazonaws.com/latest/deb/gitlab-runner_"
@@ -76,8 +81,9 @@ install_package() {
 	install=$(sudo dpkg -i "$filename")
 	#install=$(dpkg -i "$filename")
 	echo "install=$install"
+
+	# TODO: verify runner is  installed succesfully
 }
-#TODO: reverse installation
 
 
 # source src/install_and_boot_gitlab_runner.sh && register_gitlab_runner
@@ -89,16 +95,18 @@ register_gitlab_runner() {
 
 	
 	#url="http://localhost"
-	gitlab_url="http://127.0.0.1"
-	description=trucolrunner
-	executor=shell
+	local gitlab_url="http://127.0.0.1"
+	local description=trucolrunner
+	#executor=shell
+	local executor=docker
 	#dockerimage="ruby:2.6"
 	
 	# Get Gitlab Server runner registration token.
 	get_gitlab_server_runner_tokenV1
 	
 	# runner_token=$(get_last_line_of_set_of_lines "\${output}") # python code output is given after last echo in shell, so read it from file instead of from output
-	runner_token=$(cat "$RUNNER_REGISTRATION_TOKEN_FILEPATH")
+	local runner_token=$(cat "$RUNNER_REGISTRATION_TOKEN_FILEPATH")
+	read -p "runner_token=$runner_token"
 	
 	# TODO: delete plain text registration token after reading.
 	#echo "runner_token=$runner_token"
@@ -111,12 +119,23 @@ register_gitlab_runner() {
 	#--executor docker \
 	#--docker-image ruby:2.6)
 	
+	# Shell executor:
+	#sudo gitlab-runner register \
+	#--non-interactive \
+	#--url "$gitlab_url" \
+	#--description $description \
+	#--registration-token "$runner_token" \
+	#--executor $executor
+
 	sudo gitlab-runner register \
 	--non-interactive \
 	--url "$gitlab_url" \
 	--description $description \
 	--registration-token "$runner_token" \
-	--executor $executor
+	--docker-image "docker:20.10.16" \
+	--executor $executor \
+	--docker-privileged \
+	--docker-volumes "/certs/client"
 }
 
 

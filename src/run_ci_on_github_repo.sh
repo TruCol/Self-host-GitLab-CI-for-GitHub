@@ -522,7 +522,6 @@ set_build_status_of_github_commit_using_github_pat() {
 	# TODO: replace second $commit_build_status with the actual build output or error message.
 	# shellcheck disable=SC2059
 	json_string=$(printf "$JSON_FMT" "$commit_build_status" "$commit_build_status" "$redirect_to_ci_url")
-	echo "json_string=$json_string"
 	
 	# Set the build status
 	setting_output=$(curl -H "Authorization: token $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" --request POST --data "$json_string" https://api.github.com/repos/"$github_username"/"$github_repo_name"/statuses/"$github_commit_sha")
@@ -536,6 +535,7 @@ set_build_status_of_github_commit_using_github_pat() {
 		## Assert $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL is not in personal_creds
 		if [ "$(file_contains_string "GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$PERSONAL_CREDENTIALS_PATH")" == "FOUND" ]; then
 			echo "Error, the GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL is still in the PERSONAL_CREDENTIALS_PATH file."
+			exit 116
 		fi
 
 		echo "ERROR, the github personal access token is not valid. Please make a new one. See https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token and ensure you tick. $setting_output"
@@ -555,10 +555,7 @@ set_build_status_of_github_commit_using_github_pat() {
 	
 	found_urls="$(string_in_lines "$expected_url" "${urls_in_json}")"
 	found_state="$(string_in_lines "$expected_state" "${getting_output_json}")"
-	
-	echo "found_urls=$found_urls"
-	echo "found_state=$found_state"
-	
+
 	if [ "$found_urls" == "NOTFOUND" ]; then
 		# shellcheck disable=SC2059
 		printf "Error, the status of the repo did not contain:$expected_url \n because the getting output was: $getting_output"
@@ -628,11 +625,11 @@ check_if_can_set_build_status_of_github_commit_using_github_pat() {
 	# Create message in JSON format
 	JSON_FMT='{"state":"%s","description":"%s","target_url":"%s"}\n'
 	# shellcheck disable=SC2059
-	json_string=$(printf "$JSON_FMT" "$commit_build_status" "$commit_build_status" "$redirect_to_ci_url")
+	local json_string=$(printf "$JSON_FMT" "$commit_build_status" "$commit_build_status" "$redirect_to_ci_url")
 	#echo "json_string=$json_string"
 	
 	# Set the build status
-	setting_output=$(curl -H "Authorization: token $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" --request POST --data "$json_string" https://api.github.com/repos/"$github_username"/"$github_repo_name"/statuses/"$github_commit_sha")
+	local setting_output=$(curl -H "Authorization: token $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" --request POST --data "$json_string" https://api.github.com/repos/"$github_username"/"$github_repo_name"/statuses/"$github_commit_sha")
 	
 	# Check if output is valid
 	#echo "setting_output=$setting_output"

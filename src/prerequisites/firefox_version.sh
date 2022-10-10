@@ -101,7 +101,7 @@ remove_snap_install_firefox_if_existant(){
 		# User permission is granted here, remove firefox snap installation.
 		yes | sudo snap remove firefox 2>&1
 		assert_firefox_is_not_installed_using_snap
-		echo "Firefox is removed." > /dev/tty
+		echo "2.a Firefox is removed." > /dev/tty
 	fi
 	assert_firefox_is_not_installed_using_snap
 }

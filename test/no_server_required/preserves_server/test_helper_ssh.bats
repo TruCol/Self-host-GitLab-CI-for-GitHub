@@ -177,7 +177,7 @@ setup() {
 	assert_equal "$GITHUB_USERNAME_GLOBAL" a-t-0
 	#has_access="$()"
 	non_existant_repository="NON_EXISTANT_REPOSITORY"
-	run bash -c "source src/import.sh src/helper/helper_ssh.sh && check_quick_ssh_access_to_repo $GITHUB_USERNAME_GLOBAL $non_existant_repository"
+	run bash -c "source src/import.sh src/Selenium/SSH/local_ssh_checks.sh && check_quick_ssh_access_to_repo $GITHUB_USERNAME_GLOBAL $non_existant_repository"
 	assert_failure
 	assert_output 'Your ssh-account:'$GITHUB_USERNAME_GLOBAL' does not have pull access to the repository:'$non_existant_repository
 }

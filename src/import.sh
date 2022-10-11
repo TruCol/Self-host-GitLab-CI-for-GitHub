@@ -53,7 +53,6 @@ source src/helper/helper_configuration.sh
 source src/helper/helper_dir_edit.sh
 source src/helper/helper_docker.sh
 source src/helper/helper_parsing.sh
-source src/helper/helper_ssh.sh
 source src/helper/verification/helper_md5sum.sh
 source src/helper/verification/sha256_computing.sh
 
@@ -66,7 +65,9 @@ source src/prerequisites/install_support_programs.sh
 source src/Selenium/create_gitlab_personal_access_token.sh # TODO: verify its naming.
 source src/Selenium/create_github_personal_access_token.sh
 source src/Selenium/get_gitlab_server_runner_token.sh
-source src/Selenium/GitHub_ssh.sh
+source src/Selenium//SSH/ensure_GitHub_ssh_access.sh
+source src/Selenium/SSH/local_ssh_checks.sh
+source src/Selenium/SSH/check_GitHub_ssh_access.sh
 
 # For uninstallation
 source src//GitLab_server/uninstall_gitlab_server.sh

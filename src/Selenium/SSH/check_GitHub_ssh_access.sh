@@ -1,6 +1,7 @@
 #!/bin/bash
 # Checks whether machine can push and pull to/from GitHub build status repo.
 # bash -c 'source src/import.sh && check_quick_ssh_access_to_repo  "a-t-0" "gitlab-ci-build-statuses"'
+# git ls-remote git@github.com:a-t-0/gitlab-ci-build-statuses.git
 #######################################
 # Checks if the device has ssh-access to some repository. If retry argument is
 # passed, it will call itself once more.

@@ -66,6 +66,7 @@ source src/prerequisites/install_support_programs.sh
 source src/Selenium/create_gitlab_personal_access_token.sh # TODO: verify its naming.
 source src/Selenium/create_github_personal_access_token.sh
 source src/Selenium/get_gitlab_server_runner_token.sh
+source src/Selenium/GitHub_ssh.sh
 
 # For uninstallation
 source src//GitLab_server/uninstall_gitlab_server.sh

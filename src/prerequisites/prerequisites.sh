@@ -229,23 +229,7 @@ set_personal_github_pat_and_verify() {
 }
 
 
-# Run with: 
-# bash -c "source src/import.sh && ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status a-t-0"
-ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status() {
-	local github_username="$1"
-	local github_pwd="$2"
 
-	# Assumes the GitLab build status repository exists in GitHub.
-	# Verify if the GitLab build status repository exists in GitHub.	
-	assert_public_github_repository_exists "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL"
-
-	# Get the GitHub ssh deploy key to push and pull the GitLab build status 
-	# icons to the GitHub build status repository.
-	printf "\n\n\n Ensuring a ssh deploy key is to GitHub to push build status icons to your build status repository.\n\n\n."
-	get_github_build_status_repo_ssh_deploy_key "example@example.com" "$GITHUB_SSH_DEPLOY_KEY_NAME" "$github_username" "$github_pwd"
-	printf "\n\n\n Verifying the GitHub ssh deploy token is able to push build status icons to your build status repository.\n\n\n."
-	verify_machine_has_push_access_to_gitlab_build_status_repo_in_github "$GITHUB_SSH_DEPLOY_KEY_NAME"
-}
 
 #######################################
 # 0. Ensures a GitHub personal access token is usable to set GitHub commit 

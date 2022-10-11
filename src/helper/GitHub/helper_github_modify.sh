@@ -81,12 +81,11 @@ push_to_github_repository_with_ssh() {
 	local target_directory="$1"
 	# Verify has push access
 	
-	printf "Pushing from:$target_directory"
 	# Push
 	if [ "$target_directory" != "" ]; then
 		if [ -d "$target_directory" ]; then
-			output=$(cd "$target_directory" && git push)
-			echo "$output"
+			output=$(cd "$target_directory" && git push > /dev/null 2>&1)
+			echo "SUCCESS"
 		else
 			echo "The target directory:$target_directory was not found."
 			exit 4

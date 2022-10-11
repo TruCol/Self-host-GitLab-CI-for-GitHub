@@ -256,7 +256,7 @@ if [ "$has_ssh_push_access" == "NOTFOUND" ]; then
 elif [ "$has_ssh_push_access" == "FOUND" ]; then
   # Verify the GitHub ssh deploy key works.
   printf "\n\n\n Verifying you indeed have ssh push access to $GITHUB_STATUS_WEBSITE_GLOBAL using your GitHub ssh-deploy key."
-  verify_machine_has_push_access_to_gitlab_build_status_repo_in_github "$GITHUB_SSH_DEPLOY_KEY_NAME"
+  has_push_access_to_gitlab_build_status_repo_in_github "$GITHUB_SSH_DEPLOY_KEY_NAME"
 else
   echo "Error, the output of ssh_check_output did not end in FOUND, nor in NOTFOUND: $ssh_check_output"
   exit 56

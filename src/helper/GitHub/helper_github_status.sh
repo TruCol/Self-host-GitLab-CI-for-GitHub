@@ -455,32 +455,32 @@ download_repository() {
 # Outputs:
 #  
 # TODO(a-t-0): write tests for method.
-# TODO(a-t-0): rename to: download_and_locally_overwrite_repository_using_ssh
 #######################################
+# bash -c 'source src/import.sh && download_and_overwrite_repository_using_ssh "a-t-0" "gitlab-ci-build-statuses"'
 download_and_overwrite_repository_using_ssh() {
 	local git_username="$1"
 	local reponame="$2"
 	local target_directory="$3"
+
 	local repo_url="git@github.com:"$git_username"/"$reponame".git"
 	
 	# Delete target directory if it exists.
-	printf "\n\n\n Remove target directory:$target_directory if exists \n\n\n"
 	remove_dir "$target_directory"
 	manual_assert_dir_not_exists "$target_directory"
+	# Delete repo directory if it exists.
+	remove_dir "$reponame"
+	manual_assert_dir_not_exists "$reponame"
 	
 
 	if [ "$target_directory" != "" ]; then
-		printf "\n\n\n git clone $repo_url \ninto directory:\n$target_directory \n\n\n"
-		git clone $repo_url $target_directory &&
-		set +e
+		git clone $repo_url $target_directory > /dev/null 2>&1 &&
+		set +e 
 		manual_assert_dir_exists "$target_directory/$repo_name"
 	else
-		printf "\n\n\n git clone $repo_url in PWD=$PWD \n\n\n"
-		git clone $repo_url &&
+		git clone $repo_url > /dev/null 2>&1 &&
 		set +e
 		manual_assert_dir_exists "$reponame"
 	fi
-	printf "\n\n\n DONE CLONING REPOSITORY \n\n\n"
 }
 
 # Run with: 

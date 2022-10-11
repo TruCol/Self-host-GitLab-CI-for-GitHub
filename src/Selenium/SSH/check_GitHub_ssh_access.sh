@@ -6,7 +6,7 @@
 # Checks if the device has ssh-access to some repository. If retry argument is
 # passed, it will call itself once more.
 # Local variables:
-#  local_git_username
+#  github_username
 #  github_repository
 #  is_retry
 #  my_service_status
@@ -14,7 +14,7 @@
 # Globals:
 #  None.
 # Arguments:
-#  local_git_username
+#  github_username
 #  github_repository
 #  is_retry
 # Returns:
@@ -23,23 +23,25 @@
 #  FOUND if the machine has ssh-access to a repository.
 #  NOTFOUND if the machine does not have ssh-access to a repository.
 #######################################
+# Run with: 
+# bash -c 'source src/import.sh && check_quick_ssh_access_to_repo "a-t-0" "gitlab-ci-build-statuses"'
 check_quick_ssh_access_to_repo() {
-	local local_git_username=$1
+	local github_username=$1
 	local github_repository=$2
 	local is_retry=$3
 	
 	# shellcheck disable=SC2034
-	local my_service_status=$(git ls-remote git@github.com:"$local_git_username"/"$github_repository".git 2>&1)
+	local my_service_status=$(git ls-remote git@github.com:"$github_username"/"$github_repository".git 2>&1)
 	local found_error_in_ssh_command=$(lines_contain_string "ERROR" "\${my_service_status}")
 	if [ "$found_error_in_ssh_command" == "NOTFOUND" ]; then
-		echo "FOUND"
+		echo "HAS_QUICK_SSH_ACCESS"
 	elif [ "$found_error_in_ssh_command" == "FOUND" ]; then
 		# Two tries is enough to determine the device does not have ssh-access.
 		if [ "$is_retry" == "YES" ]; then
 			echo "NOTFOUND"
 		else
 			# Perform recursive call to run function one more time.
-			check_quick_ssh_access_to_repo "$local_git_username" "$github_repository" "YES"
+			echo $(check_quick_ssh_access_to_repo "$github_username" "$github_repository" "YES")
 		fi
 	fi
 }
@@ -70,7 +72,7 @@ check_quick_ssh_access_to_repo() {
 # TODO(a-t-0): Write tests for this method.
 #######################################
 # Run with: 
-# bash -c "source src/import.sh && has_pull_access_to_gitlab_build_status_repo_in_github some_github_deploy_key" "a-t-0"
+# bash -c 'source src/import.sh && has_pull_access_to_gitlab_build_status_repo_in_github "a-t-0"'
 has_pull_access_to_gitlab_build_status_repo_in_github() {
 	local github_user="$1"
 	
@@ -88,6 +90,7 @@ has_pull_access_to_gitlab_build_status_repo_in_github() {
 	# 4. Delete the repository locally for cleaning up.
 	remove_dir "$GITHUB_STATUS_WEBSITE_GLOBAL"
 	manual_assert_dir_not_exists "$GITHUB_STATUS_WEBSITE_GLOBAL"
+	echo "HAS_SSH_PULL_ACCESS"
 }
 
 
@@ -128,8 +131,8 @@ has_pull_access_to_gitlab_build_status_repo_in_github() {
 # TODO(a-t-0): Write tests for this method.
 #######################################
 # Run with: 
-# bash -c "source src/import.sh && verify_machine_has_push_access_to_gitlab_build_status_repo_in_github some_github_deploy_key"
-verify_machine_has_push_access_to_gitlab_build_status_repo_in_github() {
+# bash -c "source src/import.sh && has_push_access_to_gitlab_build_status_repo_in_github"
+has_push_access_to_gitlab_build_status_repo_in_github() {
 	
 	# 0. Deletes the GitHub build status repository locally.
 	remove_dir "$GITHUB_STATUS_WEBSITE_GLOBAL"
@@ -169,7 +172,10 @@ verify_machine_has_push_access_to_gitlab_build_status_repo_in_github() {
 	# TODO(a-t-0): Verify changes are committed.
 
 	# 5. Push the new/changed file to the GitHub build status repository.
-	push_to_github_repository_with_ssh "$GITHUB_STATUS_WEBSITE_GLOBAL"
+	if [ "$(push_to_github_repository_with_ssh "$GITHUB_STATUS_WEBSITE_GLOBAL")" != "SUCCESS" ]; then
+		echo "ERROR"
+		exit 6
+	fi
 		
 	# 6. Delete the local copy of the GitHub build status repository.
 	remove_dir "$GITHUB_STATUS_WEBSITE_GLOBAL"
@@ -186,4 +192,5 @@ verify_machine_has_push_access_to_gitlab_build_status_repo_in_github() {
 	# 9. Delete the local GitHub build status repository for cleaning up.
 	remove_dir "$GITHUB_STATUS_WEBSITE_GLOBAL"
 	manual_assert_dir_not_exists "$GITHUB_STATUS_WEBSITE_GLOBAL"
+	echo "HAS_SSH_PUSH_ACCESS"
 }

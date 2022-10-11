@@ -31,7 +31,7 @@ github_commit_already_has_gitlab_ci_build_status_result() {
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub"
 	
 	# Verify ssh-access
-	#has_access="$(check_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+	#has_access="$(check_quick_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	# Determine whether the Build status repository is cloned.
 	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")

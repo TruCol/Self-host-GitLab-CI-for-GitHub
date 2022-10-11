@@ -248,11 +248,11 @@ ensure_github_pat_can_be_used_to_set_commit_build_status $GITHUB_USERNAME_GLOBAL
 # to GitHub, before creating a new one.
 printf "\n\n 6. Checking to see if you already have ssh push access to the "
 printf "$GITHUB_STATUS_WEBSITE_GLOBAL repository with your ssh-deploy key."
-has_ssh_push_access=$(check_if_machine_has_push_access_to_gitlab_build_status_repo_in_github $GITHUB_USERNAME_GLOBAL)
+has_ssh_push_access=$(has_pull_access_to_gitlab_build_status_repo_in_github $GITHUB_USERNAME_GLOBAL)
 if [ "$has_ssh_push_access" == "NOTFOUND" ]; then
   # Get the GitHub ssh deploy key.
   printf "\n\n\n Ssh access to $GITHUB_STATUS_WEBSITE_GLOBAL was not found. Now creating an ssh deploy key for you and adding it to GitHub."
-  ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status $GITHUB_USERNAME_GLOBAL $github_password
+  has_pull_access_to_gitlab_build_status_repo_in_github $GITHUB_USERNAME_GLOBAL $github_password
 elif [ "$has_ssh_push_access" == "FOUND" ]; then
   # Verify the GitHub ssh deploy key works.
   printf "\n\n\n Verifying you indeed have ssh push access to $GITHUB_STATUS_WEBSITE_GLOBAL using your GitHub ssh-deploy key."

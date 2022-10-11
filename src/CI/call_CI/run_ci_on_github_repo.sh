@@ -108,7 +108,7 @@ download_github_repo_on_which_to_run_ci() {
 	# Verify ssh-access
 	# TODO: resolve error when ran from test.
 	printf "\n\n\n Verify user has ssh-access to GitHub repository."
-	has_access="$(check_ssh_access_to_repo "$github_username" "$github_repo_name")"
+	has_access="$(check_quick_ssh_access_to_repo "$github_username" "$github_repo_name")"
 
 	# Clone GitHub repo at start of test.
 	printf "\n\n\n Clone the GitHub repository.\n\n\n"
@@ -736,7 +736,7 @@ push_commit_build_status_in_github_status_repo_to_github() {
 		commit_changes "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL" "New_build_status."
 		
 		# Verify ssh-access
-		#has_access="$(check_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+		#has_access="$(check_quick_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 		
 		# 13. Push the changes to the GitHub build status repository.
 		#push_to_github_repository "$github_username" "$has_access" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"

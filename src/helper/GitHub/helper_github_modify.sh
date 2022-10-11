@@ -235,7 +235,7 @@ get_build_status_repository_from_github() {
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	#has_access="$(check_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+	#has_access="$(check_quick_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	# 8. Clone the GitHub build statusses repository.
 	printf " download_and_overwrite_repository_using_ssh"

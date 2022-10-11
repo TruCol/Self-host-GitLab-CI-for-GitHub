@@ -83,7 +83,7 @@ setup() {
 	
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+	has_access="$(check_quick_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	# Clone GitHub repo at start of test.
 	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$gitlab_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$gitlab_repo_name"
@@ -333,7 +333,7 @@ setup() {
 	
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+	has_access="$(check_quick_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	# Clone GitHub repo at start of test.
 	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
@@ -420,7 +420,7 @@ setup() {
 	
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+	has_access="$(check_quick_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	# Clone GitHub repository.
 	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$gitlab_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$gitlab_repo_name"

@@ -88,9 +88,7 @@ create_and_activate_local_github_ssh_deploy_key() {
 	local private_key_filename="$GITHUB_SSH_DEPLOY_KEY_NAME"
 
 	# Generate ssh-key and add it to ssh-agent
-	read -p "Setting"
 	generate_ssh_key_if_not_exists "$GITHUB_SSH_EMAIL"
-	read -p "Done"
 	
     # Assert the ssh-keys exist.
 	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"

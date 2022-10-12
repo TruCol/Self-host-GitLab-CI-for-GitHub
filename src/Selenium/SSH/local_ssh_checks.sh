@@ -50,7 +50,7 @@ generate_ssh_key_if_not_exists() {
 			echo "PARTIALFOUND"
 
 			# Recreate ssh-key pair
-			ssh-keygen -t ed25519 -C "$email" -f ~/.ssh/"$identifier" -P ""
+			ssh-keygen -t ed25519 -C "$email" -f ~/.ssh/"$GITHUB_SSH_DEPLOY_KEY_NAME" -P ""
 		fi
 	else
 		if [ "$(file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename")" == "FOUND" ]; then
@@ -61,11 +61,11 @@ generate_ssh_key_if_not_exists() {
 			# Indicate only half of expected keys were found.
 			echo "PARTIALFOUND"
 			# Recreate ssh-key pair
-			ssh-keygen -t ed25519 -C "$email" -f ~/.ssh/"$identifier" -P ""
+			ssh-keygen -t ed25519 -C "$email" -f ~/.ssh/"$GITHUB_SSH_DEPLOY_KEY_NAME" -P ""
 		else
 			echo "NOTFOUND"
 			# Create ssh-key pair
-			ssh-keygen -t ed25519 -C "$email" -f ~/.ssh/"$identifier" -P ""
+			yes | ssh-keygen -t ed25519 -C "$email" -f ~/.ssh/"$GITHUB_SSH_DEPLOY_KEY_NAME" -P ""
 		fi
 	fi
 

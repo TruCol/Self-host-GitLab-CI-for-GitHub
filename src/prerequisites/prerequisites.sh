@@ -23,7 +23,7 @@ set_gitlab_pwd() {
 	local gitlab_pwd="$1"
 	
 	if [ "$gitlab_pwd" != "" ]; then
-		set_default_personal_cred_if_empty "GITLAB_SERVER_PASSWORD_GLOBAL" "$gitlab_pwd"
+		add_entry_to_personal_cred_file "GITLAB_SERVER_PASSWORD_GLOBAL" "$gitlab_pwd"
 	else
 		echo "Error, the GitLab password entered by the user is empty."
 		exit 5
@@ -143,8 +143,8 @@ assert_github_pat_can_be_used_to_set_commit_build_status() {
 # TODO(a-t-0): Include verification on url format (Must have http:// (I think)).
 #######################################
 # Run with: 
-# bash -c "source src/import.sh && set_default_personal_cred_if_empty GITLAB_SERVER_HTTP_URL gitlab_url"
-set_default_personal_cred_if_empty(){
+# bash -c "source src/import.sh && add_entry_to_personal_cred_file GITLAB_SERVER_HTTP_URL gitlab_url"
+add_entry_to_personal_cred_file(){
 	local identifier="$1"
 	local incoming_value="$2"
 	

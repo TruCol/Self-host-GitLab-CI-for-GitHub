@@ -86,7 +86,7 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
+	has_access="$(check_quick_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
 	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
@@ -152,7 +152,7 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
+	has_access="$(check_quick_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
 	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
@@ -198,7 +198,7 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
+	has_access="$(check_quick_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
 	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
@@ -263,7 +263,7 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
+	has_access="$(check_quick_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
 	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
@@ -305,7 +305,7 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
+	has_access="$(check_quick_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
 	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
@@ -358,7 +358,7 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
+	has_access="$(check_quick_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
 	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
@@ -411,7 +411,7 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
+	has_access="$(check_quick_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
 	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
@@ -460,7 +460,7 @@ setup() {
 	assert_file_exist "$MIRROR_LOCATION/GitLab"
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
+	has_access="$(check_quick_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$github_repo_name")"
 	
 	# Clone GitHub repo at start of test.
 	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"

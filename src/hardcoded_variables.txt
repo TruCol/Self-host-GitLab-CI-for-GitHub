@@ -27,7 +27,6 @@ RUNNER_TIMESTAMP_FILEPATH=src/logs/time_gitlab_runner_started.txt
 SERVER_STARTUP_TIME_LIMIT=3000
 RUNNER_STARTUP_TIME_LIMIT=600
 RUNNER_REGISTRATION_TOKEN_FILEPATH=src/runner_registration_token.txt
-GITHUB_BUILD_STATUS_REPO_DEPLOY_TOKEN_FILEPATH=src/github_build_status_repo_deploy_key.txt
 CONDA_ENVIRONMENT_NAME=get_gitlab_generation_token
 REPONAME_GET_RUNNER_TOKEN_PYTHON="get-gitlab-runner-registration-token"
 RUNNER_USERNAME="gitlab-runner" 
@@ -47,13 +46,11 @@ MIRROR_LOCATION=src/mirrors
 TEST_FILENAME_TRUE=test_filename_true
 TEST_FILENAME_FALSE=test_filename_false
 
-# GitHub commit build status properties
-COMMIT_WHOSE_BUILD_STATUS_IS_SET_FOR_TESTING_PURPOSES=02c5fce3500d7b9e2d79cb5b7d886020a403cf58
-
 # Specify location of personal credentials. (Stored outside repository to 
 # prevent accidental pushing of the personal credentials)
 PERSONAL_CREDENTIALS_PATH="../personal_creds.txt"
 GITHUB_SSH_DEPLOY_KEY_NAME=some_github_deploy_key
+GITHUB_SSH_EMAIL=example@example.com
 
 TMP_GITLAB_BUILD_STATUS_FILEPATH=src/tmp_gitlab_build_status.txt
 

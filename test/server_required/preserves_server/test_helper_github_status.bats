@@ -89,7 +89,7 @@ END
 	assert_equal "$GITHUB_USERNAME_GLOBAL" a-t-0
 	
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+	has_access="$(check_quick_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	# TODO: Assert the code indeed has ssh-access.
 	# TODO: preserve duplicate of has_access and rename it to has_ssh_access.
 	# TODO: rename duplicate has_access function to: verify_ssh_access and ensure it throws an error.
@@ -131,7 +131,7 @@ END
 # 3.c Clone repository and verify it is cloned
 @test "Verify whether the repository is cloned, if it is cloned." {
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+	has_access="$(check_quick_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	repo_was_cloned=$(verify_github_repository_is_cloned "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
@@ -143,7 +143,7 @@ END
 	
 	###################### Self contained test ###############
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+	has_access="$(check_quick_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	###################### Self contained test ###############
@@ -164,7 +164,7 @@ END
 	
 	###################### Self contained test ###############
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+	has_access="$(check_quick_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	###################### Self contained test ###############
@@ -192,7 +192,7 @@ END
 	company="GitHub"
 	###################### Self contained test ###############
 	# Verify ssh-access
-	has_access="$(check_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+	has_access="$(check_quick_ssh_access_to_repo "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 	
 	clone_github_repository "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$has_access" "$MIRROR_LOCATION/GitHub/$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 	###################### Self contained test ###############

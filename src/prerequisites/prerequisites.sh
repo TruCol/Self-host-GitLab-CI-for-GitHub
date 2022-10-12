@@ -23,7 +23,7 @@ set_gitlab_pwd() {
 	local gitlab_pwd="$1"
 	
 	if [ "$gitlab_pwd" != "" ]; then
-		set_default_personal_cred_if_empty "GITLAB_SERVER_PASSWORD_GLOBAL" "$gitlab_pwd"
+		add_entry_to_personal_cred_file "GITLAB_SERVER_PASSWORD_GLOBAL" "$gitlab_pwd"
 	else
 		echo "Error, the GitLab password entered by the user is empty."
 		exit 5
@@ -72,180 +72,10 @@ assert_required_repositories_exist(){
 }
 
 
-#######################################
-# Ensures the GitHub personal access token can be used to set the commit status
-# on a GitHub commit. Does this by getting the latest commit (sha) on the
-# GitHub test repository and setting the status to "pending" and "success"
-# and probing the build status of that commit of that repository accordingly.
-# Locals:
-#  github_username
-#  github_reponame_to_set_commit_status_on
-#  github_pwd
-#  latest_commit_on_default_branch
-#  personal_credits_contain_global
-#  set_pending
-#  set_succes
-# Globals:
-#  PERSONAL_CREDENTIALS_PATH
-#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
-# Arguments:
-#  github_username
-#  github_reponame_to_set_commit_status_on
-#  github_pwd
-# Returns:
-#  0 If the GitHub commit build statusses can be set correctly.
-#  4 If the GitHub commit sha has a length other than the expected 40.
-# Outputs:
-#  A lot of text on how the function was evaluated.
-#######################################
-# Run with: 
-# bash -c "source src/import.sh && ensure_github_pat_can_be_used_to_set_commit_build_status a-t-0 sponsor_example"
-ensure_github_pat_can_be_used_to_set_commit_build_status() {
-	local github_username="$1"
-	local github_reponame_to_set_commit_status_on="$2"
-	local github_pwd="$3"
-	
-	# TODO(a-t-0): If the GitHub repository for testing purposes does not yet
-	# exist in GitHub, create it automatically for the user.
-
-	# Verify GitHub repository for testing purposes, exists.
-	assert_public_github_repository_exists "$github_username" "$github_reponame_to_set_commit_status_on"
-
-	# Get the latest commit of that repository GitHub repository.
-	local latest_commit_on_default_branch=$(get_latest_commit_public_github_repo $github_username $github_reponame_to_set_commit_status_on)
-
-	# Verify the GitHub commit sha has a correct lenght/formatting.
-	if [ ${#latest_commit_on_default_branch} -eq 40 ]; then 
-		# TODO: verify this needs to be echoed.
-		echo "5.a len=${#latest_commit_on_default_branch}"
-	else 
-		echo "Error, the commit sha:$latest_commit_on_default_branch is not of correct length"  > /dev/tty
-		exit 4
-	fi
-	
-	# Credentials are used to push to GitHub, so check if the file with 
-	# (GitHub) credentials exists.
-	ensure_file_exists "$PERSONAL_CREDENTIALS_PATH"
-	
-	# Verify the GitHub personal access token is stored in the credentials 
-	# file.
-	local personal_credits_contain_global=$(file_contains_string "GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$PERSONAL_CREDENTIALS_PATH")
-	if [ "$personal_credits_contain_global" == "FOUND" ]; then
-		
-		# Output details on what this code is doing, to terminal.
-		# TODO: determine if output should be removed.
-		echo "5.b Found GitHub pat in personal_creds.txt" > /dev/tty
-		echo "5.c github_username=$github_username" > /dev/tty
-		echo "5.d github_reponame_to_set_commit_status_on=" > /dev/tty
-		echo "$github_reponame_to_set_commit_status_on" > /dev/tty
-		echo "5.e latest_commit_on_default_branch=$latest_commit_on_default_branch" > /dev/tty
-		echo "5.f GITLAB_SERVER_HTTP_URL=$GITLAB_SERVER_HTTP_URL" > /dev/tty
-		
-		# Set the build status of a GitHub commit to "pending".
-		# TODO: determine why GITLAB_SERVER_HTTP_URL is used.
-		local set_pending=$(check_if_can_set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $GITLAB_SERVER_HTTP_URL "pending")
-		
-		# Verify build status of the GitHub commit is changed successfully.
-		if [ "$set_pending" == "TRUE" ]; then
-			echo '5.g Set GitHub build status succesfully to: "pending"' > /dev/tty
-			
-			# Set the build status of a GitHub commit to "success".
-			local set_succes=$(check_if_can_set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $GITLAB_SERVER_HTTP_URL "success")
-			
-			if [ "$set_succes" == "TRUE" ]; then
-				echo '5.h Set GitHub build status succesfully to: "success"' > /dev/tty
-			else
-				echo "Did not set status to success"
-				# TODO: determine whether error should be thrown.
-				set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $github_pwd
-			fi
-		else
-			echo "Did not set status to pending"
-			# TODO: determine whether error should be thrown.
-			set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $github_pwd
-		fi
-	else
-		echo "Did not find GitHub pat in personal_creds"
-		# TODO: determine whether error should be thrown.
-		set_personal_github_pat_and_verify $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $github_pwd
-	fi
-}
-
-#######################################
-# Creates and adds the GitHub personal access token (PAT), using the Python repository:
-# get-gitlab-runner-registration-token, to GitHub and stores it locally in the
-# credentials file. Then reloads the credentials file and verifies whether the
-# GitHub PAT can be used to set/change GitHub commit build statusses.
-#
-# Locals:
-#  github_username
-#  github_reponame_to_set_commit_status_on
-#  latest_commit_on_default_branch
-#  github_pwd
-#  personal_credits_contain_global
-#  set_pending
-#  set_succes
-# Globals:
-#  PERSONAL_CREDENTIALS_PATH
-#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
-# Arguments:
-#  github_username
-#  github_reponame_to_set_commit_status_on
-#  github_pwd
-# Returns:
-#  0 If the GitHub commit build statusses can be set correctly.
-#  4 If the GitHub commit sha has a length other than the expected 40.
-# Outputs:
-#  A lot of text on how the function was evaluated.
-#######################################
-set_personal_github_pat_and_verify() {
-	local github_username="$1"
-	local github_reponame_to_set_commit_status_on="$2"
-	local latest_commit_on_default_branch="$3"
-	local github_pwd="$4"
-
-	
-	# Ensure the PERSONAL_CREDENTIALS_PATH file exists, (and create it if not).
-	ensure_file_exists "$PERSONAL_CREDENTIALS_PATH"
-
-	# TODO: first verify if the GitHub pat exists and can be used, before
-	# creating a new one.
-	# Get github pat and ensure it is in PERSONAL_CREDENTIALS_PATH.
-	get_github_personal_access_token $github_username $github_pwd
-	
-	# Reload personal credentials to load new GitHub token.
-	source "$PERSONAL_CREDENTIALS_PATH"
-
-	# Assert the GitHub pat can be used to set the github commit status.
-	# TODO: verify if this is not a duplicate function of: 
-	# ensure_github_pat_can_be_used_to_set_commit_build_status
-	printf "5.g Verifying the GitHub personal access token can be used to set"
-	printf "a commit status to: Pending."
-	set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $GITLAB_SERVER_HTTP_URL "pending"
-	
-	printf "5.h Verifying the GitHub personal access token can be used to set"
-	printf "a commit status to: Success."
-	set_build_status_of_github_commit_using_github_pat $github_username $github_reponame_to_set_commit_status_on $latest_commit_on_default_branch $GITLAB_SERVER_HTTP_URL "success"
-}
 
 
-# Run with: 
-# bash -c "source src/import.sh && ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status a-t-0"
-ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status() {
-	local github_username="$1"
-	local github_pwd="$2"
 
-	# Assumes the GitLab build status repository exists in GitHub.
-	# Verify if the GitLab build status repository exists in GitHub.	
-	assert_public_github_repository_exists "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL"
 
-	# Get the GitHub ssh deploy key to push and pull the GitLab build status 
-	# icons to the GitHub build status repository.
-	printf "\n\n\n Ensuring a ssh deploy key is to GitHub to push build status icons to your build status repository.\n\n\n."
-	get_github_build_status_repo_ssh_deploy_key "example@example.com" "$GITHUB_SSH_DEPLOY_KEY_NAME" "$github_username" "$github_pwd"
-	printf "\n\n\n Verifying the GitHub ssh deploy token is able to push build status icons to your build status repository.\n\n\n."
-	verify_machine_has_push_access_to_gitlab_build_status_repo_in_github "$GITHUB_SSH_DEPLOY_KEY_NAME"
-}
 
 #######################################
 # 0. Ensures a GitHub personal access token is usable to set GitHub commit 
@@ -274,8 +104,11 @@ ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status() {
 assert_github_pat_can_be_used_to_set_commit_build_status() {
 	local github_username="$1"
 	local github_reponame="$2"
+
+	local latest_commit_on_default_branch="$(get_latest_commit_public_github_repo "$github_username"	"$PUBLIC_GITHUB_TEST_REPO_GLOBAL")"
+
 	# Get the GitHub personal access token to set the commit build status.
-	#get_github_personal_access_token $GITHUB_USERNAME_GLOBAL	
+	#ensure_github_pat_is_added_to_github $GITHUB_USERNAME_GLOBAL	
 	# Verify the GitHub personal access token is able to set the commit build 
 	# status.
 	# Reload GitHub personal access token from personal credentials.
@@ -284,9 +117,9 @@ assert_github_pat_can_be_used_to_set_commit_build_status() {
 	# TODO: ensure the personal creds file contains the credentials.
 
 	# Set and verify being able to set commit build status for: pending
-	set_build_status_of_github_commit_using_github_pat "$github_username" "$github_reponame" "$COMMIT_WHOSE_BUILD_STATUS_IS_SET_FOR_TESTING_PURPOSES" "$GITLAB_SERVER_HTTP_URL"  "pending"
+	set_build_status_of_github_commit_using_github_pat "$github_username" "$github_reponame" "$latest_commit_on_default_branch" "$GITLAB_SERVER_HTTP_URL"  "pending"
 	# Set and verify being able to set commit build status for: success
-	set_build_status_of_github_commit_using_github_pat "$github_username" "$github_reponame" "$COMMIT_WHOSE_BUILD_STATUS_IS_SET_FOR_TESTING_PURPOSES" "$GITLAB_SERVER_HTTP_URL"  "success"
+	set_build_status_of_github_commit_using_github_pat "$github_username" "$github_reponame" "$latest_commit_on_default_branch" "$GITLAB_SERVER_HTTP_URL"  "success"
 	# TODO: verify this method set_build_status_of_github_commit_using_github_pat contains an assert
 	# and change the name accordingly
 }
@@ -310,8 +143,8 @@ assert_github_pat_can_be_used_to_set_commit_build_status() {
 # TODO(a-t-0): Include verification on url format (Must have http:// (I think)).
 #######################################
 # Run with: 
-# bash -c "source src/import.sh && set_default_personal_cred_if_empty GITLAB_SERVER_HTTP_URL gitlab_url"
-set_default_personal_cred_if_empty(){
+# bash -c "source src/import.sh && add_entry_to_personal_cred_file GITLAB_SERVER_HTTP_URL gitlab_url"
+add_entry_to_personal_cred_file(){
 	local identifier="$1"
 	local incoming_value="$2"
 	

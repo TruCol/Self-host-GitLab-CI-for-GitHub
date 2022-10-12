@@ -455,56 +455,35 @@ download_repository() {
 # Outputs:
 #  
 # TODO(a-t-0): write tests for method.
-# TODO(a-t-0): rename to: download_and_locally_overwrite_repository_using_ssh
 #######################################
+# bash -c 'source src/import.sh && download_and_overwrite_repository_using_ssh "a-t-0" "gitlab-ci-build-statuses"'
 download_and_overwrite_repository_using_ssh() {
 	local git_username="$1"
 	local reponame="$2"
 	local target_directory="$3"
+
 	local repo_url="git@github.com:"$git_username"/"$reponame".git"
 	
 	# Delete target directory if it exists.
-	printf "\n\n\n Remove target directory:$target_directory if exists \n\n\n"
 	remove_dir "$target_directory"
 	manual_assert_dir_not_exists "$target_directory"
+	# Delete repo directory if it exists.
+	remove_dir "$reponame"
+	manual_assert_dir_not_exists "$reponame"
 	
 
 	if [ "$target_directory" != "" ]; then
-		printf "\n\n\n git clone $repo_url \ninto directory:\n$target_directory \n\n\n"
-		git clone $repo_url $target_directory &&
-		set +e
+		git clone $repo_url $target_directory > /dev/null 2>&1 &&
+		set +e 
 		manual_assert_dir_exists "$target_directory/$repo_name"
 	else
-		printf "\n\n\n git clone $repo_url in PWD=$PWD \n\n\n"
-		git clone $repo_url &&
+		git clone $repo_url > /dev/null 2>&1 &&
 		set +e
 		manual_assert_dir_exists "$reponame"
 	fi
-	printf "\n\n\n DONE CLONING REPOSITORY \n\n\n"
 }
 
-# Run with: 
-# bash -c "source src/import.sh && get_latest_commit_public_github_repo a-t-0 sponsor_example"
-# Uses GitHub api to get the latest commit of a GitHub repository (branch).
-get_latest_commit_public_github_repo() {
-	local github_username="$1"
-	local github_repo_name="$2"
 
-	# Assert repo exists.
-	assert_public_github_repository_exists "$github_username" "$github_repo_name"
-
-	# Get commits
-	commits_json=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$github_username/$github_repo_name/commits?per_page=1&page=1)
-	#echo "commits_json=$commits_json"
-	#echo ""
-
-	# Get the first commit.
-	readarray -t branch_commits_arr <  <(echo "$commits_json" | jq ".[].sha")
-	#echo "branch_commits_arr=$branch_commits_arr"
-	
-	# remove quotations
-	echo "$branch_commits_arr" | tr -d '"'
-}
 
 get_remote_github_list_of_repo_branches(){
 	local github_user="a-t-0"

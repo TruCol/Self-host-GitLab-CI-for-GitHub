@@ -183,24 +183,23 @@ fi
 
 ### Verify prerequistes
 if [ "$github_username" != "" ]; then
-  echo "Setting: github_username=$github_username"
-  set_default_personal_cred_if_empty "GITHUB_USERNAME_GLOBAL" $github_username
+  echo "Storing your GitHub username:$github_username in a personal cred file."
+  add_entry_to_personal_cred_file "GITHUB_USERNAME_GLOBAL" $github_username
 fi
 # GitHub password is not stored.
 
 if [ "$gitlab_username" != "" ]; then
-	set_default_personal_cred_if_empty "GITLAB_SERVER_ACCOUNT_GLOBAL" $gitlab_username
+  echo "Storing your GitLab username:$gitlab_username in a personal cred file."
+	add_entry_to_personal_cred_file "GITLAB_SERVER_ACCOUNT_GLOBAL" $gitlab_username
 fi
 if [ "$gitlab_pwd" != "" ]; then
+  echo "Storing your GitLab password in a personal cred file."
   set_gitlab_pwd $gitlab_pwd
 fi
 if [ "$gitlab_email" != "" ]; then
-	set_default_personal_cred_if_empty "GITLAB_ROOT_EMAIL_GLOBAL" "$gitlab_email"
+  echo "Storing your GitLab email:$gitlab_email in a personal cred file."
+	add_entry_to_personal_cred_file "GITLAB_ROOT_EMAIL_GLOBAL" "$gitlab_email"
 fi
-if [ "$gitlab_email" != "" ]; then
-	set_default_personal_cred_if_empty "GITLAB_ROOT_EMAIL_GLOBAL" "$gitlab_email"
-fi
-
 # TODO: verify required data is in personal_creds.txt
 
 
@@ -208,8 +207,8 @@ fi
 source "$PERSONAL_CREDENTIALS_PATH"
 
 # Verify the personal credits are stored correctly.
-printf "\n\n 0. Verifying the $PERSONAL_CREDENTIALS_PATH contains the right"
-printf " data."
+#printf "\n\n 0. Verifying the $PERSONAL_CREDENTIALS_PATH contains the right"
+#printf " data."
 verify_prerequisite_personal_creds_txt_contain_required_data
 verify_prerequisite_personal_creds_txt_loaded
 
@@ -219,6 +218,7 @@ printf "\n\n 1. Now getting sudo permission to perform the GitLab installation."
 {
   sudo echo "hi"
 } &> /dev/null
+
 # Ensuring the Firefox installation is performed with ppa/apt instead of snap.
 # This is such that the browser can be controlled automatically.
 printf "\n\n 2. Now ensuring the firefox is installed with ppa and apt instead."
@@ -239,39 +239,15 @@ printf " account."
 # Get the GitHub personal access code.
 printf "\n\n 5. Setting and Getting the GitHub personal access token if it "
 printf "does not yet exist."
-# TODO: RE-enable, only disabled to speed up debugging.!
-ensure_github_pat_can_be_used_to_set_commit_build_status $GITHUB_USERNAME_GLOBAL $PUBLIC_GITHUB_TEST_REPO_GLOBAL $github_password
-
-
+ensure_github_pat_is_added_to_github $GITHUB_USERNAME_GLOBAL $github_password
 
 # Check if ssh deploy key already exists and can be used to push
 # to GitHub, before creating a new one.
-printf "\n\n 6. Checking to see if you already have ssh push access to the "
+printf "\n\n 6. Ensuring you have ssh push access to the "
 printf "$GITHUB_STATUS_WEBSITE_GLOBAL repository with your ssh-deploy key."
-has_ssh_push_access=$(check_if_machine_has_push_access_to_gitlab_build_status_repo_in_github $GITHUB_USERNAME_GLOBAL)
-if [ "$has_ssh_push_access" == "NOTFOUND" ]; then
-  # Get the GitHub ssh deploy key.
-  printf "\n\n\n Ssh access to $GITHUB_STATUS_WEBSITE_GLOBAL was not found. Now creating an ssh deploy key for you and adding it to GitHub."
-  ensure_github_ssh_deploy_key_can_be_used_to_push_github_build_status $GITHUB_USERNAME_GLOBAL $github_password
-elif [ "$has_ssh_push_access" == "FOUND" ]; then
-  # Verify the GitHub ssh deploy key works.
-  printf "\n\n\n Verifying you indeed have ssh push access to $GITHUB_STATUS_WEBSITE_GLOBAL using your GitHub ssh-deploy key."
-  verify_machine_has_push_access_to_gitlab_build_status_repo_in_github "$GITHUB_SSH_DEPLOY_KEY_NAME"
-else
-  echo "Error, the output of ssh_check_output did not end in FOUND, nor in NOTFOUND: $ssh_check_output"
-  exit 56
-fi
+ensure_github_ssh_deploy_key_has_access_to_build_status_repo $GITHUB_USERNAME_GLOBAL $github_password $GITHUB_STATUS_WEBSITE_GLOBAL
 
 
-# TODO: Verify the GitHub personal access token is in $PERSONAL_CREDENTIALS_PATH file."
-# verify_personal_creds_txt_contain_pacs
-
-# Install prerequisites
-printf "\n\n\n Checking if jquery is installed."
-if [ $(jq --version) != "jq-1.6" ]; then
-  printf "\n\n\n Installing jquery."
-	yes | sudo apt install jq
-fi
 
 
 # Start gitlab server installation and gitlab runner installation.

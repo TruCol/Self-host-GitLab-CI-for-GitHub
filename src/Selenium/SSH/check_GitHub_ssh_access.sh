@@ -134,7 +134,7 @@ has_pull_access_to_gitlab_build_status_repo_in_github() {
 # Run with: 
 # bash -c "source src/import.sh && has_push_access_to_gitlab_build_status_repo_in_github"
 has_push_access_to_gitlab_build_status_repo_in_github() {
-	
+
 	# 0. Deletes the GitHub build status repository locally.
 	remove_dir "$GITHUB_STATUS_WEBSITE_GLOBAL"
 	manual_assert_dir_not_exists "$GITHUB_STATUS_WEBSITE_GLOBAL"

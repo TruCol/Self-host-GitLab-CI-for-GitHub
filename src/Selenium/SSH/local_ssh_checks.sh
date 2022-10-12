@@ -266,3 +266,66 @@ assert_ssh_agent_is_running_in_this_shell() {
 		exit 5
 	fi
 }
+
+
+#######################################
+# Gets the latest commit sha of the repository to test the GitHub pac token.
+# Local variables:
+# 
+# Globals:
+#  None.
+# Arguments:
+#   
+# Returns:
+#  0 if 
+#  7 if 
+# Outputs:
+#  None.
+# TODO(a-t-0): change root with Global variable.
+#######################################
+# Run with: 
+# bash -c 'source src/import.sh && get_latest_commit_public_github_repo "a-t-0" sponsor_example'
+get_latest_commit_public_github_repo() {
+	local github_username="$1"
+	local github_repo_name="$2"
+
+	# TODO(a-t-0): If the GitHub repository for testing purposes does not yet
+	# exist in GitHub, create it automatically for the user.
+
+	# Verify GitHub repository for testing purposes, exists.
+	assert_public_github_repository_exists "$github_username" "$github_repo_name"
+
+	# Get the latest commit of that repository GitHub repository.
+	local latest_commit_on_default_branch=$(get_latest_commit_sha_of_default_branch $github_username $github_repo_name)
+
+	# Verify the GitHub commit sha has a correct lenght/formatting.
+	if [ ${#latest_commit_on_default_branch} -eq 40 ]; then 
+		echo "$latest_commit_on_default_branch"
+	else 
+		echo "Error, the commit sha:$latest_commit_on_default_branch is not of correct length"  > /dev/tty
+		exit 4
+	fi
+}
+
+# Uses GitHub api to get the latest commit of a GitHub repository (branch).
+# Run with: 
+# bash -c "source src/import.sh && get_latest_commit_public_github_repo a-t-0 sponsor_example"
+get_latest_commit_sha_of_default_branch() {
+	local github_username="$1"
+	local github_repo_name="$2"
+
+	# Assert repo exists.
+	assert_public_github_repository_exists "$github_username" "$github_repo_name"
+
+	# Get commits
+	local commits_json=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$github_username/$github_repo_name/commits?per_page=1&page=1)
+	#echo "commits_json=$commits_json"
+	#echo ""
+
+	# Get the first commit.
+	readarray -t branch_commits_arr <  <(echo "$commits_json" | jq ".[].sha")
+	#echo "branch_commits_arr=$branch_commits_arr"
+	
+	# remove quotations
+	echo "$branch_commits_arr" | tr -d '"'
+}

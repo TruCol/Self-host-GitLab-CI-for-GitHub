@@ -81,15 +81,14 @@ add_ssh_deploy_key_to_github() {
 #  
 # TODO(a-t-0): Write tests for this method.
 #######################################
-# bash -c 'source src/import.sh && add_ssh_deploy_key_to_github example@example.com'
-activate_local_ssh_github_deploy_key() {
-    local email="$1"
+# bash -c 'source src/import.sh && create_and_activate_local_github_ssh_deploy_key'
+create_and_activate_local_github_ssh_deploy_key() {
     
     local public_key_filename="$GITHUB_SSH_DEPLOY_KEY_NAME.pub"
 	local private_key_filename="$GITHUB_SSH_DEPLOY_KEY_NAME"
 
 	# Generate ssh-key and add it to ssh-agent
-	generate_ssh_key_if_not_exists "$email"
+	generate_ssh_key_if_not_exists "$GITHUB_SSH_EMAIL"
 	
     # Assert the ssh-keys exist.
 	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"

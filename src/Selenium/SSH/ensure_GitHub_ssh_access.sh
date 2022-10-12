@@ -18,16 +18,17 @@
 #  
 # TODO(a-t-0): Write tests for this method.
 #######################################
-# bash -c 'source src/import.sh && ensure_github_ssh_deploy_key_has_access_to_build_status_repo "a-t-0" "gitlab-ci-build-statuses"'
+# bash -c 'source src/import.sh && ensure_github_ssh_deploy_key_has_access_to_build_status_repo "a-t-0" "somepwd" "gitlab-ci-build-statuses"'
 ensure_github_ssh_deploy_key_has_access_to_build_status_repo(){
 	local github_username="$1"
-	local github_repository=$2
+	local github_pwd="$2"
+	local github_repository="$3"
 
-	local ensured_quick_ssh_access_to_github="$(ensure_check_quick_ssh_access_to_repo "$github_username" "$github_repository")"
+	local ensured_quick_ssh_access_to_github="$(ensure_quick_ssh_access_to_repo "$github_username" "$github_repository")"
 	if [[ "$ensured_quick_ssh_access_to_github" == "ENSURED_QUICK_SSH_ACCESS" ]]; then
-		local ensured_pull_ssh_access_to_github="$(ensure_has_pull_access_to_gitlab_build_status_repo_in_github "$github_username")"
+		local ensured_pull_ssh_access_to_github="$(ensure_has_pull_access_to_gitlab_build_status_repo_in_github "$github_username" "$github_pwd")"
 		if [[ "$ensured_pull_ssh_access_to_github" == "ENSURED_SSH_PULL_ACCESS" ]]; then
-			local ensured_push_ssh_access_to_github="$(ensure_has_push_access_to_gitlab_build_status_repo_in_github)"
+			local ensured_push_ssh_access_to_github="$(ensure_has_push_access_to_gitlab_build_status_repo_in_github "$github_username" "$github_pwd")"
 			if [[ "$ensured_push_ssh_access_to_github" == "ENSURED_SSH_PUSH_ACCESS" ]]; then
 				echo "Got SSH push and pull access to GitHub build status repo."
 			else
@@ -69,8 +70,8 @@ ensure_github_ssh_deploy_key_has_access_to_build_status_repo(){
 #  
 # TODO(a-t-0): Write tests for this method.
 #######################################
-# bash -c 'source src/import.sh && ensure_check_quick_ssh_access_to_repo "a-t-0" "gitlab-ci-build-statuses"'
-ensure_check_quick_ssh_access_to_repo(){
+# bash -c 'source src/import.sh && ensure_quick_ssh_access_to_repo "a-t-0" "gitlab-ci-build-statuses"'
+ensure_quick_ssh_access_to_repo(){
 	local github_username=$1
 	local github_repository=$2
 	local is_retry="$3"
@@ -84,11 +85,13 @@ ensure_check_quick_ssh_access_to_repo(){
 			echo "Error, was not able to achieve quick_ssh_access."
 			exit 4
 		else
-			# TODO: Ensure quick_ssh_access is obtained.
-
+			# Ensure quick_ssh_access is obtained.
+			# TODO: verify that function actually yields quick access on clean
+			# Ubuntu 22.04 image.
+			create_and_activate_local_github_ssh_deploy_key
 			
 			# Perform recursive call to run function one more time.
-			echo $(ensure_check_quick_ssh_access_to_repo "$github_username" "$github_repository" "YES")
+			echo $(ensure_quick_ssh_access_to_repo "$github_username" "$github_repository" "YES")
 		fi
 	else
 		echo "ENSURED_QUICK_SSH_ACCESS"
@@ -120,10 +123,11 @@ ensure_check_quick_ssh_access_to_repo(){
 #  
 # TODO(a-t-0): Write tests for this method.
 #######################################
-# bash -c 'source src/import.sh && ensure_has_pull_access_to_gitlab_build_status_repo_in_github "a-t-0"'
+# bash -c 'source src/import.sh && ensure_has_pull_access_to_gitlab_build_status_repo_in_github "a-t-0" "somepwd"'
 ensure_has_pull_access_to_gitlab_build_status_repo_in_github(){
 	local github_username="$1"
-	local is_retry="$2"
+	local github_pwd="$2"
+	local is_retry="$3"
 	
 	# Check if the code has SSH access to the GitHub build status repository.
 	has_pull_ssh_acces_to_github="$(has_pull_access_to_gitlab_build_status_repo_in_github "$github_username")"
@@ -134,11 +138,11 @@ ensure_has_pull_access_to_gitlab_build_status_repo_in_github(){
 			echo "Error, was not able to achieve pull ssh access."
 			exit 4
 		else
-			# TODO: Ensure pull ssh access is obtained.
-
+			# Ensure pull ssh access is obtained.
+			add_ssh_deploy_key_to_github "$github_username" "$github_pwd"
 			
 			# Perform recursive call to run function one more time.
-			echo $(ensure_has_pull_access_to_gitlab_build_status_repo_in_github "$github_username" "YES")
+			echo $(ensure_has_pull_access_to_gitlab_build_status_repo_in_github "$github_username" "$github_pwd" "YES")
 		fi
 	else
 		echo "ENSURED_SSH_PULL_ACCESS"
@@ -170,9 +174,11 @@ ensure_has_pull_access_to_gitlab_build_status_repo_in_github(){
 #  
 # TODO(a-t-0): Write tests for this method.
 #######################################
-# bash -c "source src/import.sh && ensure_has_push_access_to_gitlab_build_status_repo_in_github"
+# bash -c 'source src/import.sh && ensure_has_push_access_to_gitlab_build_status_repo_in_github "a-t-0" "somepwd"'
 ensure_has_push_access_to_gitlab_build_status_repo_in_github(){
-	local is_retry="$1"
+	local github_username="$1"
+	local github_pwd="$2"
+	local is_retry="$3"
 	
 	# Check if the code has SSH access to the GitHub build status repository.
 	has_push_ssh_acces_to_github="$(has_push_access_to_gitlab_build_status_repo_in_github)"
@@ -183,11 +189,11 @@ ensure_has_push_access_to_gitlab_build_status_repo_in_github(){
 			echo "Error, was not able to achieve push ssh access."
 			exit 4
 		else
-			# TODO: Ensure push ssh access is obtained.
-
+			# Ensure push ssh access is obtained.
+			add_ssh_deploy_key_to_github "$github_username" "$github_pwd"
 			
 			# Perform recursive call to run function one more time.
-			echo $(ensure_has_push_access_to_gitlab_build_status_repo_in_github "YES")
+			echo $(ensure_has_push_access_to_gitlab_build_status_repo_in_github "$github_username" "$github_pwd" "YES")
 		fi
 	else
 		echo "ENSURED_SSH_PUSH_ACCESS"

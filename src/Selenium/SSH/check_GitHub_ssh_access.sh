@@ -40,6 +40,7 @@ check_quick_ssh_access_to_repo() {
 		if [ "$is_retry" == "YES" ]; then
 			echo "NOTFOUND"
 		else
+			create_and_activate_local_github_ssh_deploy_key
 			# Perform recursive call to run function one more time.
 			echo $(check_quick_ssh_access_to_repo "$github_username" "$github_repository" "YES")
 		fi

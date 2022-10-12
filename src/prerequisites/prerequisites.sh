@@ -211,7 +211,7 @@ set_personal_github_pat_and_verify() {
 	# TODO: first verify if the GitHub pat exists and can be used, before
 	# creating a new one.
 	# Get github pat and ensure it is in PERSONAL_CREDENTIALS_PATH.
-	get_github_personal_access_token $github_username $github_pwd
+	ensure_github_pat_is_added_to_github $github_username $github_pwd
 	
 	# Reload personal credentials to load new GitHub token.
 	source "$PERSONAL_CREDENTIALS_PATH"
@@ -259,7 +259,7 @@ assert_github_pat_can_be_used_to_set_commit_build_status() {
 	local github_username="$1"
 	local github_reponame="$2"
 	# Get the GitHub personal access token to set the commit build status.
-	#get_github_personal_access_token $GITHUB_USERNAME_GLOBAL	
+	#ensure_github_pat_is_added_to_github $GITHUB_USERNAME_GLOBAL	
 	# Verify the GitHub personal access token is able to set the commit build 
 	# status.
 	# Reload GitHub personal access token from personal credentials.

@@ -62,8 +62,8 @@ source src/prerequisites/prerequisites.sh
 source src/prerequisites/install_support_programs.sh
 
 # To get GitLab personal access token
-source src/Selenium/create_gitlab_personal_access_token.sh # TODO: verify its naming.
-source src/Selenium/create_github_personal_access_token.sh
+source src/Selenium/PAC/create_gitlab_personal_access_token.sh # TODO: verify its naming.
+source src/Selenium/PAC/ensure_github_personal_access_token_is_created.sh
 source src/Selenium/get_gitlab_server_runner_token.sh
 source src/Selenium/SSH/check_GitHub_ssh_access.sh
 source src/Selenium/SSH/ensure_GitHub_ssh_access.sh

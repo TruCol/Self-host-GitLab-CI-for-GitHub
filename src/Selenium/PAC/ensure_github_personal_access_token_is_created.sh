@@ -26,52 +26,88 @@
 # TODO(a-t-0): delete, no token is created, using ssh deploy key instead.
 #######################################
 # run with:
-
-# source src/import.sh && get_github_personal_access_token a-t-0
-# bash -c "source src/import.sh && get_github_personal_access_token a-t-0"
-get_github_personal_access_token() {
+# bash -c 'source src/import.sh && ensure_github_pat_is_added_to_github "a-t-0"  "somepwd"'
+ensure_github_pat_is_added_to_github() {
 	local github_username="$1"
 	local github_pwd="$2"
+	local can_use_github_pat=$(has_working_github_pat "$github_username")
+	if [ "$can_use_github_pat" == "NOTFOUND" ]; then
 
-	# TODO: support not passing github pwd such that the Python code asks it
-	# during runtime.
-	if [ "$github_pwd" == "" ]; then
-		echo "Error, GitHub password was not specified. Please include it in this function."
-		exit 4
+		# TODO: support not passing github pwd such that the Python code asks it
+		# during runtime.
+		if [ "$github_pwd" == "" ]; then
+			echo "Error, GitHub password was not specified. Please include it in this function."
+			exit 4
+		fi
+
+		# Get the repository that can automatically get the GitHub deploy token.
+		download_repository "$github_username" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
+		manual_assert_dir_exists "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
+
+		# TODO: verify path before running command.
+
+		printf "\n\n Now using a browser controller repository to create a GitHub personal access token and store it localy.\n\n."
+		# shellcheck disable=SC2034
+		if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
+			eval "$(conda shell.bash hook)"
+			export repo_name=$REPONAME_GET_RUNNER_TOKEN_PYTHON
+			export github_username=$github_username
+			export github_pwd=$github_pwd
+			# TODO: include GITHUB_USERNAME_GLOBAL
+			#cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat
+			cd $repo_name && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat -hu $github_username -hp $github_pwd
+		else
+			eval "$(conda shell.bash hook)"
+			export repo_name=$REPONAME_GET_RUNNER_TOKEN_PYTHON
+			export github_username=$github_username
+			export github_pwd=$github_pwd
+			# TODO: GITHUB_USERNAME_GLOBAL
+			#cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat
+			cd $repo_name && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat -hu $github_username -hp $github_pwd
+		fi
+		cd ..
+
+		# Overwrite GitHub password export to filler.
+		export github_pwd="filler"
+		# TODO: Verify path BEFORE and after running command.
+		# TODO: Verify the token is in the PERSONAL_CREDENTIALS_PATH file.
+	elif [ "$can_use_github_pat" != "FOUND" ]; then
+		echo "Error, the has_working_github_pat output was neither FOUND nor"
+		echo "NOTFOUND:$can_use_github_pat"
+		exit 5
 	fi
-
-	# Get the repository that can automatically get the GitHub deploy token.
-	download_repository "$github_username" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
-	manual_assert_dir_exists "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
-
-	# TODO: verify path before running command.
-
-	printf "\n\n Now using a browser controller repository to create a GitHub personal access token and store it localy.\n\n."
-	# shellcheck disable=SC2034
-	if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
-		eval "$(conda shell.bash hook)"
-		export repo_name=$REPONAME_GET_RUNNER_TOKEN_PYTHON
-		export github_username=$github_username
-		export github_pwd=$github_pwd
-		# TODO: include GITHUB_USERNAME_GLOBAL
-		#cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat
-		cd $repo_name && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat -hu $github_username -hp $github_pwd
-	else
-		eval "$(conda shell.bash hook)"
-		export repo_name=$REPONAME_GET_RUNNER_TOKEN_PYTHON
-		export github_username=$github_username
-		export github_pwd=$github_pwd
-		# TODO: GITHUB_USERNAME_GLOBAL
-		#cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat
-		cd $repo_name && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat -hu $github_username -hp $github_pwd
-	fi
-	cd ..
-
-	# Overwrite GitHub password export to filler.
-	export github_pwd="filler"
-	# TODO: Verify path BEFORE and after running command.
-	# TODO: Verify the token is in the PERSONAL_CREDENTIALS_PATH file.
 }
+
+
+#######################################
+# Returns FOUND if the GitHub personal access token is already set. NOTFOUND
+# otherwise.
+#
+# Local variables:
+#  github_username
+# Globals:
+#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
+#  COMMIT_WHOSE_BUILD_STATUS_IS_SET_FOR_TESTING_PURPOSES
+#  GITLAB_SERVER_HTTP_URL
+# Arguments:
+#  github_username
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#
+#######################################
+# Run with:
+# bash -c 'source src/import.sh && has_working_github_pat a-t-0'
+has_working_github_pat() {
+	local github_username="$1"
+	pat_usage_output=$(assert_set_build_status_of_github_commit_using_github_pat "$github_username" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$COMMIT_WHOSE_BUILD_STATUS_IS_SET_FOR_TESTING_PURPOSES" "$GITLAB_SERVER_HTTP_URL" "pending")
+	if [ "$pat_usage_output" == "USED GITHUB PAT" ]; then	
+		echo "FOUND"
+	else
+		echo "NOTFOUND"
+	fi
+}
+
 
 #######################################
 # Verifies the repository is able to set the build status of GitHub commits in
@@ -94,11 +130,11 @@ get_github_personal_access_token() {
 # Run with:
 # bash -c 'source src/import.sh && assert_set_build_status_of_github_commit_using_github_pat a-t-0 sponsor_example 02c5fce3500d7b9e2d79cb5b7d886020a403cf58 http://127.0.0.1  pending'
 assert_set_build_status_of_github_commit_using_github_pat() {
-	github_username="$1"
-	github_repo_name="$2"
-	github_commit_sha="$3"
-	redirect_to_ci_url="$4"
-	commit_build_status="$5"
+	local github_username="$1"
+	local github_repo_name="$2"
+	local github_commit_sha="$3"
+	local redirect_to_ci_url="$4"
+	local commit_build_status="$5"
 
 	# Check if arguments are valid.
 	if [[ "$github_commit_sha" == "" ]]; then
@@ -120,18 +156,17 @@ assert_set_build_status_of_github_commit_using_github_pat() {
 
 	#echo "redirect_to_ci_url=$redirect_to_ci_url"
 	#echo "commit_build_status=$commit_build_status"
-
+	
 	# Create message in JSON format
 	JSON_FMT='{"state":"%s","description":"%s","target_url":"%s"}\n'
 	# shellcheck disable=SC2059
 	json_string=$(printf "$JSON_FMT" "$commit_build_status" "$commit_build_status" "$redirect_to_ci_url")
-	echo "json_string=$json_string"
-
+	
 	# Set the build status
+	# TODO: silence output.
 	setting_output=$(curl -H "Authorization: token $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" --request POST --data "$json_string" https://api.github.com/repos/"$github_username"/"$github_repo_name"/statuses/"$github_commit_sha")
-
+	
 	# Check if output is valid
-	echo "setting_output=$setting_output"
 	if [ "$(lines_contain_string '"message": "Bad credentials"' "${setting_output}")" == "FOUND" ]; then
 		# Remove the current GitHub personal access token from the $PERSONAL_CREDENTIALS_PATH file.
 		remove_line_from_file_if_contains_substring "$PERSONAL_CREDENTIALS_PATH" "GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL"
@@ -152,7 +187,7 @@ assert_set_build_status_of_github_commit_using_github_pat() {
 	# Verify the build status is set correctly
 	getting_output_json=$(GET https://api.github.com/repos/"$github_username"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
 	urls_in_json="$(echo "${getting_output_json[0]}" | jq ".[].url")"
-	printf "\n\n\n getting_output_json is:$getting_output_json \n\n\n"
+	#printf "\n\n\n getting_output_json is:$getting_output_json \n\n\n"
 
 	# TODO also make it work for: expected_url=
 	#json_string={"state":"failure","description":"failure","target_url":"http://127.0.0.1"}
@@ -161,13 +196,15 @@ assert_set_build_status_of_github_commit_using_github_pat() {
 
 	found_urls="$(string_in_lines "$expected_url" "${urls_in_json}")"
 	found_state="$(string_in_lines "$expected_state" "${getting_output_json}")"
-
 	if [ "$found_urls" == "NOTFOUND" ]; then
 		# shellcheck disable=SC2059
-		printf "Error, the status of the repo did not contain:$expected_url \n because the getting output was: $getting_output_json"
+		echo "Error, the status of the repo did not contain:$expected_url \n because the getting output was: $getting_output_json"
 		exit 119
 	elif [ "$found_state" == "NOTFOUND" ]; then
 		echo "Error, the status of the repo did not contain:$expected_state"
 		exit 120
+	fi
+	if [ "$found_urls" == "FOUND" ] && [ "$found_state" == "FOUND" ]; then
+		echo "USED GITHUB PAT"
 	fi
 }

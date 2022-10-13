@@ -127,6 +127,7 @@ register_gitlab_runner() {
 	#--registration-token "$runner_token" \
 	#--executor $executor
 
+	# Works something but not all the way.
 	sudo gitlab-runner register \
 	--non-interactive \
 	--url "$gitlab_url" \
@@ -135,7 +136,8 @@ register_gitlab_runner() {
 	--docker-image "docker:20.10.16" \
 	--executor $executor \
 	--docker-privileged \
-	--docker-volumes "/certs/client"
+	--docker-volumes "/certs/client" \
+	--docker-network-mode host
 }
 
 

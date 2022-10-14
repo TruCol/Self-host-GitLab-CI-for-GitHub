@@ -237,6 +237,9 @@ printf " account."
 assert_required_repositories_exist "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
 assert_required_repositories_exist "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 
+# Verify the GitHub user has ssh-access to GitHub.
+assert_user_has_ssh_access_to_github "$GITHUB_USERNAME_GLOBAL"
+
 # Get the GitHub personal access code.
 printf "\n\n 5. Setting and Getting the GitHub personal access token if it "
 printf "does not yet exist."

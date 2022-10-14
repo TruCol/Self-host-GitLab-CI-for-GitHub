@@ -165,23 +165,17 @@ copy_evaluated_commit_to_github_status_repo() {
 	# 9. Verify the Build status repository is cloned.
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 
-	printf "\n3.$i.8.1 github_branch_name=$github_branch_name"
 	# 10. Copy the GitLab CI Build status icon to the build status repository.
 	# Create a folder of the repository on which a CI has been ran, inside the GitHub build status website repository, if it does not exist yet
 	# Also add a folder for the branch(es) of that GitLab CI repository, in that respective folder.
-	printf "\n3.$i.8.2 Specifying build status dir "
-	build_status_icon_output_dir="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$organisation/$github_repo_name/$github_branch_name"
-	printf "\n3.$i.8.3 Made:build_status_icon_output_dir=$build_status_icon_output_dir "
+	local build_status_icon_output_dir="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$organisation/$github_repo_name/$github_branch_name"
 	mkdir -p "$build_status_icon_output_dir"
 	
 	
 	# TODO: 11. Include the build status and link to the GitHub commit in the repository in the SVG file.
 	# Create build status icon
-	printf "\n3.$i.8.4 creating build status icon for: github_commit_sha=$github_commit_sha "
 	touch "$build_status_icon_output_dir""/$github_commit_sha.txt"
-	
 	# Assert svg file is created correctly
-	printf "\n3.$i.8.5 Assert build file exists "
 	manual_assert_equal "$(file_exists "$build_status_icon_output_dir""/$github_commit_sha.txt")" "FOUND"
 	
 	if [ "$github_commit_sha" == "" ]; then
@@ -195,17 +189,17 @@ copy_evaluated_commit_to_github_status_repo() {
 	# Append commit to list of evaluated commits.
 	# TODO: verify works: if not in list already
 	matches_on_commit="$(grep $github_commit_sha "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME")"
-	printf "\n3.$i.8.6 Checking if the file at:$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME contains the github_commit_sha=$github_commit_sha \n and matches_on_commit=$matches_on_commit"
+	printf "\n4.$i.8.6 Checking if the file at:$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME contains the github_commit_sha=$github_commit_sha \n and matches_on_commit=$matches_on_commit"
 	contains_sha_already=$(string_in_lines "$github_commit_sha" "$matches_on_commit")
-	printf "\n3.$i.8.7 contains_sha_already=$contains_sha_already"
+	printf "\n4.$i.8.7 contains_sha_already=$contains_sha_already"
 	if [ "$contains_sha_already" == "NOTFOUND" ]; then
-		printf "\n3.$i.8.8 appending commit sha to the list "
+		printf "\n4.$i.8.8 appending commit sha to the list "
 		echo "$github_commit_sha" >> "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME"
 		#read -p "ADDED! Verify it is there, and verify the GitHub commit status of the repo."
 	fi
 
 	# manual_assert evaluated GitHub commit list file exists.
-	printf "\n3.$i.8.9 Assert the GitHub build status file list exists at: "$(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME")" "FOUND""
+	printf "\n4.$i.8.9 Assert the GitHub build status file list exists at: "$(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME")" "FOUND""
 	manual_assert_equal "$(file_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME")" "FOUND"
 	
 	# TODO: assert evaluated GitHub commit lists contains the GitHub commit

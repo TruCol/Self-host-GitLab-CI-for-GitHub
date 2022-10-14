@@ -165,6 +165,7 @@ create_dir() {
 # Structure:dir_edit
 remove_dir() {
 	abs_dir=$1
+	# TODO: silence.
 	if [ "$(dir_exists "$abs_dir")" == "FOUND" ]; then
 		rm -rf "$abs_dir"
 	fi

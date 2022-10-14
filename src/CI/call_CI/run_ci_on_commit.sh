@@ -38,7 +38,7 @@ copy_github_commits_with_yaml_to_gitlab_repo() {
 
 	
 	# Check if branch is found in local GitHub repo.
-	printf "\n Checkout a local GitHub branch."
+	printf "\n Checkout a local GitHub branch:\n"
 	local checkout_output="$(checkout_commit_in_github_repo "$github_repo_name" "$github_commit_sha" "GitHub")"
 	
 	

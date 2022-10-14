@@ -31,50 +31,69 @@ set_gitlab_pwd() {
 }
 
 #######################################
-# Assertes that the following GitHub resositories of this user exist:
-# 0. A GitHub respository that stores the GitLab CI build statusses.
-# 1. A GitHub respository that can be used to test the GitLab CI.
+# Assertes that a GitHub user has a GitHub repository.
 # Throws an error if either of these two repositories is missing.
 # Locals:
 #  github_username
+#  repo_name
 # Globals:
-#  GITHUB_STATUS_WEBSITE_GLOBAL
-#  PUBLIC_GITHUB_TEST_REPO_GLOBAL
+#  None
+# Arguments:
+#  github_username
+#  repo_name
+# Returns:
+#  0 If command was evaluated successfully.
+#  11 if the GitHub repository is missing.
+# Outputs:
+#  Nothing if the method is successfull.
+# TODO: 
+#  include catch for:The requested URL returned error: 403 rate limit exceeded.
+#######################################
+# Run with: 
+# bash -c 'source src/import.sh && assert_required_repositories_exist a-t-0'
+
+assert_required_repositories_exist(){
+	local github_username="$1"
+	local repo_name="$2"
+	
+	if [ $(check_public_github_repository_exists "$github_username" "$repo_name") != "FOUND" ]; then
+		echo "Before installing GitLab, please ensure the repository:$repo_name exists in your GitHub account:$github_username"
+		echo "To ensure the content is valid, fork it from: https://www.github.com/a-t-0/$repo_name"
+		exit 11
+	fi
+}
+
+#######################################
+# Assertes the user has SSH access to GitHub.
+# Throws an error if no SSH access to GitHub has been found.
+# Locals:
+#  github_username
+# Globals:
+#  None
 # Arguments:
 #  github_username
 # Returns:
 #  0 If command was evaluated successfully.
-#  11 if the GitHub repository for GitLab CI testing purposes, is missing.
-#  12 if the GitHub repository containing the GitLab CI build statusses, is
-#  missing.
+#  11 if the GitHub user does not have SSH access to GitHub.
 # Outputs:
-#  FOUND if Both repositories are found. 
+#  Nothing if the method is successfull.
 #######################################
 # Run with: 
-# bash -c "source src/import.sh && assert_required_repositories_exist a-t-0"
-# TODO: silence the echo "FOUND" if assert passes.
-# TODO: include catch for: The requested URL returned error: 403 rate limit exceeded
-assert_required_repositories_exist(){
+# bash -c 'source src/import.sh && assert_user_has_ssh_access_to_github a-t-0'
+assert_user_has_ssh_access_to_github(){
 	local github_username="$1"
-	#$GITHUB_STATUS_WEBSITE_GLOBAL
-	#$PUBLIC_GITHUB_TEST_REPO_GLOBAL
-	if [ $(check_public_github_repository_exists "$github_username" $GITHUB_STATUS_WEBSITE_GLOBAL) == "FOUND" ]; then
-		if [ $(check_public_github_repository_exists "$github_username" $PUBLIC_GITHUB_TEST_REPO_GLOBAL) == "FOUND" ]; then
-			echo "FOUND"
-		else
-			echo "Before installing GitLab, please ensure the repository:$PUBLIC_GITHUB_TEST_REPO_GLOBAL exists in your GitHub account:$github_username"
-			exit 11
-		fi
-	else
-		echo "Before installing GitLab, please ensure the repository:$GITHUB_STATUS_WEBSITE_GLOBAL exists in your GitHub account:$github_username"
-		exit 12
+
+	local ssh_probe_response=$(ssh -T git@github.com 2>&1)
+	local expected_output="Hi $github_username! You've successfully authenticated, but GitHub does not provide shell access."
+	
+	if [ "$ssh_probe_response" != "$expected_output" ]; then
+		echo "Before installing GitLab, please ensure GitHub user:$github_username"
+		echo "has ssh-access to GitHub. See: https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent"
+		echo ""
+		echo "Error, $ssh_probe_response != $expected_output"
+		exit 11
 	fi
 }
-
-
-
-
-
 
 
 #######################################

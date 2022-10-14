@@ -44,7 +44,7 @@ ensure_github_pat_is_added_to_github() {
 		fi
 
 		# Get the repository that can automatically get the GitHub deploy token.
-		download_repository "$github_username" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
+		download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
 		manual_assert_dir_exists "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
 
 		# TODO: verify path before running command.

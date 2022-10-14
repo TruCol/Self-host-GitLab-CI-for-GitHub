@@ -234,7 +234,11 @@ printf "\n\n 4. Verifying the $GITHUB_STATUS_WEBSITE_GLOBAL and "
 printf "$PUBLIC_GITHUB_TEST_REPO_GLOBAL repositories exist in your GitHub"
 printf " account."
 # TODO: include catch for: The requested URL returned error: 403 rate limit exceeded
-#assert_required_repositories_exist $GITHUB_USERNAME_GLOBAL
+assert_required_repositories_exist "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
+assert_required_repositories_exist "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
+
+# Verify the GitHub user has ssh-access to GitHub.
+assert_user_has_ssh_access_to_github "$GITHUB_USERNAME_GLOBAL"
 
 # Get the GitHub personal access code.
 printf "\n\n 5. Setting and Getting the GitHub personal access token if it "

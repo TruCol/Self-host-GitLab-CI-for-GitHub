@@ -221,7 +221,7 @@ printf "\n\n 1. Now getting sudo permission to perform the GitLab installation."
 
 # Ensuring the Firefox installation is performed with ppa/apt instead of snap.
 # This is such that the browser can be controlled automatically.
-printf "\n\n 2. Now ensuring the firefox is installed with ppa and apt instead."
+printf "\n3. Now ensuring the firefox is installed with ppa and apt instead."
 printf "of snap."
 swap_snap_firefox_with_ppa_apt_firefox_installation
 
@@ -258,7 +258,7 @@ ensure_github_ssh_deploy_key_has_access_to_build_status_repo $GITHUB_USERNAME_GL
 if [ "$server_flag" == "true" ]; then
   # TODO: verify required data is in personal_creds.txt 
 	# TODO: uncomment
-  printf "\n\n\n Installing the GitLab server!"
+  printf "\n Installing the GitLab server!"
   install_and_run_gitlab_server "$GITLAB_SERVER_PASSWORD_GLOBAL"
 	echo "Installed gitlab server, should be up in a few minutes. You can visit it at:"
   echo "$GITLAB_SERVER_HTTP_URL"
@@ -266,17 +266,17 @@ fi
 
 # TODO: Remove, this is done during the installation of the GitLab server.
 # Get the GitLab personal access token
-#printf "\n\n\n Verifying the GitLab personal access token works."
+#printf "\n Verifying the GitLab personal access token works."
 #ensure_new_gitlab_personal_access_token_works
 
 # Verify all required credentials are in personal_creds.txt
-printf "\n\n\n Verifying the GitHub and GitLab personal access tokens are in the $PERSONAL_CREDENTIALS_PATH file."
+printf "\n Verifying the GitHub and GitLab personal access tokens are in the $PERSONAL_CREDENTIALS_PATH file."
 verify_personal_creds_txt_contain_pacs
 
 
 # Set GitLab password without displaying it in terminal.
 ####if [ "$gitlab_personal_access_token_flag" == "true" ]; then
-####  printf "\n\n\n Creating and storing GitLab personal access token."
+####  printf "\n Creating and storing GitLab personal access token."
 ####  create_gitlab_personal_access_token $gitlab_personal_access_token
 #### 
 ####  # Check if token, as loaded from  not "" otherwise throw error
@@ -291,7 +291,7 @@ verify_personal_creds_txt_contain_pacs
 if [ "$runner_flag" == "true" ]; then
 	# Test if the gitlab server is running
 	if [ "$(gitlab_server_is_running | tail -1)" == "RUNNING" ]; then
-    printf "\n\n\n Installing the GitLab runner!"
+    printf "\n Installing the GitLab runner!"
 		install_and_run_gitlab_runner
 	else
 		echo "ERROR, tried to start GitLab runner directly without the GitLab server running."

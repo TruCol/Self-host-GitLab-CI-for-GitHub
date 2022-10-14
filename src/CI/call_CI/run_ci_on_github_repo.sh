@@ -71,23 +71,40 @@ run_ci_on_github_repo() {
 
 	# TODO: change this method to download with https?
 	# Download the GitHub repo on which to run the GitLab CI:
-	printf "\n\n\n Download the GitHub repository on which to run GitLab CI."
+	printf "\n\n0. Download the GitHub repository on which to run GitLab CI."
 	download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
 
 	# Remove the GitLab repository. # TODO: move this to each branch
 	# Similarly for each commit
+	printf "\n1. Download the GitHub repository on which to run GitLab CI."
 	remove_the_gitlab_repository_on_which_ci_is_ran
 
 	# TODO: write test to verify whether the build status can be pushed to a branch. (access wise).
 	# TODO: Store log file output if a repo (and/or branch) have been skipped.
 	# TODO: In that log file, inlcude: time, which user, which repo, which branch, why.
-	printf "\n\n\n Exporting GitLab CI result back to a GitHub repository."
+	printf "\n3. Exporting GitLab CI result back to a GitHub repository."
 	copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "$organisation"
-	printf "DONE WITH run CI"
+	printf "\n\n3. Done with CI."
 
 }
 
 
+#######################################
+# This downloads a GitHub repository from a GitHub user over SSH if it is
+# possible, otherwise over https. For https it assumes the repo is public.
+# Local variables:
+#  github_username
+#  github_repo_name
+# Globals:
+#  MIRROR_LOCATION
+# Arguments:
+#  github_username
+#  github_repo_name
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  Nothing if the GitHub repo was downloaded correctly.
+#######################################
 # run with:
 # source src/import.sh && download_github_repo_on_which_to_run_ci "a-t-0" "sponsor_example"
 download_github_repo_on_which_to_run_ci() {
@@ -95,27 +112,17 @@ download_github_repo_on_which_to_run_ci() {
 	local github_repo_name="$2"
 	
 	# Create mirror directories
-	printf "\n\n\n Creating Mirror Directories."
 	create_mirror_directories
-	# TODO: replace asserts with functions
 	manual_assert_not_equal "$MIRROR_LOCATION" ""
 	manual_assert_dir_exists "$MIRROR_LOCATION"
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub"
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitLab"
 	
-	
-
 	# Verify ssh-access
-	# TODO: resolve error when ran from test.
-	printf "\n\n\n Verify user has ssh-access to GitHub repository."
-	has_access="$(check_quick_ssh_access_to_repo "$github_username" "$github_repo_name")"
+	has_quick_ssh_access="$(check_quick_ssh_access_to_repo "$github_username" "$github_repo_name")"
 
 	# Clone GitHub repo at start of test.
-	printf "\n\n\n Clone the GitHub repository.\n\n\n"
-	clone_github_repository "$github_username" "$github_repo_name" "$has_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
-	# TODO: determine why this downloads to: src/mirrors/GitHub/sponsor_example/sponsor_example (one too deep.)
-	#download_and_overwrite_repository_using_ssh "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/"
-	sleep 2
+	clone_github_repository "$github_username" "$github_repo_name" "$has_quick_ssh_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
 	
 	# 2. Verify the GitHub repo is cloned.
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
@@ -152,11 +159,13 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
 
 	# 3. Get the GitHub branches
-	printf "\n\n\n Get the branches of the GitHub repository on which to run GitLab CI."
+	printf "\n2. Get the branches of the GitHub repository on which to run GitLab CI.\n"
+	printf "The first letter of each branch of the GitHub repo is:\n"
 	get_git_branches github_branches "GitHub" "$github_repo_name"      # call function to populate the array
+	printf "\n"
+	
 	# shellcheck disable=SC2154
 	declare -p github_branches
-
 	#manual_assert_equal ""${github_branches[0]}"" "attack_in_new_file"
 	#manual_assert_equal ""${github_branches[1]}"" "attack_unit_test"
 	#manual_assert_equal ""${github_branches[2]}"" "main"
@@ -164,21 +173,21 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 	#manual_assert_equal ""${github_branches[4]}"" "no_attack_in_new_file"
 	
 	# 4. Loop over the GitHub branches by checking each branch out.
-	printf "\n\n\n Loop over each GitHub branch and run the GitLab CI on it."
+	printf "\n3. Loop over each GitHub branch and run the GitLab CI on it."
 	for i in "${!github_branches[@]}"; do
-		printf "NEXT BRANCH: ${github_branches[i]}"
+		printf "\n3.$i next branch: ${github_branches[i]}"
 		
 		# Check if branch is found in local GitHub repo.
-		printf "\n\n\n Checkout a local GitHub branch."
+		printf "\n3.$i.1 Checkout a local GitHub branch."
 		local checkout_output="$(checkout_branch_in_github_repo "$github_repo_name" "${github_branches[i]}" "GitHub")"
 		# TODO: write some test to verify this.
 		
 		# Get SHA of commit of local GitHub branch.
-		printf "\n\n\n Get the commit SHA of the checked out local GitHub branch."
+		printf "\n3.$i.2 Get the commit SHA of the checked out local GitHub branch."
 		local current_branch_github_commit_sha=$(get_current_github_branch_commit "$github_repo_name" "${github_branches[i]}" "GitHub")
-		echo "current_branch_github_commit_sha=$current_branch_github_commit_sha"
+		
 		if [ "$current_branch_github_commit_sha" == "" ]; then
-			echo "github_repo_name=$github_repo_name, branch=${github_branches[i]} in folder GitHub, the commit is empty:$current_branch_github_commit_sha"
+			echo "ERROR, github_repo_name=$github_repo_name, branch=${github_branches[i]} in folder GitHub, the commit is empty:$current_branch_github_commit_sha"
 			exit 4
 		fi
 		
@@ -188,25 +197,24 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 		# TODO: change to return a list of branches that contain GitLab 
 		# yaml files, such that this function can get tested, instead 
 		# of diving a method deeper.
-		printf "\n\n\n Check if the local GitHub branch contains a GitLab yaml."
+		printf "\n3.$i.3 Check if the local GitHub branch contains a GitLab yaml."
 		local branch_contains_yaml="$(verify_github_branch_contains_gitlab_yaml "$github_repo_name" "${github_branches[i]}" "GitHub")"
 		if [[ "$branch_contains_yaml" == "FOUND" ]]; then
 		
 			# TODO: check if github commit already has CI build status
 			# TODO: allow overriding this check to enforce the CI to run again on this commit.
-			printf "\n\n\n Check if the commit of the GitHub branch already has CI results."
+			printf "\n3.$i.4 Check if the commit of the GitHub branch already has CI results."
 			commit_filename="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$organisation/$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha.txt"
 			exists="$(file_exists $commit_filename)"
-			echo "commit_filename=$commit_filename"
-			echo "exists=$exists"
+			
 			if [ "$(file_exists $commit_filename)" == "NOTFOUND" ]; then
 			#if [ "$does_not_yet_have_a_build_status" == "TRUE" ]; then
 				#echo "The commit:$current_branch_github_commit_sha does not yet have a build status."
 				if [[ "$branch_contains_yaml" == "FOUND" ]]; then
-					echo "The commit:$current_branch_github_commit_sha does not yet have a build status, and it DOES have a GitLab yaml."
-					printf "\n\n\n Copy GitHub branch content to a GItLab branch to run the GitLab CI on it."
+					printf "\n3.$i.5 The commit:$current_branch_github_commit_sha does not yet have a build status, and it DOES have a GitLab yaml."
+					printf "\n3.$i.6 Copy GitHub branch content to a GItLab branch to run the GitLab CI on it."
 					copy_github_branch_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$organisation"
-					echo "RUN_CI_ON_GITHUB_REPO Copied GitHub branch with GitLab yaml to GitLab repository mirror."
+					printf "\n3.$i.7 RUN_CI_ON_GITHUB_REPO Copied GitHub branch with GitLab yaml to GitLab repository mirror."
 				fi
 			else
 				echo "Already has build status in GitHub:$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha"
@@ -215,13 +223,14 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 		
 		# 4.b Export the evaluated GitHub commit SHA to GitHub build 
 		# status repo.
-		printf "RUN_CI_ON_GITHUB_REPO copy_evaluated_commit_to_github_status_repo, with {github_branches[i]}=${github_branches[i]}"
+		printf "\n3.$i.8 RUN_CI_ON_GITHUB_REPO copy_evaluated_commit_to_github_status_repo, with {github_branches[i]}=${github_branches[i]}"
 		copy_evaluated_commit_to_github_status_repo "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$organisation"
 
-		printf "RUN_CI_ON_GITHUB_REPO push_commit_build_status_in_github_status_repo_to_github"
-		## 4.c Push the evaluated commit to the GitHub build status repo. 
+		printf "\n3.$i.9 RUN_CI_ON_GITHUB_REPO push_commit_build_status_in_github_status_repo_to_github"
+		## 4.c Push the evaluated commit to the GitHub build status repo.
+		# TODO determine whether the push should be completed.
 		#push_commit_build_status_in_github_status_repo_to_github "$github_username"
-		#printf "Next loop"
+		printf "\n3.$i.10 skipped pushingNext loop"
 	done
 	printf "DONE"
 	
@@ -246,34 +255,34 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	
 	
 	# Verify the get_current_github_branch function returns the correct branch.
-	printf "\n\n\n Verify if the local GitHub branch returns the correct branch."
+	printf "\n3.x.6.1 Verify if the local GitHub branch returns the correct branch."
 	actual_result="$(get_current_github_branch "$github_repo_name" "$github_branch_name" "GitHub")"
 	manual_assert_equal "$actual_result" "$github_branch_name"
 	
 	# Checkout branch, if branch is found in local GitHub repo.
-	printf "\n\n\n Verify if the local GitHub branch indeed contains a GitLab yaml."
+	printf "\n3.x.6.2 Verify if the local GitHub branch indeed contains a GitLab yaml."
 	actual_result="$(verify_github_branch_contains_gitlab_yaml "$github_repo_name" "$github_branch_name" "GitHub")"
 	manual_assert_equal "$actual_result" "FOUND"
 	
 	# 5.1 Create the empty GitLab repo.
 	# Create the empty GitLab repository (deletes any existing GitLab repos with same name).
-	printf "\n\n\n Create a new empty repository in GitLab."
+	printf "\n3.x.6.3 Create a new empty repository in GitLab."
 	# TODO: determine what happens if it already exists in GitLab
 	create_empty_repository_v0 "$gitlab_repo_name" "$GITLAB_SERVER_ACCOUNT_GLOBAL"
 	
 	# 5.2 Clone the empty Gitlab repo from the GitLab server
-	printf "\n\n\n Clone the new empty GitLab repository."
+	printf "\n3.x.6.3 Clone the new empty GitLab repository."
 	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"
 	
 	# 5.3 Check if the GitLab branch exists, if not, create it.
 	# 5.4 Check out the GitLab branch
 	# Checkout branch, if branch is found in local Gitlab repo.
-	printf "\n\n\n Checkout the (new) GitHub branch in the local GitLab repository."
+	printf "\n3.x.6.4 Checkout the (new) GitHub branch in the local GitLab repository."
 	actual_result="$(checkout_branch_in_gitlab_repo "$gitlab_repo_name" "$gitlab_branch_name" "GitLab")"
 		
 	# Verify the get_current_gitlab_branch function returns the correct branch.
 	# shellcheck disable=SC2154
-	printf "\n\n\n Verify if the local GitLab branch returns the correct branch."
+	printf "\n3.x.6.5 Verify if the local GitLab branch returns the correct branch."
 	actual_result="$(get_current_gitlab_branch "$gitlab_repo_name" "$gitlab_branch_name" "GitLab")"
 	manual_assert_equal "$actual_result" "$gitlab_branch_name"
 		
@@ -283,7 +292,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	# known. (skip branch if yes)
 	
 	# 5.7 Copy the files from the GitHub branch into the GitLab branch.
-	printf "\n\n\n Verify if the content between the local GitHub and GitLab branch is identical."
+	printf "\n3.x.6.6 Verify if the content between the local GitHub and GitLab branch is identical."
 	branch_content_identical_between_github_and_gitlab_output="$(copy_files_from_github_to_gitlab_branch "$github_repo_name" "$github_branch_name" "$gitlab_repo_name" "$gitlab_branch_name")"
 	# TODO: change this method to ommit getting last line!
 	#printf "RESULTRESULT=$result"
@@ -293,21 +302,21 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	if [ "$branch_content_identical_between_github_and_gitlab" == "TRUE" ]; then
 	
 		# 5.8 Commit the changes to GitLab.
-		printf "\n\n\n Commit the content of the GitHub branch, that is copied to the GitLab branch, to GitLab."
+		printf "\n3.x.6.7 Commit the content of the GitHub branch, that is copied to the GitLab branch, to GitLab."
 		manual_assert_not_equal "" "$github_commit_sha"
 		commit_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
 		# TODO: verify the changes are committed correctly
 
 		# 5.8. Push the results to GitLab, with the commit message of the GitHub commit sha.
 		# Perform the Push function.
-		printf "\n\n\n Push the commit to GitLab."
+		printf "\n3.x.6.8 Push the commit to GitLab."
 		
 		push_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
 		# TODO: verify the changes are pushed correctly
-		printf "DONE PUSHING, getting commit sha"
+		printf "\n3.x.6.9 DONE PUSHING, getting commit sha"
 
 		# Get last commit of GitLab repo.
-		printf "\n\n\n Push the commit to GitLab."
+		printf "\n3.x.6.10 Push the commit to GitLab."
 		gitlab_commit_sha=$(get_commit_sha_of_branch "$github_branch_name" "$github_repo_name" "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL")
 		gitlab_commit_sha=$(echo "$gitlab_commit_sha" | tr -d '"') # removes double quotes at start and end.
 		#echo "gitlab_commit_sha=$gitlab_commit_sha"
@@ -334,7 +343,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 		fi
 		
 		#read -p "build_status=$build_status.end"
-		printf "DONE MANAGE build_status=$build_status"
+		printf "\n3.x.6.11 DONE MANAGE build_status=$build_status"
 		#last_line_gitlab_ci_build_status=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${build_status}")
 		#echo "last_line_gitlab_ci_build_status=$last_line_gitlab_ci_build_status"
 
@@ -342,19 +351,19 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 
 		# 7. Once the build status is found, use github personal access token to
 		# set the build status in the GitHub commit.
-		printf "\n\n\n Set the build status of the GitHub commit using GitHub personal access token."
+		printf "\n3.x.6.12 \n\n\n Set the build status of the GitHub commit using GitHub personal access token."
 		# TODO: ensure personal access token is created automatically to set build status.
 		#output=$(set_build_status_of_github_commit_using_github_pat "$github_username" "$github_repo_name" "$github_commit_sha" "$gitlab_website_url" "$last_line_gitlab_ci_build_status")
 		output=$(set_build_status_of_github_commit_using_github_pat "$github_username" "$github_repo_name" "$github_commit_sha" "$gitlab_website_url" "$build_status")
-		printf "\n\n output=$output\n\n"
+		printf "\n3.x.6.13 output=$output"
 
 		# 8. Copy the commit build status from GitLab into the GitHub build status repo.
-		printf "\n\n copy_commit_build_status_to_github_status_repot\n\n"
-		printf  "github_username=$github_username and github_repo_name=$github_repo_name and github_branch_name=$github_branch_name and github_commit_sha=$github_commit_sha and build_status=$build_status and organisation=$organisation end.\n\n\n"
+		printf "\n3.x.6.14 copy_commit_build_status_to_github_status_repot"
+		printf  "github_username=$github_username and github_repo_name=$github_repo_name and github_branch_name=$github_branch_name and github_commit_sha=$github_commit_sha and build_status=$build_status and organisation=$organisation end."
 		copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$build_status" "$organisation"
 
 		## 9. Push the commit build status to the GitHub build status repo. 
-		#printf "\n\n push_commit_build_status_in_github_status_repo_to_github\n\n"
+		#printf "\n3.x.6.16 push_commit_build_status_in_github_status_repo_to_github"
 		#push_commit_build_status_in_github_status_repo_to_github "$github_username"
 		
 		# TODO: delete this function
@@ -381,7 +390,7 @@ manage_get_gitlab_ci_build_status() {
 	parsed_github_build_status="$(rebuild_get_gitlab_ci_build_status "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")"
 	#parsed_github_build_status=$(some_func_to_get_build_status_response)
 	echo "$parsed_github_build_status" > "$TMP_GITLAB_BUILD_STATUS_FILEPATH"
-	#printf "\n\n initiate while loop that checks if github build status is desirable. \n\n"
+	#printf "\n\n initiate while loop that checks if github build status is desirable. "
 	sleep 20
 	#read -p "parsed_github_build_status=$parsed_github_build_status.end"
 	# wait 11 * 10 = 110 seconds to get build satus, otherwise it will be stored at pending. 
@@ -421,21 +430,21 @@ rebuild_get_gitlab_ci_build_status() {
 	local gitlab_branch_name="$github_branch_name"
 
 	
-	#printf "\n\n getting pipelines via curl and gitlab pac. \n\n"
+	#printf "\n\n getting pipelines via curl and gitlab pac. "
 	# curl --header "PRIVATE-TOKEN: <your_access_token>" "http://127.0.0.1/api/v4/projects/1/pipelines"
 	pipelines=$(curl --header "PRIVATE-TOKEN: $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "http://127.0.0.1/api/v4/projects/$GITLAB_SERVER_ACCOUNT_GLOBAL%2F$gitlab_repo_name/pipelines")
 	#printf "pipelines=$pipelines"
 	# get build status from pipelines
-	#printf "\n\n get job from pipeline json using jq \n\n"
+	#printf "\n\n get job from pipeline json using jq "
 	job=$(echo "$pipelines" | jq -r 'map(select(.sha == "'"$gitlab_commit_sha"'"))')
 	#printf "job=$job"
 	#gitlab_ci_status="$(echo "$job" | jq ".[].status")" | tr -d '"')
-	#printf "\n\n get gitlab_ci_status from job json from jq.  \n\n"
+	#printf "\n\n get gitlab_ci_status from job json from jq.  "
 	gitlab_ci_status=$(echo "$(echo $job | jq ".[].status")" | tr -d '"')
 	#printf "gitlab_ci_status=$gitlab_ci_status"
-	#printf "\n\n get parsed github status unparsed gitlab_ci_status=$gitlab_ci_status.  \n\n"
+	#printf "\n\n get parsed github status unparsed gitlab_ci_status=$gitlab_ci_status.  "
 	parsed_github_status="$(parse_gitlab_ci_status_to_github_build_status "$gitlab_ci_status")"
-	#printf "\n\n get parsed_github_status $parsed_github_status.  \n\n"
+	#printf "\n\n get parsed_github_status $parsed_github_status.  "
 	echo "$parsed_github_status"
 }
 
@@ -638,15 +647,15 @@ copy_commit_build_status_to_github_status_repo() {
 push_commit_build_status_in_github_status_repo_to_github() {
 	
 	# Verify the Build status repository is cloned.
-	printf "\n\n\n Cloning $GITHUB_STATUS_WEBSITE_GLOBAL repo\n\n\n\n"
+	printf "\n Cloning $GITHUB_STATUS_WEBSITE_GLOBAL repo"
 	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")
 	manual_assert_equal "$repo_was_cloned" "FOUND"
-	printf "\n\n\n $GITHUB_STATUS_WEBSITE_GLOBAL repo was cloned\n\n\n\n"
+	printf "\n $GITHUB_STATUS_WEBSITE_GLOBAL repo was cloned"
 
 	# 12. Verify there have been changes made. Only push if changes are added."
-	printf "\n\n\n has changes=$(git_has_changes $MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL)"
+	printf "\n has changes=$(git_has_changes $MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL)"
 	if [[ "$(git_has_changes "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")" == "FOUND" ]]; then
-		printf "\n\n\n commit_changes from: $MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL."
+		printf "\n commit_changes from: $MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL."
 		commit_changes "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL" "New_build_status."
 		
 		# Verify ssh-access
@@ -654,7 +663,7 @@ push_commit_build_status_in_github_status_repo_to_github() {
 		
 		# 13. Push the changes to the GitHub build status repository.
 		#push_to_github_repository "$github_username" "$has_access" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
-		printf "\n\n\n push_to_github_repository_with_ssh from: $MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL."
+		printf "\n push_to_github_repository_with_ssh from: $MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL."
 		push_to_github_repository_with_ssh "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 	fi
 	

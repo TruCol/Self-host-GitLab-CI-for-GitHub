@@ -434,8 +434,8 @@ get_lhs_of_line_till_character() {
 # Structure:Parsing
 get_rhs_of_line_till_character() {
 	# TODO: include space right after character, e.g. return " with" instead of "width" on ": with".
-	line=$1
-	character=$2
+	local line=$1
+	local character=$2
 	
 	rhs=$(cut -d "$character" -f2- <<< "$line")
 	echo "$rhs"

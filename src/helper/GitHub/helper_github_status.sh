@@ -41,11 +41,11 @@ verify_github_repository_is_cloned() {
 ####verify_github_repository_is_cloned "$github_repo" "$MIRROR_LOCATION/GitHub/$github_repository"
 get_git_branches() {
     local -n arr=$1             # use nameref for indirection
-	company=$2
-	git_repository=$3
+	local company=$2
+	local git_repository=$3
 	arr=() # innitialise array with branches
 	
-	theoutput=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git branch --all)
+	local theoutput=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git branch --all)
 	#read -p  "IN GET PWD=$PWD"
 	#read -p  "MIRROR_LOCATION=$MIRROR_LOCATION"
 	#read -p  "company=$company"
@@ -56,7 +56,6 @@ get_git_branches() {
 	while IFS= read -r line; do
 		number_of_lines=$(echo "$theoutput" | wc -l)
 		if [ "$number_of_lines" -eq 1 ]; then
-			echo "number_of_lines=$number_of_lines"
 			arr+=("${line:2}")
 		# Only parse remote branches.
 		elif [ "${line:0:17}" == "  remotes/origin/" ]; then
@@ -70,6 +69,7 @@ get_git_branches() {
 				
 				# Filter out git theoutput artifacts of that do not start with a letter or number.
 				# Assumes branch names always start with a letter or number.
+				# TODO: make this check silent.
 				if grep '^[-0-9a-zA-Z]*$' <<<"${branch:0:1}" ;then 
 					
 					# Append the branch name to the array of branches

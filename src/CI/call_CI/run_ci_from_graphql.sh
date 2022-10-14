@@ -125,7 +125,7 @@ loop_through_repos_in_api_query_json() {
 			# TODO: verify the GitHub repo exists
 			# TODO: change this method to download with https?
 			# Download the GitHub repo on which to run the GitLab CI:
-			printf "\n\n\n Download the GitHub repository on which to run GitLab CI."
+			printf "\n Download the GitHub repository on which to run GitLab CI."
 			download_github_repo_on_which_to_run_ci "$github_organisation" "$repo_name_without_quotations"
 			printf "Downloaded GitHub repo on which to run GitLab CI for:$repo_name_without_quotations"
 	

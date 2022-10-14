@@ -266,7 +266,7 @@ assert_set_build_status_of_github_commit_using_github_pat() {
 	# Verify the build status is set correctly
 	getting_output_json=$(GET https://api.github.com/repos/"$github_username"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
 	urls_in_json="$(echo "${getting_output_json[0]}" | jq ".[].url")"
-	#printf "\n\n\n getting_output_json is:$getting_output_json \n\n\n"
+	#printf "\n getting_output_json is:$getting_output_json \n\n\n"
 
 	# TODO also make it work for: expected_url=
 	#json_string={"state":"failure","description":"failure","target_url":"http://127.0.0.1"}

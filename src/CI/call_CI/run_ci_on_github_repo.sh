@@ -84,7 +84,7 @@ run_ci_on_github_repo() {
 	# TODO: In that log file, inlcude: time, which user, which repo, which branch, why.
 	printf "\n2. Exporting GitLab CI result back to a GitHub repository."
 	copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "$organisation"
-	printf "\n4. Done with CI."
+	printf "\n4. Done with CI.\n"
 
 }
 
@@ -226,7 +226,6 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 			add_commit_sha_to_evaluated_list "$current_branch_github_commit_sha" "$EVALUATED_COMMITS_LIST_FILENAME"
 		fi
 	done
-		
 	push_commit_build_status_in_github_status_repo_to_github "$github_username"
 }
 

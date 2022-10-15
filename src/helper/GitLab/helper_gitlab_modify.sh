@@ -444,7 +444,7 @@ clone_repository() {
   # TODO:write test to verify the gitlab username and server don't end with a spacebar character.
 
   # Clone the GitLab repository into the GitLab mirror storage location.
-  output=$(cd "$target_directory" && git clone http://$gitlab_username:$local_gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
+  output=$(cd "$target_directory" && git clone --quiet http://$gitlab_username:$local_gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
 }
 
 
@@ -799,9 +799,8 @@ commit_changes_to_gitlab() {
             copy_github_files_and_folders_to_gitlab "$MIRROR_LOCATION/GitHub/$github_repo_name" "$MIRROR_LOCATION/GitLab/$github_repo_name"
 
             # Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
-            read -p "Before comparison_result"
             local comparison_result="$(two_folders_are_identical_excluding_subdir $MIRROR_LOCATION/GitHub/$github_repo_name $MIRROR_LOCATION/GitLab/$github_repo_name .git)"
-            read -p "After comparison_result"
+            
 
             # Verify the files were correctly copied from GitHub branch to GitLab branch.
             if [ "$comparison_result" == "IDENTICAL" ]; then

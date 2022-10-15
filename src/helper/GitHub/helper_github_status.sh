@@ -13,12 +13,22 @@ github_repo_exists_locally(){
 
 # Structure:Github_status
 # check if repo is private
-# skip
+# TODO: delete this function and replace it with:
+# Verify the mirror location exists
+# manual_assert_not_equal "$MIRROR_LOCATION" ""
+# manual_assert_dir_exists "$MIRROR_LOCATION"
+# manual_assert_dir_exists "$MIRROR_LOCATION/GitHub"
+# 
+# # Verify the Build status repository is cloned.
+# manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 verify_github_repository_is_cloned() {
 	
 	if [[ "$1" != "" ]] && [[ "$2" != "" ]]; then
 		github_repository="$1"
 		target_directory="$2"
+	else
+		echo "Error, arguments are empty"
+		exit 10
 	fi
 	
 	local found_repo=$(dir_exists "$target_directory")
@@ -41,11 +51,11 @@ verify_github_repository_is_cloned() {
 ####verify_github_repository_is_cloned "$github_repo" "$MIRROR_LOCATION/GitHub/$github_repository"
 get_git_branches() {
     local -n arr=$1             # use nameref for indirection
-	company=$2
-	git_repository=$3
+	local company=$2
+	local git_repository=$3
 	arr=() # innitialise array with branches
 	
-	theoutput=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git branch --all)
+	local theoutput=$(cd "$MIRROR_LOCATION/$company/$git_repository" && git branch --all)
 	#read -p  "IN GET PWD=$PWD"
 	#read -p  "MIRROR_LOCATION=$MIRROR_LOCATION"
 	#read -p  "company=$company"
@@ -56,7 +66,6 @@ get_git_branches() {
 	while IFS= read -r line; do
 		number_of_lines=$(echo "$theoutput" | wc -l)
 		if [ "$number_of_lines" -eq 1 ]; then
-			echo "number_of_lines=$number_of_lines"
 			arr+=("${line:2}")
 		# Only parse remote branches.
 		elif [ "${line:0:17}" == "  remotes/origin/" ]; then
@@ -70,6 +79,7 @@ get_git_branches() {
 				
 				# Filter out git theoutput artifacts of that do not start with a letter or number.
 				# Assumes branch names always start with a letter or number.
+				# TODO: make this check silent.
 				if grep '^[-0-9a-zA-Z]*$' <<<"${branch:0:1}" ;then 
 					
 					# Append the branch name to the array of branches
@@ -90,14 +100,14 @@ get_git_branches() {
 # Structure:Gitlab_status
 # TODO: remove above 20 lines with this fucntion
 get_commit_sha_of_branch() {
-	desired_branch=$1
-	repository_name=$2
-	gitlab_username=$3
-	personal_access_token=$4
+	local desired_branch=$1
+	local repository_name=$2
+	local gitlab_username=$3
+	local personal_access_token=$4
 	
 	# Get the branches of the GitLab CI resositories, and their latest commit.
 	# TODO: switch server name
-	branches=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repository_name/repository/branches")
+	branches=$(curl --silent --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repository_name/repository/branches")
 	
 	# Get two parallel arrays of branches and their latest commits
 	readarray -t branch_names_arr <  <(echo "$branches" | jq ".[].name")

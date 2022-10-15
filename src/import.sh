@@ -40,6 +40,7 @@ filler="Filler"
 # For installation
 source src/CI/helper_ci_management.sh
 source src/CI/GitLab_runner/install_and_boot_gitlab_runner.sh
+source src/CI/call_CI/verify_build_statusses_are_valid.sh
 
 source src/helper/GitHub/helper_github_modify.sh
 source src/helper/GitHub/helper_github_status.sh

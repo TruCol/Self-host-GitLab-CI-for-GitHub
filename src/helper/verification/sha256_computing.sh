@@ -56,9 +56,9 @@ two_folders_are_identical() {
 }
 
 two_folders_are_identical_excluding_subdir() {
-	dirpath_one="$1"
-	dirpath_two="$2"
-	excluding_subdir="$3"
+	local dirpath_one="$1"
+	local dirpath_two="$2"
+	local excluding_subdir="$3"
 	
 	if [ "$(dir_exists "$dirpath_one")" == "FOUND" ]; then
 		if [ "$(dir_exists "$dirpath_two")" == "FOUND" ]; then

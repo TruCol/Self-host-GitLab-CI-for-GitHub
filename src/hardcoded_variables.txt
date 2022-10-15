@@ -40,6 +40,8 @@ SOURCE_FOLDERPATH=src/$SOURCE_FOLDERNAME
 GITHUB_STATUS_WEBSITE_GLOBAL=gitlab-ci-build-statuses
 PUBLIC_GITHUB_TEST_REPO_GLOBAL=sponsor_example
 EVALUATED_COMMITS_LIST_FILENAME=evaluated_commits.txt
+EVALUATED_COMMITS_WITH_CI_LIST_FILENAME=evaluated_commits_with_ci.txt
+EVALUATED_COMMIT_WITH_ERROR_LIST_FILENAME=unsuccessfull_ci_commits.txt
 
 # Specify Mirror folder
 MIRROR_LOCATION=src/mirrors
@@ -55,3 +57,9 @@ GITHUB_SSH_EMAIL=example@example.com
 TMP_GITLAB_BUILD_STATUS_FILEPATH=src/tmp_gitlab_build_status.txt
 
 WAIT_ON_CI_TO_FINISH=40 # Multiplied with 10 seconds, so 40=400 seconds.
+
+# GitLab build statusses
+#success
+#pending
+#failed
+#unknown

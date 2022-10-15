@@ -38,7 +38,7 @@ copy_github_commits_with_yaml_to_gitlab_repo() {
 
 	
 	# Check if branch is found in local GitHub repo.
-	printf "\n\n\n Checkout a local GitHub branch."
+	printf "\n Checkout a local GitHub branch:\n"
 	local checkout_output="$(checkout_commit_in_github_repo "$github_repo_name" "$github_commit_sha" "GitHub")"
 	
 	
@@ -46,15 +46,15 @@ copy_github_commits_with_yaml_to_gitlab_repo() {
 	# TODO: change to return a list of branches that contain GitLab 
 	# yaml files, such that this function can get tested, instead 
 	# of diving a method deeper.
-	printf "\n\n\n Check if the local GitHub branch contains a GitLab yaml."
-	#read -p "verify_github_commit_contains_gitlab_yaml\n\n"
+	printf "\n Check if the local GitHub branch contains a GitLab yaml."
+	#read -p "verify_github_commit_contains_gitlab_yaml"
 	local branch_contains_yaml="$(verify_github_commit_contains_gitlab_yaml "$github_repo_name" "GitHub")"
 	printf "branch_contains_yaml=$branch_contains_yaml"
 	if [[ "$branch_contains_yaml" == "FOUND" ]]; then
 	
 		# TODO: check if github commit already has CI build status
 		# TODO: allow overriding this check to enforce the CI to run again on this commit.
-		printf "\n\n\n Check if the commit of the GitHub branch already has CI results."
+		printf "\n Check if the commit of the GitHub branch already has CI results."
 		commit_filename="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$organisation/$github_repo_name/$github_branch/$github_commit_sha.txt"
 		exists="$(file_exists $commit_filename)"
 		printf "commit_filename=$commit_filename"
@@ -65,7 +65,7 @@ copy_github_commits_with_yaml_to_gitlab_repo() {
 			printf "commit filename does not yet exist"
 			if [[ "$branch_contains_yaml" == "FOUND" ]]; then
 				printf "The commit:$github_commit_sha does not yet have a build status, and it DOES have a GitLab yaml."
-				printf "\n\n\n Copy GitHub branch content to a GItLab branch to run the GitLab CI on it."
+				printf "\n Copy GitHub branch content to a GItLab branch to run the GitLab CI on it."
 				copy_github_commit_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "$github_branch" "$github_commit_sha" "$organisation"
 				echo "Copied GitHub branch with GitLab yaml to GitLab repository mirror."
 			fi
@@ -78,7 +78,8 @@ copy_github_commits_with_yaml_to_gitlab_repo() {
 		
 	# 4.b Export the evaluated GitHub commit SHA to GitHub build 
 	# status repo.
-	copy_evaluated_commit_to_github_status_repo "$github_repo_name" "$github_branch" "$github_commit_sha" "$organisation"
+	create_empty_build_status_txt "$github_repo_name" "$github_branch" "$github_commit_sha" "$organisation"
+	add_commit_sha_to_evaluated_list "$github_commit_sha" "$EVALUATED_COMMITS_LIST_FILENAME"
 		
 }
 
@@ -104,7 +105,7 @@ copy_github_commit_with_yaml_to_gitlab_repo() {
 	# 5.1 Create the empty GitLab repo.
 	# Create the empty GitLab repository (deletes any existing GitLab repos with same name).
 	# TODO: determine what happens if it already exists in GitLab
-	create_empty_repository_v0 "$gitlab_repo_name" "$GITLAB_SERVER_ACCOUNT_GLOBAL"
+	ensure_new_empty_repo_is_created_in_gitlab "$gitlab_repo_name" "$GITLAB_SERVER_ACCOUNT_GLOBAL"
 	
 	# 5.2 Clone the empty Gitlab repo from the GitLab server
 	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"
@@ -169,7 +170,7 @@ copy_github_commit_with_yaml_to_gitlab_repo() {
 
 		#build_status="$(call_eg_function_with_timeout "$github_repo_name" "$github_branch_name" "$gitlab_commit_sha")"
 		echo "build_status=$build_status"
-		#read -p "\n\n\n DONE GETTING build status., IT IS:$build_status \n\n\n"
+		#read -p "\n\n\n DONE GETTING build status., IT IS:$build_status "
 		#last_line_gitlab_ci_build_status=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${build_status}")
 		#echo "last_line_gitlab_ci_build_status=$last_line_gitlab_ci_build_status"
 

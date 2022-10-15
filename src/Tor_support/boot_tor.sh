@@ -178,7 +178,7 @@ start_and_monitor_tor_connection(){
 				# restart jobs
 				echo "Killed all jobs"
 				sleep 6 &
-				printf "\n\n\n Job 1"
+				printf "\n Job 1"
 				sleep 5 &
 				echo "started Job 2"
 			fi

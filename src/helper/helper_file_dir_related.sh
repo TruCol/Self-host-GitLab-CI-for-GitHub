@@ -165,6 +165,7 @@ create_dir() {
 # Structure:dir_edit
 remove_dir() {
 	abs_dir=$1
+	# TODO: silence.
 	if [ "$(dir_exists "$abs_dir")" == "FOUND" ]; then
 		rm -rf "$abs_dir"
 	fi
@@ -292,5 +293,36 @@ dir_contains_at_least_one_test_boolean_file() {
 		echo "FOUND"
 	else
 		echo "NOTFOUND"
+	fi
+}
+
+
+#######################################
+# Removes all lines from a file that contain a certain substring.
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+#######################################
+# Run with: 
+# bash -c 'source src/import.sh src/CI/call_CI/verify_build_statusses_are_valid.sh && delete_lines_containing_substring_from_file some_commit_sha some_filepath'
+delete_lines_containing_substring_from_file() {
+	local commit_sha="$1"
+	local filepath="$2"
+	
+	# Remove all lines that contain the commit sha, from file.
+	sed -i "/$commit_sha/d" $filepath
+
+	# Assert the substring is not in file.
+	if [ "$(file_contains_string "$commit_sha" "$filepath")" == "FOUND" ]; then
+		echo "Error, the file:$filename still contains:$commit_sha"
+		exit 5
 	fi
 }

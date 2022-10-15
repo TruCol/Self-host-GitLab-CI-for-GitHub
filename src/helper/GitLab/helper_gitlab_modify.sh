@@ -208,13 +208,14 @@ git_pull_gitlab_repo() {
 
 # Structure:gitlab_status
 #6.d.1 If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
-# source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && create_empty_repository_v0 "sponsor_example" "root"
-##run bash -c "source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && create_empty_repository_v0 sponsor_example root"
+# source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && ensure_new_empty_repo_is_created_in_gitlab "sponsor_example" "root"
+##run:
+# bash -c "source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && ensure_new_empty_repo_is_created_in_gitlab sponsor_example root"
 #######################################
 # Checks for a repository in the GitLab server and deletes it if it exists.
 # Afterwards, a new empty repository is created.
 # How to run:
-#  source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && create_empty_repository_v0 "sponsor_example" "root"
+#  source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && ensure_new_empty_repo_is_created_in_gitlab "sponsor_example" "root"
 # Local variables:
 #  gitlab_repo_name
 #  gitlab_username
@@ -235,12 +236,14 @@ git_pull_gitlab_repo() {
 # TODO(a-t-0): Capitalize $personal_access_token in all files.
 # TODO(a-t-0): Localize $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL as an argument.
 #######################################
-create_empty_repository_v0() {
+# run with:
+# bash -c 'source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && ensure_new_empty_repo_is_created_in_gitlab new_repo root'
+ensure_new_empty_repo_is_created_in_gitlab() {
   local gitlab_repo_name="$1"
   local gitlab_username="$2"
 
    # load personal_access_token (from hardcoded data)
-    personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
+    local personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 
   # TODO(a-t-0): Check if GitLab server is running.
 
@@ -249,19 +252,22 @@ create_empty_repository_v0() {
 
     # If it already exists, delete the repository
     delete_existing_repository "$gitlab_repo_name" "$gitlab_username"
+    printf "\n Waiting 30 secs untill repo is deleted from GitLab server."
     sleep 30
+    # TODO: replace this with a while loop that waits until the repo is deleted.
 
     # Verify the repository is deleted.
     if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
       # Throw an error if it is not deleted.
       echo "The GitLab repository was supposed to be deleted, yet it still exists."
-      #exit 177
+      exit 177
     fi
   fi
 
   # Create repository.
-  curl -H "Content-Type:application/json" "$GITLAB_SERVER_HTTP_URL/api/v4/projects?private_token=$personal_access_token" -d "{ \"name\": \"$gitlab_repo_name\" }"
+  curl --silent -H "Content-Type:application/json" "$GITLAB_SERVER_HTTP_URL/api/v4/projects?private_token=$personal_access_token" -d "{ \"name\": \"$gitlab_repo_name\" }"  > /dev/null 2>&1 &
   sleep 30
+  printf "\n Waiting 30 secs untill repo is (re)created in GitLab server."
 
   # Verify the repository is created.
   if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" != "FOUND" ]; then
@@ -269,7 +275,6 @@ create_empty_repository_v0() {
     echo "The GitLab repository was supposed to be created, yet it does not yet exists."
     exit 178
   fi
-
 }
 
 
@@ -298,7 +303,7 @@ create_gitlab_repository_if_not_exists() {
 
   # Check if repository already exists in GitLab server.
   if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "NOTFOUND" ]; then
-    create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
+    ensure_new_empty_repo_is_created_in_gitlab "$gitlab_repo_name" "$gitlab_username"
   elif [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
     echo ""
   else
@@ -383,6 +388,8 @@ delete_gitlab_repository_if_it_exists() {
 # Outputs:
 #  None.
 #######################################
+# run with:
+# bash -c 'source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && delete_existing_repository new_repo root'
 delete_existing_repository() {
   local repo_name="$1"
   local repo_username="$2"
@@ -392,7 +399,7 @@ delete_existing_repository() {
   personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 
   local output
-  output=$(curl -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE "$GITLAB_SERVER_HTTP_URL"/api/v4/projects/"$repo_username"%2F"$repo_name")
+  output=$(curl --silent -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE "$GITLAB_SERVER_HTTP_URL"/api/v4/projects/"$repo_username"%2F"$repo_name")
 
   if [  "$(lines_contain_string '{"message":"404 Project Not Found"}' "${output}")" == "FOUND" ]; then
     echo "ERROR, you tried to delete a GitLab repository that does not exist."
@@ -437,7 +444,7 @@ clone_repository() {
   # TODO:write test to verify the gitlab username and server don't end with a spacebar character.
 
   # Clone the GitLab repository into the GitLab mirror storage location.
-  output=$(cd "$target_directory" && git clone http://$gitlab_username:$local_gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
+  output=$(cd "$target_directory" && git clone --quiet http://$gitlab_username:$local_gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
 }
 
 
@@ -792,24 +799,25 @@ commit_changes_to_gitlab() {
             copy_github_files_and_folders_to_gitlab "$MIRROR_LOCATION/GitHub/$github_repo_name" "$MIRROR_LOCATION/GitLab/$github_repo_name"
 
             # Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
-            comparison_result="$(two_folders_are_identical_excluding_subdir $MIRROR_LOCATION/GitHub/$github_repo_name $MIRROR_LOCATION/GitLab/$github_repo_name .git)"
+            local comparison_result="$(two_folders_are_identical_excluding_subdir $MIRROR_LOCATION/GitHub/$github_repo_name $MIRROR_LOCATION/GitLab/$github_repo_name .git)"
+            
 
             # Verify the files were correctly copied from GitHub branch to GitLab branch.
             if [ "$comparison_result" == "IDENTICAL" ]; then
               #echo "IDENTICAL"
 
               # Get the path before executing the command (to verify it is restored correctly after).
-              pwd_before="$PWD"
+              local pwd_before="$PWD"
 
               if [[ "$(git_has_changes "$MIRROR_LOCATION/GitLab/$github_repo_name")" == "FOUND" ]]; then
 
                 # Commit the changes to GitLab.
-                cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit -m \"$github_commit_sha\"
+                cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit -m \"$github_commit_sha\"  > /dev/null 2>&1 &
                 cd ../../../..
               fi
 
               # Get the path after executing the command (to verify it is restored correctly after).
-              pwd_after="$PWD"
+              local pwd_after="$PWD"
 
               # Verify the current path is the same as it was when this function started.
               path_before_equals_path_after_command "$pwd_before" "$pwd_after"
@@ -1105,7 +1113,6 @@ delete_all_gitlab_files() {
 	for f in $source_dir
 	do
 	if [ -f "$f" ]; then
-		echo "File DELETE $f"
 		rm "$f"
 	fi
 	done
@@ -1133,11 +1140,10 @@ delete_all_gitlab_folders() {
 	for f in $source_dir
 	do
 	if [ -d "$f" ]; then
+    # Do not delete the ".", "..", and ".git" folders.
 		if [[ "${f: -2}" != "/." && "${f: -3}" != "/.." && "${f: -5}" != "/.git" ]]; then
-			echo "Dir Delete $f"
+      # Delete all other folders in that directory.
 			rm -r "$f"
-		else
-			echo "Dir EXCLUDE FROM DELETE $f"
 		fi
 	fi
 	done
@@ -1169,7 +1175,6 @@ copy_all_gitlab_files() {
 	for f in $source_dir
 	do
 	if [ -f "$f" ]; then
-		echo "File Copy $f"
 		cp -r "$f" "$target_dir"
 	fi
 	done
@@ -1198,22 +1203,16 @@ copy_all_gitlab_folders() {
 	for f in $source_dir
 	do
 	if [ -d "$f" ]; then
+    # Do not delete the ".", "..", and ".git" folders.
 		if [[ "${f: -2}" != "/." && "${f: -3}" != "/.." && "${f: -5}" != "/.git" ]]; then
-			echo "Dir Copy $f to $target_dir"
 			cp -r "$f" "$target_dir"
-			#cp "$f" "$target_dir"
-		else
-			echo "Dir EXCLUDE FROM COPY $f"
 		fi
 	fi
 	done
 }
 
 remove_the_gitlab_repository_on_which_ci_is_ran() {
-# 1. Clone the GitLab repo.
-	printf "\n\n\n Removing GitLab repository if it still existed from a previous run."
-	
-	# Delete GitLab repo at start of test.
+  # Delete GitLab repo at start of test.
 	remove_dir "$MIRROR_LOCATION/GitLab"
 	manual_assert_dir_not_exists "$MIRROR_LOCATION/GitLab"
 }

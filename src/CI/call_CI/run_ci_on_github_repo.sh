@@ -258,8 +258,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	# 5.1 Create the empty GitLab repo.
 	# Create the empty GitLab repository (deletes any existing GitLab repos with same name).
 	printf "\n4.x.6.3 Create a new empty repository in GitLab."
-	# TODO: determine what happens if it already exists in GitLab
-	create_empty_gitlab_repository_v0 "$gitlab_repo_name" "$GITLAB_SERVER_ACCOUNT_GLOBAL"
+	ensure_new_empty_repo_is_created_in_gitlab "$gitlab_repo_name" "$GITLAB_SERVER_ACCOUNT_GLOBAL"
 	
 	# 5.2 Clone the empty Gitlab repo from the GitLab server
 	printf "\n4.x.6.3 Clone the new empty GitLab repository."

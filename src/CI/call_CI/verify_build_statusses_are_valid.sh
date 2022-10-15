@@ -26,12 +26,32 @@ commit_build_status_txt_is_valid(){
     local github_repo_name="$2"
     local github_branch_name="$3"
     local commit_sha="$4"
-    
 
     local build_status_txt_filepath="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$organisation/$github_repo_name/$github_branch_name/$commit_sha.txt"
-    # Verify GitHub repository on which the CI is ran, exists locally.
-	local build_status_txt_exists=$(file_exists "$build_status_txt_filepath")
+    commit_build_txt_is_valid "$build_status_txt_filepath"
+}
+
+
+#######################################
+# Checks whether the the build status txt file of a particular commit file,
+# contains a valid GitLab build status.
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  FOUND - if the commit sha has a valid value.
+#  NOTFOUND - if the commit sha does not have a valid value.
+#######################################
+commit_build_txt_is_valid(){
+    local build_status_txt_filepath="$1"
     
+    local build_status_txt_exists=$(file_exists "$build_status_txt_filepath")
     if [ "$build_status_txt_exists" != "FOUND" ]; then
         echo "NOTFOUND"
     else
@@ -54,11 +74,12 @@ commit_build_status_txt_is_valid(){
             echo "Empty build status on first line."
             echo "NOTFOUND"
         else
-            echo "Invalid content:$first_line_without_trailing_chars"
+            echo "Invalid content:$first_line_without_trailing_chars."
             echo "NOTFOUND"
         fi
     fi
 }
+
 
 #######################################
 # Loops over all the commit build status txts in the GitHub repository with the
@@ -78,9 +99,38 @@ commit_build_status_txt_is_valid(){
 #  
 #######################################
 # Run with: 
-# bash -c "source src/import.sh src/CI/call_CI/verify_build_statusses_are_valid.sh && assert_commit_build_status_txt_is_valid
+# bash -c 'source src/import.sh src/CI/call_CI/verify_build_statusses_are_valid.sh && delete_invalid_commit_txts'
 delete_invalid_commit_txts(){
-    echo "pass"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+    #local sub_path_pattern="*/*/*/*.txt"
+    #$organisation/$github_repo_name/$github_branch_name/$commit_sha.txt"
+    for build_status_txt in "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/"*/*/*/*.txt; do
+        if [ "$(commit_build_txt_is_valid "$build_status_txt")" != "FOUND" ]; then
+            
+            start=$((${#build_status_txt} - 44))
+            commit_sha=${build_status_txt:$start:40}
+            if [ "${#commit_sha}" != 40 ]; then
+                echo "Error, the commit sha does not have length 40:"
+                echo "$commit_sha"
+                echo "$build_status_txt"
+                exit 5
+            fi
+
+            echo "commit_sha=$commit_sha"
+            
+
+            # Remove commit from evaluated list.
+            delete_lines_containing_substring_from_file $commit_sha "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME"
+            # Remove commit from evaluated with GitLab CI yml list.
+            delete_lines_containing_substring_from_file $commit_sha "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_WITH_CI_LIST_FILENAME"
+            # Add to errored list.
+            add_commit_sha_to_evaluated_list $commit_sha $EVALUATED_COMMIT_WITH_ERROR_LIST_FILENAME
+
+            # Delete build status txt file and verify it is deleted.
+            rm "$build_status_txt"
+            manual_assert_file_does_not_exists "$build_status_txt"
+        fi
+    done
 }
 
 #######################################

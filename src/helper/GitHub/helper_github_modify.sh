@@ -258,11 +258,7 @@ add_commit_sha_to_evaluated_list() {
 	local contains_sha_already=$(string_in_lines "$github_commit_sha" "$matches_on_commit")
 	
 	if [ "$contains_sha_already" == "NOTFOUND" ]; then
-		printf "\n4.$i.8.8 appending commit sha:$github_commit_sha to the list"
-		printf "of evaluated commits."
 		echo "$github_commit_sha" >> "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$list_filename"
-	else
-		printf "\n4.$i.8.7 A The evaulated commits already contained a build status for:$github_commit_sha"
 	fi
 
 	# manual_assert evaluated GitHub commit list file exists.

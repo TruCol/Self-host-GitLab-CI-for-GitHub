@@ -102,22 +102,22 @@ commit_build_txt_is_valid(){
 # bash -c 'source src/import.sh src/CI/call_CI/verify_build_statusses_are_valid.sh && delete_invalid_commit_txts'
 delete_invalid_commit_txts(){
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
-    #local sub_path_pattern="*/*/*/*.txt"
+    
+    # The */*/*/*.txt adheres to:
     #$organisation/$github_repo_name/$github_branch_name/$commit_sha.txt"
     for build_status_txt in "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/"*/*/*/*.txt; do
         if [ "$(commit_build_txt_is_valid "$build_status_txt")" != "FOUND" ]; then
             
+            # Extract the commit sha from the build status filepath.
             start=$((${#build_status_txt} - 44))
             commit_sha=${build_status_txt:$start:40}
+            # Verify the commit_sha length.
             if [ "${#commit_sha}" != 40 ]; then
                 echo "Error, the commit sha does not have length 40:"
                 echo "$commit_sha"
                 echo "$build_status_txt"
                 exit 5
             fi
-
-            echo "commit_sha=$commit_sha"
-            
 
             # Remove commit from evaluated list.
             delete_lines_containing_substring_from_file $commit_sha "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME"
@@ -132,6 +132,7 @@ delete_invalid_commit_txts(){
         fi
     done
 }
+
 
 #######################################
 # Verfies the GitHub repository with the GitLab CI build status results,

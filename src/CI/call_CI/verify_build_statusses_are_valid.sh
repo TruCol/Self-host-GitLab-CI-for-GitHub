@@ -58,28 +58,32 @@ commit_build_txt_is_valid(){
         # File is found, verify it contains: "passed, pending,success,failed,.."
         local first_line=$(head -n 1 "$build_status_txt_filepath")
         local first_line_without_trailing_chars=$(echo "$first_line" | tr -d '\r')
-        if [ "$first_line_without_trailing_chars" == "success" ]; then
-            echo "FOUND"
-        elif [ "$first_line_without_trailing_chars" == "running" ]; then
-            echo "FOUND"
-        elif [ "$first_line_without_trailing_chars" == "canceled" ]; then
-            echo "FOUND"
-        elif [ "$first_line_without_trailing_chars" == "failure" ]; then
-            echo "FOUND"
-        elif [ "$first_line_without_trailing_chars" == "pending" ]; then
-            echo "FOUND"
-        elif [ "$first_line_without_trailing_chars" == "unknown" ]; then
-            echo "FOUND"
-        elif [ "$first_line_without_trailing_chars" == "" ]; then
-            echo "Empty build status on first line."
-            echo "NOTFOUND"
-        else
-            echo "Invalid content:$first_line_without_trailing_chars."
-            echo "NOTFOUND"
-        fi
+        is_valid_build_status "$first_line_without_trailing_chars"
     fi
 }
 
+is_valid_build_status(){
+    local build_status="$1"
+    if [ "$build_status" == "success" ]; then
+        echo "FOUND"
+    elif [ "$build_status" == "running" ]; then
+        echo "FOUND"
+    elif [ "$build_status" == "canceled" ]; then
+        echo "FOUND"
+    elif [ "$build_status" == "failure" ]; then
+        echo "FOUND"
+    elif [ "$build_status" == "pending" ]; then
+        echo "FOUND"
+    elif [ "$build_status" == "unknown" ]; then
+        echo "FOUND"
+    elif [ "$build_status" == "" ]; then
+        echo "Empty build status on first line."
+        echo "NOTFOUND"
+    else
+        echo "Invalid content:$build_status."
+        echo "NOTFOUND"
+    fi
+}
 
 #######################################
 # Loops over all the commit build status txts in the GitHub repository with the
@@ -156,9 +160,10 @@ assert_commit_build_status_txt_is_valid(){
     local github_branch_name="$3"
     local commit_sha="$4"
 
-    if [ "$(commit_build_status_txt_is_valid "$organisation" "$github_repo_name" "$github_branch_name" "$commit_sha")" != "FOUND" ]; then
+    local commit_build_status_is_valid="$(commit_build_status_txt_is_valid "$organisation" "$github_repo_name" "$github_branch_name" "$commit_sha")"
+    if [ "$commit_build_status_is_valid" != "FOUND" ]; then
         echo "Error, the commit:$github_repo_name/$github_branch_name/$commit_sha"
-        echo "Does not have a vallid build status file."
+        echo "Does not have a valid build status file.$commit_build_status_is_valid"
         exit 11
     fi
 }

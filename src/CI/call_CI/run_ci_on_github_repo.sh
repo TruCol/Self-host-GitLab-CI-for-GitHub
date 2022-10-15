@@ -210,7 +210,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 				create_empty_build_status_txt "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$github_username"
 
 				# TODO: rename
-				copy_github_branch_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$github_username"
+				copy_github_branch_with_yaml_to_gitlab_repo_and_get_build_status "$github_username" "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$github_username"
 				printf "\n4.$i.3 Completed running GitLab CI on repo."
 
 				# 4.b Export the evaluated GitHub commit SHA to GitHub build status repo.
@@ -232,7 +232,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 
 # This copies a single branch, the other, similar function above, copies all 
 # branches.
-copy_github_branch_with_yaml_to_gitlab_repo() {
+copy_github_branch_with_yaml_to_gitlab_repo_and_get_build_status() {
 	local github_username="$1"
 	local github_repo_name="$2"
 	local github_branch_name="$3"
@@ -293,14 +293,13 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 		# 5.8 Commit the changes to GitLab.
 		printf "\n4.x.6.7 Commit the content of the GitHub branch, that is copied to the GitLab branch, to GitLab."
 		manual_assert_not_equal "" "$github_commit_sha"
-		
+
 		commit_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
 		# TODO: verify the changes are committed correctly
 
 		# 5.8. Push the results to GitLab, with the commit message of the GitHub commit sha.
 		# Perform the Push function.
 		printf "\n4.x.6.8 Push the commit to GitLab."
-		
 		push_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
 		# TODO: verify the changes are pushed correctly
 		printf "\n4.x.6.9 DONE PUSHING, getting commit sha"
@@ -333,12 +332,15 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 			exit 4
 		fi
 		
+		# Verify build_status
+		if [ "$(is_valid_build_status "$build_status")" != "FOUND" ]; then
+			echo "Error, build status:$build_status is not valid"
+			exit 5
+		fi
 		#read -p "build_status=$build_status.end"
 		printf "\n4.x.6.11 DONE MANAGE build_status=$build_status"
 		#last_line_gitlab_ci_build_status=$(get_last_line_of_set_of_lines_without_evaluation_of_arg "${build_status}")
 		#echo "last_line_gitlab_ci_build_status=$last_line_gitlab_ci_build_status"
-
-
 
 		# 7. Once the build status is found, use github personal access token to
 		# set the build status in the GitHub commit.
@@ -349,8 +351,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 		printf "\n4.x.6.13 output=$output"
 
 		# 8. Copy the commit build status from GitLab into the GitHub build status repo.
-		printf "\n4.x.6.14 copy_commit_build_status_to_github_status_repot"
-		printf  "github_username=$github_username and github_repo_name=$github_repo_name and github_branch_name=$github_branch_name and github_commit_sha=$github_commit_sha and build_status=$build_status and organisation=$organisation end."
+		printf "\n4.x.6.14 copy_commit_build_status_to_github_status_repo"
 		copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$build_status" "$organisation"
 
 		## 9. Push the commit build status to the GitHub build status repo. 

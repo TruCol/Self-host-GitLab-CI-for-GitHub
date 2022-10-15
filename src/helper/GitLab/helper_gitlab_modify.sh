@@ -1056,7 +1056,7 @@ push_changes_to_gitlab() {
 
             else
               echo "ERROR, the content in the GitHub branch is not exactly"
-			        "copied into the GitLab branch, even when excluding the .git directory."
+			        echo "copied into the GitLab branch, even when excluding the .git directory."
               exit 11
             fi
 

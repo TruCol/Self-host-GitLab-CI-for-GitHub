@@ -131,9 +131,12 @@ download_github_repo_on_which_to_run_ci() {
 
 
 #######################################
-# Copies the GitHub branches that have a yaml file, to the local copy of the
-# GitLab repository.
-#
+# 0. First verifies that the GitHub repository on which the CI is ran, exists.
+# 1. Then loops over the branches of that repository, and checkes out the 
+# latest commit of each branch.
+# 2. Then it checks whether the commit contains a GitLab CI yaml. If it does:
+# 2.1 It checks whether the commit sha already has a GitLab build status.
+# 
 # 
 # Local variables:
 #  
@@ -190,8 +193,6 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 			exit 4
 		fi
 		
-		
-		
 		# 5. If the branch contains a gitlab yaml file then
 		# TODO: change to return a list of branches that contain GitLab 
 		# yaml files, such that this function can get tested, instead 
@@ -205,31 +206,33 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 			exists="$(file_exists $commit_filename)"
 			
 			if [ "$(file_exists $commit_filename)" == "NOTFOUND" ]; then
-			#if [ "$does_not_yet_have_a_build_status" == "TRUE" ]; then
-				#echo "The commit:$current_branch_github_commit_sha does not yet have a build status."
-				if [[ "$branch_contains_yaml" == "FOUND" ]]; then
-					printf "\n4.$i.5 Has GitLab yml, no build status yet."
-					copy_github_branch_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$organisation"
-					printf "\n4.$i.6 DONE WITH CI.\n\n"
-				fi
-			else
-				printf "\n4.$i.7 The following commit already has GitLab build status in GitHub:\n$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha "
-			fi
-		fi
-		
-		# 4.b Export the evaluated GitHub commit SHA to GitHub build 
-		# status repo.
-		printf "\n4.$i.8 copy_evaluated_commit_to_github_status_repo :$github_repo_name, branch:${github_branches[i]}"
-		copy_evaluated_commit_to_github_status_repo "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$organisation"
+				printf "\n4.$i.2 Commit file: $commit_filename"
+				printf "has GitLab yml, no build status yet. Running GitLab CI on:$github_repo_name-${github_branches[i]}"
+				
+				create_empty_build_status_txt "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$organisation"
 
-		printf "\n4.$i.9 RUN_CI_ON_GITHUB_REPO push_commit_build_status_in_github_status_repo_to_github"
-		## 4.c Push the evaluated commit to the GitHub build status repo.
-		# TODO determine whether the push should be completed.
-		#push_commit_build_status_in_github_status_repo_to_github "$github_username"
-		printf "\n4.$i.10 skipped pushing. \n\n"
+				copy_github_branch_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$organisation"
+				printf "\n4.$i.3 Completed running GitLab CI on repo."
+
+				# 4.b Export the evaluated GitHub commit SHA to GitHub build status repo.
+				add_commit_sha_to_evaluated_list "$current_branch_github_commit_sha" "$EVALUATED_COMMITS_WITH_CI_LIST_FILENAME"
+
+				# TODO: copy build status to build_status txt.
+			else
+				printf "\n4.$i.4 The following commit already has GitLab build status in GitHub:\n$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha "
+			fi
+
+			# 4.b Export the evaluated GitHub commit SHA to evaluated_commits 
+			# list in the GitHub build status repo.
+			add_commit_sha_to_evaluated_list "$current_branch_github_commit_sha" "$EVALUATED_COMMITS_LIST_FILENAME"
+		fi
 	done
+		
+
+	## 4.c Push the evaluated commit to the GitHub build status repo.
+	# TODO determine whether the push should be completed.
+	push_commit_build_status_in_github_status_repo_to_github "$github_username"
 	printf "DONE"
-	
 }
 
 

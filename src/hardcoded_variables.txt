@@ -40,6 +40,7 @@ SOURCE_FOLDERPATH=src/$SOURCE_FOLDERNAME
 GITHUB_STATUS_WEBSITE_GLOBAL=gitlab-ci-build-statuses
 PUBLIC_GITHUB_TEST_REPO_GLOBAL=sponsor_example
 EVALUATED_COMMITS_LIST_FILENAME=evaluated_commits.txt
+EVALUATED_COMMITS_WITH_CI_LIST_FILENAME=evaluated_commits_with_ci.txt
 
 # Specify Mirror folder
 MIRROR_LOCATION=src/mirrors

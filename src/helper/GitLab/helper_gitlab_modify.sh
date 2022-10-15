@@ -813,7 +813,7 @@ commit_changes_to_gitlab() {
               if [[ "$(git_has_changes "$MIRROR_LOCATION/GitLab/$github_repo_name")" == "FOUND" ]]; then
 
                 # Commit the changes to GitLab.
-                cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit -m \"$github_commit_sha\"
+                cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit -m \"$github_commit_sha\"  > /dev/null 2>&1 &
                 cd ../../../..
               fi
 

@@ -178,7 +178,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 	# 4. Loop over the GitHub branches by checking each branch out.
 	printf "\n4. Loop over each GitHub branch and run the GitLab CI on it."
 	for i in "${!github_branches[@]}"; do
-		printf "\n4.$i next branch: ${github_branches[i]}"
+		printf "\n\n4.$i next branch: ${github_branches[i]}"
 		
 		# Check if branch is found in local GitHub repo.
 		printf "\n4.$i.1 Checkout a local GitHub branch.\n"
@@ -219,7 +219,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 
 				# TODO: copy build status to build_status txt.
 			else
-				printf "\n4.$i.4 The following commit already has GitLab build status in GitHub:\n$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha "
+				printf "4.$i.4 The following commit already has GitLab build status in GitHub:\n$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha "
 			fi
 
 			# 4.b Export the evaluated GitHub commit SHA to evaluated_commits 

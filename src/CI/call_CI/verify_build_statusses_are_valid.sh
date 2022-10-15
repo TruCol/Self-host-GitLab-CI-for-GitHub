@@ -15,7 +15,8 @@
 # Returns:
 #  0 If function was evaluated succesfull.
 # Outputs:
-#  
+#  FOUND - if the commit sha has a valid value.
+#  NOTFOUND - if the commit sha does not have a valid value.
 #######################################
 # Run with: 
 # bash -c 'source src/import.sh src/CI/call_CI/verify_build_statusses_are_valid.sh && commit_build_status_txt_is_valid hiveminds renamed_test_repo no_attack_in_filecontent 51d8783648feebf7e793c010d5878e08360e856b'
@@ -57,6 +58,29 @@ commit_build_status_txt_is_valid(){
             echo "NOTFOUND"
         fi
     fi
+}
+
+#######################################
+# Loops over all the commit build status txts in the GitHub repository with the
+# GitLab build statusses, and deletes all the txts with invalid build statusses.
+# Then removes those from BOTH evaluated lists. And adds them to a "erroneous"
+# list.
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+#######################################
+# Run with: 
+# bash -c "source src/import.sh src/CI/call_CI/verify_build_statusses_are_valid.sh && assert_commit_build_status_txt_is_valid
+delete_invalid_commit_txts(){
+    echo "pass"
 }
 
 #######################################

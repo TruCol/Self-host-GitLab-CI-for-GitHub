@@ -228,11 +228,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 		fi
 	done
 		
-
-	## 4.c Push the evaluated commit to the GitHub build status repo.
-	# TODO determine whether the push should be completed.
 	push_commit_build_status_in_github_status_repo_to_github "$github_username"
-	printf "DONE"
 }
 
 
@@ -642,30 +638,37 @@ copy_commit_build_status_to_github_status_repo() {
 	
 }
 
+
 # bash -c "source src/import.sh && push_commit_build_status_in_github_status_repo_to_github a-t-0"
 push_commit_build_status_in_github_status_repo_to_github() {
 	
+	# Verify the mirror location exists
+	manual_assert_not_equal "$MIRROR_LOCATION" ""
+	manual_assert_dir_exists "$MIRROR_LOCATION"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub"
+
 	# Verify the Build status repository is cloned.
-	printf "\n Cloning $GITHUB_STATUS_WEBSITE_GLOBAL repo"
-	repo_was_cloned=$(verify_github_repository_is_cloned "$GITHUB_STATUS_WEBSITE_GLOBAL" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")
-	manual_assert_equal "$repo_was_cloned" "FOUND"
-	printf "\n $GITHUB_STATUS_WEBSITE_GLOBAL repo was cloned"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 
 	# 12. Verify there have been changes made. Only push if changes are added."
-	printf "\n has changes=$(git_has_changes $MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL)"
-	if [[ "$(git_has_changes "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")" == "FOUND" ]]; then
-		printf "\n commit_changes from: $MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL."
+	local build_status_repo_has_changes="$(git_has_changes "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL")"
+	if [[ "$build_status_repo_has_changes" == "FOUND" ]]; then
 		commit_changes "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL" "New_build_status."
 		
 		# Verify ssh-access
-		#has_access="$(check_quick_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
+		has_quick_ssh_access="$(check_quick_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 		
-		# 13. Push the changes to the GitHub build status repository.
-		#push_to_github_repository "$github_username" "$has_access" "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
-		printf "\n push_to_github_repository_with_ssh from: $MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL."
-		push_to_github_repository_with_ssh "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+		if [[ "$has_quick_ssh_access" == "HAS_QUICK_SSH_ACCESS" ]]; then
+			push_to_github_repository_with_ssh "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+			# TODO 14. Verify the changes are pushed to the GitHub build status repository.
+		else
+			echo "ERROR, the machine does not have ssh access to GitHub, so "
+			echo "the new build status is not pushed to:$GITHUB_STATUS_WEBSITE_GLOBAL"
+			exit 11
+		fi
+	else
+		printf "\n No new build statusses were found."
 	fi
 	
-	printf "DONE PUSHING"
-	# TODO 14. Verify the changes are pushed to the GitHub build status repository.
+	
 }

@@ -13,12 +13,22 @@ github_repo_exists_locally(){
 
 # Structure:Github_status
 # check if repo is private
-# skip
+# TODO: delete this function and replace it with:
+# Verify the mirror location exists
+# manual_assert_not_equal "$MIRROR_LOCATION" ""
+# manual_assert_dir_exists "$MIRROR_LOCATION"
+# manual_assert_dir_exists "$MIRROR_LOCATION/GitHub"
+# 
+# # Verify the Build status repository is cloned.
+# manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 verify_github_repository_is_cloned() {
 	
 	if [[ "$1" != "" ]] && [[ "$2" != "" ]]; then
 		github_repository="$1"
 		target_directory="$2"
+	else
+		echo "Error, arguments are empty"
+		exit 10
 	fi
 	
 	local found_repo=$(dir_exists "$target_directory")

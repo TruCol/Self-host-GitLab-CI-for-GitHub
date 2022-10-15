@@ -151,7 +151,16 @@ delete_invalid_commit_txts(){
 # Run with: 
 # bash -c "source src/import.sh src/CI/call_CI/verify_build_statusses_are_valid.sh && assert_commit_build_status_txt_is_valid
 assert_commit_build_status_txt_is_valid(){
-    echo "pass"
+    local organisation="$1"
+    local github_repo_name="$2"
+    local github_branch_name="$3"
+    local commit_sha="$4"
+
+    if [ "$(commit_build_status_txt_is_valid "$organisation" "$github_repo_name" "$github_branch_name" "$commit_sha")" != "FOUND" ]; then
+        echo "Error, the commit:$github_repo_name/$github_branch_name/$commit_sha"
+        echo "Does not have a vallid build status file."
+        exit 11
+    fi
 }
 
 #######################################

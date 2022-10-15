@@ -64,7 +64,6 @@ run_ci_on_all_repositories_of_user(){
 run_ci_on_github_repo() {
 	github_username="$1"
 	github_repo_name="$2"
-	local organisation="$3"
 	
 	# 9. Verify the Build status repository is cloned.
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
@@ -83,7 +82,7 @@ run_ci_on_github_repo() {
 	# TODO: Store log file output if a repo (and/or branch) have been skipped.
 	# TODO: In that log file, inlcude: time, which user, which repo, which branch, why.
 	printf "\n2. Exporting GitLab CI result back to a GitHub repository."
-	copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "$organisation"
+	copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name"
 	printf "\n4. Done with CI.\n"
 
 }
@@ -149,6 +148,7 @@ download_github_repo_on_which_to_run_ci() {
 # Outputs:
 #  
 # TODO(a-t-0): Write tests for this method.
+# TODO: be consistent in using github_username vs organisation!
 #######################################
 # Run with: 
 # bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && copy_github_branches_with_yaml_to_gitlab_repo a-t-0 sponsor_example"
@@ -156,7 +156,6 @@ download_github_repo_on_which_to_run_ci() {
 copy_github_branches_with_yaml_to_gitlab_repo() {
 	local github_username="$1"
 	local github_repo_name="$2"
-	local organisation="$3"
 	
 	# Verify GitHub repository on which the CI is ran, exists locally.
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
@@ -202,21 +201,22 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 		
 			# TODO: check if github commit already has CI build status
 			# TODO: allow overriding this check to enforce the CI to run again on this commit.
-			commit_filename="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$organisation/$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha.txt"
+			commit_filename="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_username/$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha.txt"
 			exists="$(file_exists $commit_filename)"
 			
 			if [ "$(file_exists $commit_filename)" == "NOTFOUND" ]; then
 				printf "\n4.$i.2 Commit file: $commit_filename"
 				printf "\nhas GitLab yml, no build status yet. Running GitLab CI on:$github_repo_name-${github_branches[i]}"
-				create_empty_build_status_txt "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$organisation"
+				create_empty_build_status_txt "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$github_username"
 
-				copy_github_branch_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$organisation"
+				# TODO: rename
+				copy_github_branch_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$github_username"
 				printf "\n4.$i.3 Completed running GitLab CI on repo."
 
 				# 4.b Export the evaluated GitHub commit SHA to GitHub build status repo.
 				add_commit_sha_to_evaluated_list "$current_branch_github_commit_sha" "$EVALUATED_COMMITS_WITH_CI_LIST_FILENAME"
 
-				# TODO: copy build status to build_status txt.
+				assert_commit_build_status_txt_is_valid "$github_username" "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha"
 			else
 				printf "4.$i.4 The following commit already has GitLab build status in GitHub:\n$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha "
 			fi
@@ -293,6 +293,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 		# 5.8 Commit the changes to GitLab.
 		printf "\n4.x.6.7 Commit the content of the GitHub branch, that is copied to the GitLab branch, to GitLab."
 		manual_assert_not_equal "" "$github_commit_sha"
+		
 		commit_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
 		# TODO: verify the changes are committed correctly
 

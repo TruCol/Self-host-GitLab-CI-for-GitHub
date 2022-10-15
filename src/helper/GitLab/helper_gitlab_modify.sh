@@ -1047,7 +1047,7 @@ push_changes_to_gitlab() {
               cd ../../../..
               #read -p "Done path"
               # Get the path after executing the command (to verify it is
-			  # restored correctly after).
+			        # restored correctly after).
               local pwd_after
               pwd_after="$PWD"
 
@@ -1055,9 +1055,8 @@ push_changes_to_gitlab() {
               path_before_equals_path_after_command "$pwd_before" "$pwd_after"
 
             else
-              echo "ERROR, the content in the GitHub branch is not exactly
-			  copied into the GitLab branch, even when excluding the .git directory."
-			  END
+              echo "ERROR, the content in the GitHub branch is not exactly"
+			        "copied into the GitLab branch, even when excluding the .git directory."
               exit 11
             fi
 

@@ -78,7 +78,8 @@ copy_github_commits_with_yaml_to_gitlab_repo() {
 		
 	# 4.b Export the evaluated GitHub commit SHA to GitHub build 
 	# status repo.
-	create_build_status_txt_and_add_sha_to_evaluated_list "$github_repo_name" "$github_branch" "$github_commit_sha" "$organisation"
+	create_empty_build_status_txt "$github_repo_name" "$github_branch" "$github_commit_sha" "$organisation"
+	add_commit_sha_to_evaluated_list "$github_commit_sha" "$EVALUATED_COMMITS_LIST_FILENAME"
 		
 }
 

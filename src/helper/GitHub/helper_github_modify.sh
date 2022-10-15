@@ -169,7 +169,7 @@ git_pull_github_repo() {
 # TODO(a-t-0): Write tests for this method.
 #######################################
 # Run with:
-# bash -c "source src/import.sh && create_build_status_txt_and_add_sha_to_evaluated_list sponsor_example main somecommit_sha hiveminds"
+# bash -c "source src/import.sh && create_empty_build_status_txt sponsor_example somebranch somesha a-t-0
 create_empty_build_status_txt() {
 	local github_repo_name="$1"
 	local github_branch_name="$2"
@@ -236,7 +236,7 @@ create_empty_build_status_txt() {
 # it as a "new" commit if it comes from a different repo and/or branch.
 #######################################
 # Run with:
-# bash -c "source src/import.sh && add_commit_sha_to_evaluated_list some_sha some_list"
+# bash -c "source src/import.sh && add_commit_sha_to_evaluated_list some_sha EVALUATED_COMMITS_LIST_FILENAME"
 add_commit_sha_to_evaluated_list() {
 	local github_commit_sha="$1"
 	local list_filename="$2"

@@ -99,7 +99,7 @@ setup() {
 	assert_equal "$actual_result" "$github_branch_name"
 	
 	# Create the empty GitLab repository (deletes any existing GitLab repos with same name).
-	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
+	create_empty_gitlab_repository_v0 "$gitlab_repo_name" "$gitlab_username"
 	
 	# Clone the GitLab repository from the GitLab server
 	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"
@@ -124,14 +124,14 @@ setup() {
 	assert_equal "$gitlab_username" "root"
 	
 	# Create the empty GitLab repository.
-	create_empty_repository_v0 "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$gitlab_username"
+	create_empty_gitlab_repository_v0 "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$gitlab_username"
 	
 	# Verify the repository is created.
 	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
 	assert_equal "$gitlab_repo_exists" "FOUND"
 }
 
-@test "Test whether an empty repository is created with create_empty_repository_v0, if it did not exist in advance." {
+@test "Test whether an empty repository is created with create_empty_gitlab_repository_v0, if it did not exist in advance." {
 	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
@@ -154,7 +154,7 @@ setup() {
 	fi
 	
 	# Create the empty GitLab repository.
-	create_empty_repository_v0 "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$gitlab_username"
+	create_empty_gitlab_repository_v0 "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$gitlab_username"
 	
 	# Verify the repository is created.
 	gitlab_repo_exists=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
@@ -310,7 +310,7 @@ setup() {
 	
 	
 	# Create GitLab repo in server
-	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
+	create_empty_gitlab_repository_v0 "$gitlab_repo_name" "$gitlab_username"
 	
 	# Verify the repo is created.
 	# TODO: fix error
@@ -350,7 +350,7 @@ setup() {
 	assert_equal "$actual_result" "$github_branch_name"
 	
 	# Create the empty GitLab repository (deletes any existing GitLab repos with same name).
-	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
+	create_empty_gitlab_repository_v0 "$gitlab_repo_name" "$gitlab_username"
 	
 	# Clone the GitLab repository from the GitLab server
 	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"
@@ -398,7 +398,7 @@ setup() {
 	assert_equal "$gitlab_repo_exists" "NOTFOUND"
 	
 	# Create GitLab repo in server
-	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
+	create_empty_gitlab_repository_v0 "$gitlab_repo_name" "$gitlab_username"
 	
 	# Verify the repo is created.
 	output_after_creation=$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")
@@ -436,7 +436,7 @@ setup() {
 	assert_equal "$actual_result" "$github_branch_name"
 	
 	# Create the empty GitLab repository (deletes any existing GitLab repos with same name).
-	create_empty_repository_v0 "$gitlab_repo_name" "$gitlab_username"
+	create_empty_gitlab_repository_v0 "$gitlab_repo_name" "$gitlab_username"
 	
 	# Clone the GitLab repository from the GitLab server
 	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"

@@ -73,7 +73,7 @@ setup() {
 	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 
-	create_empty_repository_v0 "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$gitlab_username"
+	create_empty_gitlab_repository_v0 "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$gitlab_username"
 	
 	# Verify the repo is created.
 	output_after_creation=$(gitlab_mirror_repo_exists_in_gitlab "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
@@ -89,7 +89,7 @@ setup() {
 	assert_equal "$gitlab_username" "root"
 	
 	test_repo_name="extra-project"
-	create_empty_repository_v0 "$test_repo_name" "$gitlab_username"
+	create_empty_gitlab_repository_v0 "$test_repo_name" "$gitlab_username"
 	output_after_creation=$(gitlab_mirror_repo_exists_in_gitlab "$test_repo_name")
 	assert_equal "$output_after_creation" "FOUND"
 	deletion_output=$(delete_gitlab_repo_if_it_exists "$test_repo_name")
@@ -118,7 +118,7 @@ setup() {
 	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	assert_equal "$gitlab_username" "root"
 	
-	create_empty_repository_v0 "non-existing-repository" "$gitlab_username" 
+	create_empty_gitlab_repository_v0 "non-existing-repository" "$gitlab_username" 
 	output=$(gitlab_mirror_repo_exists_in_gitlab "non-existing-repository")
 	assert_equal "$output" "FOUND"
 }

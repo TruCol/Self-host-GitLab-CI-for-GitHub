@@ -105,7 +105,7 @@ copy_github_commit_with_yaml_to_gitlab_repo() {
 	# 5.1 Create the empty GitLab repo.
 	# Create the empty GitLab repository (deletes any existing GitLab repos with same name).
 	# TODO: determine what happens if it already exists in GitLab
-	create_empty_repository_v0 "$gitlab_repo_name" "$GITLAB_SERVER_ACCOUNT_GLOBAL"
+	create_empty_gitlab_repository_v0 "$gitlab_repo_name" "$GITLAB_SERVER_ACCOUNT_GLOBAL"
 	
 	# 5.2 Clone the empty Gitlab repo from the GitLab server
 	get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$gitlab_repo_name"

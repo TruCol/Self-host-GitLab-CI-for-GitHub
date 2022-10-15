@@ -207,8 +207,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 			
 			if [ "$(file_exists $commit_filename)" == "NOTFOUND" ]; then
 				printf "\n4.$i.2 Commit file: $commit_filename"
-				printf "has GitLab yml, no build status yet. Running GitLab CI on:$github_repo_name-${github_branches[i]}"
-				
+				printf "\nhas GitLab yml, no build status yet. Running GitLab CI on:$github_repo_name-${github_branches[i]}"
 				create_empty_build_status_txt "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$organisation"
 
 				copy_github_branch_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$organisation"
@@ -248,14 +247,11 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	# Get GitLab server url from credentials file.
 	local gitlab_website_url=$(echo "$GITLAB_SERVER_HTTP_URL" | tr -d '\r')
 	
-	
-	# Verify the get_current_github_branch function returns the correct branch.
-	printf "\n4.x.6.1 Verify if the local GitHub branch returns the correct branch."
+	 Verify the get_current_github_branch function returns the correct branch.
 	actual_result="$(get_current_github_branch "$github_repo_name" "$github_branch_name" "GitHub")"
 	manual_assert_equal "$actual_result" "$github_branch_name"
 	
 	# Checkout branch, if branch is found in local GitHub repo.
-	printf "\n4.x.6.2 Verify if the local GitHub branch indeed contains a GitLab yaml."
 	actual_result="$(verify_github_branch_contains_gitlab_yaml "$github_repo_name" "$github_branch_name" "GitHub")"
 	manual_assert_equal "$actual_result" "FOUND"
 	
@@ -263,7 +259,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	# Create the empty GitLab repository (deletes any existing GitLab repos with same name).
 	printf "\n4.x.6.3 Create a new empty repository in GitLab."
 	# TODO: determine what happens if it already exists in GitLab
-	create_empty_repository_v0 "$gitlab_repo_name" "$GITLAB_SERVER_ACCOUNT_GLOBAL"
+	create_empty_gitlab_repository_v0 "$gitlab_repo_name" "$GITLAB_SERVER_ACCOUNT_GLOBAL"
 	
 	# 5.2 Clone the empty Gitlab repo from the GitLab server
 	printf "\n4.x.6.3 Clone the new empty GitLab repository."

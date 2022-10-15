@@ -247,7 +247,7 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 	# Get GitLab server url from credentials file.
 	local gitlab_website_url=$(echo "$GITLAB_SERVER_HTTP_URL" | tr -d '\r')
 	
-	 Verify the get_current_github_branch function returns the correct branch.
+	# Verify the get_current_github_branch function returns the correct branch.
 	actual_result="$(get_current_github_branch "$github_repo_name" "$github_branch_name" "GitHub")"
 	manual_assert_equal "$actual_result" "$github_branch_name"
 	
@@ -319,8 +319,9 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 		#delete_file_if_it_exists $TMP_GITLAB_BUILD_STATUS_FILEPATH
 		# assert status file is deleted
 		#manual_assert_file_does_not_exists $TMP_GITLAB_BUILD_STATUS_FILEPATH
-
+		read -p "Before Manage"
 		manage_get_gitlab_ci_build_status $github_repo_name $github_branch_name $gitlab_commit_sha
+		read -p "After Manage"
 		#read -p "Got Build status, check what it is in file. MANAGE"
 		if [ "$(file_exists $TMP_GITLAB_BUILD_STATUS_FILEPATH)" == "FOUND" ]; then
 		
@@ -367,10 +368,10 @@ copy_github_branch_with_yaml_to_gitlab_repo() {
 # TODO: 5.9 Verify the CI is running for this commit.
 
 manage_get_gitlab_ci_build_status() {
-	github_repo_name="$1"
-	github_branch_name="$2"
-	gitlab_commit_sha="$3"
-	count=0
+	local github_repo_name="$1"
+	local github_branch_name="$2"
+	local gitlab_commit_sha="$3"
+	local count=0
 	
 	# Set default built status to unknown for starters
 	echo "unknown" > "$TMP_GITLAB_BUILD_STATUS_FILEPATH"
@@ -422,18 +423,18 @@ rebuild_get_gitlab_ci_build_status() {
 	
 	#printf "\n\n getting pipelines via curl and gitlab pac. "
 	# curl --header "PRIVATE-TOKEN: <your_access_token>" "http://127.0.0.1/api/v4/projects/1/pipelines"
-	pipelines=$(curl --header "PRIVATE-TOKEN: $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "http://127.0.0.1/api/v4/projects/$GITLAB_SERVER_ACCOUNT_GLOBAL%2F$gitlab_repo_name/pipelines")
+	local pipelines=$(curl --silent --header "PRIVATE-TOKEN: $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "http://127.0.0.1/api/v4/projects/$GITLAB_SERVER_ACCOUNT_GLOBAL%2F$gitlab_repo_name/pipelines")
 	#printf "pipelines=$pipelines"
 	# get build status from pipelines
 	#printf "\n\n get job from pipeline json using jq "
-	job=$(echo "$pipelines" | jq -r 'map(select(.sha == "'"$gitlab_commit_sha"'"))')
+	local job=$(echo "$pipelines" | jq -r 'map(select(.sha == "'"$gitlab_commit_sha"'"))')
 	#printf "job=$job"
 	#gitlab_ci_status="$(echo "$job" | jq ".[].status")" | tr -d '"')
 	#printf "\n\n get gitlab_ci_status from job json from jq.  "
-	gitlab_ci_status=$(echo "$(echo $job | jq ".[].status")" | tr -d '"')
+	local gitlab_ci_status=$(echo "$(echo $job | jq ".[].status")" | tr -d '"')
 	#printf "gitlab_ci_status=$gitlab_ci_status"
 	#printf "\n\n get parsed github status unparsed gitlab_ci_status=$gitlab_ci_status.  "
-	parsed_github_status="$(parse_gitlab_ci_status_to_github_build_status "$gitlab_ci_status")"
+	local parsed_github_status="$(parse_gitlab_ci_status_to_github_build_status "$gitlab_ci_status")"
 	#printf "\n\n get parsed_github_status $parsed_github_status.  "
 	echo "$parsed_github_status"
 }

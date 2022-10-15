@@ -799,14 +799,16 @@ commit_changes_to_gitlab() {
             copy_github_files_and_folders_to_gitlab "$MIRROR_LOCATION/GitHub/$github_repo_name" "$MIRROR_LOCATION/GitLab/$github_repo_name"
 
             # Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
-            comparison_result="$(two_folders_are_identical_excluding_subdir $MIRROR_LOCATION/GitHub/$github_repo_name $MIRROR_LOCATION/GitLab/$github_repo_name .git)"
+            read -p "Before comparison_result"
+            local comparison_result="$(two_folders_are_identical_excluding_subdir $MIRROR_LOCATION/GitHub/$github_repo_name $MIRROR_LOCATION/GitLab/$github_repo_name .git)"
+            read -p "After comparison_result"
 
             # Verify the files were correctly copied from GitHub branch to GitLab branch.
             if [ "$comparison_result" == "IDENTICAL" ]; then
               #echo "IDENTICAL"
 
               # Get the path before executing the command (to verify it is restored correctly after).
-              pwd_before="$PWD"
+              local pwd_before="$PWD"
 
               if [[ "$(git_has_changes "$MIRROR_LOCATION/GitLab/$github_repo_name")" == "FOUND" ]]; then
 
@@ -816,7 +818,7 @@ commit_changes_to_gitlab() {
               fi
 
               # Get the path after executing the command (to verify it is restored correctly after).
-              pwd_after="$PWD"
+              local pwd_after="$PWD"
 
               # Verify the current path is the same as it was when this function started.
               path_before_equals_path_after_command "$pwd_before" "$pwd_after"
@@ -1139,10 +1141,10 @@ delete_all_gitlab_folders() {
 	for f in $source_dir
 	do
 	if [ -d "$f" ]; then
+    # Do not delete the ".", "..", and ".git" folders.
 		if [[ "${f: -2}" != "/." && "${f: -3}" != "/.." && "${f: -5}" != "/.git" ]]; then
+      # Delete all other folders in that directory.
 			rm -r "$f"
-		else
-			echo "Dir EXCLUDE FROM DELETE $f"
 		fi
 	fi
 	done
@@ -1202,11 +1204,9 @@ copy_all_gitlab_folders() {
 	for f in $source_dir
 	do
 	if [ -d "$f" ]; then
+    # Do not delete the ".", "..", and ".git" folders.
 		if [[ "${f: -2}" != "/." && "${f: -3}" != "/.." && "${f: -5}" != "/.git" ]]; then
 			cp -r "$f" "$target_dir"
-			#cp "$f" "$target_dir"
-		else
-			echo "Dir EXCLUDE FROM COPY $f"
 		fi
 	fi
 	done

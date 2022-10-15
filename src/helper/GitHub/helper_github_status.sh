@@ -100,10 +100,10 @@ get_git_branches() {
 # Structure:Gitlab_status
 # TODO: remove above 20 lines with this fucntion
 get_commit_sha_of_branch() {
-	desired_branch=$1
-	repository_name=$2
-	gitlab_username=$3
-	personal_access_token=$4
+	local desired_branch=$1
+	local repository_name=$2
+	local gitlab_username=$3
+	local personal_access_token=$4
 	
 	# Get the branches of the GitLab CI resositories, and their latest commit.
 	# TODO: switch server name

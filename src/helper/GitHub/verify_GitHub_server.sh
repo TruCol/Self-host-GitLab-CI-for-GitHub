@@ -35,50 +35,34 @@ assert_github_build_status_is_set_correctly() {
     local getting_output_json=$(GET https://api.github.com/repos/"$github_username"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
         
     # Verify the build status json/response is not empty.
-    if [ "$getting_output_json" == "" ] || [ "$getting_output_json" == " " ]; then
-        echo "Error, the output of getting the GitHub commit build status is"
-        echo "empty:$getting_output_json."
+    if [ "$getting_output_json" == "" ] || [ "$getting_output_json" == " " ] || [ "$getting_output_json" == "[]" ]; then
+        printf "Error, the output of getting the GitHub commit build status is empty:\n"
+        printf "$getting_output_json.\n"
         exit 5
     else
         # Extract the urls from the json response.
         local urls_in_json="$(echo "${getting_output_json[0]}" | jq ".[].url")"
         local state_in_json="$(echo "${getting_output_json[0]}" | jq ".[].state")"
-        echo "urls_in_json=$urls_in_json"
-        echo "state_in_json=$state_in_json"
-
+        
         local expected_url_entry='"url":"'"$expected_url"'",'
         local expected_state_entry='"state":"'"$commit_build_status"'",'
-        echo "expected_url_entry=$expected_url_entry"
-        echo "expected_state_entry=$expected_state_entry"
-        echo "getting_output_json0=${getting_output_json[0]}"
+
         local found_url_entry="$(string_in_lines "$expected_url_entry" "${getting_output_json[0]}")"
         local found_state_entry="$(string_in_lines "$expected_state_entry" "${getting_output_json[0]}")"
-        echo "found_url_entry=$found_url_entry"
-        echo "found_state_entry=$found_state_entry"
-
-        # Verify the expected url and state are found in the GitHub response.
-        local found_urls="$(string_in_lines "$expected_url" "${urls_in_json}")"
-	    local found_state="$(string_in_lines "$expected_state" "${getting_output_json}")"
         
-        if [ "$found_urls" != "FOUND" ]; then
+        # Verify the expected url and state are found in the GitHub response.
+        if [ "$found_url_entry" != "FOUND" ]; then
             # shellcheck disable=SC2059
-		    printf "Error, GitHub commit status Get request did not contain the"
-            printf "expected url:"
-            printf "$expected_url"
-            printf "Instead, the getting output was:"
-            printf "$getting_output_json"
-            printf "And urls_in_json="
-            printf "$urls_in_json."
+		    printf "Error, GitHub commit status Get request did not contain expected_url_entry:\n"
+            printf "$expected_url_entry\n\n"
+            printf "Instead, the getting output was:\n"
+            printf "${getting_output_json[0]}\n\n"
 		    exit 6
-        elif [ "$found_state" != "FOUND" ]; then
-            printf "Error, the status of the repo did not contain:$expected_state"
-            printf "expected url:"
-            printf "$expected_url"
-            printf "Instead, the getting output was:"
-            printf "$getting_output_json"
-            printf "And urls_in_json="
-            printf "$urls_in_json"
-            printf "Instead, and urls_in_json=$found_state."
+        elif [ "$found_state_entry" != "FOUND" ]; then
+            printf "Error, the status of the repo did not contain expected_state_entry:\n"
+            printf "$expected_state_entry\n\n"
+            printf "Instead, the getting output was:\n"
+            printf "${getting_output_json[0]}\n\n"
 		    exit 7
         fi
     fi           

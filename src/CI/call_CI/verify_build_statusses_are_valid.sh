@@ -159,6 +159,19 @@ assert_commit_build_status_txt_is_valid(){
     local github_repo_name="$2"
     local github_branch_name="$3"
     local commit_sha="$4"
+    echo "organisation=$organisation"
+    echo "github_repo_name=$github_repo_name"
+    echo "github_branch_name=$github_branch_name"
+    echo "commit_sha=$commit_sha"
+
+    # Verify the commit_sha length. TODO: remove duplicate.
+    if [ "${#commit_sha}" != 40 ]; then
+        echo "Error, the commit sha does not have length 40:"
+        echo "$commit_sha"
+        echo "$build_status_txt"
+        exit 5
+    fi
+
 
     local commit_build_status_is_valid="$(commit_build_status_txt_is_valid "$organisation" "$github_repo_name" "$github_branch_name" "$commit_sha")"
     if [ "$commit_build_status_is_valid" != "FOUND" ]; then

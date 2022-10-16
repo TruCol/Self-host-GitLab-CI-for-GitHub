@@ -45,7 +45,7 @@ run_ci_on_all_repositories_of_user(){
 		echo "$github_repository"
 
 		# TODO: redo with timeout.
-		run_ci_on_github_repo "$github_organisation_or_username" "$github_repository" "$github_organisation_or_username"
+		run_ci_on_github_repo "$github_organisation_or_username" "$github_repository"
 	done
 
 	# push build status icons to GitHub build status repository.
@@ -56,11 +56,11 @@ run_ci_on_all_repositories_of_user(){
 # First:
 # bash -c "source src/import.sh helper_github_modify.sh && get_build_status_repository_from_github"
 # Then:
-# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo a-t-0 sponsor_example a-t-0"
-# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds sponsor_example hiveminds"
-# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds renamed_test_repo hiveminds"
-# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo trucol trucol trucol"
-# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo trucol checkstyle-for-bash trucol"
+# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo a-t-0 sponsor_example"
+# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds sponsor_example"
+# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds renamed_test_repo"
+# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo trucol trucol"
+# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo trucol checkstyle-for-bash"
 run_ci_on_github_repo() {
 	github_username="$1"
 	github_repo_name="$2"
@@ -177,6 +177,7 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 	# 4. Loop over the GitHub branches by checking each branch out.
 	printf "\n4. Loop over each GitHub branch and run the GitLab CI on it."
 	for i in "${!github_branches[@]}"; do
+		local github_branch=${github_branches[i]}
 		printf "\n\n4.$i next branch: ${github_branches[i]}"
 		
 		# Check if branch is found in local GitHub repo.
@@ -191,7 +192,6 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 			echo "ERROR, github_repo_name=$github_repo_name, branch=${github_branches[i]} in folder GitHub, the commit is empty:$current_branch_github_commit_sha"
 			exit 4
 		fi
-		
 		# 5. If the branch contains a gitlab yaml file then
 		# TODO: change to return a list of branches that contain GitLab 
 		# yaml files, such that this function can get tested, instead 
@@ -203,20 +203,19 @@ copy_github_branches_with_yaml_to_gitlab_repo() {
 			# TODO: allow overriding this check to enforce the CI to run again on this commit.
 			commit_filename="$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$github_username/$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha.txt"
 			exists="$(file_exists $commit_filename)"
-			
 			if [ "$(file_exists $commit_filename)" == "NOTFOUND" ]; then
 				printf "\n4.$i.2 Commit file: $commit_filename"
 				printf "\nhas GitLab yml, no build status yet. Running GitLab CI on:$github_repo_name-${github_branches[i]}"
 				create_empty_build_status_txt "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$github_username"
-
-				# TODO: rename
+				
+				#TODO: determine why the ${github_branches[i]} var is reset below. (perhaps due to error)
 				copy_github_branch_with_yaml_to_gitlab_repo_and_get_build_status "$github_username" "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha" "$github_username"
 				printf "\n4.$i.3 Completed running GitLab CI on repo."
 
 				# 4.b Export the evaluated GitHub commit SHA to GitHub build status repo.
 				add_commit_sha_to_evaluated_list "$current_branch_github_commit_sha" "$EVALUATED_COMMITS_WITH_CI_LIST_FILENAME"
-
-				assert_commit_build_status_txt_is_valid "$github_username" "$github_repo_name" "${github_branches[i]}" "$current_branch_github_commit_sha"
+				
+				assert_commit_build_status_txt_is_valid "$github_username" "$github_repo_name" "$github_branch" "$current_branch_github_commit_sha"
 			else
 				printf "4.$i.4 The following commit already has GitLab build status in GitHub:\n$github_repo_name/${github_branches[i]}/$current_branch_github_commit_sha "
 			fi
@@ -318,9 +317,8 @@ copy_github_branch_with_yaml_to_gitlab_repo_and_get_build_status() {
 		#delete_file_if_it_exists $TMP_GITLAB_BUILD_STATUS_FILEPATH
 		# assert status file is deleted
 		#manual_assert_file_does_not_exists $TMP_GITLAB_BUILD_STATUS_FILEPATH
-		read -p "Before Manage"
 		manage_get_gitlab_ci_build_status $github_repo_name $github_branch_name $gitlab_commit_sha
-		read -p "After Manage"
+
 		#read -p "Got Build status, check what it is in file. MANAGE"
 		if [ "$(file_exists $TMP_GITLAB_BUILD_STATUS_FILEPATH)" == "FOUND" ]; then
 		

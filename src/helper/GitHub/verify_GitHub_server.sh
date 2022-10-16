@@ -33,9 +33,9 @@ assert_github_build_status_is_set_correctly() {
     local getting_output_json=$(GET https://api.github.com/repos/"$github_username"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
         
     # Verify the build status json/response is not empty.
-    if [ "$getting_output_json" == "" ]; then
+    if [ "$getting_output_json" == "" ] || [ "$getting_output_json" == " " ]; then
         echo "Error, the output of getting the GitHub commit build status is"
-        echo "empty: $getting_output_json"
+        echo "empty: $getting_output_json."
         exit 5
     else
         # Extract the urls from the json response.

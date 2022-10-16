@@ -544,25 +544,7 @@ set_build_status_of_github_commit_using_github_pat() {
 		exit 118
 	fi
 	
-	# Verify the build status is set correctly
-	getting_output_json=$(GET https://api.github.com/repos/"$github_username"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
-	urls_in_json="$(echo "${getting_output_json[0]}" | jq ".[].url")"
-	
-	expected_url="https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha"
-	expected_state="\"state\":\"$commit_build_status\","
-	
-	
-	found_urls="$(string_in_lines "$expected_url" "${urls_in_json}")"
-	found_state="$(string_in_lines "$expected_state" "${getting_output_json}")"
-
-	if [ "$found_urls" == "NOTFOUND" ]; then
-		# shellcheck disable=SC2059
-		printf "Error, the status of the repo did not contain:$expected_url \n because the getting output was: $getting_output"
-		exit 119
-	elif [ "$found_state" == "NOTFOUND" ]; then
-		echo "Error, the status of the repo did not contain:$expected_state"
-		exit 120
-	fi
+	assert_github_build_status_is_set_correctly "$github_username" "$github_repo_name" "$github_commit_sha" "$commit_build_status"
 }
 
 

@@ -35,7 +35,7 @@ assert_github_build_status_is_set_correctly() {
     # Verify the build status json/response is not empty.
     if [ "$getting_output_json" == "" ] || [ "$getting_output_json" == " " ]; then
         echo "Error, the output of getting the GitHub commit build status is"
-        echo "empty: $getting_output_json."
+        echo "empty:$getting_output_json."
         exit 5
     else
         # Extract the urls from the json response.
@@ -49,11 +49,11 @@ assert_github_build_status_is_set_correctly() {
             # shellcheck disable=SC2059
 		    printf "Error, GitHub commit status Get request did not contain the"
             printf "expected url:$expected_url \n"
-            printf "Instead, the getting output was: $getting_output"
+            printf "Instead, the getting output was:$getting_output."
 		    exit 6
         elif [ "$found_state" != "FOUND" ]; then
             echo "Error, the status of the repo did not contain:$expected_state"
-            echo "Instead, we found:$getting_output_json"
+            echo "Instead, we found:$getting_output_json."
 		    exit 7
         fi
     fi           

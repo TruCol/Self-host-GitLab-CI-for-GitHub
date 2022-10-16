@@ -401,7 +401,7 @@ manage_get_gitlab_ci_build_status() {
 		if [ "$(is_desirable_github_build_status_excluding_pending $parsed_github_build_status)" == "FOUND" ]; then
 			break
 		fi
-		echo "in loop parsed_github_build_status=$parsed_github_build_status"
+		echo "Awaiting GitLab CI result. Current status:$parsed_github_build_status Running at:$GITLAB_SERVER_HTTP_URL/root/$github_repo_name/-/jobs/"
 	done
 }
 

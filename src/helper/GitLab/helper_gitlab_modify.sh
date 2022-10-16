@@ -814,7 +814,7 @@ commit_changes_to_gitlab() {
                 
                 # Commit the changes to GitLab.
                 #cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit -m \"$github_commit_sha\"  > /dev/null 2>&1 &
-                cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit -m \"$github_commit_sha\"
+                cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit --quiet -m \"$github_commit_sha\"
                 #cd ../../../..
                 cd $pwd_before
               fi
@@ -890,7 +890,7 @@ commit_changes_to_gitlab_for_commit() {
             # Verify the files were correctly copied from GitHub branch to GitLab branch.
             if [ "$comparison_result" == "IDENTICAL" ]; then
               #echo "IDENTICAL"
-              
+
 
               # Get the path before executing the command (to verify it is restored correctly after).
               pwd_before="$PWD"
@@ -1045,7 +1045,7 @@ push_changes_to_gitlab() {
 
               # Commit the changes to GitLab.
               #read -p "PUSH to GITLAB\n\n\n"
-              cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git push --set-upstream origin "$gitlab_branch_name"
+              cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git push --quiet --set-upstream origin "$gitlab_branch_name"
               cd ../../../..
               #read -p "Done path"
               # Get the path after executing the command (to verify it is

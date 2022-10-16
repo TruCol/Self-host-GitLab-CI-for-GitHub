@@ -19,6 +19,8 @@
 #######################################
 # Run with:
 # bash -c 'source src/import.sh && assert_github_build_status_is_set_correctly a-t-0 sponsor_example 02c5fce3500d7b9e2d79cb5b7d886020a403cf58 pending'
+# bash -c 'source src/import.sh && assert_github_build_status_is_set_correctly HiveMinds gitlab-ci-multi-runner be2559e534f87377a02faf9f6144e63fbc58f018 pending'
+# bash -c 'source src/import.sh && assert_github_build_status_is_set_correctly HiveMinds gitlab-ci-multi-runner be2559e534f87377a02faf9f6144e63fbc58f018 failure'
 assert_github_build_status_is_set_correctly() {
     local github_username="$1"
 	local github_repo_name="$2"
@@ -40,6 +42,19 @@ assert_github_build_status_is_set_correctly() {
     else
         # Extract the urls from the json response.
         local urls_in_json="$(echo "${getting_output_json[0]}" | jq ".[].url")"
+        local state_in_json="$(echo "${getting_output_json[0]}" | jq ".[].state")"
+        echo "urls_in_json=$urls_in_json"
+        echo "state_in_json=$state_in_json"
+
+        local expected_url_entry='"url":"'"$expected_url"'",'
+        local expected_state_entry='"state":"'"$commit_build_status"'",'
+        echo "expected_url_entry=$expected_url_entry"
+        echo "expected_state_entry=$expected_state_entry"
+        echo "getting_output_json0=${getting_output_json[0]}"
+        local found_url_entry="$(string_in_lines "$expected_url_entry" "${getting_output_json[0]}")"
+        local found_state_entry="$(string_in_lines "$expected_state_entry" "${getting_output_json[0]}")"
+        echo "found_url_entry=$found_url_entry"
+        echo "found_state_entry=$found_state_entry"
 
         # Verify the expected url and state are found in the GitHub response.
         local found_urls="$(string_in_lines "$expected_url" "${urls_in_json}")"
@@ -48,12 +63,22 @@ assert_github_build_status_is_set_correctly() {
         if [ "$found_urls" != "FOUND" ]; then
             # shellcheck disable=SC2059
 		    printf "Error, GitHub commit status Get request did not contain the"
-            printf "expected url:$expected_url \n"
-            printf "Instead, the getting output was:$getting_output."
+            printf "expected url:"
+            printf "$expected_url"
+            printf "Instead, the getting output was:"
+            printf "$getting_output_json"
+            printf "And urls_in_json="
+            printf "$urls_in_json."
 		    exit 6
         elif [ "$found_state" != "FOUND" ]; then
-            echo "Error, the status of the repo did not contain:$expected_state"
-            echo "Instead, we found:$getting_output_json."
+            printf "Error, the status of the repo did not contain:$expected_state"
+            printf "expected url:"
+            printf "$expected_url"
+            printf "Instead, the getting output was:"
+            printf "$getting_output_json"
+            printf "And urls_in_json="
+            printf "$urls_in_json"
+            printf "Instead, and urls_in_json=$found_state."
 		    exit 7
         fi
     fi           

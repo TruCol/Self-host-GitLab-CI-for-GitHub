@@ -544,7 +544,7 @@ set_build_status_of_github_commit_using_github_pat() {
 		exit 118
 	fi
 	
-	assert_github_build_status_is_set_correctly "$github_username" "$github_repo_name" "$github_commit_sha" "$commit_build_status"
+	manage_github_build_status_check "$github_username" "$github_repo_name" "$github_commit_sha" "$commit_build_status"
 }
 
 

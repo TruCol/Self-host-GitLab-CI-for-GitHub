@@ -2,6 +2,32 @@
 # Contains code that is used to verify certain aspects on the GitHub server 
 # side.
 
+# Tries to verify the GitHub commit build status 5 times, if no valid build
+# status is found, it throws an error.
+# bash -c 'source src/import.sh && manage_github_build_status_check HiveMinds gitlab-ci-multi-runner 907cfa5e0682e938691ba5f5d665ff8147833a89 failure'
+manage_github_build_status_check(){
+    local github_username="$1"
+	local github_repo_name="$2"
+	local github_commit_sha="$3"
+	local commit_build_status="$4"
+    
+    # Specify how many retries are allowed.
+    local nr_of_retries=6
+    local termination_limit="$((nr_of_retries-2))"
+    local i="0"
+
+    while [ $i -lt $nr_of_retries ]; do
+        local found_valid_build_status="$(github_build_status_is_set_correctly "$github_username" "$github_repo_name" "$github_commit_sha" "$commit_build_status")"
+        i=$[$i+1]
+        if [ "$found_valid_build_status" == "FOUND" ]; then
+            break
+        elif [[ "$i" == "$termination_limit" ]]; then
+            assert_github_build_status_is_set_correctly "$github_username" "$github_repo_name" "$github_commit_sha" "$commit_build_status"
+            break
+        fi
+    done
+}
+
 #######################################
 # Asserts the build status is set correctly on a GitHub commit.
 # 
@@ -67,34 +93,6 @@ assert_github_build_status_is_set_correctly() {
 		    exit 7
         fi
     fi
-}
-
-# Tries to verify the GitHub commit build status 5 times, if no valid build
-# status is found, it throws an error.
-# bash -c 'source src/import.sh && manage_github_build_status_check HiveMinds gitlab-ci-multi-runner 907cfa5e0682e938691ba5f5d665ff8147833a89 failure'
-manage_github_build_status_check(){
-    local github_username="$1"
-	local github_repo_name="$2"
-	local github_commit_sha="$3"
-	local commit_build_status="$4"
-    
-    # Specify how many retries are allowed.
-    local nr_of_retries=6
-    local termination_limit="$((nr_of_retries-2))"
-    local i="0"
-
-    while [ $i -lt $nr_of_retries ]; do
-        local found_valid_build_status="$(github_build_status_is_set_correctly "$github_username" "$github_repo_name" "$github_commit_sha" "$commit_build_status")"
-        echo "found_valid_build_status=$found_valid_build_status"
-        i=$[$i+1]
-        if [ "$found_valid_build_status" == "FOUND" ]; then
-            break
-        elif [[ "$i" == "$termination_limit" ]]; then
-            assert_github_build_status_is_set_correctly "$github_username" "$github_repo_name" "$github_commit_sha" "$commit_build_status"
-            echo "ASSERTED"
-            break
-        fi
-    done
 }
 
 # bash -c 'source src/import.sh && github_build_status_is_set_correctly HiveMinds gitlab-ci-multi-runner 907cfa5e0682e938691ba5f5d665ff8147833a89 failure'

@@ -35,7 +35,6 @@ two_folders_are_identical() {
 	
 	if [ "$(dir_exists "$dirpath_one")" == "FOUND" ]; then
 		if [ "$(dir_exists "$dirpath_two")" == "FOUND" ]; then
-			read -p "before diff1"
 			if [ "$(diff -r "$dirpath_one" "$dirpath_two")" == "" ]; then
 				echo "IDENTICAL"
 			else
@@ -63,7 +62,6 @@ two_folders_are_identical_excluding_subdir() {
 	
 	if [ "$(dir_exists "$dirpath_one")" == "FOUND" ]; then
 		if [ "$(dir_exists "$dirpath_two")" == "FOUND" ]; then
-			read -p "before diff2"
 			if [ "$(dir_exists "$excluding_subdir")" == "FOUND" ]; then
 				if [ "$(diff -r "$dirpath_one" "$dirpath_two" -qr --exclude="$excluding_subdir")" == "" ]; then
 					echo "IDENTICAL"

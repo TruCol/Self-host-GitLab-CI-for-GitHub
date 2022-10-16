@@ -85,6 +85,79 @@ is_valid_build_status(){
     fi
 }
 
+
+#######################################
+# Loops over all the commit build statusses in a list of commit sha's. Then
+# for each commit loops over all the commit_build_status_txt files in the 
+# GitHub repository with the GitLab build statusses. Then removes each 
+# commit_sha from the list, if it does not have a valid build_status_txt file.
+# 
+# Local variables:
+#  
+# Globals:
+#  
+# Arguments:
+#  
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  
+#######################################
+# Run with: 
+# bash -c 'source src/import.sh && remove_commits_without_build_status_from_evaluated_list evaluated_commits_with_ci.txt'
+# bash -c 'source src/import.sh && remove_commits_without_build_status_from_evaluated_list "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME"'
+# bash -c 'source src/import.sh && remove_commits_without_build_status_from_evaluated_list "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_WITH_CI_LIST_FILENAME"'
+remove_commits_without_build_status_from_evaluated_list(){
+    local some_list_filepath="$1"
+    while IFS="" read -r p || [ -n "$p" ]
+    do
+      #printf '%s\n' "$p"
+      local wanted_commit_sha=$p
+      echo "$wanted_commit_sha"
+      if [ "$(commit_has_build_status_file $wanted_commit_sha)" != "FOUND" ]; then
+        # Remove commit from evaluated list.
+        delete_lines_containing_substring_from_file $wanted_commit_sha "$some_list_filepath"
+      fi
+    done < $some_list_filepath
+}
+
+# bash -c 'source src/import.sh && commit_has_build_status_file 2ebecfd1c08cf0aeb36301779e0e68b4110428e9'
+# bash -c 'source src/import.sh && commit_has_build_status_file aeaaa57120f74a695ef4215e819a175296a3de10'
+
+commit_has_build_status_file() {
+    local wanted_commit_sha="$1"
+
+    local found_build_txt="FALSE"
+    manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
+    
+    # The */*/*/*.txt adheres to:
+    #$organisation/$github_repo_name/$github_branch_name/$commit_sha.txt"
+    for build_status_txt in "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/"*/*/*/*.txt; do
+        
+        # Only keep commit_build_txt files with valid build status.
+        if [ "$(commit_build_txt_is_valid "$build_status_txt")" == "FOUND" ]; then
+            
+            # Extract the commit sha from the build status filepath.
+            start=$((${#build_status_txt} - 44))
+            commit_sha=${build_status_txt:$start:40}
+            # Verify the commit_sha length.
+            if [ "${#commit_sha}" != 40 ]; then
+                echo "Error, the commit sha does not have length 40:"
+                echo "$commit_sha"
+                echo "$build_status_txt"
+                exit 5
+            elif [ "$wanted_commit_sha" == "$commit_sha" ]; then
+                    found_build_txt="TRUE"
+                    echo "FOUND"
+                    break
+            fi
+        fi
+    done
+    if [ "$found_build_txt" != "TRUE" ]; then
+        echo "NOTFOUND"
+    fi
+}
+
 #######################################
 # Loops over all the commit build status txts in the GitHub repository with the
 # GitLab build statusses, and deletes all the txts with invalid build statusses.
@@ -136,6 +209,7 @@ delete_invalid_commit_txts(){
         fi
     done
 }
+
 
 
 #######################################

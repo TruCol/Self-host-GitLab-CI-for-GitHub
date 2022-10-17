@@ -233,10 +233,6 @@ assert_commit_build_status_txt_is_valid(){
     local github_repo_name="$2"
     local github_branch_name="$3"
     local commit_sha="$4"
-    echo "organisation=$organisation"
-    echo "github_repo_name=$github_repo_name"
-    echo "github_branch_name=$github_branch_name"
-    echo "commit_sha=$commit_sha"
 
     # Verify the commit_sha length. TODO: remove duplicate.
     if [ "${#commit_sha}" != 40 ]; then

@@ -344,12 +344,11 @@ copy_github_branch_with_yaml_to_gitlab_repo_and_get_build_status() {
 		# set the build status in the GitHub commit.
 		printf "\n4.x.6.12 \n\n\n Set the build status of the GitHub commit using GitHub personal access token."
 		# TODO: ensure personal access token is created automatically to set build status.
-		#output=$(set_build_status_of_github_commit_using_github_pat "$github_username" "$github_repo_name" "$github_commit_sha" "$gitlab_website_url" "$last_line_gitlab_ci_build_status")
-		output=$(set_build_status_of_github_commit_using_github_pat "$github_username" "$github_repo_name" "$github_commit_sha" "$gitlab_website_url" "$build_status")
-		printf "\n4.x.6.13 output=$output"
+		
+		set_build_status_of_github_commit_using_github_pat "$github_username" "$github_repo_name" "$github_commit_sha" "$gitlab_website_url" "$build_status"
 
 		# 8. Copy the commit build status from GitLab into the GitHub build status repo.
-		printf "\n4.x.6.14 copy_commit_build_status_to_github_status_repo"
+		printf "\n4.x.6.13 copy_commit_build_status_to_github_status_repo"
 		copy_commit_build_status_to_github_status_repo "$github_username" "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$build_status" "$organisation"
 
 		## 9. Push the commit build status to the GitHub build status repo. 
@@ -523,7 +522,7 @@ set_build_status_of_github_commit_using_github_pat() {
 	json_string=$(printf "$JSON_FMT" "$commit_build_status" "$commit_build_status" "$redirect_to_ci_url")
 	
 	# Set the build status
-	setting_output=$(curl -H "Authorization: token $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" --request POST --data "$json_string" https://api.github.com/repos/"$github_username"/"$github_repo_name"/statuses/"$github_commit_sha")
+	setting_output=$(curl --silent -H "Authorization: token $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" --request POST --data "$json_string" https://api.github.com/repos/"$github_username"/"$github_repo_name"/statuses/"$github_commit_sha")
 	
 	# Check if output is valid
 	#echo "setting_output=$setting_output"

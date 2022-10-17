@@ -17,6 +17,7 @@ setup_tor_website_for_gitlab_server_flag='false'
 gitlab_username_flag='false'
 gitlab_pwd_flag='false'
 gitlab_email_flag='false'
+prerequistes_only_flag='false'
 
 # Specify variable defaults
 gitlab_username="root"
@@ -34,6 +35,7 @@ print_usage() {
   # that indicates whether or not the user will set the commit build statuses
   # on GitHub or not.
   
+  printf "\n-p | --prereq                          to verify prerequisites."
   printf "\n-r | --runner                          to do an installation of the GitLab runner."
   printf "\n-s | --server                          to do an installation of the GitLab server."
   
@@ -134,9 +136,10 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       shift
       ;;
-      #shift # past argument
-      #shift
-      #;;
+    -p|--prereq)
+      prerequistes_only_flag='true'
+      shift # past argument
+      ;;
     -*|--*)
       echo "Unknown option $1"
       print_usage
@@ -164,6 +167,10 @@ if [[ -n $1 ]]; then
     tail -1 "$1"
 fi
 
+# Set GitLab password without displaying it in terminal.
+if [ "$prerequistes_only_flag" == "true" ]; then
+	ensure_prerequisites_compliance
+fi
 
 # Set GitLab password without displaying it in terminal.
 if [ "$gitlab_pwd_flag" == "true" ]; then
@@ -181,97 +188,20 @@ if [ "$github_pwd_flag" == "true" ]; then
   assert_is_non_empty_string ${github_password}
 fi
 
-### Verify prerequistes
-if [ "$github_username" != "" ]; then
-  echo "Storing your GitHub username:$github_username in a personal cred file."
-  add_entry_to_personal_cred_file "GITHUB_USERNAME_GLOBAL" $github_username
-fi
-# GitHub password is not stored.
-
-if [ "$gitlab_username" != "" ]; then
-  echo "Storing your GitLab username:$gitlab_username in a personal cred file."
-	add_entry_to_personal_cred_file "GITLAB_SERVER_ACCOUNT_GLOBAL" $gitlab_username
-fi
-if [ "$gitlab_pwd" != "" ]; then
-  echo "Storing your GitLab password in a personal cred file."
-  set_gitlab_pwd $gitlab_pwd
-fi
-if [ "$gitlab_email" != "" ]; then
-  echo "Storing your GitLab email:$gitlab_email in a personal cred file."
-	add_entry_to_personal_cred_file "GITLAB_ROOT_EMAIL_GLOBAL" "$gitlab_email"
-fi
-# TODO: verify required data is in personal_creds.txt
-
-
-# Reload personal_creds.txt
-source "$PERSONAL_CREDENTIALS_PATH"
-
-# Verify the personal credits are stored correctly.
-#printf "\n\n 0. Verifying the $PERSONAL_CREDENTIALS_PATH contains the right"
-#printf " data."
-verify_prerequisite_personal_creds_txt_contain_required_data
-verify_prerequisite_personal_creds_txt_loaded
-
-
-# Raise sudo permission at the start, to prevent requiring user permission half way through tests.
-printf "\n\n 1. Now getting sudo permission to perform the GitLab installation."
-{
-  sudo echo "hi"
-} &> /dev/null
-
-# Ensuring the Firefox installation is performed with ppa/apt instead of snap.
-# This is such that the browser can be controlled automatically.
-printf "\n3. Now ensuring the firefox is installed with ppa and apt instead."
-printf "of snap."
-swap_snap_firefox_with_ppa_apt_firefox_installation
-
-# Ensure jq is installed correctly.
-printf "\n\n 3. Now ensuring jquery is installed."
-install_jquery_using_apt
-
-# Verify the GitHub user has the required repositories.
-printf "\n\n 4. Verifying the $GITHUB_STATUS_WEBSITE_GLOBAL and "
-printf "$PUBLIC_GITHUB_TEST_REPO_GLOBAL repositories exist in your GitHub"
-printf " account."
-# TODO: include catch for: The requested URL returned error: 403 rate limit exceeded
-assert_required_repositories_exist "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
-assert_required_repositories_exist "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
-
-# Verify the GitHub user has ssh-access to GitHub.
-assert_user_has_ssh_access_to_github "$GITHUB_USERNAME_GLOBAL"
-
-# Get the GitHub personal access code.
-printf "\n\n 5. Setting and Getting the GitHub personal access token if it "
-printf "does not yet exist."
-ensure_github_pat_is_added_to_github $GITHUB_USERNAME_GLOBAL $github_password
-
-# Check if ssh deploy key already exists and can be used to push
-# to GitHub, before creating a new one.
-printf "\n\n 6. Ensuring you have ssh push access to the "
-printf "$GITHUB_STATUS_WEBSITE_GLOBAL repository with your ssh-deploy key."
-ensure_github_ssh_deploy_key_has_access_to_build_status_repo $GITHUB_USERNAME_GLOBAL $github_password $GITHUB_STATUS_WEBSITE_GLOBAL
-
 
 
 
 # Start gitlab server installation and gitlab runner installation.
 if [ "$server_flag" == "true" ]; then
-  # TODO: verify required data is in personal_creds.txt 
-	# TODO: uncomment
+  printf "\n Ensuring prequisites are satisfied."
+  ensure_prerequisites_compliance
   printf "\n Installing the GitLab server!"
   install_and_run_gitlab_server "$GITLAB_SERVER_PASSWORD_GLOBAL"
 	echo "Installed gitlab server, should be up in a few minutes. You can visit it at:"
   echo "$GITLAB_SERVER_HTTP_URL"
 fi
 
-# TODO: Remove, this is done during the installation of the GitLab server.
-# Get the GitLab personal access token
-#printf "\n Verifying the GitLab personal access token works."
-#ensure_new_gitlab_personal_access_token_works
 
-# Verify all required credentials are in personal_creds.txt
-printf "\n Verifying the GitHub and GitLab personal access tokens are in the $PERSONAL_CREDENTIALS_PATH file."
-verify_personal_creds_txt_contain_pacs
 
 
 # Set GitLab password without displaying it in terminal.

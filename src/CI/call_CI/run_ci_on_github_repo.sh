@@ -72,7 +72,7 @@ run_ci_on_github_repo() {
 	# TODO: change this method to download with https?
 	# Download the GitHub repo on which to run the GitLab CI:
 	printf "\n\n0. Download the GitHub repository on which to run GitLab CI."
-	download_github_repo_on_which_to_run_ci "$github_username" "$github_repo_name"
+	download_github_repo_to_mirror_location "$github_username" "$github_repo_name"
 
 	# Remove the GitLab repository. # TODO: move this to each branch
 	# Similarly for each commit
@@ -86,46 +86,6 @@ run_ci_on_github_repo() {
 	copy_github_branches_with_yaml_to_gitlab_repo "$github_username" "$github_repo_name"
 	printf "\n4. Done with CI.\n"
 
-}
-
-
-#######################################
-# This downloads a GitHub repository from a GitHub user over SSH if it is
-# possible, otherwise over https. For https it assumes the repo is public.
-# Local variables:
-#  github_username
-#  github_repo_name
-# Globals:
-#  MIRROR_LOCATION
-# Arguments:
-#  github_username
-#  github_repo_name
-# Returns:
-#  0 If function was evaluated succesfull.
-# Outputs:
-#  Nothing if the GitHub repo was downloaded correctly.
-#######################################
-# run with:
-# source src/import.sh && download_github_repo_on_which_to_run_ci "a-t-0" "sponsor_example"
-download_github_repo_on_which_to_run_ci() {
-	local github_username="$1"
-	local github_repo_name="$2"
-	
-	# Create mirror directories
-	create_mirror_directories
-	manual_assert_not_equal "$MIRROR_LOCATION" ""
-	manual_assert_dir_exists "$MIRROR_LOCATION"
-	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub"
-	manual_assert_dir_exists "$MIRROR_LOCATION/GitLab"
-	
-	# Verify ssh-access
-	has_quick_ssh_access="$(check_quick_ssh_access_to_repo "$github_username" "$github_repo_name")"
-
-	# Clone GitHub repo at start of test.
-	clone_github_repository "$github_username" "$github_repo_name" "$has_quick_ssh_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
-	
-	# 2. Verify the GitHub repo is cloned.
-	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
 }
 
 

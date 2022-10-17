@@ -1,6 +1,8 @@
 # Self-hosted GitLab CI for all your GitHub repos
 
 Hi, thanks for checking out this repo! :) It runs your own self-hosted GitLab CI on all GitHub repositories of a GitHub user/organisation, in a single command. Tested on Ubuntu 20.04.1 LTS. This CI deployment partially CI's its own CI deployment.
+
+[![GitLab Build Status](https://raw.githubusercontent.com/a-t-0/gitlab-ci-build-statuses/master/trucol/Self-host-GitLab-CI-for-GitHub/develop/build_status.svg)](https://github.com/a-t-0/gitlab-ci-build-statuses/tree/master/trucol/Self-host-GitLab-CI-for-GitHub/develop)
 ![image](https://user-images.githubusercontent.com/34750068/188695430-f8fc4c8e-cf66-48ff-b9cb-7934cfdfeee5.png)
 
 You can use this to easily host your own GitLab server, or to run your own GitLab CI on all your GitHub repositories, for free.

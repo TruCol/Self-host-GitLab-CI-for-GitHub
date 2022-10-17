@@ -76,52 +76,40 @@ assert_github_build_status_is_set_correctly() {
         printf "$getting_output_json.\n"
         exit 5
     else
-        # Extract the urls from the json response.
+        # Extract the urls from the json response and get the first url.
         local urls_in_json="$(echo "${getting_output_json[0]}" | jq ".[].url")"
         for word in $urls_in_json
         do
             local first_url_in_json=$word
             break
         done
+        # Get the commit form the first url from the json response.
+        local commit_of_first_url_with_end_quotation=${first_url_in_json: -41}
+        local commit_of_first_url=${commit_of_first_url_with_end_quotation:0:40}
 
+        # Verify the GitHub resonse concerns the right commit.
+        if [ "$github_commit_sha" != "$commit_of_first_url" ]; then
+            read -p "Different urls:"
+            read -p "$expected_url_with_quotations"
+            read -p "$first_url_in_json"
+            exit 6
+        fi
+        
+        # Extract the states from the json response and get the first state.
         local state_in_json="$(echo "${getting_output_json[0]}" | jq ".[].state")"
         for word in $state_in_json
         do
             local first_state_in_json=$word
             break
         done
-        read -p "first_url_in_json="
-        read -p "$first_url_in_json"
-        read -p "first_state_in_json="
-        read -p "$first_state_in_json"
-        commit_of_first_url_with_end_quotation=${first_url_in_json: -41}
-        commit_of_first_url=${commit_of_first_url_with_end_quotation:0:40}
-        read -p "commit_of_first_url=$commit_of_first_url."
-        read -p "commit_of_first_url=$github_commit_sha."
-        if [ "$github_commit_sha" == "$commit_of_first_url" ]; then
-            read -p "GOT SAME COMMIT!"
-        fi
-
-        # Verify the expected url and state are found in the GitHub response.
-        if [ "$expected_url_with_quotations" == "$first_url_in_json" ]; then
-            read -p "GOTTTT ITTT"
-        else
-            read -p "Different urls:"
-            read -p "$expected_url_with_quotations"
-            read -p "$first_url_in_json"
-        fi
-
-        if [ "$expected_state_with_quotations" == "$first_state_in_json" ]; then
-            read -p "GOTTTT ITTT again"
-        else
+        
+        # Verify the GitHub resonse has the expected build status.
+        if [ "$expected_state_with_quotations" != "$first_state_in_json" ]; then
             read -p "Different states:"
             read -p "$expected_state_with_quotations"
             read -p "$first_state_in_json"
 		    exit 6
         fi
-
-        
-        
     fi
 }
 
@@ -133,8 +121,9 @@ github_build_status_is_set_correctly(){
 	local commit_build_status="$4"
 
     # Define the expected response contents.
-    local expected_url="https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha"
-    local expected_state="\"state\":\"$commit_build_status\","
+    local expected_url_with_quotations='"'"https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha"'"'
+    #local expected_state='"'"\"state\":\"$commit_build_status\","
+    local expected_state_with_quotations='"'"$commit_build_status"'"'
 
     # Get the json containing the GitHub build statusses.
     local getting_output_json=$(GET https://api.github.com/repos/"$github_username"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
@@ -143,23 +132,36 @@ github_build_status_is_set_correctly(){
     if [ "$getting_output_json" == "" ] || [ "$getting_output_json" == " " ] || [ "$getting_output_json" == "[]" ]; then
         echo "NOTFOUND"
     else
-        # Extract the urls from the json response.
+        # Extract the urls from the json response and get the first url.
         local urls_in_json="$(echo "${getting_output_json[0]}" | jq ".[].url")"
-        local state_in_json="$(echo "${getting_output_json[0]}" | jq ".[].state")"
-        
-        local expected_url_entry='"url":"'"$expected_url"'",'
-        local expected_state_entry='"state":"'"$commit_build_status"'",'
+        for word in $urls_in_json
+        do
+            local first_url_in_json=$word
+            break
+        done
+        # Get the commit form the first url from the json response.
+        local commit_of_first_url_with_end_quotation=${first_url_in_json: -41}
+        local commit_of_first_url=${commit_of_first_url_with_end_quotation:0:40}
 
-        local found_url_entry="$(string_in_lines "$expected_url_entry" "${getting_output_json[0]}")"
-        local found_state_entry="$(string_in_lines "$expected_state_entry" "${getting_output_json[0]}")"
         
+        
+        # Extract the states from the json response and get the first state.
+        local state_in_json="$(echo "${getting_output_json[0]}" | jq ".[].state")"
+        for word in $state_in_json
+        do
+            local first_state_in_json=$word
+            break
+        done
         # Verify the expected url and state are found in the GitHub response.
-        if [ "$found_url_entry" != "FOUND" ]; then
-		    echo "NOTFOUND"
-        elif [ "$found_state_entry" != "FOUND" ]; then
+        if [ "$expected_state_with_quotations" == "$first_state_in_json" ] && [ "$github_commit_sha" == "$commit_of_first_url" ]; then
+		    echo "FOUND"
+        
+        # Verify the GitHub resonse concerns the right commit.
+        elif [ "$github_commit_sha" != "$commit_of_first_url" ]; then
             echo "NOTFOUND"
-        elif [ "$found_url_entry" == "FOUND" ] && [ "$found_state_entry" == "FOUND" ]; then
-            echo "FOUND"
+        # Verify the GitHub resonse has the expected build status.
+        elif [ "$expected_state_with_quotations" != "$first_state_in_json" ]; then
+            echo "NOTFOUND"
         fi
     fi
 }

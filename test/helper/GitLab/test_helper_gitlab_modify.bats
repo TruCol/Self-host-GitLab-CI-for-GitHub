@@ -142,8 +142,7 @@ setup() {
 	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
 	
 		# If it already exists, delete the repository
-		delete_existing_repository "$gitlab_repo_name" "$gitlab_username"
-		sleep 60
+		delete_existing_repository_from_gitlab "$gitlab_repo_name" "$gitlab_username"
 		
 		# Verify the repository is deleted.
 		if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
@@ -172,8 +171,7 @@ setup() {
 	if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
 	
 		# If it already exists, delete the repository
-		delete_existing_repository "$gitlab_repo_name" "$gitlab_username"
-		sleep 60
+		delete_existing_repository_from_gitlab "$gitlab_repo_name" "$gitlab_username"
 		
 		# Verify the repository is deleted.
 		if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
@@ -270,7 +268,7 @@ setup() {
 	fi
 	
 	# If it already exists, delete the repository
-	run bash -c "# source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && delete_existing_repository sponsor_example root"
+	run bash -c "# source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && delete_existing_repository_from_gitlab sponsor_example root"
 	assert_failure
 	assert_output --partial "ERROR, you tried to delete a GitLab repository that does not exist."
 }

@@ -396,7 +396,7 @@ get_build_status() {
 	gitlab_username=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')
 	repo_name=$SOURCE_FOLDERNAME
 	
-	sleep 30
+	sleep 20
 	
 	# curl build status
 	output=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name/pipelines")

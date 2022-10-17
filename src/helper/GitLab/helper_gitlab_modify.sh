@@ -58,11 +58,7 @@ delete_gitlab_repo_if_it_exists() {
     assert_equal "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" "NOTFOUND"
   elif [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
     # TODO(a-t-0): change root with Global variable.
-    delete_existing_repository "$gitlab_repo_name" "root"
-    sleep 5
-    local deleted_repo_is_found
-	deleted_repo_is_found="$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")"
-    assert_equal "$deleted_repo_is_found" "NOTFOUND"
+    delete_existing_repository_from_gitlab "$gitlab_repo_name" "root"
   else
     echo "The repository was not NOTFOUND, nor was it FOUND. "
     exit 7
@@ -251,11 +247,8 @@ ensure_new_empty_repo_is_created_in_gitlab() {
   if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
 
     # If it already exists, delete the repository
-    delete_existing_repository "$gitlab_repo_name" "$gitlab_username"
-    printf "\n Waiting 30 secs untill repo is deleted from GitLab server."
-    sleep 30
-    # TODO: replace this with a while loop that waits until the repo is deleted.
-
+    delete_existing_repository_from_gitlab "$gitlab_repo_name" "$gitlab_username"
+    
     # Verify the repository is deleted.
     if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
       # Throw an error if it is not deleted.
@@ -266,8 +259,7 @@ ensure_new_empty_repo_is_created_in_gitlab() {
 
   # Create repository.
   curl --silent -H "Content-Type:application/json" "$GITLAB_SERVER_HTTP_URL/api/v4/projects?private_token=$personal_access_token" -d "{ \"name\": \"$gitlab_repo_name\" }"  > /dev/null 2>&1 &
-  sleep 30
-  printf "\n Waiting 30 secs untill repo is (re)created in GitLab server."
+  wait_until_repo_exists_in_gitlab "$gitlab_repo_name"
 
   # Verify the repository is created.
   if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" != "FOUND" ]; then
@@ -277,6 +269,103 @@ ensure_new_empty_repo_is_created_in_gitlab() {
   fi
 }
 
+
+# run with:
+# bash -c 'source src/import.sh && wait_until_repo_exists_in_gitlab nonexistant_repo'
+# bash -c 'source src/import.sh && wait_until_repo_exists_in_gitlab sponsor_example'
+wait_until_repo_exists_in_gitlab(){
+  local gitlab_repo_name="$1"
+
+  # Specify how many retries are allowed.
+  local nr_of_retries=10
+  local termination_limit="$((nr_of_retries-2))"
+  local i="0"
+
+  while [ $i -lt $nr_of_retries ]; do
+      local found_repo="$(repo_exists_in_gitlab_server "$gitlab_repo_name")"
+      i=$[$i+1]
+      if [ "$found_repo" == "FOUND" ]; then
+          break
+      elif [[ "$i" == "$termination_limit" ]]; then
+          echo "Error, did not find repo in GitLab server, within permitted timeframe."
+          exit 6
+          break
+      fi
+      sleep 5
+  done
+}
+
+# bash -c 'source src/import.sh && wait_until_repo_does_not_exist_in_gitlab nonexistant_repo'
+# bash -c 'source src/import.sh && wait_until_repo_does_not_exist_in_gitlab sponsor_example'
+wait_until_repo_does_not_exist_in_gitlab(){
+  local gitlab_repo_name="$1"
+
+  # Specify how many retries are allowed.
+  local nr_of_retries=10
+  local termination_limit="$((nr_of_retries-2))"
+  local i="0"
+
+  while [ $i -lt $nr_of_retries ]; do
+      local found_repo="$(repo_exists_in_gitlab_server "$gitlab_repo_name")"
+      i=$[$i+1]
+      if [ "$found_repo" == "NOTFOUND" ]; then
+          break
+      elif [[ "$i" == "$termination_limit" ]]; then
+          echo "Error, still found the repo in GitLab server, within permitted timeframe."
+          exit 6
+          break
+      fi
+      sleep 5
+  done
+}
+
+# run with:
+# bash -c 'source src/import.sh && repo_exists_in_gitlab_server nonexistant_repo'
+# bash -c 'source src/import.sh && repo_exists_in_gitlab_server sponsor_example'
+repo_exists_in_gitlab_server(){
+  local gitlab_repo_name="$1"
+
+  local temporary_test_filepath=/tmp/TESTRET
+  local expected_if_non_existant="fatal: repository '$GITLAB_SERVER_HTTP_URL/$GITLAB_SERVER_ACCOUNT_GLOBAL/$gitlab_repo_name/' not found"
+  local acceptable_warning="warning: redirecting to $GITLAB_SERVER_HTTP_URL/$GITLAB_SERVER_ACCOUNT_GLOBAL/$gitlab_repo_name.git/"
+
+  # Delete file exists.
+  delete_file_if_it_exists $temporary_test_filepath
+
+  # Check if gitlab repo exists and output any errors to file. 
+  something=$(git ls-remote http://$GITLAB_SERVER_ACCOUNT_GLOBAL:$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL@$GITLAB_SERVER/$GITLAB_SERVER_ACCOUNT_GLOBAL/$gitlab_repo_name 2> $temporary_test_filepath)
+  # Used to verify it throws an error if auth is invalid.
+  #something=$(git ls-remote http://$GITLAB_SERVER_ACCOUNT_GLOBAL:$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBALasdf@$GITLAB_SERVER/$GITLAB_SERVER_ACCOUNT_GLOBAL/$gitlab_repo_name 2> $temporary_test_filepath)
+  
+
+  # Check if the output file contains an error.
+  if [[ -n `cat $temporary_test_filepath` ]]; then
+    # Check if the error indicates the repo does not exist, or whether there is another issue.
+    if [ "$(file_contains_string "$expected_if_non_existant" "$temporary_test_filepath")" != "FOUND" ]; then
+      # An error is thrown, check if it is an acceptable error or not.
+      if [ "$acceptable_warning" == "$(cat $temporary_test_filepath)" ]; then
+        # This means the repository exists.    
+        echo "FOUND"
+      else
+        echo 'ERROR, checking if GitLab repo exists yielded an error other than "the repo does not exist"'
+        echo "$(cat $temporary_test_filepath)."
+        echo "$acceptable_warning."
+        exit 5
+      fi
+    elif [ "$(file_contains_string "$expected_if_non_existant" "$temporary_test_filepath")" == "FOUND" ]; then
+      # The output file contained the expected error, for when a repo does not exist.
+      echo "NOTFOUND"
+    else
+      echo "Error, checking if a GitLab repo exists in server, yielded an unexpected output error:"
+      echo "$(cat $temporary_test_filepath)."
+    fi
+  else
+    echo "FOUND"
+  fi
+
+  # Delete file exists.
+  delete_file_if_it_exists $temporary_test_filepath
+}
 
 #######################################
 # Checks if repository exists in the GitLab server and creates a new empty 
@@ -350,8 +439,7 @@ delete_gitlab_repository_if_it_exists() {
     echo ""
   elif [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "FOUND" ]; then
     # If it exists, delete the repository.
-    delete_existing_repository "$gitlab_repo_name" "$gitlab_username"
-    sleep 30
+    delete_existing_repository_from_gitlab "$gitlab_repo_name" "$gitlab_username"
   else
     echo "ERROR, the GitLab repository: $gitlab_repo_name is not found, nor is it determined that it does not exist."
     exit 181
@@ -370,7 +458,7 @@ delete_gitlab_repository_if_it_exists() {
 # Checks if repository exists in the GitLab server and deletes it. Otherwise, an  
 # error is shown.
 # How to run:
-#  source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && delete_existing_repository 
+#  source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && delete_existing_repository_from_gitlab 
 #  "sponsor_example" "root"
 # Local variables:
 #  gitlab_repo_name
@@ -389,8 +477,8 @@ delete_gitlab_repository_if_it_exists() {
 #  None.
 #######################################
 # run with:
-# bash -c 'source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && delete_existing_repository new_repo root'
-delete_existing_repository() {
+# bash -c 'source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && delete_existing_repository_from_gitlab new_repo root'
+delete_existing_repository_from_gitlab() {
   local repo_name="$1"
   local repo_username="$2"
 
@@ -405,6 +493,8 @@ delete_existing_repository() {
     echo "ERROR, you tried to delete a GitLab repository that does not exist."
     exit 183
   fi
+
+  wait_until_repo_does_not_exist_in_gitlab "$gitlab_repo_name"
 }
 
 #

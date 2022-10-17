@@ -62,6 +62,7 @@ source src/prerequisites/firefox_version.sh
 source src/prerequisites/jquery.sh
 source src/prerequisites/prerequisites.sh
 source src/prerequisites/install_support_programs.sh
+source src/prerequisites/manage_prerequisites.sh
 
 # To get GitLab personal access token
 source src/Selenium/PAT/create_gitlab_personal_access_token.sh # TODO: verify its naming.

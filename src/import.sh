@@ -2,18 +2,6 @@
 source src/hardcoded_variables.txt
 source src/helper/helper_file_dir_related.sh
 
-
-# TODO: replace with hardcoded PERSONAL_CREDENTIALS_PATH.
-if [ "$(file_exists "../personal_creds.txt")" == "FOUND" ]; then
-	source ../personal_creds.txt
-elif [ "$(file_exists "src/creds.txt")" == "FOUND" ]; then
-	source src/creds.txt
-	echo "Note you are using the default credentials, would you like to create your own personal credentials file (outside this repo) y/n?"
-else
-	echo "No credentials found."
-	exit 7
-fi
-
 # Remove the trailing edge characters from the global variables read from
 # hardcoded_variables.txt and personal_creds.txt
 GITLAB_SERVER_ACCOUNT_GLOBAL=$(echo "$GITLAB_SERVER_ACCOUNT_GLOBAL" | tr -d '\r')

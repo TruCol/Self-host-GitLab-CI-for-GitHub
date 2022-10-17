@@ -253,3 +253,16 @@ verify_personal_creds_txt_contain_pacs() {
 		exit 5
 	fi
 }
+
+
+verify_personal_credentials() {
+    if [ "$(file_exists "$PERSONAL_CREDENTIALS_PATH")" == "FOUND" ]; then
+    	source $PERSONAL_CREDENTIALS_PATH
+    elif [ "$(file_exists "src/creds.txt")" == "FOUND" ]; then
+    	source src/creds.txt
+    	echo "Note you are using the default credentials, would you like to create your own personal credentials file (outside this repo) y/n?"
+    else
+    	echo "No credentials found."
+    	exit 7
+    fi
+}

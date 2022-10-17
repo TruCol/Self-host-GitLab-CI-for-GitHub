@@ -2,6 +2,7 @@
 # This script contains the receipe that verifies the prerequisites are 
 # satisfied.
 ensure_prerequisites_compliance() {
+    local no_credentials_check="$1"
     ### Verify prerequistes
     if [ "$github_username" != "" ]; then
       echo "Storing your GitHub username:$github_username in a personal cred file."
@@ -23,6 +24,9 @@ ensure_prerequisites_compliance() {
     fi
     # TODO: verify required data is in personal_creds.txt
 
+    if [ "$no_credentials_check" == "" ]; then
+      verify_personal_credentials
+    fi
 
     # Reload personal_creds.txt
     source "$PERSONAL_CREDENTIALS_PATH"

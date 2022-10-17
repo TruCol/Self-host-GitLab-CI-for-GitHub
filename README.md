@@ -1,15 +1,27 @@
 # Self-hosted GitLab CI for all your GitHub repos
 
-Hi, thanks for checking out this repo! :) It runs your own self-hosted GitLab CI on all GitHub repositories of a GitHub user/organisation, in a single command. Tested on Ubuntu 20.04 LTS. 
-
-### Disclaimer
-This is still WIP, we do not yet dog-feed; this CI does not yet CI this CI deployment. For that, we [need to switch the ~~flux capcitor~~ runner/executor from shell to docker/virtual machine](https://github.com/TruCol/Self-host-GitLab-CI-for-GitHub/issues/100), such that the CI deployment tests do not interfere with the CI deployment.
-
+Hi, thanks for checking out this repo! :) It runs your own self-hosted GitLab CI on all GitHub repositories of a GitHub user/organisation, in a single command. Tested on Ubuntu 20.04.1 LTS. This CI deployment partially CI's its own CI deployment.
 ![image](https://user-images.githubusercontent.com/34750068/188695430-f8fc4c8e-cf66-48ff-b9cb-7934cfdfeee5.png)
 
+You can use this to easily host your own GitLab server, or to run your own GitLab CI on all your GitHub repositories, for free.
+
+## How
+The GitLab server runs on your device, so you don't have to pay anyone, the build statusses of the GitHub commits are pushed from GitLab to GitHub automatically.
+
+ - The build status badges and results are stored in a (new) GitHub repository named: [gitlab-ci-build-statuses](https://github.com/a-t-0/gitlab-ci-build-statuses). That allows you to display your GitLab CI badge on all your GitHub repo's by referring to the build status icon stored (and updated) in that repo.
+This is done by adding a GitHub SSH deploy key to your GitHub account, which is used to push GitLab build statusses from your device into your new GitHub repository.
+- The GitHub commit statusses are also automatically set/updated when you run the GitLab CI. A GitHub personal access token is added to your GitHub for this purpose.
+
+Both setting the GitHub SSH deploy key and personal access token are automated, using the Selenium browser controller, which is automatically downloaded by [this repo](https://github.com/a-t-0/get-gitlab-runner-registration-token), which is automatically downloaded as well. That repo creates a conda environment that is automatically created and activated to set the respective GitHub tokens. Anaconda is not automatically installed.
+
+The browsercontroller is a lot of boilerplate code, so you can also just manually add the SSH deploy token to GitHub. Similarly, for the GitHub personal access token, you can manually store it in the: `personal_creds.txt` file above the repo root folder, with:
+```
+GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL=yourpersonalgithubaccesstoken
+```
+and then the code should automatically detect that you already have the prequisite access to GitHub, and automatically skip the whole boiler-plate browser controller stuf.
 
 ## Setup GitLab server + GitLab runner CI
-To install your own GitLab server:
+To install your own GitLab server and GitLab runner:
 ```
 git clone https://github.com/TruCol/Self-host-GitLab-CI-for-GitHub.git
 cd Self-host-GitLab-CI-for-GitHub
@@ -19,18 +31,21 @@ chmod +x *.sh
 (You can leave out `-hp` if you're not comfortable typing your GitHub pw in code, then you'll be manually prompted to login via the browser.)
 
 
-## Run your GitLab CI on all repositories of an arbitrary GitHub User:
+## Run your GitLab CI on GitHub
+You can perform various types of CI runs. To run the CI commands, you should first have set up the GitLab server using the above command. These are described below:
+
+### CI latest commit of each branch of each repo of a GitHub user
+(Yes any GitHub user, doesn't have to be your GitHub user account.)
 ```
 bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user <some GitHub account/organisation>"
 ```
-## Run your GitLab CI on a particular repository
+### CI latest commit of a particular GitHub repository
 ```
 bash -c "source src/import.sh helper_github_modify.sh && get_build_status_repository_from_github"
-bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds renamed_test_repo hiveminds"
+bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_github_repo hiveminds renamed_test_repo"
 ```
 
-## Run your GitLab CI on a particular commit using GraphQL
-First, ensure GitHub Personal Access Token is valid. After installation of the GitLab CI, (and re-using it after a month+), first get your GitHub personal access token:
+### CI a particular commit using GraphQL
 ```
 bash -c "source src/import.sh && get_github_personal_access_token <your GitHub username> <your GitHub password>"
 ```

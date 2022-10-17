@@ -280,7 +280,7 @@ copy_github_branch_with_yaml_to_gitlab_repo_and_get_build_status() {
 	# known. (skip branch if yes)
 	
 	# 5.7 Copy the files from the GitHub branch into the GitLab branch.
-	printf "\n4.x.6.6 Verify if the content between the local GitHub and GitLab branch is identical."
+	printf "\n4.x.6.6 Verify if the content between the local GitHub and GitLab branch is identical.\n"
 	branch_content_identical_between_github_and_gitlab_output="$(copy_files_from_github_to_gitlab_branch "$github_repo_name" "$github_branch_name" "$gitlab_repo_name" "$gitlab_branch_name")"
 	# TODO: change this method to ommit getting last line!
 	#printf "RESULTRESULT=$result"
@@ -290,7 +290,7 @@ copy_github_branch_with_yaml_to_gitlab_repo_and_get_build_status() {
 	if [ "$branch_content_identical_between_github_and_gitlab" == "TRUE" ]; then
 	
 		# 5.8 Commit the changes to GitLab.
-		printf "\n4.x.6.7 Commit the content of the GitHub branch, that is copied to the GitLab branch, to GitLab."
+		printf "\n4.x.6.7 Commit the content of the GitHub branch, that is copied to the GitLab branch, to GitLab.\n"
 		manual_assert_not_equal "" "$github_commit_sha"
 
 		commit_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
@@ -298,13 +298,13 @@ copy_github_branch_with_yaml_to_gitlab_repo_and_get_build_status() {
 
 		# 5.8. Push the results to GitLab, with the commit message of the GitHub commit sha.
 		# Perform the Push function.
-		printf "\n4.x.6.8 Push the commit to GitLab."
+		printf "\n4.x.6.8 Push the commit to GitLab.\n"
 		push_changes_to_gitlab "$github_repo_name" "$github_branch_name" "$github_commit_sha" "$gitlab_repo_name" "$gitlab_branch_name"
 		# TODO: verify the changes are pushed correctly
 		printf "\n4.x.6.9 DONE PUSHING, getting commit sha"
 
 		# Get last commit of GitLab repo.
-		printf "\n4.x.6.10 Push the commit to GitLab."
+		printf "\n4.x.6.10 Push the commit to GitLab.\n"
 		gitlab_commit_sha=$(get_commit_sha_of_branch "$github_branch_name" "$github_repo_name" "$GITLAB_SERVER_ACCOUNT_GLOBAL" "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL")
 		gitlab_commit_sha=$(echo "$gitlab_commit_sha" | tr -d '"') # removes double quotes at start and end.
 		#echo "gitlab_commit_sha=$gitlab_commit_sha"
@@ -401,7 +401,7 @@ manage_get_gitlab_ci_build_status() {
 		if [ "$(is_desirable_github_build_status_excluding_pending $parsed_github_build_status)" == "FOUND" ]; then
 			break
 		fi
-		echo "Awaiting GitLab CI result. Current status:$parsed_github_build_status Running at:$GITLAB_SERVER_HTTP_URL/root/$github_repo_name/-/jobs/"
+		echo "Awaiting GitLab CI result. Job status:$parsed_github_build_status, more details:$GITLAB_SERVER_HTTP_URL/root/$github_repo_name/-/jobs/"
 	done
 }
 

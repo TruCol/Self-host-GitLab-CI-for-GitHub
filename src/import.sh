@@ -49,6 +49,7 @@ source src/helper/GitLab/helper_gitlab_modify.sh
 source src/helper/GitLab/helper_gitlab_status.sh
 source src/helper/git_neutral/helper_git_neutral.sh
 source src/helper/helper.sh
+source src/try_bug.sh
 
 source src/helper/verification/helper_asserts.sh # Loads assert abilities into code
 source src/helper/helper_configuration.sh

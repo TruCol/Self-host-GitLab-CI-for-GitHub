@@ -602,7 +602,6 @@ get_last_space_delimted_item_in_line() {
 	echo "${stringarray[-1]}"
 }
 
-
 #######################################
 # 
 # Local variables:

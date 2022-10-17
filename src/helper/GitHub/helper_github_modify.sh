@@ -291,3 +291,42 @@ get_build_status_repository_from_github() {
 	# Create a folder of the repository on which a CI has been ran, inside the GitHub build status website repository, if it does not exist yet
 	# Also add a folder for the branch(es) of that GitLab CI repository, in that respective folder.
 }
+
+#######################################
+# This downloads a GitHub repository from a GitHub user over SSH if it is
+# possible, otherwise over https. For https it assumes the repo is public.
+# Local variables:
+#  github_username
+#  github_repo_name
+# Globals:
+#  MIRROR_LOCATION
+# Arguments:
+#  github_username
+#  github_repo_name
+# Returns:
+#  0 If function was evaluated succesfull.
+# Outputs:
+#  Nothing if the GitHub repo was downloaded correctly.
+#######################################
+# run with:
+# source src/import.sh && download_github_repo_to_mirror_location "a-t-0" "sponsor_example"
+download_github_repo_to_mirror_location() {
+	local github_username="$1"
+	local github_repo_name="$2"
+	
+	# Create mirror directories
+	create_mirror_directories
+	manual_assert_not_equal "$MIRROR_LOCATION" ""
+	manual_assert_dir_exists "$MIRROR_LOCATION"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub"
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitLab"
+	
+	# Verify ssh-access
+	has_quick_ssh_access="$(check_quick_ssh_access_to_repo "$github_username" "$github_repo_name")"
+
+	# Clone GitHub repo at start of test.
+	clone_github_repository "$github_username" "$github_repo_name" "$has_quick_ssh_access" "$MIRROR_LOCATION/GitHub/$github_repo_name"
+	
+	# 2. Verify the GitHub repo is cloned.
+	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$github_repo_name"
+}

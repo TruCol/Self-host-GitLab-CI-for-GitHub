@@ -33,34 +33,37 @@ ensure_prerequisites_compliance() {
 
 
     # Raise sudo permission at the start, to prevent requiring user permission half way through tests.
-    printf "\n\n 1. Now getting sudo permission to perform the GitLab installation."
+    printf "\n\n1. Now getting sudo permission to perform the GitLab installation."
     {
       sudo echo "hi"
     } &> /dev/null
 
     # Ensuring the Firefox installation is performed with ppa/apt instead of snap.
     # This is such that the browser can be controlled automatically.
-    printf "\n3. Now ensuring the firefox is installed with ppa and apt instead."
+    printf "\n2. Now ensuring the firefox is installed with ppa and apt instead."
     printf "of snap."
     swap_snap_firefox_with_ppa_apt_firefox_installation
 
     # Ensure jq is installed correctly.
-    printf "\n\n 3. Now ensuring jquery is installed."
+    printf "\n\n3. Now ensuring jquery is installed."
     install_jquery_using_apt
 
     # Verify the GitHub user has the required repositories.
-    printf "\n\n 4. Verifying the $GITHUB_STATUS_WEBSITE_GLOBAL and "
+    printf "\n\n4. Verifying the $GITHUB_STATUS_WEBSITE_GLOBAL and "
     printf "$PUBLIC_GITHUB_TEST_REPO_GLOBAL repositories exist in your GitHub"
     printf " account."
     # TODO: include catch for: The requested URL returned error: 403 rate limit exceeded
-    assert_required_repositories_exist "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
-    assert_required_repositories_exist "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
+    assert_required_repositories_exist_in_github_server "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
+    assert_required_repositories_exist_in_github_server "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
+
+    # Verifying the GitHub repositories exist locally.
+    download_github_repo_to_mirror_location "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
 
     # Verify the GitHub user has ssh-access to GitHub.
     assert_user_has_ssh_access_to_github "$GITHUB_USERNAME_GLOBAL"
 
     # Get the GitHub personal access code.
-    printf "\n\n 5. Setting and Getting the GitHub personal access token if it "
+    printf "\n\n5. Setting and Getting the GitHub personal access token if it "
     printf "does not yet exist."
     ensure_github_pat_is_added_to_github $GITHUB_USERNAME_GLOBAL $github_password
     # After setting the GitHub pat, verify it is stored correctly locally.
@@ -68,9 +71,9 @@ ensure_prerequisites_compliance() {
 
     # Check if ssh deploy key already exists and can be used to push
     # to GitHub, before creating a new one.
-    printf "\n\n 6. Ensuring you have ssh push access to the "
+    printf "\n\n6. Ensuring you have ssh push access to the "
     printf "$GITHUB_STATUS_WEBSITE_GLOBAL repository with your ssh-deploy key."
     ensure_github_ssh_deploy_key_has_access_to_build_status_repo $GITHUB_USERNAME_GLOBAL $github_password $GITHUB_STATUS_WEBSITE_GLOBAL
 
-    
+    assert_required_repositories_exist_in_github_server "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
 }

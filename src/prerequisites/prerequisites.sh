@@ -50,9 +50,9 @@ set_gitlab_pwd() {
 #  include catch for:The requested URL returned error: 403 rate limit exceeded.
 #######################################
 # Run with: 
-# bash -c 'source src/import.sh && assert_required_repositories_exist a-t-0'
+# bash -c 'source src/import.sh && assert_required_repositories_exist_in_github_server a-t-0'
 
-assert_required_repositories_exist(){
+assert_required_repositories_exist_in_github_server(){
 	local github_username="$1"
 	local repo_name="$2"
 	

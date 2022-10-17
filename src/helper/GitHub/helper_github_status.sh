@@ -384,10 +384,25 @@ check_public_github_repository_exists() {
 	local github_username="$1"
 	local github_repo_name="$2"
 	
-	if curl -fsS "https://api.github.com/repos/${github_username}/${github_repo_name}" >/dev/null; then	
-		echo "FOUND"
-	else
-		echo "NOTFOUND"
+	request_output=$(curl -fsS "https://api.github.com/repos/${github_username}/${github_repo_name}")
+	if [ "$request_output" == "curl: (22) The requested URL returned error: 403" ]; then
+		read -p "You asked GitHub for information too often, GitHub says no."
+		
+		while true; do
+		read -p "Do you want to skip this test?(y/n)" yn
+		case $yn in
+			[Yy]* ) local skip="TRUE"; break;;
+			[Nn]* ) local skip="FALSE"; break;;
+			* ) echo "Please answer yes or no." > /dev/tty;;
+		esac
+	done
+	fi
+	if [ "$skip" != "TRUE" ]; then
+		if curl -fsS "https://api.github.com/repos/${github_username}/${github_repo_name}" >/dev/null; then	
+			echo "FOUND"
+		else
+			echo "NOTFOUND"
+		fi
 	fi
 }
 

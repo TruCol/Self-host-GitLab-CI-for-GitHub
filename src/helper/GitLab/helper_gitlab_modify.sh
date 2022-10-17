@@ -795,8 +795,9 @@ commit_changes_to_gitlab() {
             # If there exist differences in the files or folders in the branch (excluding the .git directory)
 
             # Then copy the files and folders from the GitHub branch into the GitLab branch (excluding the .git directory)
-            # That also deletes the files that exist in the GitLab branch that do not exist in the GitHub branch (excluding the .git directory)
+            # That also deletes the files that exist in the GitLab branch that do not exist in the GitHub branch (excluding the .git directory)            
             copy_github_files_and_folders_to_gitlab "$MIRROR_LOCATION/GitHub/$github_repo_name" "$MIRROR_LOCATION/GitLab/$github_repo_name"
+
 
             # Then verify the checksum of the files and folders in the branches are identical (excluding the .git directory)
             local comparison_result="$(two_folders_are_identical_excluding_subdir $MIRROR_LOCATION/GitHub/$github_repo_name $MIRROR_LOCATION/GitLab/$github_repo_name .git)"
@@ -810,10 +811,12 @@ commit_changes_to_gitlab() {
               local pwd_before="$PWD"
 
               if [[ "$(git_has_changes "$MIRROR_LOCATION/GitLab/$github_repo_name")" == "FOUND" ]]; then
-
+                
                 # Commit the changes to GitLab.
-                cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit -m \"$github_commit_sha\"  > /dev/null 2>&1 &
-                cd ../../../..
+                #cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit -m \"$github_commit_sha\"  > /dev/null 2>&1 &
+                cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit --quiet -m \"$github_commit_sha\"
+                #cd ../../../..
+                cd $pwd_before
               fi
 
               # Get the path after executing the command (to verify it is restored correctly after).
@@ -821,7 +824,6 @@ commit_changes_to_gitlab() {
 
               # Verify the current path is the same as it was when this function started.
               path_before_equals_path_after_command "$pwd_before" "$pwd_after"
-
               # TODO: Verify the changes were committed to GitLab correctly. (There are no remaining files to be added)
               #git status
               # TODO: Verify the changes were committed to GitLab correctly. (There commit message equals the sha)
@@ -831,7 +833,6 @@ commit_changes_to_gitlab() {
               echo "ERROR, the content in the GitHub branch is not exactly copied into the GitLab branch, even when excluding the .git directory."
               exit 11
             fi
-
           else
             echo "ERROR, the GitLab branch does not exist locally."
             exit 12
@@ -890,13 +891,14 @@ commit_changes_to_gitlab_for_commit() {
             if [ "$comparison_result" == "IDENTICAL" ]; then
               #echo "IDENTICAL"
 
+
               # Get the path before executing the command (to verify it is restored correctly after).
               pwd_before="$PWD"
 
               if [[ "$(git_has_changes "$MIRROR_LOCATION/GitLab/$github_repo_name")" == "FOUND" ]]; then
 
                 # Commit the changes to GitLab.
-                cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit -m \"$github_commit_sha\"
+                cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git add -A && git commit --quiet -m \"$github_commit_sha\"
                 cd ../../../..
               fi
 
@@ -1043,11 +1045,11 @@ push_changes_to_gitlab() {
 
               # Commit the changes to GitLab.
               #read -p "PUSH to GITLAB\n\n\n"
-              cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git push --set-upstream origin "$gitlab_branch_name"
+              cd "$MIRROR_LOCATION/GitLab/$github_repo_name" && git push --quiet --set-upstream origin "$gitlab_branch_name"
               cd ../../../..
               #read -p "Done path"
               # Get the path after executing the command (to verify it is
-			  # restored correctly after).
+			        # restored correctly after).
               local pwd_after
               pwd_after="$PWD"
 
@@ -1055,9 +1057,8 @@ push_changes_to_gitlab() {
               path_before_equals_path_after_command "$pwd_before" "$pwd_after"
 
             else
-              echo "ERROR, the content in the GitHub branch is not exactly
-			  copied into the GitLab branch, even when excluding the .git directory."
-			  END
+              echo "ERROR, the content in the GitHub branch is not exactly"
+			        echo "copied into the GitLab branch, even when excluding the .git directory."
               exit 11
             fi
 

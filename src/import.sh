@@ -44,6 +44,7 @@ source src/CI/call_CI/verify_build_statusses_are_valid.sh
 
 source src/helper/GitHub/helper_github_modify.sh
 source src/helper/GitHub/helper_github_status.sh
+source src/helper/GitHub/verify_GitHub_server.sh
 source src/helper/GitLab/helper_gitlab_modify.sh
 source src/helper/GitLab/helper_gitlab_status.sh
 source src/helper/git_neutral/helper_git_neutral.sh

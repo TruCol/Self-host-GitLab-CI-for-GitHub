@@ -111,3 +111,16 @@ Alternatively to running all tests with `./test.sh`, you can run a single testfi
 ```
 ./test/libs/bats/bin/bats test/helper/GitLab/test_helper_gitlab_modify.bats
 ```
+
+## Removing invalid build statusses
+```
+bash -c 'source src/import.sh && remove_commits_without_build_status_from_evaluated_list "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_LIST_FILENAME"'
+
+bash -c 'source src/import.sh && remove_commits_without_build_status_from_evaluated_list "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL/$EVALUATED_COMMITS_WITH_CI_LIST_FILENAME"'
+
+cd src/mirrors/GitHub/gitlab-ci-build-statuses/
+git add *
+git commit -m "Removed old build statusses."
+git push
+cd ../../../..
+```

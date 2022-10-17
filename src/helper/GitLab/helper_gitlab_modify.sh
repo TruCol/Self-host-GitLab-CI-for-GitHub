@@ -269,7 +269,7 @@ wait_until_repo_exists_in_gitlab(){
   local gitlab_repo_name="$1"
 
   # Specify how many retries are allowed.
-  local nr_of_retries=10
+  local nr_of_retries=30
   local termination_limit="$((nr_of_retries-2))"
   local i="0"
 

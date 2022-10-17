@@ -63,8 +63,9 @@ assert_github_build_status_is_set_correctly() {
 	local commit_build_status="$4"
 
     # Define the expected response contents.
-    local expected_url="https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha"
-    local expected_state="\"state\":\"$commit_build_status\","
+    local expected_url_with_quotations='"'"https://api.github.com/repos/$github_username/$github_repo_name/statuses/$github_commit_sha"'"'
+    #local expected_state='"'"\"state\":\"$commit_build_status\","
+    local expected_state_with_quotations='"'"$commit_build_status"'"'
 
     # Get the json containing the GitHub build statusses.
     local getting_output_json=$(GET https://api.github.com/repos/"$github_username"/"$github_repo_name"/commits/"$github_commit_sha"/statuses)
@@ -77,78 +78,50 @@ assert_github_build_status_is_set_correctly() {
     else
         # Extract the urls from the json response.
         local urls_in_json="$(echo "${getting_output_json[0]}" | jq ".[].url")"
-        local state_in_json="$(echo "${getting_output_json[0]}" | jq ".[].state")"
-        read -p "urls_in_json=$urls_in_json"
-        read -p "expected_url=$expected_url"
-        read -p "state_in_json=$state_in_json"
-        read -p "getting_output_json=$getting_output_json"
-
         for word in $urls_in_json
         do
             local first_url_in_json=$word
             break
         done
+
+        local state_in_json="$(echo "${getting_output_json[0]}" | jq ".[].state")"
         for word in $state_in_json
         do
             local first_state_in_json=$word
             break
         done
-        read -p "first_url_in_json=$first_url_in_json"
-        read -p "first_state_in_json=$first_state_in_json"
-        local expected_url_with_quotations='"'$expected_url'"'
-        local expected_state_with_quotations='"'$expected_state'"'
-        read -p "expected_url_with_quotations=$expected_url_with_quotations"
-        read -p "Equals:"
-        read -p "$first_url_in_json."
-        read -p "$expected_url_with_quotations."
-
-        
-        local expected_url_entry='"url":"'"$expected_url"'",'
-        local expected_state_entry='"state":"'"$commit_build_status"'",'
-
-        local found_url_entry="$(command_output_contains "$expected_url_entry" "${getting_output_json[0]}")"
-        local found_state_entry="$(command_output_contains "$expected_state_entry" "${getting_output_json[0]}")"
-
-        local found_url_entry_two="$(command_output_contains "$expected_url" "$urls_in_json")"
-        local found_state_entry_two="$(command_output_contains "$expected_state" "$state_in_json")"
-        read -p "found_url_entry_two=$found_url_entry_two"
-        read -p "found_state_entry_two=$found_state_entry_two"
-
-        local found_url_entry_three="$(command_output_contains "$expected_url" "$first_url_in_json")"
-        local found_state_entry_three="$(command_output_contains "$expected_state" "$first_state_in_json")"
-        read -p "found_url_entry_three=$found_url_entry_three"
-        read -p "found_state_entry_three=$found_state_entry_three"
-
-        if [ "$expected_url_with_quotations" == "$first_url_in_json" ]; then
-            read -p "GOTTTT ITTT"
-        fi
-        if [ "$expected_state_with_quotations" == "$first_state_in_json" ]; then
-            read -p "GOTTTT ITTT again"
+        read -p "first_url_in_json="
+        read -p "$first_url_in_json"
+        read -p "first_state_in_json="
+        read -p "$first_state_in_json"
+        commit_of_first_url_with_end_quotation=${first_url_in_json: -41}
+        commit_of_first_url=${commit_of_first_url_with_end_quotation:0:40}
+        read -p "commit_of_first_url=$commit_of_first_url."
+        read -p "commit_of_first_url=$github_commit_sha."
+        if [ "$github_commit_sha" == "$commit_of_first_url" ]; then
+            read -p "GOT SAME COMMIT!"
         fi
 
         # Verify the expected url and state are found in the GitHub response.
-        if [ "$found_url_entry" != "FOUND" ]; then
-            # shellcheck disable=SC2059
-		    printf "Error, GitHub commit status Get request did not contain expected_url_entry:\n"
-            printf "$expected_url_entry\n\n"
-            printf "Instead, the getting output was:\n"
-            printf "${getting_output_json[0]}.\n\n"
-            printf "And found_url_entry is:"
-            printf "$found_url_entry."
-            printf "And found_url_entry_two is:"
-            printf "$found_url_entry_two."
-		    exit 6
-        elif [ "$found_state_entry" != "FOUND" ]; then
-            printf "Error, the status of the repo did not contain expected_state_entry:\n"
-            printf "$expected_state_entry\n\n"
-            printf "Instead, the getting output was:\n"
-            printf "${getting_output_json[0]}\n\n"
-            printf "And found_state_entry is:"
-            printf "$found_state_entry."
-            printf "And found_state_entry_two is:"
-            printf "$found_state_entry_two."
-		    exit 7
+        if [ "$expected_url_with_quotations" == "$first_url_in_json" ]; then
+            read -p "GOTTTT ITTT"
+        else
+            read -p "Different urls:"
+            read -p "$expected_url_with_quotations"
+            read -p "$first_url_in_json"
         fi
+
+        if [ "$expected_state_with_quotations" == "$first_state_in_json" ]; then
+            read -p "GOTTTT ITTT again"
+        else
+            read -p "Different states:"
+            read -p "$expected_state_with_quotations"
+            read -p "$first_state_in_json"
+		    exit 6
+        fi
+
+        
+        
     fi
 }
 

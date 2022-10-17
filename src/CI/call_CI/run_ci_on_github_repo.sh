@@ -65,6 +65,8 @@ run_ci_on_all_repositories_of_user(){
 run_ci_on_github_repo() {
 	github_username="$1"
 	github_repo_name="$2"
+
+	verify_personal_credentials
 	
 	# 9. Verify the Build status repository is cloned.
 	manual_assert_dir_exists "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"

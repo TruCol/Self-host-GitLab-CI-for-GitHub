@@ -231,8 +231,11 @@ ensure_new_empty_repo_is_created_in_gitlab() {
   local gitlab_username="$2"
 
    # load personal_access_token (from hardcoded data)
-    local personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
-
+  local personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
+  if [ "$personal_access_token" == "" ]; then
+    echo "Error, personal credentials not loaded correctly."
+    exit 6
+  fi
   # TODO(a-t-0): Check if GitLab server is running.
 
   # Check if repository already exists in GitLab server.

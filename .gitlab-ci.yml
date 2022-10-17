@@ -1,0 +1,11 @@
+stages:
+  - test_stage
+before_script:
+  - rm -r test/libs/*
+  - chmod +x *.sh
+  - ./install-bats-libs.sh
+
+stage:
+  stage: test_stage
+  script:
+    - ./test.sh

@@ -39,7 +39,7 @@ END
 	output=$(sudo systemctl start docker)
 	
 	# Start GitLab Docker container
-	run_gitlab_docker
+	run_gitlab_server_in_docker_container
 	
 	# Get the docker image name
 	docker_image_name=$(get_gitlab_package)
@@ -87,7 +87,7 @@ END
 	output=$(sudo systemctl start docker)
 	
 	# Start GitLab Docker container
-	run_gitlab_docker
+	run_gitlab_server_in_docker_container
 	
 	# Get the docker image name
 	docker_image_name=$(get_gitlab_package)
@@ -129,7 +129,7 @@ END
 	output=$(sudo systemctl start docker)
 	
 	# Start GitLab Docker container
-	run_gitlab_docker
+	run_gitlab_server_in_docker_container
 	
 	# Get the docker image name
 	docker_image_name=$(get_gitlab_package)

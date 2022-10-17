@@ -193,22 +193,15 @@ fi
 
 # Start gitlab server installation and gitlab runner installation.
 if [ "$server_flag" == "true" ]; then
-  # TODO: verify required data is in personal_creds.txt 
-	# TODO: uncomment
+  printf "\n Ensuring prequisites are satisfied."
+  ensure_prerequisites_compliance
   printf "\n Installing the GitLab server!"
   install_and_run_gitlab_server "$GITLAB_SERVER_PASSWORD_GLOBAL"
 	echo "Installed gitlab server, should be up in a few minutes. You can visit it at:"
   echo "$GITLAB_SERVER_HTTP_URL"
 fi
 
-# TODO: Remove, this is done during the installation of the GitLab server.
-# Get the GitLab personal access token
-#printf "\n Verifying the GitLab personal access token works."
-#ensure_new_gitlab_personal_access_token_works
 
-# Verify all required credentials are in personal_creds.txt
-printf "\n Verifying the GitHub and GitLab personal access tokens are in the $PERSONAL_CREDENTIALS_PATH file."
-verify_personal_creds_txt_contain_pacs
 
 
 # Set GitLab password without displaying it in terminal.

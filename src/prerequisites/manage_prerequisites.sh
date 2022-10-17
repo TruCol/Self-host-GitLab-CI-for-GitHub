@@ -27,9 +27,7 @@ ensure_prerequisites_compliance() {
     # Reload personal_creds.txt
     source "$PERSONAL_CREDENTIALS_PATH"
 
-    # Verify the personal credits are stored correctly.
-    #printf "\n\n 0. Verifying the $PERSONAL_CREDENTIALS_PATH contains the right"
-    #printf " data."
+    # Verify the initial personal credits are stored correctly.
     verify_prerequisite_personal_creds_txt_contain_required_data
     verify_prerequisite_personal_creds_txt_loaded
 
@@ -65,10 +63,14 @@ ensure_prerequisites_compliance() {
     printf "\n\n 5. Setting and Getting the GitHub personal access token if it "
     printf "does not yet exist."
     ensure_github_pat_is_added_to_github $GITHUB_USERNAME_GLOBAL $github_password
+    # After setting the GitHub pat, verify it is stored correctly locally.
+    verify_personal_creds_txt_contain_pacs    
 
     # Check if ssh deploy key already exists and can be used to push
     # to GitHub, before creating a new one.
     printf "\n\n 6. Ensuring you have ssh push access to the "
     printf "$GITHUB_STATUS_WEBSITE_GLOBAL repository with your ssh-deploy key."
     ensure_github_ssh_deploy_key_has_access_to_build_status_repo $GITHUB_USERNAME_GLOBAL $github_password $GITHUB_STATUS_WEBSITE_GLOBAL
+
+    
 }

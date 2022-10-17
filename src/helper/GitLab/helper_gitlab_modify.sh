@@ -131,11 +131,8 @@ get_gitlab_repo_if_not_exists_locally_and_exists_in_gitlab() {
   # TODO(a-t-0): verify local gitlab mirror repo directories are created
   create_mirror_directories
 
-  if [ "$(verify_mirror_directories_are_created)" != "FOUND" ]; then
-    echo "ERROR, the GitLab repository was not found locally."
-    exit 8
-  # TODO(a-t-0): verify the repository exists in GitLab, throw error otherwise.
-  elif [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "NOTFOUND" ]; then
+  verify_mirror_directories_are_created
+  if [ "$(gitlab_mirror_repo_exists_in_gitlab "$gitlab_repo_name")" == "NOTFOUND" ]; then
     echo "ERROR, the GitLab repository was not found in the GitLab server."
     exit 9
   else
@@ -202,11 +199,6 @@ git_pull_gitlab_repo() {
 }
 
 
-# Structure:gitlab_status
-#6.d.1 If the GItHub branch already exists in the GItLab mirror repository does not yet exist, create it.
-# source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && ensure_new_empty_repo_is_created_in_gitlab "sponsor_example" "root"
-##run:
-# bash -c "source src/import.sh src/helper/GitLab/helper_gitlab_modify.sh && ensure_new_empty_repo_is_created_in_gitlab sponsor_example root"
 #######################################
 # Checks for a repository in the GitLab server and deletes it if it exists.
 # Afterwards, a new empty repository is created.

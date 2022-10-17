@@ -10,11 +10,6 @@ manage_github_build_status_check(){
 	local github_repo_name="$2"
 	local github_commit_sha="$3"
 	local commit_build_status="$4"
-    
-    echo "github_username=$github_username"
-	echo "github_repo_name=$github_repo_name"
-	echo "github_commit_sha=$github_commit_sha"
-	echo "commit_build_status=$commit_build_status"
 
     # Specify how many retries are allowed.
     local nr_of_retries=6
@@ -25,10 +20,8 @@ manage_github_build_status_check(){
         local found_valid_build_status="$(github_build_status_is_set_correctly "$github_username" "$github_repo_name" "$github_commit_sha" "$commit_build_status")"
         i=$[$i+1]
         if [ "$found_valid_build_status" == "FOUND" ]; then
-            echo "FOUND IT"
             break
         elif [[ "$i" == "$termination_limit" ]]; then
-            echo "DID NOT FIND IT, now ASSERTING"
             assert_github_build_status_is_set_correctly "$github_username" "$github_repo_name" "$github_commit_sha" "$commit_build_status"
             break
         fi
@@ -102,7 +95,6 @@ assert_github_build_status_is_set_correctly() {
             local first_state_in_json=$word
             break
         done
-        
         # Verify the GitHub resonse has the expected build status.
         if [ "$expected_state_with_quotations" != "$first_state_in_json" ]; then
             read -p "Different states:"
@@ -142,8 +134,6 @@ github_build_status_is_set_correctly(){
         # Get the commit form the first url from the json response.
         local commit_of_first_url_with_end_quotation=${first_url_in_json: -41}
         local commit_of_first_url=${commit_of_first_url_with_end_quotation:0:40}
-
-        
         
         # Extract the states from the json response and get the first state.
         local state_in_json="$(echo "${getting_output_json[0]}" | jq ".[].state")"
@@ -152,10 +142,10 @@ github_build_status_is_set_correctly(){
             local first_state_in_json=$word
             break
         done
+
         # Verify the expected url and state are found in the GitHub response.
         if [ "$expected_state_with_quotations" == "$first_state_in_json" ] && [ "$github_commit_sha" == "$commit_of_first_url" ]; then
 		    echo "FOUND"
-        
         # Verify the GitHub resonse concerns the right commit.
         elif [ "$github_commit_sha" != "$commit_of_first_url" ]; then
             echo "NOTFOUND"

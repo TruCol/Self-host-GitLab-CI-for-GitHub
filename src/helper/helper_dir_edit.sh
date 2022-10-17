@@ -57,8 +57,6 @@ verify_mirror_directories_are_created() {
 	elif test ! -d "$MIRROR_LOCATION/GitLab"; then
 		echo "Mirror location GitLab directory is not created"
 		exit 3
-	else
-		echo "FOUND"
 	fi
 }
 

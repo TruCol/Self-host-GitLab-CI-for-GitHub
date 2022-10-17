@@ -313,9 +313,10 @@ get_org_repos() {
 	arr=() # innitialise array with branches
 	
 	# get GitHub personal access token or verify ssh access to support private repositories.
-	github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
-	
-	theoutput=$(curl -H "Authorization: token $github_personal_access_code" "Accept: application/vnd.github.v3+json" https://api.github.com/users/"${github_organisation_or_username}"/repos?per_page=100 | jq -r '.[] | .name')
+	local github_personal_access_code=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
+
+	# Getting the first 100 repositories of a GitHub user.
+	local first_hundred_reponames=$(curl --silent -H "Authorization: token $github_personal_access_code" https://api.github.com/users/"$github_organisation_or_username"/repos?per_page=100 | jq -r '.[] | .name')
 	
 	# Parse branches from branch list response
 	while IFS= read -r line; do
@@ -324,7 +325,7 @@ get_org_repos() {
 		arr+=("$line")
 		
 	# List repositories and feed them into a line by line parser
-	done <<< "$theoutput"
+	done <<< "$first_hundred_reponames"
 }
 
 

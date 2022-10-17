@@ -26,25 +26,26 @@
 initialise_github_repositories_array() {
 	local github_organisation_or_username="$1"
 	get_org_repos github_repositories "$github_organisation_or_username" # call function to populate the array
-	declare -p github_repositories
+	declare -p github_repositories > /dev/null &
 }
 
-# source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user "hiveminds"
-# source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user "a-t-0"
 # bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user hiveminds"
+# bash -c "source src/import.sh src/CI/call_CI/run_ci_on_github_repo.sh && run_ci_on_all_repositories_of_user a-t-0"
 run_ci_on_all_repositories_of_user(){
 	local github_organisation_or_username="$1"
 	
 	# Get the GitHub build status repository.
 	get_build_status_repository_from_github
-
+	
 	initialise_github_repositories_array "$github_organisation_or_username"
-	echo "github_repositories=${github_repositories[@]}"
-
+	printf "Running this CI on the first commit of each branch of the following repositories:\n"
 	for github_repository in "${github_repositories[@]}"; do
 		echo "$github_repository"
-
-		# TODO: redo with timeout.
+	done
+	
+	printf "\nNow starting the CI loop:\n"
+	for github_repository in "${github_repositories[@]}"; do
+		echo "$github_repository"
 		run_ci_on_github_repo "$github_organisation_or_username" "$github_repository"
 	done
 

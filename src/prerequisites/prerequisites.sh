@@ -3,6 +3,26 @@
 # verify the installation prerequisites/requirements are met.
 
 #######################################
+# Installs curl
+# Locals:
+#  None
+# Globals:
+#  None
+# Arguments:
+#  None
+# Returns:
+#  0 If command was evaluated successfully.
+# Outputs:
+#  None
+#######################################
+install_curl() {
+	yes | sudo apt install curl
+
+	# TODO: verify curl is installed succesfully.
+}
+
+
+#######################################
 # Checks if firefox is installed using snap or not.
 # Locals:
 #  respones_lines

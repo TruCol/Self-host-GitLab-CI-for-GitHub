@@ -42,6 +42,9 @@ ensure_prerequisites_compliance() {
       sudo echo "hi"
     } &> /dev/null
 
+    # Ensure curl command is available.
+    install_curl
+
     # Ensuring the Firefox installation is performed with ppa/apt instead of snap.
     # This is such that the browser can be controlled automatically.
     printf "\n2. Now ensuring the firefox is installed with ppa and apt instead."

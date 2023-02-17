@@ -571,7 +571,7 @@ start_docker() {
 # Structure:gitlab_docker
 list_all_docker_containers() {
 	output=$(sudo docker ps -a)
-	read -p "$output"
+	echo "$output"
 }
 
 #######################################

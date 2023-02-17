@@ -76,10 +76,16 @@ assert_required_repositories_exist_in_github_server(){
 	local github_username="$1"
 	local repo_name="$2"
 	
-	if [ $(check_public_github_repository_exists "$github_username" "$repo_name") != "FOUND" ]; then
-		echo "Before installing GitLab, please ensure the repository:$repo_name exists in your GitHub account:$github_username"
+	local repo_exists
+	repo_exists=$(check_public_github_repository_exists_with_api "$github_username" "$repo_name")
+	if [[ "$repo_exists" == "NOTFOUND" ]]; then
+		echo "Error, before installing GitLab, please ensure the repository:$repo_name exists in your GitHub account:$github_username"
 		echo "To ensure the content is valid, fork it from: https://www.github.com/a-t-0/$repo_name"
 		exit 11
+	elif [[ "$repo_exists" == "FOUND" ]]; then
+		echo ""
+	else
+		echo "Error, did not find GitHub repo at:$github_username/$repo_name"
 	fi
 }
 
@@ -254,6 +260,11 @@ verify_prerequisite_personal_creds_txt_loaded() {
 }
 
 verify_personal_creds_txt_contain_pacs() {
+	verify_github_pac_exists_in_persional_creds_txt
+	verify_gitlab_pac_exists_in_persional_creds_txt
+}
+
+verify_github_pac_exists_in_persional_creds_txt() {
 	if [ $(file_contains_string "GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
 		echo "Error, the GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
 		exit 5
@@ -262,8 +273,10 @@ verify_personal_creds_txt_contain_pacs() {
 		echo "Error, the GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
+}
 
 
+verify_gitlab_pac_exists_in_persional_creds_txt() {
 	if [ $(file_contains_string "GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
 		echo "Error, the GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
 		exit 5
@@ -273,7 +286,6 @@ verify_personal_creds_txt_contain_pacs() {
 		exit 5
 	fi
 }
-
 
 verify_personal_credentials() {
     if [ "$(file_exists "$PERSONAL_CREDENTIALS_PATH")" == "FOUND" ]; then

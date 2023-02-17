@@ -73,8 +73,9 @@ ensure_prerequisites_compliance() {
     printf "\n\n5. Setting and Getting the GitHub personal access token if it "
     printf "does not yet exist."
     ensure_github_pat_is_added_to_github $GITHUB_USERNAME_GLOBAL $github_password
+    verify_github_pac_exists_in_persional_creds_txt
     # After setting the GitHub pat, verify it is stored correctly locally.
-    verify_personal_creds_txt_contain_pacs    
+    # verify_personal_creds_txt_contain_pacs    
 
     # Check if ssh deploy key already exists and can be used to push
     # to GitHub, before creating a new one.

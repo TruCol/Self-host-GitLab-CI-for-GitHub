@@ -141,6 +141,8 @@ get_registration_token_with_python() {
 	fi
 	cd ..
 	# TODO: verify path
+
+	# TODO: assert runner registration token exists.
 }
 
 get_gitlab_server_runner_tokenV2() {

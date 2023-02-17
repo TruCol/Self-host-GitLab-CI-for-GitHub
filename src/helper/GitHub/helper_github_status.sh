@@ -377,32 +377,25 @@ assert_current_github_branch() {
 # TODO(a-t-0): Write test for function.
 #######################################
 # run with:
-#source src/helper/GitHub/helper_github_status.sh && check_public_github_repository_exists "a-t-0" "some_non_existing_repository"
-#source src/helper/GitHub/helper_github_status.sh && check_public_github_repository_exists "a-t-0" "gitlab-ci-build-statuses"
-#source src/helper/GitHub/helper_github_status.sh && check_public_github_repository_exists "ocaml" "ocaml"
-check_public_github_repository_exists() {
+#source src/helper/GitHub/helper_github_status.sh && check_public_github_repository_exists_with_api "a-t-0" "some_non_existing_repository"
+#source src/helper/GitHub/helper_github_status.sh && check_public_github_repository_exists_with_api "a-t-0" "gitlab-ci-build-statuses"
+#source src/helper/GitHub/helper_github_status.sh && check_public_github_repository_exists_with_api "ocaml" "ocaml"
+check_public_github_repository_exists_with_api() {
 	local github_username="$1"
 	local github_repo_name="$2"
 	
-	request_output=$(curl -fsS "https://api.github.com/repos/${github_username}/${github_repo_name}")
-	if [ "$request_output" == "curl: (22) The requested URL returned error: 403" ]; then
+	
+	local request_output
+	request_output=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/${github_username}/${github_repo_name})
+	local full_repo_name
+	full_repo_name=$(echo "$request_output" | jq -r '.full_name')
+	if [[ "$request_output" == "curl: (22) The requested URL returned error: 403" ]]; then
 		read -p "You asked GitHub for information too often, GitHub says no."
-		
-		while true; do
-		read -p "Do you want to skip this test?(y/n)" yn
-		case $yn in
-			[Yy]* ) local skip="TRUE"; break;;
-			[Nn]* ) local skip="FALSE"; break;;
-			* ) echo "Please answer yes or no." > /dev/tty;;
-		esac
-	done
-	fi
-	if [ "$skip" != "TRUE" ]; then
-		if curl -fsS "https://api.github.com/repos/${github_username}/${github_repo_name}" >/dev/null; then	
-			echo "FOUND"
-		else
-			echo "NOTFOUND"
-		fi
+		exit 5
+	elif [[ "$full_repo_name" == "${github_username}/${github_repo_name}" ]]; then
+		echo "FOUND"
+	else
+		echo "NOTFOUND"
 	fi
 }
 
@@ -431,7 +424,7 @@ assert_public_github_repository_exists() {
 	local github_username="$1"
 	local github_repo_name="$2"
 
-	if [[ $(check_public_github_repository_exists "$github_username" "$github_repo_name") != "FOUND" ]]; then
+	if [[ $(check_public_github_repository_exists_with_api "$github_username" "$github_repo_name") != "FOUND" ]]; then
 		echo "The repository www.github.com/${github_username}/${github_repo_name} is not a public GitHub repository/doesn't exist. Please create it/make it public, and try again."
 		exit 5
 	fi

@@ -15,15 +15,16 @@ install_and_run_gitlab_runner() {
 	
 	# Install GitLab Runner regardless of whether the runner service is already running or not.
 		get_runner_package "$arch"
-		read -p "Got runner package"
+		read -p "Got runner package <enter>"
 		install_package "$arch"
-		read -p "Installed runner"
+		read -p "Installed runner <enter>"
+		echo "Now registering GitLab runner using Python repo."
 		register_gitlab_runner
-		read -p "Registered runner"
+		read -p "Registered runner <enter>"
 		create_gitlab_ci_user
-		read -p "create_gitlab_ci_user"
+		read -p "create_gitlab_ci_user <enter>"
 		install_gitlab_runner_service
-		read -p "install_gitlab_runner_service"
+		read -p "install_gitlab_runner_service <enter>"
 		start_gitlab_runner_service
 		run_gitlab_runner_service
 	if [ "$(gitlab_runner_is_running "$arch")" == "NOTRUNNING" ]; then
@@ -102,6 +103,7 @@ register_gitlab_runner() {
 	#dockerimage="ruby:2.6"
 	
 	# Get Gitlab Server runner registration token.
+	echo "RUNNER_REGISTRATION_TOKEN_FILEPATH=$RUNNER_REGISTRATION_TOKEN_FILEPATH"
 	get_gitlab_server_runner_tokenV1
 	
 	# runner_token=$(get_last_line_of_set_of_lines "\${output}") # python code output is given after last echo in shell, so read it from file instead of from output
@@ -188,7 +190,7 @@ install_gitlab_runner_service() {
 		added_runner_to_visudo=$(visudo_contains "$visudo_line" "$filepath")
 		if [  "$added_runner_to_visudo" == "NOTFOUND" ]; then
 			# TODO: raise exception
-			echo "ERROR, did not find the visudo user thatwas added"
+			echo "ERROR, did not find the visudo user that was added"
 			#exit 1
 		fi
 	fi

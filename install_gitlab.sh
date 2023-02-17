@@ -221,7 +221,7 @@ fi
 if [ "$runner_flag" == "true" ]; then
 	# Test if the gitlab server is running
 	if [ "$(gitlab_server_is_running | tail -1)" == "RUNNING" ]; then
-    printf "\n Installing the GitLab runner!"
+    printf "\nInstalling the GitLab runner!"
 		install_and_run_gitlab_runner
 	else
 		echo "ERROR, tried to start GitLab runner directly without the GitLab server running."

@@ -73,7 +73,7 @@ remove_sshd() {
 	elif [ "${response_lines:0:9}" == "docker-pr" ]; then
 		kill_a_program_with_program_nr "docker-pr"
 	elif [ "$response_lines" == "" ]; then
-			echo "sshd process already killed."	
+			echo "sshd process:$target_port already killed."	
 	else
 		echo "The response to the lsof command does not start with:sshd"
 		exit 7

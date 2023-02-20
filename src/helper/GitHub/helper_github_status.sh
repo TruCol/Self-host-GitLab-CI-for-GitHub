@@ -383,22 +383,58 @@ assert_current_github_branch() {
 check_public_github_repository_exists_with_api() {
 	local github_username="$1"
 	local github_repo_name="$2"
-	
-	
-	local request_output
-	request_output=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/${github_username}/${github_repo_name})
-	local full_repo_name
-	full_repo_name=$(echo "$request_output" | jq -r '.full_name')
-	if [[ "$request_output" == "curl: (22) The requested URL returned error: 403" ]]; then
-		read -p "You asked GitHub for information too often, GitHub says no."
-		exit 5
-	elif [[ "$full_repo_name" == "${github_username}/${github_repo_name}" ]]; then
-		echo "FOUND"
+
+	if [[ "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" == "" ]]; then
+		check_public_github_repository_exists_without_api $github_username $github_repo_name
 	else
-		echo "NOTFOUND"
+		local request_output
+		request_output=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/${github_username}/${github_repo_name})
+		local full_repo_name
+		full_repo_name=$(echo "$request_output" | jq -r '.full_name')
+		if [[ "$request_output" == "curl: (22) The requested URL returned error: 403" ]]; then
+			read -p "You asked GitHub for information too often, GitHub says no."
+			exit 5
+		elif [[ "$full_repo_name" == "${github_username}/${github_repo_name}" ]]; then
+			echo "FOUND"
+		else
+			echo "NOTFOUND"
+		fi
 	fi
 }
 
+
+# run with:
+#source src/helper/GitHub/helper_github_status.sh && check_public_github_repository_exists_without_api "a-t-0" "some_non_existing_repository"
+#source src/helper/GitHub/helper_github_status.sh && check_public_github_repository_exists_without_api "a-t-0" "gitlab-ci-build-statuses"
+#source src/helper/GitHub/helper_github_status.sh && check_public_github_repository_exists_without_api "ocaml" "ocaml"
+check_public_github_repository_exists_without_api() {
+	local github_username
+	github_username="$1"
+	local github_repo
+	github_repo="$2"
+
+	local url
+	url="https://github.com/$github_username/$github_repo"
+	
+	# Get website head(er) content
+	local website_head_content
+	website_head_content="$(curl -s --head $url)"
+	
+	# Get the first line of the website head(er) content.
+	local first_line=`echo "${website_head_content}" | head -1`
+	
+	# Remove trailing characters with xargs
+	local website_status=$(echo "$first_line" | xargs)
+	
+	if [[ "$website_status" == "HTTP/2 200" ]]; then
+		echo "FOUND"
+	elif [[ "$website_status" == "HTTP/2 404" ]]; then
+		echo "NOTFOUND"
+	else
+		echo "Error, unexpected website status response: $website_status for: $url"
+		exit 1
+  	fi
+}
 
 #######################################
 # Asserts a public GitHub repository exists. Throws error otherwise.

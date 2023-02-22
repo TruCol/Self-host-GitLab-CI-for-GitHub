@@ -48,8 +48,8 @@ ensure_github_pat_is_added_to_github() {
 		manual_assert_dir_exists "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
 
 		# TODO: verify path before running command.
-
 		printf "\n\n Now using a browser controller repository to create a GitHub personal access token and store it localy.\n\n."
+		printf "\n\n Create conda environment:$CONDA_ENVIRONMENT_NAME.\n\n."
 		# shellcheck disable=SC2034
 		if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
 			eval "$(conda shell.bash hook)"

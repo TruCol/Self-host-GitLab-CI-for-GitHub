@@ -318,14 +318,22 @@ get_latest_commit_sha_of_default_branch() {
 	assert_public_github_repository_exists "$github_username" "$github_repo_name"
 
 	# Get commits
-	local commits_json=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$github_username/$github_repo_name/commits?per_page=1&page=1)
-	#echo "commits_json=$commits_json"
-	#echo ""
+	# local commits_json=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/$github_username/$github_repo_name/commits?per_page=1&page=1)
+	local commits_json=$(curl  -H "Accept: application/vnd.github.v3+json"  --header "Authorization: token $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" https://api.github.com/repos/$github_username/$github_repo_name/commits?per_page=1&page=1)
+
+	if [[ "$commits_json" == "*rate*" ]]; then 
+		if [[ "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" != "" ]]; then
+		    local commits_json=$(curl  --header 'Accept: application/vnd.github.v3+json'  --header "Authorization: token $GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" https://api.github.com/repos/$github_username/$github_repo_name/commits?per_page=1&page=1)
+		else
+			echo "Error, GitHub did not have a personal access token, and got rate limiting. Solution see TODO in code."
+			# TODO: include check for api rate limiting, if yes, get from page source.
+			# src="/a-t-0/gitlab-ci-build-statuses/tree-commit/.."
+		fi
+	fi 
 
 	# Get the first commit.
 	readarray -t branch_commits_arr <  <(echo "$commits_json" | jq ".[].sha")
-	#echo "branch_commits_arr=$branch_commits_arr"
-	
+
 	# remove quotations
 	echo "$branch_commits_arr" | tr -d '"'
 }

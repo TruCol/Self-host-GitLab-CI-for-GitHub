@@ -597,7 +597,7 @@ push_commit_build_status_in_github_status_repo_to_github() {
 		# Verify ssh-access
 		has_quick_ssh_access="$(check_quick_ssh_access_to_repo "$github_username" "$GITHUB_STATUS_WEBSITE_GLOBAL")"
 		
-		if [[ "$has_quick_ssh_access" == "HAS_QUICK_SSH_ACCESS" ]]; then
+		if [[ "$has_quick_ssh_access" == "FOUND" ]]; then
 			push_to_github_repository_with_ssh "$MIRROR_LOCATION/GitHub/$GITHUB_STATUS_WEBSITE_GLOBAL"
 			# TODO 14. Verify the changes are pushed to the GitHub build status repository.
 		else

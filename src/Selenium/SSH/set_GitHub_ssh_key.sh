@@ -83,7 +83,9 @@ add_ssh_deploy_key_to_github() {
 #######################################
 # bash -c 'source src/import.sh && create_and_activate_local_github_ssh_deploy_key'
 create_and_activate_local_github_ssh_deploy_key() {
-    
+	local github_username="$1"
+	local github_pwd="$2"
+
     local public_key_filename="$GITHUB_SSH_DEPLOY_KEY_NAME.pub"
 	local private_key_filename="$GITHUB_SSH_DEPLOY_KEY_NAME"
 
@@ -94,4 +96,7 @@ create_and_activate_local_github_ssh_deploy_key() {
 	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
 	manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$private_key_filename"
 	activate_ssh_agent_and_add_ssh_key_to_ssh_agent
+	
+	# TODO: Add ssh-key to GitHub
+	add_ssh_deploy_key_to_github $github_username $github_pwd
 }

@@ -32,21 +32,20 @@ check_quick_ssh_access_to_repo() {
 	
 	# shellcheck disable=SC2034
 	local my_service_status=$(git ls-remote git@github.com:"$github_username"/"$github_repository".git 2>&1)
-	local found_error_in_ssh_command=$(lines_contain_string "ERROR" "\${my_service_status}")
-	if [ "$found_error_in_ssh_command" == "NOTFOUND" ]; then
-		echo "HAS_QUICK_SSH_ACCESS"
-	elif [ "$found_error_in_ssh_command" == "FOUND" ]; then
+	local found_error_in_ssh_command=$(lines_contain_string "ERROR" "${my_service_status}")
+	local found_permission_lack_in_ssh_command=$(lines_contain_string "Permission" "${my_service_status}")
+	if [ "$found_error_in_ssh_command" == "NOTFOUND" ] && [ "$found_permission_lack_in_ssh_command" == "NOTFOUND" ]; then
+		echo "FOUND"
+	else
 		# Two tries is enough to determine the device does not have ssh-access.
 		if [ "$is_retry" == "YES" ]; then
 			echo "NOTFOUND"
-		else
-			create_and_activate_local_github_ssh_deploy_key
+		else 
 			# Perform recursive call to run function one more time.
 			echo $(check_quick_ssh_access_to_repo "$github_username" "$github_repository" "YES")
 		fi
 	fi
 }
-
 
 #######################################
 # Verifies machine has push access to gitlab build status repository in GitHub.

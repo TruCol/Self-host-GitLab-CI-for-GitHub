@@ -41,7 +41,7 @@ alternative_check_can_use_github_pat_to_set_commit_status() {
 	if [ "$personal_credits_contain_global" == "FOUND" ]; then
 		
 		# Get the commit sha of the latest commit on the default branch.
-		local latest_commit_on_default_branch="$(get_latest_commit_public_github_repo "$github_username"	"$PUBLIC_GITHUB_TEST_REPO_GLOBAL")"
+		local latest_commit_on_default_branch="$(get_latest_commit_public_github_repo "$github_username" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")"
 
 		# Set the build status of a GitHub commit to "pending". GitLab server
 		# url is used because clicking on the build status should refer back to
@@ -177,9 +177,10 @@ check_if_can_set_build_status_of_github_commit_using_github_pat() {
 has_working_github_pat() {
 	local github_username="$1"
 
-	local latest_commit_on_default_branch="$(get_latest_commit_public_github_repo "$github_username"	"$PUBLIC_GITHUB_TEST_REPO_GLOBAL")"
-
+	local latest_commit_on_default_branch="$(get_latest_commit_public_github_repo "$github_username" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")"
+	
 	pat_usage_output=$(assert_set_build_status_of_github_commit_using_github_pat "$github_username" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL" "$latest_commit_on_default_branch" "$GITLAB_SERVER_HTTP_URL" "pending")
+	
 	if [ "$pat_usage_output" == "USED GITHUB PAT" ]; then	
 		echo "FOUND"
 	else

@@ -637,12 +637,12 @@ function stringStripNCharsFromStart {
 # TODO(a-t-0):
 #######################################
 assert_first_four_chars_are_sshd() {
-	local string="$"
+	local string="$1"
 	
 	if [ "${string:0:4}" == "sshd" ]; then
 		echo "FOUND"
 	else
-		echo "The response to the lsof command does not start with:sshd"
+		echo "The response to the lsof command does not start with:sshd. Instead found string=$string"
 		exit 7
 	fi
 }

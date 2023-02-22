@@ -76,16 +76,20 @@ assert_required_repositories_exist_in_github_server(){
 	local github_username="$1"
 	local repo_name="$2"
 	
-	local repo_exists
-	repo_exists=$(check_public_github_repository_exists_with_api "$github_username" "$repo_name")
-	if [[ "$repo_exists" == "NOTFOUND" ]]; then
+	local repo_exists_with_api
+	repo_exists_with_api=$(check_public_github_repository_exists_with_api "$github_username" "$repo_name")
+	local repo_exists_without_api
+	repo_exists_without_api=$(check_public_github_repository_exists_without_api "$github_username" "$repo_name")
+	
+	if [[ "$repo_exists_with_api" == "NOTFOUND" ]] && [[ "$repo_exists_without_api" == "NOTFOUND" ]]; then
 		echo "Error, before installing GitLab, please ensure the repository:$repo_name exists in your GitHub account:$github_username"
 		echo "To ensure the content is valid, fork it from: https://www.github.com/a-t-0/$repo_name"
 		exit 11
-	elif [[ "$repo_exists" == "FOUND" ]]; then
+	elif [[ "$repo_exists_with_api" == "FOUND" ]] || [[ "$repo_exists_without_api" == "FOUND" ]]; then
 		echo ""
 	else
 		echo "Error, did not find GitHub repo at:$github_username/$repo_name"
+		echo " with: repo_exists_with_api=$repo_exists_with_api and repo_exists_without_api=$repo_exists_without_api"
 	fi
 }
 
@@ -110,9 +114,11 @@ assert_user_has_ssh_access_to_github(){
 	local github_username="$1"
 
 	local ssh_probe_response=$(ssh -T git@github.com 2>&1)
-	local expected_output="Hi $github_username! You've successfully authenticated, but GitHub does not provide shell access."
-	
-	if [ "$ssh_probe_response" != "$expected_output" ]; then
+	# local expected_output="Hi $github_username! You've successfully authenticated, but GitHub does not provide shell access."
+	local expected_output='successfully authenticated, but GitHub does not provide shell access.'
+
+	# if [ "$ssh_probe_response" != *"$expected_output"* ]; then
+	if [[ "$ssh_probe_response" != *"successfully authenticated, but GitHub does not provide shell access."* ]]; then
 		echo "Before installing GitLab, please ensure GitHub user:$github_username"
 		echo "has ssh-access to GitHub. See: https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent"
 		echo ""
@@ -150,14 +156,10 @@ assert_github_pat_can_be_used_to_set_commit_build_status() {
 	local github_username="$1"
 	local github_reponame="$2"
 
-	local latest_commit_on_default_branch="$(get_latest_commit_public_github_repo "$github_username"	"$PUBLIC_GITHUB_TEST_REPO_GLOBAL")"
-
-	# Get the GitHub personal access token to set the commit build status.
-	#ensure_github_pat_is_added_to_github $GITHUB_USERNAME_GLOBAL	
-	# Verify the GitHub personal access token is able to set the commit build 
-	# status.
 	# Reload GitHub personal access token from personal credentials.
 	source "$PERSONAL_CREDENTIALS_PATH"
+	local latest_commit_on_default_branch="$(get_latest_commit_public_github_repo "$github_username"	"$PUBLIC_GITHUB_TEST_REPO_GLOBAL")"
+
 	
 	# TODO: ensure the personal creds file contains the credentials.
 

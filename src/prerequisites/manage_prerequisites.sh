@@ -63,11 +63,8 @@ ensure_prerequisites_compliance() {
     assert_required_repositories_exist_in_github_server "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
     assert_required_repositories_exist_in_github_server "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 
-    # Verifying the GitHub repositories exist locally.
-    download_github_repo_to_mirror_location "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
-
-    # Verify the GitHub user has ssh-access to GitHub.
-    assert_user_has_ssh_access_to_github "$GITHUB_USERNAME_GLOBAL"
+    # Ensure (mini) conda is installed.
+    ensure_miniconda_is_installed
 
     # Get the GitHub personal access code.
     printf "\n\n5. Setting and Getting the GitHub personal access token if it "
@@ -84,4 +81,12 @@ ensure_prerequisites_compliance() {
     ensure_github_ssh_deploy_key_has_access_to_build_status_repo $GITHUB_USERNAME_GLOBAL $github_password $GITHUB_STATUS_WEBSITE_GLOBAL
 
     assert_required_repositories_exist_in_github_server "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
+    
+
+    # Verify the GitHub user has ssh-access to GitHub.
+    assert_user_has_ssh_access_to_github "$GITHUB_USERNAME_GLOBAL"
+
+    # Verifying the GitHub repositories exist locally.
+    download_github_repo_to_mirror_location "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
+
 }

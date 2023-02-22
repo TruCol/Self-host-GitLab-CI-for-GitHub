@@ -47,6 +47,7 @@ source src/helper/verification/helper_md5sum.sh
 source src/helper/verification/sha256_computing.sh
 
 source src/prerequisites/firefox_version.sh
+source src/prerequisites/install_miniconda.sh
 source src/prerequisites/jquery.sh
 source src/prerequisites/prerequisites.sh
 source src/prerequisites/install_support_programs.sh

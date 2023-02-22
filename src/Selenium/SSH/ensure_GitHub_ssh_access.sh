@@ -24,7 +24,7 @@ ensure_github_ssh_deploy_key_has_access_to_build_status_repo(){
 	local github_pwd="$2"
 	local github_repository="$3"
 
-	local ensured_quick_ssh_access_to_github="$(ensure_quick_ssh_access_to_repo "$github_username" "$github_repository")"
+	local ensured_quick_ssh_access_to_github="$(ensure_quick_ssh_access_to_repo "$github_username" "$github_pwd" "$github_repository")"
 	if [[ "$ensured_quick_ssh_access_to_github" == "ENSURED_QUICK_SSH_ACCESS" ]]; then
 		local ensured_pull_ssh_access_to_github="$(ensure_has_pull_access_to_gitlab_build_status_repo_in_github "$github_username" "$github_pwd")"
 		if [[ "$ensured_pull_ssh_access_to_github" == "ENSURED_SSH_PULL_ACCESS" ]]; then
@@ -73,13 +73,13 @@ ensure_github_ssh_deploy_key_has_access_to_build_status_repo(){
 # bash -c 'source src/import.sh && ensure_quick_ssh_access_to_repo "a-t-0" "gitlab-ci-build-statuses"'
 ensure_quick_ssh_access_to_repo(){
 	local github_username=$1
-	local github_repository=$2
-	local is_retry="$3"
+	local github_pwd=$2
+	local github_repository=$3
+	local is_retry="$4"
 	
 	# Check if the code has SSH access to the GitHub build status repository.
 	has_quick_ssh_access_to_github="$(check_quick_ssh_access_to_repo "$github_username" "$github_repository")"
-	
-	if [[ "$has_quick_ssh_access_to_github" != "HAS_QUICK_SSH_ACCESS" ]]; then
+	if [[ "$has_quick_ssh_access_to_github" != "FOUND" ]]; then
 
 		if [ "$is_retry" == "YES" ]; then
 			echo "Error, was not able to achieve quick_ssh_access."
@@ -88,10 +88,10 @@ ensure_quick_ssh_access_to_repo(){
 			# Ensure quick_ssh_access is obtained.
 			# TODO: verify that function actually yields quick access on clean
 			# Ubuntu 22.04 image.
-			create_and_activate_local_github_ssh_deploy_key
+			create_and_activate_local_github_ssh_deploy_key "$github_username" "$github_pwd"
 			
 			# Perform recursive call to run function one more time.
-			echo $(ensure_quick_ssh_access_to_repo "$github_username" "$github_repository" "YES")
+			echo $(ensure_quick_ssh_access_to_repo "$github_username" "$github_pwd" "$github_repository" "YES")
 		fi
 	else
 		echo "ENSURED_QUICK_SSH_ACCESS"

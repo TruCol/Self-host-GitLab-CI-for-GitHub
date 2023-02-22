@@ -44,7 +44,7 @@ clone_github_repository() {
 	# Remove target directory if it already exists.
 	remove_dir "$target_directory"
 
-	if [[ "$has_quick_ssh_access" == "HAS_QUICK_SSH_ACCESS" ]]; then
+	if [[ "$has_quick_ssh_access" == "FOUND" ]]; then
 		git clone --quiet git@github.com:"$github_username"/"$github_repository" "$target_directory"
 	else
 		git clone --quiet https://github.com/"$github_username"/"$github_repository".git "$target_directory"

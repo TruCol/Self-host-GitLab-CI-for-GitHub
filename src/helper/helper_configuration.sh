@@ -37,6 +37,32 @@ get_architecture() {
 	echo $mapped_architecture
 }
 
+# bash -c "source src/import.sh && remove_port_processes"
+remove_port_processes(){
+	
+	# Loop through GITLAB_PORT_1 .. to GITLAB_PORT_3 from hardcoded_variables.
+	for ((i=1; i<4; i++))
+	do
+		# Load a port combination in form <left port>:<right port>.
+	    port_combo="GITLAB_PORT_$i"
+		
+		# Split port from <left port>:<right port> into two separate variables.
+		IFS=':' read -ra SOME_ARR <<< "${!port_combo}"
+		
+		# Loop over the port numbers.
+		for the_port in "${SOME_ARR[@]}"; do
+
+			# Terminate the processes occupying that port until no processes are left on that port.
+		  	while [[ "$(port_is_occupied $the_port)" == "TRUE" ]]; do
+				remove_sshd "$the_port"
+			done
+		done
+
+	done
+	
+
+
+}
 
 #######################################
 # Kills the sshd process to prevent the:
@@ -72,7 +98,9 @@ remove_sshd() {
 		kill_a_program_with_program_nr "sshd"
 	elif [ "${response_lines:0:9}" == "docker-pr" ]; then
 		kill_a_program_with_program_nr "docker-pr"
-	elif [[ "$response_lines" == "" ]] || [[ "${response_lines:0:5}" == "httpd" ]] ; then
+	elif [[ "${response_lines:0:5}" == "httpd" ]]; then
+		kill_a_program_with_program_nr "httpd"
+	elif [[ "$response_lines" == "" ]]; then
 			echo "sshd process:$target_port already killed."	
 	else
 		echo "The response to the lsof command does not start with:sshd, instead found response_lines=$response_lines"
@@ -81,6 +109,27 @@ remove_sshd() {
 	
 	# TODO: ensure it works.
 	assert_sshd_process_is_not_running_anymore
+}
+
+port_is_occupied() {
+	local target_port=$1
+	
+	local response_lines=$(sudo lsof -i -P -n | grep *:$target_port)
+	
+	
+	#if [ "${response_lines:0:4}" == "sshd" ]; then
+	if [ "${response_lines:0:4}" == "sshd" ]; then
+		echo "TRUE"
+	elif [ "${response_lines:0:9}" == "docker-pr" ]; then
+		echo "TRUE"
+	elif [[ "${response_lines:0:5}" == "httpd" ]]; then
+		echo "TRUE"
+	elif [[ "$response_lines" == "" ]]; then
+		echo "FALSE"
+	else
+		echo "The response to the lsof command does not start with:sshd, instead found response_lines=$response_lines"
+		exit 7
+	fi
 }
 
 
@@ -112,16 +161,13 @@ kill_a_program_with_program_nr() {
 	
 	# Get the first line of the lsof output.
 	local first_line=$(get_line_by_nr_from_variable "$line_nr" "${response_lines}")
-	read -p "first_line=$first_line"
 	
 	# Get the string starting with the program number from first line.
 	local prog_nr_str=$(stringStripNCharsFromStart "$first_line" $len_program_description)
-	read -p "prog_nr_str=$prog_nr_str"
 	
 	# Get the first digits representing the number of the program.
 	prog_nr=$(echo "$prog_nr_str" | cut -d' ' -f1)
-	read -p "prog_nr=$prog_nr"
-
+	
 	# Kill the program through its program number.
 	sudo kill "$prog_nr"
 }

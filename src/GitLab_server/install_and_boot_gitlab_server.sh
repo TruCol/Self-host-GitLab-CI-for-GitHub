@@ -21,15 +21,8 @@ install_and_run_gitlab_server() {
 	
 	if [ "$gitlab_server_is_running" == "NOTRUNNING" ]; then
 
-		# This ensures the docker containers are not running on the *:22 port.
-		remove_sshd 22
-		remove_sshd 23
-		remove_sshd 23
-		remove_sshd 80
-		remove_sshd 80
-		# This ensures the docker containers are not running on the *:443 port.
-		remove_sshd 443
-		remove_sshd 443
+		# This ensures the docker containers are not running on the used gitlab ports.
+		remove_port_processes
 		
 		# Ensures docker is installed
 		install_docker

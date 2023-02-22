@@ -10,12 +10,14 @@ HIDDENSERVICENAME_SSH=other_hidden_service
 #x86_64_runner_checksum=98915670b9fc238e9a08b61e82edb23f
 #x86_64_runner_checksum=f45e6120a936e07b59b1a9f460897b38
 #x86_64_runner_checksum=4a6aa970e604c7077a269ed079afbde6
-x86_64_runner_checksum=75d1c7f8d2c601d68c49eb8ae1c4e663
+#x86_64_runner_checksum=75d1c7f8d2c601d68c49eb8ae1c4e663
+x86_64_runner_checksum=a251dfbdd6a625ded6e0de4655d63f1a
 
 # TODO: capitalise x86_64_runner_checksum
 GITLAB_SERVER="127.0.0.1"
 GITLAB_SERVER_HTTP_URL="http://$GITLAB_SERVER"
-GITLAB_PORT_1="443:443"
+#GITLAB_PORT_1="443:443"
+GITLAB_PORT_1="444:444"
 GITLAB_PORT_2="80:80"
 GITLAB_PORT_3="23:22"
 GITLAB_NAME="gitlab"

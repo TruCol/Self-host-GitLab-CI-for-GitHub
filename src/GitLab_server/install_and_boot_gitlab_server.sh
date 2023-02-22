@@ -105,6 +105,7 @@ run_gitlab_server_in_docker_container() {
 	
 	gitlab_package=$(get_gitlab_package)
 	
+	local output
 	output=$(sudo docker run --detach \
 	  --hostname "$GITLAB_SERVER" \
 	  --publish "$GITLAB_PORT_1" --publish "$GITLAB_PORT_2" --publish "$GITLAB_PORT_3" \
@@ -115,7 +116,7 @@ run_gitlab_server_in_docker_container() {
 	  --volume "$GITLAB_HOME"/data:/var/opt/gitlab \
 	  -e GITLAB_ROOT_EMAIL="$GITLAB_ROOT_EMAIL_GLOBAL" -e GITLAB_ROOT_PASSWORD="$gitlab_pwd" -e EXTERNAL_URL="http://127.0.0.1" \
 	  "$gitlab_package")
-	  echo "$output"
+	echo "$output"
 }
 
 # You can check how long it takes before the gitlab server is completed running with:

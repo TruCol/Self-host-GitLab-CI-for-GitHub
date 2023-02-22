@@ -108,7 +108,6 @@ register_gitlab_runner() {
 	
 	# runner_token=$(get_last_line_of_set_of_lines "\${output}") # python code output is given after last echo in shell, so read it from file instead of from output
 	local runner_token=$(cat "$RUNNER_REGISTRATION_TOKEN_FILEPATH")
-	read -p "runner_token=$runner_token"
 	
 	# TODO: delete plain text registration token after reading.
 	#echo "runner_token=$runner_token"

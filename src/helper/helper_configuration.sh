@@ -51,13 +51,11 @@ remove_port_processes(){
 		
 		# Loop over the port numbers.
 		for the_port in "${SOME_ARR[@]}"; do
-
 			# Terminate the processes occupying that port until no processes are left on that port.
 		  	while [[ "$(port_is_occupied $the_port)" == "TRUE" ]]; do
 				remove_sshd "$the_port"
 			done
 		done
-
 	done
 	
 

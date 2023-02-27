@@ -1,7 +1,7 @@
 #!/bin/bash
 POSITIONAL_ARGS=()
 
-
+source src/stacktrace.sh
 source src/import.sh
 
 # Specify default argument values.

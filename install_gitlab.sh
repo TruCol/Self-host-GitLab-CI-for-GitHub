@@ -168,11 +168,6 @@ if [[ -n $1 ]]; then
 fi
 
 # Set GitLab password without displaying it in terminal.
-if [ "$prerequistes_only_flag" == "true" ]; then
-	ensure_prerequisites_compliance
-fi
-
-# Set GitLab password without displaying it in terminal.
 if [ "$gitlab_pwd_flag" == "true" ]; then
 	echo -n "Your new GitLab password:"
 	read -s gitlab_pwd
@@ -188,7 +183,10 @@ if [ "$github_pwd_flag" == "true" ]; then
   assert_is_non_empty_string ${github_password}
 fi
 
-
+# Set GitLab password without displaying it in terminal.
+if [ "$prerequistes_only_flag" == "true" ]; then
+	ensure_prerequisites_compliance
+fi
 
 
 # Start gitlab server installation and gitlab runner installation.

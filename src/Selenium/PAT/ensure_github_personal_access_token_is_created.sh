@@ -33,54 +33,27 @@ ensure_github_pat_is_added_to_github() {
 	local github_username="$1"
 	local github_pwd="$2"
 	
-	local can_use_github_pat=$(has_working_github_pat "$github_username")
-	if [ "$can_use_github_pat" == "NOTFOUND" ]; then
-
-		# TODO: support not passing github pwd such that the Python code asks it
-		# during runtime.
-		if [ "$github_pwd" == "" ]; then
-			echo "Error, GitHub password was not specified. Please include it in this function."
-			exit 4
-		fi
-
-		# Get the repository that can automatically get the GitHub deploy token.
-		download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
-		manual_assert_dir_exists "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
-
-		# TODO: verify path before running command.
-		printf "\n\n Now using a browser controller repository to create a GitHub personal access token and store it localy.\n\n."
-		printf "\n\n Create conda environment:$CONDA_ENVIRONMENT_NAME.\n\n."
-		# shellcheck disable=SC2034
-		if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
-			eval "$(conda shell.bash hook)"
-			export repo_name=$REPONAME_GET_RUNNER_TOKEN_PYTHON
-			export github_username=$github_username
-			export github_pwd=$github_pwd
-			# TODO: include GITHUB_USERNAME_GLOBAL
-			#cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat
-			cd $repo_name && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat -hu $github_username -hp $github_pwd
-		else
-			eval "$(conda shell.bash hook)"
-			export repo_name=$REPONAME_GET_RUNNER_TOKEN_PYTHON
-			export github_username=$github_username
-			export github_pwd=$github_pwd
-			# TODO: GITHUB_USERNAME_GLOBAL
-			#cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat
-			cd $repo_name && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat -hu $github_username -hp $github_pwd
-		fi
-		cd ..
-
-		# Overwrite GitHub password export to filler.
-		export github_pwd="filler"
-		# TODO: Verify path BEFORE and after running command.
-		# TODO: Verify the token is in the PERSONAL_CREDENTIALS_PATH file.
-	elif [ "$can_use_github_pat" != "FOUND" ]; then
-		echo "Error, the has_working_github_pat output was neither FOUND nor"
-		echo "NOTFOUND:$can_use_github_pat"
+	# Verify personal credentials can be loaded from file.
+	if [[ "$PERSONAL_CREDENTIALS_PATH" == "" ]]; then 
+		echo "Error, cannot find personal credentials path."
 		exit 5
 	fi
 
-	local can_use_github_pat=$(has_working_github_pat "$github_username")
+	source $PERSONAL_CREDENTIALS_PATH
+	# Check if GitHub PAT is in personal access tokens.
+	if [[ "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" == "" ]]; then
+		# If not, put it in there.
+		set_github_pat "$github_username" "$github_pwd"
+		
+		# Then assert it is in there.
+		source $PERSONAL_CREDENTIALS_PATH
+		if [[ "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" == "" ]]; then
+			echo "Error, after adding the personal access token to GitHub, it"
+			echo "was not found in $PERSONAL_CREDENTIALS_PATH:"
+			exit 5
+		fi
+	fi
+
 	local alternative_can_use_github_pat=$(alternative_check_can_use_github_pat_to_set_commit_status "$github_username" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL")
 	if [ "$can_use_github_pat" != "FOUND" ]; then
 		echo "Error, was not able to use the GitHub personal access token (I):"
@@ -89,7 +62,51 @@ ensure_github_pat_is_added_to_github() {
 			echo "Error, was not able to use the GitHub personal access token (II):"
 			echo "$alternative_can_use_github_pat"
 		fi
-	fi
+	fi	
 }
 
 
+set_github_pat() {
+	local github_username="$1"
+	local github_pwd="$2"
+
+	# TODO: support not passing github pwd such that the Python code asks it
+	# during runtime.
+	if [ "$github_pwd" == "" ]; then
+		echo "Error, GitHub password was not specified. Please include it in this function."
+		exit 4
+	fi
+
+	# Get the repository that can automatically get the GitHub deploy token.
+	download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
+	manual_assert_dir_exists "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
+
+	# TODO: verify path before running command.
+	printf "\n\n Now using a browser controller repository to create a GitHub personal access token and store it localy.\n\n."
+	printf "\n\n Create conda environment:$CONDA_ENVIRONMENT_NAME.\n\n."
+	# shellcheck disable=SC2034
+	if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
+		eval "$(conda shell.bash hook)"
+		export repo_name=$REPONAME_GET_RUNNER_TOKEN_PYTHON
+		export github_username=$github_username
+		export github_pwd=$github_pwd
+		# TODO: include GITHUB_USERNAME_GLOBAL
+		#cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat
+		cd $repo_name && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat -hu $github_username -hp $github_pwd
+	else
+		eval "$(conda shell.bash hook)"
+		export repo_name=$REPONAME_GET_RUNNER_TOKEN_PYTHON
+		export github_username=$github_username
+		export github_pwd=$github_pwd
+		# TODO: GITHUB_USERNAME_GLOBAL
+		#cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat
+		cd $repo_name && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat -hu $github_username -hp $github_pwd
+	fi
+	cd ..
+
+	# Overwrite GitHub password export to filler.
+	export github_pwd="filler"
+	# TODO: Verify path BEFORE and after running command.
+	# TODO: Verify the token is in the PERSONAL_CREDENTIALS_PATH file.
+
+}

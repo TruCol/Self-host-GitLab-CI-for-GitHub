@@ -74,6 +74,10 @@ ensure_prerequisites_compliance() {
     # After setting the GitHub pat, verify it is stored correctly locally.
     # verify_personal_creds_txt_contain_pacs    
 
+    # Ensure pip is installed.
+    sudo apt install pip --yes
+    # TODO: verify pip is installed
+
     # Check if ssh deploy key already exists and can be used to push
     # to GitHub, before creating a new one.
     printf "\n\n6. Ensuring you have ssh push access to the "

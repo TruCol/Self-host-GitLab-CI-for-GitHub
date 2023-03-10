@@ -125,7 +125,7 @@ get_registration_token_with_python() {
 	pip install gitbrowserinteract --no-input
 	# TODO: assert the pip package is installed succesfully.
 	
-	python -m gitbrowserinteract.__main__ --glr
+	python3 -m gitbrowserinteract.__main__ --glr
 	
 	
 	

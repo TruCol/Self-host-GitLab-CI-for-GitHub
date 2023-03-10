@@ -87,7 +87,7 @@ set_github_pat() {
 	pip install gitbrowserinteract --no-input
 	# TODO: assert the pip package is installed succesfully.
 	
-	python -m gitbrowserinteract.__main__ --hubcpat -hu $github_username -hp $github_pwd
+	python3 -m gitbrowserinteract.__main__ --hubcpat -hu $github_username -hp $github_pwd
 
 	# Overwrite GitHub password export to filler.
 	export github_pwd="filler"

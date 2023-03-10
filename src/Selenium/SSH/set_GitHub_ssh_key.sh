@@ -44,7 +44,7 @@ add_ssh_deploy_key_to_github() {
 	
 	# 2. Run the Selenium browser controller to add the GitHub public SSH 
     # deploy key to GitHub.
-	python -m gitbrowserinteract.__main__ --d --ssh "$public_ssh_key_data" -hu $github_username -hp $github_pwd
+	python3 -m gitbrowserinteract.__main__ --d --ssh "$public_ssh_key_data" -hu $github_username -hp $github_pwd
 
     # TODO: verify the GitHub SSH deploy key works.
 }

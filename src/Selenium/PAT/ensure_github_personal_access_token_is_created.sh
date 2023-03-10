@@ -4,7 +4,7 @@
 
 #######################################
 # Gets a new GitHub personal access token (PAT), using the Python repository:
-# get-gitlab-runner-registration-token. This repository is downloaded.
+# gitbrowserinteract. This repository is downloaded.
 # Next, the conda environment of this repository is created if it does not
 # exist, and then the environment is activated. Once activated, the Python
 # code is activated, and it downloads a Firefox browser controller for 
@@ -91,16 +91,16 @@ set_github_pat() {
 		export github_username=$github_username
 		export github_pwd=$github_pwd
 		# TODO: include GITHUB_USERNAME_GLOBAL
-		#cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat
-		cd $repo_name && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat -hu $github_username -hp $github_pwd
+		#cd gitbrowserinteract && conda deactivate && conda activate gitbrowserinteract && python -m gitbrowserinteract.__main__ --hubcpat
+		cd $repo_name && conda deactivate && conda activate gitbrowserinteract && python -m gitbrowserinteract.__main__ --hubcpat -hu $github_username -hp $github_pwd
 	else
 		eval "$(conda shell.bash hook)"
 		export repo_name=$REPONAME_GET_RUNNER_TOKEN_PYTHON
 		export github_username=$github_username
 		export github_pwd=$github_pwd
 		# TODO: GITHUB_USERNAME_GLOBAL
-		#cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat
-		cd $repo_name && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --hubcpat -hu $github_username -hp $github_pwd
+		#cd gitbrowserinteract && conda env create --file environment.yml && conda activate gitbrowserinteract && python -m gitbrowserinteract.__main__ --hubcpat
+		cd $repo_name && conda env create --file environment.yml && conda activate gitbrowserinteract && python -m gitbrowserinteract.__main__ --hubcpat -hu $github_username -hp $github_pwd
 	fi
 	cd ..
 

@@ -112,7 +112,7 @@ get_gitlab_server_runner_tokenV0() {
 #######################################
 # source src/Selenium/get_gitlab_server_runner_token.sh && get_registration_token_with_python
 get_registration_token_with_python() {
-	sudo rm -r "get-gitlab-runner-registration-token"
+	sudo rm -r "gitbrowserinteract"
 	
 	# delete the runner registration token file if it exist
 	if [ -f "$RUNNER_REGISTRATION_TOKEN_FILEPATH" ] ; then
@@ -123,7 +123,7 @@ get_registration_token_with_python() {
 	download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
 	
 	
-	# TODO: turn get_gitlab_generation_token into variable
+	# TODO: turn gitbrowserinteract into variable
 	# shellcheck disable=SC2034
 	#conda_environments=$(conda env list)
 	#read -p "CONDA_ENVIRONMENT_NAME=$CONDA_ENVIRONMENT_NAME"
@@ -131,12 +131,12 @@ get_registration_token_with_python() {
 	#if [ "$(lines_contain_string "$CONDA_ENVIRONMENT_NAME" "\${conda_environments}")" == "FOUND" ]; then
 	if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
 		eval "$(conda shell.bash hook)"
-		cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --glr
-		#cd get-gitlab-runner-registration-token && conda init get_gitlab_generation_token && python -m code.project1.src
+		cd gitbrowserinteract && conda deactivate && conda activate gitbrowserinteract && python -m gitbrowserinteract.__main__ --glr
+		#cd gitbrowserinteract && conda init gitbrowserinteract && python -m gitbrowserinteract
 		# eval $(conda shell.bash hook)
 	else
 		eval "$(conda shell.bash hook)"
-		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --glr
+		cd gitbrowserinteract && conda env create --file environment.yml && conda activate gitbrowserinteract && python -m gitbrowserinteract.__main__ --glr
 		
 	fi
 	cd ..

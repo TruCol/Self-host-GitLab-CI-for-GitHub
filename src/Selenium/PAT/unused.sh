@@ -1,7 +1,7 @@
 
 #######################################
 # Creates and adds the GitHub personal access token (PAT), using the Python repository:
-# get-gitlab-runner-registration-token, to GitHub and stores it locally in the
+# gitbrowserinteract, to GitHub and stores it locally in the
 # credentials file. Then reloads the credentials file and verifies whether the
 # GitHub PAT can be used to set/change GitHub commit build statusses.
 #

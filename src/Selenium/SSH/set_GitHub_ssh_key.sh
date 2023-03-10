@@ -48,12 +48,12 @@ add_ssh_deploy_key_to_github() {
 		eval "$(conda shell.bash hook)"
 		export github_username=$github_username
 		export github_pwd=$github_pwd
-		cd get-gitlab-runner-registration-token && conda deactivate && conda activate get_gitlab_generation_token && python -m code.project1.src --d --ssh "$public_ssh_key_data" -hu $github_username -hp $github_pwd
+		cd gitbrowserinteract && conda deactivate && conda activate gitbrowserinteract && python -m gitbrowserinteract.__main__ --d --ssh "$public_ssh_key_data" -hu $github_username -hp $github_pwd
 	else
 		eval "$(conda shell.bash hook)"
 		export github_username=$github_username
 		export github_pwd=$github_pwd
-		cd get-gitlab-runner-registration-token && conda env create --file environment.yml && conda activate get_gitlab_generation_token && python -m code.project1.src --d --ssh "$public_ssh_key_data" -hu $github_username -hp $github_pwd
+		cd gitbrowserinteract && conda env create --file environment.yml && conda activate gitbrowserinteract && python -m gitbrowserinteract.__main__ --d --ssh "$public_ssh_key_data" -hu $github_username -hp $github_pwd
 		
 	fi
 	cd ..

@@ -15,7 +15,7 @@ The GitLab server runs on your device, so you don't have to pay anyone, the buil
 This is done by adding a GitHub SSH deploy key to your GitHub account, which is used to push GitLab build statusses from your device into your new GitHub repository.
 - The GitHub commit statusses are also automatically set/updated when you run the GitLab CI. A GitHub personal access token is added to your GitHub for this purpose.
 
-Both setting the GitHub SSH deploy key and personal access token are automated, using the Selenium browser controller, which is automatically downloaded by [this repo](https://github.com/a-t-0/get-gitlab-runner-registration-token), which is automatically downloaded as well. That repo creates a conda environment that is automatically created and activated to set the respective GitHub tokens. Anaconda is not automatically installed.
+Both setting the GitHub SSH deploy key and personal access token are automated, using the Selenium browser controller, which is automatically downloaded by [this repo](https://github.com/a-t-0/gitbrowserinteract), which is automatically downloaded as well. That repo creates a conda environment that is automatically created and activated to set the respective GitHub tokens. Anaconda is not automatically installed.
 
 The browsercontroller is a lot of boilerplate code, so you can also just manually add the SSH deploy token to GitHub. Similarly, for the GitHub personal access token, you can manually store it in the: `personal_creds.txt` file above the repo root folder, with:
 ```

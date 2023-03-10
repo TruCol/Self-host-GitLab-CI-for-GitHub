@@ -39,7 +39,7 @@ add_ssh_deploy_key_to_github() {
 	export github_username=$github_username
 	export github_pwd=$github_pwd
 
-	pip install gitbrowserinteract --yes
+	pip install gitbrowserinteract --no-input
 	# TODO: assert the pip package is installed succesfully.
 	
 	# 2. Run the Selenium browser controller to add the GitHub public SSH 

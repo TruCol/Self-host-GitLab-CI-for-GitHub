@@ -122,7 +122,7 @@ get_registration_token_with_python() {
 	# Check if the repository exists
 	#download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
 	
-	pip install gitbrowserinteract --yes
+	pip install gitbrowserinteract --no-input
 	# TODO: assert the pip package is installed succesfully.
 	
 	python -m gitbrowserinteract.__main__ --glr

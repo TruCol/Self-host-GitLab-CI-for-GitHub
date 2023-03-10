@@ -84,7 +84,7 @@ set_github_pat() {
 	# TODO: verify path before running command.
 	printf "\n\n Now using a browser controller repository to create a GitHub personal access token and store it localy.\n\n."
 
-	pip install gitbrowserinteract --yes
+	pip install gitbrowserinteract --no-input
 	# TODO: assert the pip package is installed succesfully.
 	
 	python -m gitbrowserinteract.__main__ --hubcpat -hu $github_username -hp $github_pwd

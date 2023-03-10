@@ -63,22 +63,24 @@ ensure_prerequisites_compliance() {
     assert_required_repositories_exist_in_github_server "$GITHUB_USERNAME_GLOBAL" "$GITHUB_STATUS_WEBSITE_GLOBAL"
     assert_required_repositories_exist_in_github_server "$GITHUB_USERNAME_GLOBAL" "$PUBLIC_GITHUB_TEST_REPO_GLOBAL"
 
+    # Ensure pip is installed.
+    printf "\n\n5. Installing pip."
+    sudo apt install pip --yes
+    # TODO: verify pip is installed
+
     # Ensure (mini) conda is installed.
+    # TODO: determine if this can be removed.
     ensure_miniconda_is_installed
 
     # Get the GitHub personal access code.
-    printf "\n\n5. Setting and Getting the GitHub personal access token if it "
+    printf "\n\n6. Setting and Getting the GitHub personal access token if it "
     printf "does not yet exist."
     ensure_github_pat_is_added_to_github $GITHUB_USERNAME_GLOBAL $github_password
     verify_github_pac_exists_in_persional_creds_txt
     # After setting the GitHub pat, verify it is stored correctly locally.
     # verify_personal_creds_txt_contain_pacs    
 
-    # Ensure pip is installed.
-    printf "\n\n6. Installing pip."
-    sudo apt install pip --yes
-    # TODO: verify pip is installed
-
+    
     # Check if ssh deploy key already exists and can be used to push
     # to GitHub, before creating a new one.
     printf "\n\n7. Ensuring you have ssh push access to the "

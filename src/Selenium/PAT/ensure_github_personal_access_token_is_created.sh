@@ -77,36 +77,21 @@ set_github_pat() {
 		exit 4
 	fi
 
-	# Get the repository that can automatically get the GitHub deploy token.
-	download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
-	manual_assert_dir_exists "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
+	export repo_name=$REPONAME_GET_RUNNER_TOKEN_PYTHON
+	export github_username=$github_username
+	export github_pwd=$github_pwd
 
 	# TODO: verify path before running command.
 	printf "\n\n Now using a browser controller repository to create a GitHub personal access token and store it localy.\n\n."
-	printf "\n\n Create conda environment:$CONDA_ENVIRONMENT_NAME.\n\n."
-	# shellcheck disable=SC2034
-	if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
-		eval "$(conda shell.bash hook)"
-		export repo_name=$REPONAME_GET_RUNNER_TOKEN_PYTHON
-		export github_username=$github_username
-		export github_pwd=$github_pwd
-		# TODO: include GITHUB_USERNAME_GLOBAL
-		#cd gitbrowserinteract && conda deactivate && conda activate gitbrowserinteract && python -m gitbrowserinteract.__main__ --hubcpat
-		cd $repo_name && conda deactivate && conda activate gitbrowserinteract && python -m gitbrowserinteract.__main__ --hubcpat -hu $github_username -hp $github_pwd
-	else
-		eval "$(conda shell.bash hook)"
-		export repo_name=$REPONAME_GET_RUNNER_TOKEN_PYTHON
-		export github_username=$github_username
-		export github_pwd=$github_pwd
-		# TODO: GITHUB_USERNAME_GLOBAL
-		#cd gitbrowserinteract && conda env create --file environment.yml && conda activate gitbrowserinteract && python -m gitbrowserinteract.__main__ --hubcpat
-		cd $repo_name && conda env create --file environment.yml && conda activate gitbrowserinteract && python -m gitbrowserinteract.__main__ --hubcpat -hu $github_username -hp $github_pwd
-	fi
-	cd ..
+
+	pip install gitbrowserinteract -y
+	# TODO: assert the pip package is installed succesfully.
+	
+	python -m gitbrowserinteract.__main__ --hubcpat -hu $github_username -hp $github_pwd
 
 	# Overwrite GitHub password export to filler.
 	export github_pwd="filler"
-	# TODO: Verify path BEFORE and after running command.
+	
 	# TODO: Verify the token is in the PERSONAL_CREDENTIALS_PATH file.
 
 }

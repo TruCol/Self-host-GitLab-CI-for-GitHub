@@ -35,30 +35,17 @@ add_ssh_deploy_key_to_github() {
     manual_assert_file_exists "$DEFAULT_SSH_LOCATION/$public_key_filename"
 	public_ssh_key_data=$(cat "$DEFAULT_SSH_LOCATION/$public_key_filename")
 	
-	# 1. Get the repository that can automatically add the GitHub SSH deploy key
-    # to GitHub.
-	download_repository "a-t-0" "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
-	manual_assert_dir_exists "$REPONAME_GET_RUNNER_TOKEN_PYTHON"
 
-    # 2. Run the Selenium browser controller to add the GitHub public SSH 
+	export github_username=$github_username
+	export github_pwd=$github_pwd
+
+	pip install gitbrowserinteract -y
+	# TODO: assert the pip package is installed succesfully.
+	
+	# 2. Run the Selenium browser controller to add the GitHub public SSH 
     # deploy key to GitHub.
-	# TODO: verify path before running command.
-	# shellcheck disable=SC2034
-	if [ "$(conda_env_exists $CONDA_ENVIRONMENT_NAME)" == "FOUND" ]; then
-		eval "$(conda shell.bash hook)"
-		export github_username=$github_username
-		export github_pwd=$github_pwd
-		cd gitbrowserinteract && conda deactivate && conda activate gitbrowserinteract && python -m gitbrowserinteract.__main__ --d --ssh "$public_ssh_key_data" -hu $github_username -hp $github_pwd
-	else
-		eval "$(conda shell.bash hook)"
-		export github_username=$github_username
-		export github_pwd=$github_pwd
-		cd gitbrowserinteract && conda env create --file environment.yml && conda activate gitbrowserinteract && python -m gitbrowserinteract.__main__ --d --ssh "$public_ssh_key_data" -hu $github_username -hp $github_pwd
-		
-	fi
-	cd ..
+	python -m gitbrowserinteract.__main__ --d --ssh "$public_ssh_key_data" -hu $github_username -hp $github_pwd
 
-	# TODO: Verify path BEFORE and after running command.
     # TODO: verify the GitHub SSH deploy key works.
 }
 

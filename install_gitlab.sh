@@ -137,11 +137,11 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       shift
       ;;
-    -hp|--hubprereq)
+    -hpre|--hubprereq)
       hub_prerequistes_only_flag='true'
       shift # past argument
       ;;
-    -lp|--labprereq)
+    -lpre|--labprereq)
       lab_prerequistes_only_flag='true'
       shift # past argument
       ;;

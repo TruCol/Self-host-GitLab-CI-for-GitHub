@@ -31,6 +31,10 @@ cd Self-host-GitLab-CI-for-GitHub
 chmod +x *.sh
 ./install_gitlab.sh -s -r -hu <your GitHub account> -le somegitlab@email.com -lp -hp
 ```
+Do not do anything with GitHub:
+```bash
+./install_gitlab.sh -s -r -le somegitlab@email.com -lp
+```
 (You can leave out `-hp` if you're not comfortable typing your GitHub pw in code, then you'll be manually prompted to login via the browser.)
 
 

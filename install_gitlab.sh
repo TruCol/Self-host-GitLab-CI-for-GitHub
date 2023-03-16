@@ -17,7 +17,8 @@ setup_tor_website_for_gitlab_server_flag='false'
 gitlab_username_flag='false'
 gitlab_pwd_flag='false'
 gitlab_email_flag='false'
-prerequistes_only_flag='false'
+hub_prerequistes_only_flag='false'
+lab_prerequistes_only_flag='false'
 
 # Specify variable defaults
 gitlab_username="root"
@@ -136,8 +137,12 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       shift
       ;;
-    -p|--prereq)
-      prerequistes_only_flag='true'
+    -hp|--hubprereq)
+      hub_prerequistes_only_flag='true'
+      shift # past argument
+      ;;
+    -lp|--labprereq)
+      lab_prerequistes_only_flag='true'
       shift # past argument
       ;;
     -*|--*)
@@ -183,17 +188,23 @@ if [ "$github_pwd_flag" == "true" ]; then
   assert_is_non_empty_string ${github_password}
 fi
 
+# Set GitHub password without displaying it in terminal.
+if [ "$hub_prerequistes_only_flag" == "true" ]; then
+	ensure_github_prerequisites_compliance
+fi
+
 # Set GitLab password without displaying it in terminal.
-if [ "$prerequistes_only_flag" == "true" ]; then
-	ensure_prerequisites_compliance
+if [ "$lab_prerequistes_only_flag" == "true" ]; then
+	ensure_gitlab_prerequisites_compliance
 fi
 
 
 # Start gitlab server installation and gitlab runner installation.
 if [ "$server_flag" == "true" ]; then
   printf "\n Ensuring prequisites are satisfied."
-  ensure_prerequisites_compliance
+  ensure_gitlab_prerequisites_compliance
   printf "\n Installing the GitLab server!"
+  printf "\n TODO: SEPARATE INTERACTION WITH GITHUB FROM: install_and_run_gitlab_server!"
   install_and_run_gitlab_server "$GITLAB_SERVER_PASSWORD_GLOBAL"
 	echo "Installed gitlab server, should be up in a few minutes. You can visit it at:"
   echo "$GITLAB_SERVER_HTTP_URL"

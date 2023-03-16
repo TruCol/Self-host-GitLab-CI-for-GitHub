@@ -49,7 +49,9 @@ source src/helper/verification/sha256_computing.sh
 source src/prerequisites/firefox_version.sh
 source src/prerequisites/install_miniconda.sh
 source src/prerequisites/jquery.sh
-source src/prerequisites/prerequisites.sh
+source src/prerequisites/prerequisites_hub.sh
+source src/prerequisites/prerequisites_lab.sh
+source src/prerequisites/helper.sh
 source src/prerequisites/install_support_programs.sh
 source src/prerequisites/manage_prerequisites.sh
 

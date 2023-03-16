@@ -2,53 +2,7 @@
 # This script contains code that is called by the install_gitlab.sh script to
 # verify the installation prerequisites/requirements are met.
 
-#######################################
-# Installs curl
-# Locals:
-#  None
-# Globals:
-#  None
-# Arguments:
-#  None
-# Returns:
-#  0 If command was evaluated successfully.
-# Outputs:
-#  None
-#######################################
-install_curl() {
-	yes | sudo apt install curl
 
-	# TODO: verify curl is installed succesfully.
-}
-
-
-#######################################
-# Checks if firefox is installed using snap or not.
-# Locals:
-#  respones_lines
-#  found_firefox
-# Globals:
-#  None
-# Arguments:
-#  None
-# Returns:
-#  0 If command was evaluated successfully.
-# Outputs:
-#  FOUND if firefox is installed using snap.
-#  NOTFOUND if firefox is not installed using snap.
-#######################################
-# Run with: 
-# bash -c "source src/import.sh && set_gitlab_pwd gitlab_pwd"
-set_gitlab_pwd() {
-	local gitlab_pwd="$1"
-	
-	if [ "$gitlab_pwd" != "" ]; then
-		add_entry_to_personal_cred_file "GITLAB_SERVER_PASSWORD_GLOBAL" "$gitlab_pwd"
-	else
-		echo "Error, the GitLab password entered by the user is empty."
-		exit 5
-	fi
-}
 
 #######################################
 # Assertes that a GitHub user has a GitHub repository.
@@ -172,98 +126,21 @@ assert_github_pat_can_be_used_to_set_commit_build_status() {
 }
 
 
-#######################################
-# Sets the default value for Global in personal_creds.txt if the user does not
-# manually specify this url in the command line arguments.
-# Globals:
-#  GITLAB_SERVER_HTTP_URL.
-#  PERSONAL_CREDENTIALS_PATH
-# Arguments:
-#  The GitLab server that was originally passed as input argument to this 
-#  program by the user.
-# Returns:
-#  0 if the function is set correctly.
-#  5 If the GitLab server url is not set in the personal_creds.txt file at 
-#  the end of the function.
-# Outputs:
-#  Nothing
-# TODO(a-t-0): Include verification on url format (Must have http:// (I think)).
-#######################################
-# Run with: 
-# bash -c "source src/import.sh && add_entry_to_personal_cred_file GITLAB_SERVER_HTTP_URL gitlab_url"
-add_entry_to_personal_cred_file(){
-	local identifier="$1"
-	local incoming_value="$2"
-	
-	if [ "$incoming_value" != "" ]; then
-		# Ensure the PERSONAL_CREDENTIALS_PATH file exists(create if not).
-		ensure_file_exists "$PERSONAL_CREDENTIALS_PATH"
-		ensure_global_is_in_file "$identifier" "$incoming_value" "$PERSONAL_CREDENTIALS_PATH"
-	else
-		ensure_global_is_in_file "$identifier" "$GITLAB_SERVER_HTTP_URL" "$PERSONAL_CREDENTIALS_PATH"
-		# Assert the PERSONAL_CREDENTIALS_PATH contains GITLAB_SERVER_HTTP_URL.
-	    assert_file_contains_string "$identifier=$GITLAB_SERVER_HTTP_URL" "$PERSONAL_CREDENTIALS_PATH" > /dev/null 2>&1 &
-	fi
-	# Assert the PERSONAL_CREDENTIALS_PATH contains GITLAB_SERVER_HTTP_URL.
-	assert_file_contains_string "$identifier" "$PERSONAL_CREDENTIALS_PATH" > /dev/null 2>&1 &
-	
-}
 
-verify_prerequisite_personal_creds_txt_contain_required_data() {
+verify_prerequisite_personal_creds_txt_contain_required_github_data() {
 	if [ $(file_contains_string "GITHUB_USERNAME_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
 		echo "Error, the GITHUB_USERNAME_GLOBAL is not in "
 		echo "$PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
-
-	if [ $(file_contains_string "GITLAB_SERVER_ACCOUNT_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
-		echo "Error, the GITLAB_SERVER_ACCOUNT_GLOBAL is not in "
-		echo "$PERSONAL_CREDENTIALS_PATH"
-		exit 5
-	fi
-
-	if [ $(file_contains_string "GITLAB_SERVER_PASSWORD_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
-		echo "Error, the GITLAB_SERVER_PASSWORD_GLOBAL is not in "
-		echo "$PERSONAL_CREDENTIALS_PATH"
-		exit 5
-	fi
-
-	if [ $(file_contains_string "GITLAB_ROOT_EMAIL_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
-		echo "Error, the GITLAB_ROOT_EMAIL_GLOBAL is not in "
-		echo "$PERSONAL_CREDENTIALS_PATH"
-		exit 5
-	fi
 }
 
-verify_prerequisite_personal_creds_txt_loaded() {
+verify_prerequisite_github_personal_creds_txt_loaded() {
 	if [ "$GITHUB_USERNAME_GLOBAL" == "" ]; then
 		echo "Error, the GITHUB_USERNAME_GLOBAL:$GITHUB_USERNAME_GLOBAL is not"
 		echo " loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
-
-	if [ "$GITLAB_SERVER_ACCOUNT_GLOBAL" == "" ]; then
-		echo "Error, the GITLAB_SERVER_ACCOUNT_GLOBAL is not loaded correctly "
-		echo "from: $PERSONAL_CREDENTIALS_PATH"
-		exit 5
-	fi
-
-	if [ "$GITLAB_SERVER_PASSWORD_GLOBAL" == "" ]; then
-		echo "Error, the GITLAB_SERVER_PASSWORD_GLOBAL is not loaded correctly"
-		echo " from: $PERSONAL_CREDENTIALS_PATH"
-		exit 5
-	fi
-
-	if [ "$GITLAB_ROOT_EMAIL_GLOBAL" == "" ]; then
-		echo "Error, the GITLAB_ROOT_EMAIL_GLOBAL is not loaded correctly from"
-		echo ": $PERSONAL_CREDENTIALS_PATH"
-		exit 5
-	fi
-}
-
-verify_personal_creds_txt_contain_pacs() {
-	verify_github_pac_exists_in_persional_creds_txt
-	verify_gitlab_pac_exists_in_persional_creds_txt
 }
 
 verify_github_pac_exists_in_persional_creds_txt() {
@@ -275,28 +152,4 @@ verify_github_pac_exists_in_persional_creds_txt() {
 		echo "Error, the GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
 		exit 5
 	fi
-}
-
-
-verify_gitlab_pac_exists_in_persional_creds_txt() {
-	if [ $(file_contains_string "GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$PERSONAL_CREDENTIALS_PATH") != "FOUND" ]; then
-		echo "Error, the GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL is not in $PERSONAL_CREDENTIALS_PATH"
-		exit 5
-	fi
-	if [ "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" == "" ]; then
-		echo "Error, the GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL is not loaded correctly from: $PERSONAL_CREDENTIALS_PATH"
-		exit 5
-	fi
-}
-
-verify_personal_credentials() {
-    if [ "$(file_exists "$PERSONAL_CREDENTIALS_PATH")" == "FOUND" ]; then
-    	source $PERSONAL_CREDENTIALS_PATH
-    elif [ "$(file_exists "src/creds.txt")" == "FOUND" ]; then
-    	source src/creds.txt
-    	echo "Note you are using the default credentials, would you like to create your own personal credentials file (outside this repo) y/n?"
-    else
-    	echo "No credentials found."
-    	exit 7
-    fi
 }

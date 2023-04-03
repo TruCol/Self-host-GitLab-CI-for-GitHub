@@ -61,7 +61,7 @@ install_and_run_gitlab_server() {
 		ensure_new_gitlab_personal_access_token_works
 		echo "Done setting PERSONAL ACCESS TOKEN."
 		printf "\n Verifying the GitHub and GitLab personal access tokens are in the $PERSONAL_CREDENTIALS_PATH file."
-		verify_personal_creds_txt_contain_pacs
+		verify_gitlab_pac_exists_in_persional_creds_txt
 	elif [ "$gitlab_server_is_running" == "RUNNING" ]; then
 		echo "The GitLab server is already running."
 	else

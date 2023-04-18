@@ -118,9 +118,9 @@ assert_github_pat_can_be_used_to_set_commit_build_status() {
 	# TODO: ensure the personal creds file contains the credentials.
 
 	# Set and verify being able to set commit build status for: pending
-	set_build_status_of_github_commit_using_github_pat "$github_username" "$github_reponame" "$latest_commit_on_default_branch" "$GITLAB_SERVER_HTTP_URL"  "pending"
+	set_build_status_of_github_commit_using_github_pat "$github_username" "$github_reponame" "$latest_commit_on_default_branch" "$GITLAB_SERVER_HTTPS_URL"  "pending"
 	# Set and verify being able to set commit build status for: success
-	set_build_status_of_github_commit_using_github_pat "$github_username" "$github_reponame" "$latest_commit_on_default_branch" "$GITLAB_SERVER_HTTP_URL"  "success"
+	set_build_status_of_github_commit_using_github_pat "$github_username" "$github_reponame" "$latest_commit_on_default_branch" "$GITLAB_SERVER_HTTPS_URL"  "success"
 	# TODO: verify this method set_build_status_of_github_commit_using_github_pat contains an assert
 	# and change the name accordingly
 }

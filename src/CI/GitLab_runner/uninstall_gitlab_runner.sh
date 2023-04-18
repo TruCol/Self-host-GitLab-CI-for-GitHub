@@ -40,7 +40,7 @@ uninstall_package() {
 deregister_gitlab_runner() {
 	
 	# shellcheck disable=SC2034
-	url="http://localhost"
+	url="https://localhost"
 	# shellcheck disable=SC2034
 	description=trucolrunner
 	# shellcheck disable=SC2034

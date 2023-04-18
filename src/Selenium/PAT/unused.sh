@@ -48,10 +48,10 @@ set_personal_github_pat_and_verify() {
 	# ensure_github_pat_can_be_used_to_set_commit_build_status
 	printf "5.g Verifying the GitHub personal access token can be used to set"
 	printf "a commit status to: Pending."
-	set_build_status_of_github_commit_using_github_pat $github_username $PUBLIC_GITHUB_TEST_REPO_GLOBAL $latest_commit_on_default_branch $GITLAB_SERVER_HTTP_URL "pending"
+	set_build_status_of_github_commit_using_github_pat $github_username $PUBLIC_GITHUB_TEST_REPO_GLOBAL $latest_commit_on_default_branch $GITLAB_SERVER_HTTPS_URL "pending"
 	
 	printf "5.h Verifying the GitHub personal access token can be used to set"
 	printf "a commit status to: Success."
-	set_build_status_of_github_commit_using_github_pat $github_username $PUBLIC_GITHUB_TEST_REPO_GLOBAL $latest_commit_on_default_branch $GITLAB_SERVER_HTTP_URL "success"
+	set_build_status_of_github_commit_using_github_pat $github_username $PUBLIC_GITHUB_TEST_REPO_GLOBAL $latest_commit_on_default_branch $GITLAB_SERVER_HTTPS_URL "success"
 }
 

@@ -74,7 +74,7 @@ add_gitlab_personal_access_token_from_personal_creds_txt_to_gitlab() {
 check_if_personal_access_token_works() {
 	local personal_access_token="$1"
 	
-	local repositories=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
+	local repositories=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "$GITLAB_SERVER_HTTPS_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
 	#echo "repositories=$repositories"
 	if [ "${repositories:0:7}" == '[{"id":' ]; then
 		echo "TRUE"

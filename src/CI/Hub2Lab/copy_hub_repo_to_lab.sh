@@ -32,7 +32,7 @@ copy_github_repo_into_gitlab() {
 	remove_the_gitlab_repository_on_which_ci_is_ran
 
 	github2gitlab \
-   --gitlab-url http://127.0.0.1 \
+   --gitlab-url https://127.0.0.1 \
    --gitlab-token fe48f5e047397052fdad \
    --github-repo a-t-0/sponsor_example
 }

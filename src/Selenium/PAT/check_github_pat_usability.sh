@@ -46,13 +46,13 @@ alternative_check_can_use_github_pat_to_set_commit_status() {
 		# Set the build status of a GitHub commit to "pending". GitLab server
 		# url is used because clicking on the build status should refer back to
 		# the build status report on GitLab.
-		local set_pending=$(check_if_can_set_build_status_of_github_commit_using_github_pat $github_username $PUBLIC_GITHUB_TEST_REPO_GLOBAL $latest_commit_on_default_branch $GITLAB_SERVER_HTTP_URL "pending")
+		local set_pending=$(check_if_can_set_build_status_of_github_commit_using_github_pat $github_username $PUBLIC_GITHUB_TEST_REPO_GLOBAL $latest_commit_on_default_branch $GITLAB_SERVER_HTTPS_URL "pending")
 
 		# Verify build status of the GitHub commit is changed successfully.
 		if [ "$set_pending" == "TRUE" ]; then
 			
 			# Set the build status of a GitHub commit to "success".
-			local set_succes=$(check_if_can_set_build_status_of_github_commit_using_github_pat $github_username $PUBLIC_GITHUB_TEST_REPO_GLOBAL $latest_commit_on_default_branch $GITLAB_SERVER_HTTP_URL "success")			
+			local set_succes=$(check_if_can_set_build_status_of_github_commit_using_github_pat $github_username $PUBLIC_GITHUB_TEST_REPO_GLOBAL $latest_commit_on_default_branch $GITLAB_SERVER_HTTPS_URL "success")			
 			
 			if [ "$set_succes" != "TRUE" ]; then
 				echo "Error, the GitHub commit status was not succesfully set to:success"
@@ -92,7 +92,7 @@ alternative_check_can_use_github_pat_to_set_commit_status() {
 # TODO(a-t-0): verify incoming redirect url is valid.
 #######################################
 # Run with:
-# bash -c 'source src/import.sh && check_if_can_set_build_status_of_github_commit_using_github_pat a-t-0 sponsor_example 02c5fce3500d7b9e2d79cb5b7d886020a403cf58 http://127.0.0.1  pending'
+# bash -c 'source src/import.sh && check_if_can_set_build_status_of_github_commit_using_github_pat a-t-0 sponsor_example 02c5fce3500d7b9e2d79cb5b7d886020a403cf58 https://127.0.0.1  pending'
 check_if_can_set_build_status_of_github_commit_using_github_pat() {
 	local github_username="$1"
 	local github_repo_name="$2"

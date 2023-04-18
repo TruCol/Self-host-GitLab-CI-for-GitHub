@@ -210,7 +210,7 @@ git_pull_gitlab_repo() {
 # Globals:
 #  GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL
 #  MIRROR_LOCATION
-#  GITLAB_SERVER_HTTP_URL
+#  GITLAB_SERVER_HTTPS_URL
 # Arguments:
 #   Name of the GitLab repository.
 #   The GitLab username.
@@ -253,7 +253,7 @@ ensure_new_empty_repo_is_created_in_gitlab() {
   fi
 
   # Create repository.
-  curl --silent -H "Content-Type:application/json" "$GITLAB_SERVER_HTTP_URL/api/v4/projects?private_token=$personal_access_token" -d "{ \"name\": \"$gitlab_repo_name\" }"  > /dev/null 2>&1 &
+  curl --silent -H "Content-Type:application/json" "$GITLAB_SERVER_HTTPS_URL/api/v4/projects?private_token=$personal_access_token" -d "{ \"name\": \"$gitlab_repo_name\" }"  > /dev/null 2>&1 &
   wait_until_repo_exists_in_gitlab "$gitlab_repo_name"
 
   # Verify the repository is created.
@@ -321,16 +321,16 @@ repo_exists_in_gitlab_server(){
   local gitlab_repo_name="$1"
 
   local temporary_test_filepath=/tmp/TESTRET
-  local expected_if_non_existant="fatal: repository '$GITLAB_SERVER_HTTP_URL/$GITLAB_SERVER_ACCOUNT_GLOBAL/$gitlab_repo_name/' not found"
-  local acceptable_warning="warning: redirecting to $GITLAB_SERVER_HTTP_URL/$GITLAB_SERVER_ACCOUNT_GLOBAL/$gitlab_repo_name.git/"
+  local expected_if_non_existant="fatal: repository '$GITLAB_SERVER_HTTPS_URL/$GITLAB_SERVER_ACCOUNT_GLOBAL/$gitlab_repo_name/' not found"
+  local acceptable_warning="warning: redirecting to $GITLAB_SERVER_HTTPS_URL/$GITLAB_SERVER_ACCOUNT_GLOBAL/$gitlab_repo_name.git/"
 
   # Delete file exists.
   delete_file_if_it_exists $temporary_test_filepath
 
   # Check if gitlab repo exists and output any errors to file. 
-  something=$(git ls-remote http://$GITLAB_SERVER_ACCOUNT_GLOBAL:$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL@$GITLAB_SERVER/$GITLAB_SERVER_ACCOUNT_GLOBAL/$gitlab_repo_name 2> $temporary_test_filepath)
+  something=$(git ls-remote https://$GITLAB_SERVER_ACCOUNT_GLOBAL:$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL@$GITLAB_SERVER/$GITLAB_SERVER_ACCOUNT_GLOBAL/$gitlab_repo_name 2> $temporary_test_filepath)
   # Used to verify it throws an error if auth is invalid.
-  #something=$(git ls-remote http://$GITLAB_SERVER_ACCOUNT_GLOBAL:$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBALasdf@$GITLAB_SERVER/$GITLAB_SERVER_ACCOUNT_GLOBAL/$gitlab_repo_name 2> $temporary_test_filepath)
+  #something=$(git ls-remote https://$GITLAB_SERVER_ACCOUNT_GLOBAL:$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBALasdf@$GITLAB_SERVER/$GITLAB_SERVER_ACCOUNT_GLOBAL/$gitlab_repo_name 2> $temporary_test_filepath)
   
 
   # Check if the output file contains an error.
@@ -461,7 +461,7 @@ delete_gitlab_repository_if_it_exists() {
 #  personal_access_token
 # Globals:
 #  GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL
-#  GITLAB_SERVER_HTTP_URL
+#  GITLAB_SERVER_HTTPS_URL
 # Arguments:
 #  Name of the GitLab repository.
 #  The GitLab username.
@@ -482,7 +482,7 @@ delete_existing_repository_from_gitlab() {
   personal_access_token=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 
   local output
-  output=$(curl --silent -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE "$GITLAB_SERVER_HTTP_URL"/api/v4/projects/"$repo_username"%2F"$repo_name")
+  output=$(curl --silent -H 'Content-Type: application/json' -H "Private-Token: $personal_access_token" -X DELETE "$GITLAB_SERVER_HTTPS_URL"/api/v4/projects/"$repo_username"%2F"$repo_name")
 
   if [  "$(lines_contain_string '{"message":"404 Project Not Found"}' "${output}")" == "FOUND" ]; then
     echo "ERROR, you tried to delete a GitLab repository that does not exist."
@@ -529,7 +529,7 @@ clone_repository() {
   # TODO:write test to verify the gitlab username and server don't end with a spacebar character.
 
   # Clone the GitLab repository into the GitLab mirror storage location.
-  output=$(cd "$target_directory" && git clone --quiet http://$gitlab_username:$local_gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
+  output=$(cd "$target_directory" && git clone --quiet https://$gitlab_username:$local_gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
 }
 
 
@@ -780,7 +780,7 @@ push_changes() {
   local gitlab_server=$4
   local target_directory=$5
 
-  output=$(cd "$target_directory" && git push http://$gitlab_username:$gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
+  output=$(cd "$target_directory" && git push https://$gitlab_username:$gitlab_server_password@$gitlab_server/$gitlab_username/$repo_name.git)
 }
 
 
@@ -1040,7 +1040,7 @@ commit_changes_to_gitlab_for_commit() {
 #  found_branch_name
 # Globals:
 #  MIRROR_LOCATION
-#  GITLAB_SERVER_HTTP_URL
+#  GITLAB_SERVER_HTTPS_URL
 # Arguments:
 #  The GitHub repository name.
 #  The GitHub branch name.

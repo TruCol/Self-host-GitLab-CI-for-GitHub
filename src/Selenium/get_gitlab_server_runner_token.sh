@@ -16,7 +16,7 @@
 # TODO(a-t-0):
 #######################################
 get_gitlab_server_runner_tokenV1() {
-	GITURL="$GITLAB_SERVER_HTTP_URL"
+	GITURL="$GITLAB_SERVER_HTTPS_URL"
 	# shellcheck disable=SC2154
 	GITUSER="$GITLAB_SERVER_ACCOUNT_GLOBAL"
 	# shellcheck disable=SC2154
@@ -71,7 +71,7 @@ get_gitlab_server_runner_tokenV1() {
 # TODO(a-t-0):
 #######################################
 get_gitlab_server_runner_tokenV0() {
-	export GITURL="$GITLAB_SERVER_HTTP_URL"
+	export GITURL="$GITLAB_SERVER_HTTPS_URL"
 	export GITUSER="$GITLAB_SERVER_ACCOUNT_GLOBAL"
 	export GITROOTPWD="$GITLAB_SERVER_PASSWORD_GLOBAL"
 	
@@ -133,7 +133,7 @@ get_registration_token_with_python() {
 }
 
 get_gitlab_server_runner_tokenV2() {
-	GITURL="$GITLAB_SERVER_HTTP_URL"
+	GITURL="$GITLAB_SERVER_HTTPS_URL"
 	GITUSER="$GITLAB_SERVER_ACCOUNT_GLOBAL"
 	GITROOTPWD="$GITLAB_SERVER_PASSWORD_GLOBAL"
 	
@@ -173,7 +173,7 @@ get_gitlab_server_runner_tokenV2() {
 #######################################
 get_gitlab_server_runner_tokenV3() {
 	source src/hardcoded_variables.txt
-	export GITURL="$GITLAB_SERVER_HTTP_URL"
+	export GITURL="$GITLAB_SERVER_HTTPS_URL"
 	#read  -p "GITURL=$GITURL"
 	export GITUSER="$GITLAB_SERVER_ACCOUNT_GLOBAL"
 	#read  -p "GITUSER=$GITUSER"

@@ -207,7 +207,7 @@ if [ "$server_flag" == "true" ]; then
   printf "\n TODO: SEPARATE INTERACTION WITH GITHUB FROM: install_and_run_gitlab_server!"
   install_and_run_gitlab_server "$GITLAB_SERVER_PASSWORD_GLOBAL"
 	echo "Installed gitlab server, should be up in a few minutes. You can visit it at:"
-  echo "$GITLAB_SERVER_HTTP_URL"
+  echo "$GITLAB_SERVER_HTTPS_URL"
 fi
 
 

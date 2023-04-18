@@ -100,7 +100,7 @@ copy_github_commit_with_yaml_to_gitlab_repo() {
 	
 	
 	# Get GitLab server url from credentials file.
-	local gitlab_website_url=$(echo "$GITLAB_SERVER_HTTP_URL" | tr -d '\r')
+	local gitlab_website_url=$(echo "$GITLAB_SERVER_HTTPS_URL" | tr -d '\r')
 	
 	# 5.1 Create the empty GitLab repo.
 	# Create the empty GitLab repository (deletes any existing GitLab repos with same name).

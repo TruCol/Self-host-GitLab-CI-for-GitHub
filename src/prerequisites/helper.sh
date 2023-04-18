@@ -2,7 +2,7 @@
 # Sets the default value for Global in personal_creds.txt if the user does not
 # manually specify this url in the command line arguments.
 # Globals:
-#  GITLAB_SERVER_HTTP_URL.
+#  GITLAB_SERVER_HTTPS_URL.
 #  PERSONAL_CREDENTIALS_PATH
 # Arguments:
 #  The GitLab server that was originally passed as input argument to this 
@@ -16,7 +16,7 @@
 # TODO(a-t-0): Move into different file.
 #######################################
 # Run with: 
-# bash -c "source src/import.sh && add_entry_to_personal_cred_file GITLAB_SERVER_HTTP_URL gitlab_url"
+# bash -c "source src/import.sh && add_entry_to_personal_cred_file GITLAB_SERVER_HTTPS_URL gitlab_url"
 add_entry_to_personal_cred_file(){
 	local identifier="$1"
 	local incoming_value="$2"
@@ -26,11 +26,11 @@ add_entry_to_personal_cred_file(){
 		ensure_file_exists "$PERSONAL_CREDENTIALS_PATH"
 		ensure_global_is_in_file "$identifier" "$incoming_value" "$PERSONAL_CREDENTIALS_PATH"
 	else
-		ensure_global_is_in_file "$identifier" "$GITLAB_SERVER_HTTP_URL" "$PERSONAL_CREDENTIALS_PATH"
-		# Assert the PERSONAL_CREDENTIALS_PATH contains GITLAB_SERVER_HTTP_URL.
-	    assert_file_contains_string "$identifier=$GITLAB_SERVER_HTTP_URL" "$PERSONAL_CREDENTIALS_PATH" > /dev/null 2>&1 &
+		ensure_global_is_in_file "$identifier" "$GITLAB_SERVER_HTTPS_URL" "$PERSONAL_CREDENTIALS_PATH"
+		# Assert the PERSONAL_CREDENTIALS_PATH contains GITLAB_SERVER_HTTPS_URL.
+	    assert_file_contains_string "$identifier=$GITLAB_SERVER_HTTPS_URL" "$PERSONAL_CREDENTIALS_PATH" > /dev/null 2>&1 &
 	fi
-	# Assert the PERSONAL_CREDENTIALS_PATH contains GITLAB_SERVER_HTTP_URL.
+	# Assert the PERSONAL_CREDENTIALS_PATH contains GITLAB_SERVER_HTTPS_URL.
 	assert_file_contains_string "$identifier" "$PERSONAL_CREDENTIALS_PATH" > /dev/null 2>&1 &
 	
 }

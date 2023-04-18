@@ -24,18 +24,18 @@ Reading state information...
 python-is-python2 is already the newest version (2.7.17-4).
 0 upgraded, 0 newly installed, 0 to remove and 23 not upgraded.
 $ sudo apt-get update --fix-missing
-Hit:1 http://fr.archive.ubuntu.com/ubuntu focal InRelease
-Hit:2 http://fr.archive.ubuntu.com/ubuntu focal-updates InRelease
-Hit:3 http://ppa.launchpad.net/gezakovacs/ppa/ubuntu focal InRelease
-Hit:4 http://fr.archive.ubuntu.com/ubuntu focal-backports InRelease
-Hit:5 http://ppa.launchpad.net/jtaylor/keepass/ubuntu focal InRelease
+Hit:1 https://fr.archive.ubuntu.com/ubuntu focal InRelease
+Hit:2 https://fr.archive.ubuntu.com/ubuntu focal-updates InRelease
+Hit:3 https://ppa.launchpad.net/gezakovacs/ppa/ubuntu focal InRelease
+Hit:4 https://fr.archive.ubuntu.com/ubuntu focal-backports InRelease
+Hit:5 https://ppa.launchpad.net/jtaylor/keepass/ubuntu focal InRelease
 Hit:6 https://updates.signal.org/desktop/apt xenial InRelease
 Hit:7 https://swupdate.openvpn.net/community/openvpn3/repos focal InRelease
 Hit:8 https://brave-browser-apt-release.s3.brave.com stable InRelease
-Get:9 http://security.ubuntu.com/ubuntu focal-security InRelease [114 kB]
-Get:10 http://security.ubuntu.com/ubuntu focal-security/main amd64 DEP-11 Metadata [29,0 kB]
-Get:11 http://security.ubuntu.com/ubuntu focal-security/universe amd64 DEP-11 Metadata [62,5 kB]
-Get:12 http://security.ubuntu.com/ubuntu focal-security/multiverse amd64 DEP-11 Metadata [2 464 B]
+Get:9 https://security.ubuntu.com/ubuntu focal-security InRelease [114 kB]
+Get:10 https://security.ubuntu.com/ubuntu focal-security/main amd64 DEP-11 Metadata [29,0 kB]
+Get:11 https://security.ubuntu.com/ubuntu focal-security/universe amd64 DEP-11 Metadata [62,5 kB]
+Get:12 https://security.ubuntu.com/ubuntu focal-security/multiverse amd64 DEP-11 Metadata [2 464 B]
 Hit:13 https://repo.nordvpn.com//deb/nordvpn/debian stable InRelease
 Fetched 208 kB in 2s (83,9 kB/s)
 Reading package lists...

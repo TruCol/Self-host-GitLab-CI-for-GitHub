@@ -104,7 +104,7 @@ run_gitlab_server_in_docker_container() {
 	local gitlab_pwd="$1"
 	
 	gitlab_package=$(get_gitlab_package)
-	read -p "EXTERNAL_URL=$EXTERNAL_URL"
+	read -p "HTTPS_EXTERNAL_URL=$HTTPS_EXTERNAL_URL"
 	read -p "GITLAB_SERVER=$GITLAB_SERVER"
 	
 	local output
@@ -118,7 +118,7 @@ run_gitlab_server_in_docker_container() {
 	  --volume "$GITLAB_HOME"/data:/var/opt/gitlab \
 	  -e GITLAB_ROOT_EMAIL="$GITLAB_ROOT_EMAIL_GLOBAL" \
 	  -e GITLAB_ROOT_PASSWORD="$gitlab_pwd" \
-	  -e EXTERNAL_URL="\"$EXTERNAL_URL\"" \
+	  -e EXTERNAL_URL="\"$HTTPS_EXTERNAL_URL\"" \
 	  "$gitlab_package")
 	echo "$output"
 }

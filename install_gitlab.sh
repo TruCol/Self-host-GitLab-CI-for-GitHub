@@ -84,7 +84,7 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       ;;
     -eu|--external-url)
-      EXTERNAL_URL="$2"
+      HTTPS_EXTERNAL_URL="$2"
       shift # past argument
       shift
       ;;
@@ -170,7 +170,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
-assert_is_non_empty_string ${EXTERNAL_URL}
+assert_is_non_empty_string ${HTTPS_EXTERNAL_URL}
 assert_is_non_empty_string ${GITLAB_SERVER}
 
 echo "server_flag                              = ${server_flag}"

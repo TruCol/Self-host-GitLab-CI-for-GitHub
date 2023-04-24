@@ -85,7 +85,6 @@ while [[ $# -gt 0 ]]; do
       ;;
     -eu|--external-url)
       EXTERNAL_URL="$2"
-      assert_is_non_empty_string ${EXTERNAL_URL}
       shift # past argument
       shift
       ;;
@@ -99,7 +98,6 @@ while [[ $# -gt 0 ]]; do
       ;;
     -gs|--gitlab-server)
       GITLAB_SERVER="$2"
-      assert_is_non_empty_string ${GITLAB_SERVER}
       GITLAB_SERVER_HTTPS_URL="https://$GITLAB_SERVER"
       shift # past argument
       shift
@@ -172,6 +170,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+assert_is_non_empty_string ${EXTERNAL_URL}
+assert_is_non_empty_string ${GITLAB_SERVER}
 
 echo "server_flag                              = ${server_flag}"
 echo "runner_flag                              = ${runner_flag}"

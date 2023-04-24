@@ -65,6 +65,10 @@ print_usage() {
 
 while [[ $# -gt 0 ]]; do
   case $1 in
+    -b|--boot)
+      setup_boot_script_flag='true'
+      shift # past argument
+      ;;
     -s|--server)
 	    server_flag='true'
       shift # past argument
@@ -79,6 +83,12 @@ while [[ $# -gt 0 ]]; do
       deploy_ssh_flag='true'
       shift # past argument
       ;;
+    -eu|--external-url)
+      EXTERNAL_URL="$2"
+      assert_is_non_empty_string ${EXTERNAL_URL}
+      shift # past argument
+      shift
+      ;;
     -hubcssh|--github-commit-status-ssh)
       commit_status_ssh_flag='true'
       shift # past argument
@@ -87,10 +97,14 @@ while [[ $# -gt 0 ]]; do
       commit_status_personal_access_token_flag='true'
       shift # past argument
       ;;
-    -b|--boot)
-      setup_boot_script_flag='true'
+    -gs|--gitlab-server)
+      GITLAB_SERVER="$2"
+      assert_is_non_empty_string ${GITLAB_SERVER}
+      GITLAB_SERVER_HTTPS_URL="https://$GITLAB_SERVER"
       shift # past argument
+      shift
       ;;
+    
     -tw|--tor_website)
       setup_tor_website_for_gitlab_server_flag='true'
       shift # past argument

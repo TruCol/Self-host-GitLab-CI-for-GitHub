@@ -104,6 +104,8 @@ run_gitlab_server_in_docker_container() {
 	local gitlab_pwd="$1"
 	
 	gitlab_package=$(get_gitlab_package)
+	read -p "EXTERNAL_URL=$EXTERNAL_URL"
+	read -p "GITLAB_SERVER=$GITLAB_SERVER"
 	
 	local output
 	output=$(sudo docker run --detach \
@@ -114,7 +116,9 @@ run_gitlab_server_in_docker_container() {
 	  --volume "$GITLAB_HOME"/config:/etc/gitlab \
 	  --volume "$GITLAB_HOME"/logs:/var/log/gitlab \
 	  --volume "$GITLAB_HOME"/data:/var/opt/gitlab \
-	  -e GITLAB_ROOT_EMAIL="$GITLAB_ROOT_EMAIL_GLOBAL" -e GITLAB_ROOT_PASSWORD="$gitlab_pwd" -e EXTERNAL_URL="https://127.0.0.1" \
+	  -e GITLAB_ROOT_EMAIL="$GITLAB_ROOT_EMAIL_GLOBAL" \
+	  -e GITLAB_ROOT_PASSWORD="$gitlab_pwd" \
+	  -e EXTERNAL_URL="\"$EXTERNAL_URL\"" \
 	  "$gitlab_package")
 	echo "$output"
 }

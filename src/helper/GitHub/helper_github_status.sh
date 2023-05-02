@@ -107,7 +107,7 @@ get_commit_sha_of_branch() {
 	
 	# Get the branches of the GitLab CI resositories, and their latest commit.
 	# TODO: switch server name
-	branches=$(curl --silent --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repository_name/repository/branches")
+	branches=$(curl --silent --header "PRIVATE-TOKEN: $personal_access_token" "https://127.0.0.1/api/v4/projects/$gitlab_username%2F$repository_name/repository/branches")
 	
 	# Get two parallel arrays of branches and their latest commits
 	readarray -t branch_names_arr <  <(echo "$branches" | jq ".[].name")

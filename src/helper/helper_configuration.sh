@@ -40,8 +40,8 @@ get_architecture() {
 # bash -c "source src/import.sh && remove_port_processes"
 remove_port_processes(){
 	
-	# Loop through GITLAB_PORT_1 .. to GITLAB_PORT_3 from hardcoded_variables.
-	for ((i=1; i<4; i++))
+	# Loop through GITLAB_PORT_1 .. to GITLAB_PORT_4 from hardcoded_variables.
+	for ((i=1; i<5; i++))
 	do
 		# Load a port combination in form <left port>:<right port>.
 	    port_combo="GITLAB_PORT_$i"

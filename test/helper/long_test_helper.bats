@@ -43,7 +43,7 @@ load 'libs/bats-file/load'
 @test "Test download website source code." {
 	# TODO: move to long test and ensure GitLab is installed and running before executing this test.
 	source_filepath=$LOG_LOCATION$RUNNER_SOURCE_FILENAME
-	output=$(downoad_website_source "$GITLAB_SERVER_HTTP_URL" "$source_filepath")
+	output=$(downoad_website_source "$GITLAB_SERVER_HTTPS_URL" "$source_filepath")
 	
 	# TODO: delete file if exists
 	

@@ -45,7 +45,7 @@ print_usage() {
   printf "\n./install_gitlab.sh -labemail <your email for GitLab> or: ./install_gitlab.sh --gitlab-email <your email for GitLab>\n to pass your the email address you use for GitLab, and store it in your ../personal_credentials.txt."
   printf "\n./install_gitlab.sh -labpat <your new GitLab personal access token> or: ./install_gitlab.sh --gitlab-personal_access_token <your new GitLab personal access token>\n to pass your new GitLab personal access token, and store it in your ../personal_credentials.txt."
   printf "\n./install_gitlab.sh -labpwd or: ./install_gitlab.sh --gitlab-password\n to pass your new GitLab password,pass your GitLab username, and store it in your ../personal_credentials.txt."
-  printf "\n./install_gitlab.sh -laburl <website for your GitLab server> or: ./install_gitlab.sh --gitlab-email <website for your GitLab server>\n to set a custom gitlab server website (default=http://127.0.0.1), and store it in your ../personal_credentials.txt."
+  printf "\n./install_gitlab.sh -laburl <website for your GitLab server> or: ./install_gitlab.sh --gitlab-email <website for your GitLab server>\n to set a custom gitlab server website (default=https://127.0.0.1), and store it in your ../personal_credentials.txt."
   printf "\n./install_gitlab.sh -labuser <your new GitLab username> or: ./install_gitlab.sh --gitlab-username <your GitLab username>\n to set a custom GitLab username(default=root), and store it in your ../personal_credentials.txt."
 
   printf "\n\nNot yet supported:"

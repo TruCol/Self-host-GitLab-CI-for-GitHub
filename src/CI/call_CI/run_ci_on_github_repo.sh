@@ -206,7 +206,7 @@ copy_github_branch_with_yaml_to_gitlab_repo_and_get_build_status() {
 	local gitlab_branch_name="$github_branch_name"
 	
 	# Get GitLab server url from credentials file.
-	local gitlab_website_url=$(echo "$GITLAB_SERVER_HTTP_URL" | tr -d '\r')
+	local gitlab_website_url=$(echo "$GITLAB_SERVER_HTTPS_URL" | tr -d '\r')
 	
 	# Verify the get_current_github_branch function returns the correct branch.
 	actual_result="$(get_current_github_branch "$github_repo_name" "$github_branch_name" "GitHub")"
@@ -363,7 +363,7 @@ manage_get_gitlab_ci_build_status() {
 		if [ "$(is_desirable_github_build_status_excluding_pending $parsed_github_build_status)" == "FOUND" ]; then
 			break
 		fi
-		echo "Awaiting GitLab CI result. Job status:$parsed_github_build_status, more details:$GITLAB_SERVER_HTTP_URL/root/$github_repo_name/-/jobs/"
+		echo "Awaiting GitLab CI result. Job status:$parsed_github_build_status, more details:$GITLAB_SERVER_HTTPS_URL/root/$github_repo_name/-/jobs/"
 	done
 }
 
@@ -383,8 +383,8 @@ rebuild_get_gitlab_ci_build_status() {
 
 	
 	#printf "\n\n getting pipelines via curl and gitlab pac. "
-	# curl --header "PRIVATE-TOKEN: <your_access_token>" "http://127.0.0.1/api/v4/projects/1/pipelines"
-	local pipelines=$(curl --silent --header "PRIVATE-TOKEN: $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "http://127.0.0.1/api/v4/projects/$GITLAB_SERVER_ACCOUNT_GLOBAL%2F$gitlab_repo_name/pipelines")
+	# curl --header "PRIVATE-TOKEN: <your_access_token>" "https://127.0.0.1/api/v4/projects/1/pipelines"
+	local pipelines=$(curl --silent --header "PRIVATE-TOKEN: $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "https://127.0.0.1/api/v4/projects/$GITLAB_SERVER_ACCOUNT_GLOBAL%2F$gitlab_repo_name/pipelines")
 	#printf "pipelines=$pipelines"
 	# get build status from pipelines
 	#printf "\n\n get job from pipeline json using jq "
@@ -442,7 +442,7 @@ parse_gitlab_ci_status_to_github_build_status() {
 # TODO(a-t-0): verify incoming redirect url is valid.
 #######################################
 # Run with:
-# bash -c 'source src/import.sh && set_build_status_of_github_commit_using_github_pat a-t-0 sponsor_example 02c5fce3500d7b9e2d79cb5b7d886020a403cf58 http://127.0.0.1  pending'
+# bash -c 'source src/import.sh && set_build_status_of_github_commit_using_github_pat a-t-0 sponsor_example 02c5fce3500d7b9e2d79cb5b7d886020a403cf58 https://127.0.0.1  pending'
 set_build_status_of_github_commit_using_github_pat() {
 	local github_username="$1"
 	local github_repo_name="$2"

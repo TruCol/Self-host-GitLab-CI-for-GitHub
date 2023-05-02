@@ -9,7 +9,7 @@ GITLAB_SERVER_PASSWORD_GLOBAL=$(echo "$GITLAB_SERVER_PASSWORD_GLOBAL" | tr -d '\
 GITLAB_ROOT_EMAIL_GLOBAL=$(echo "$GITLAB_ROOT_EMAIL_GLOBAL" | tr -d '\r')
 GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL=$(echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
 GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL=$(echo "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL" | tr -d '\r')
-GITLAB_SERVER_HTTP_URL=$(echo "$GITLAB_SERVER_HTTP_URL" | tr -d '\r')
+#GITLAB_SERVER_HTTPS_URL=$(echo "$GITLAB_SERVER_HTTPS_URL" | tr -d '\r') # Read from cli arg
 GITLAB_SERVER_PASSWORD_GLOBAL=$(echo "$GITLAB_SERVER_PASSWORD_GLOBAL" | tr -d '\r')
 GITLAB_SERVER_PASSWORD_GLOBAL=$(echo "$GITLAB_SERVER_PASSWORD_GLOBAL" | tr -d '\r')
 
@@ -20,7 +20,7 @@ filler="Filler"
 #echo "$GITLAB_ROOT_EMAIL_GLOBAL$filler"
 #echo "$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL$filler"
 #echo "$GITHUB_PERSONAL_ACCESS_TOKEN_GLOBAL$filler"
-#echo "$GITLAB_SERVER_HTTP_URL$filler"
+#echo "$GITLAB_SERVER_HTTPS_URL$filler"
 #echo "$GITLAB_SERVER_PASSWORD_GLOBAL$filler"
 #read -p "Done"
 
@@ -49,7 +49,9 @@ source src/helper/verification/sha256_computing.sh
 source src/prerequisites/firefox_version.sh
 source src/prerequisites/install_miniconda.sh
 source src/prerequisites/jquery.sh
-source src/prerequisites/prerequisites.sh
+source src/prerequisites/prerequisites_hub.sh
+source src/prerequisites/prerequisites_lab.sh
+source src/prerequisites/helper.sh
 source src/prerequisites/install_support_programs.sh
 source src/prerequisites/manage_prerequisites.sh
 

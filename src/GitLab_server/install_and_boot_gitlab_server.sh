@@ -61,7 +61,7 @@ install_and_run_gitlab_server() {
 		ensure_new_gitlab_personal_access_token_works
 		echo "Done setting PERSONAL ACCESS TOKEN."
 		printf "\n Verifying the GitHub and GitLab personal access tokens are in the $PERSONAL_CREDENTIALS_PATH file."
-		verify_personal_creds_txt_contain_pacs
+		verify_gitlab_pac_exists_in_persional_creds_txt
 	elif [ "$gitlab_server_is_running" == "RUNNING" ]; then
 		echo "The GitLab server is already running."
 	else
@@ -104,17 +104,24 @@ run_gitlab_server_in_docker_container() {
 	local gitlab_pwd="$1"
 	
 	gitlab_package=$(get_gitlab_package)
+	read -p "HTTPS_EXTERNAL_URL=$HTTPS_EXTERNAL_URL"
+	read -p "GITLAB_SERVER=$GITLAB_SERVER"
 	
 	local output
 	output=$(sudo docker run --detach \
 	  --hostname "$GITLAB_SERVER" \
-	  --publish "$GITLAB_PORT_1" --publish "$GITLAB_PORT_2" --publish "$GITLAB_PORT_3" \
+	  --publish "$GITLAB_PORT_1" \
+	  --publish "$GITLAB_PORT_2" \
+	  --publish "$GITLAB_PORT_3" \
+	  --publish "$GITLAB_PORT_4" \
 	  --name "$GITLAB_NAME" \
 	  --restart always \
 	  --volume "$GITLAB_HOME"/config:/etc/gitlab \
 	  --volume "$GITLAB_HOME"/logs:/var/log/gitlab \
 	  --volume "$GITLAB_HOME"/data:/var/opt/gitlab \
-	  -e GITLAB_ROOT_EMAIL="$GITLAB_ROOT_EMAIL_GLOBAL" -e GITLAB_ROOT_PASSWORD="$gitlab_pwd" -e EXTERNAL_URL="http://127.0.0.1" \
+	  -e GITLAB_ROOT_EMAIL="$GITLAB_ROOT_EMAIL_GLOBAL" \
+	  -e GITLAB_ROOT_PASSWORD="$gitlab_pwd" \
+	  -e EXTERNAL_URL="\"$HTTPS_EXTERNAL_URL\"" \
 	  "$gitlab_package")
 	echo "$output"
 }

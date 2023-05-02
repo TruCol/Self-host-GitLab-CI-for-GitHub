@@ -109,13 +109,13 @@ get_project_list(){
 	local -n repo_arr="$1"     # use nameref for indirection
 
     # Get a list of the repositories in your own local GitLab server (that runs the GitLab runner CI).
-	local repositories=$(curl --silent --header "PRIVATE-TOKEN: $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
+	local repositories=$(curl --silent --header "PRIVATE-TOKEN: $GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL" "$GITLAB_SERVER_HTTPS_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&page=1")
 	#read -p "repositories=$repositories"
 	
 	# Verify the machine has access to the repositories.
 	local no_authorisation='{"message":"401 Unauthorized"}'
 	if [ "$repositories" == "$no_authorisation" ]; then
-		read -p "Error, the GitLab personal access token:$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL did not grant access to: $GITLAB_SERVER_HTTP_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&p age=1"
+		read -p "Error, the GitLab personal access token:$GITLAB_PERSONAL_ACCESS_TOKEN_GLOBAL did not grant access to: $GITLAB_SERVER_HTTPS_URL/api/v4/projects/?simple=yes&private=true&per_page=1000&p age=1"
 		exit 3
 	fi
 	
@@ -399,7 +399,7 @@ get_build_status() {
 	sleep 20
 	
 	# curl build status
-	output=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name/pipelines")
+	output=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "https://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name/pipelines")
 	
 	#echo "gitlab_username=$gitlab_username"
 	#echo "output=$output"
@@ -410,13 +410,13 @@ get_build_status() {
 	allowed_substring='"status":"pending"'
 	while [  "$(lines_contain_string "$allowed_substring" "${output}")" == "FOUND" ]; do
 		sleep 3
-		output=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name/pipelines")
+		output=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "https://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name/pipelines")
 	done
 	
 	allowed_substring='"status":"running"'
 	while [  "$(lines_contain_string "$allowed_substring" "${output}")" == "FOUND" ]; do
 		sleep 3
-		output=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "http://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name/pipelines")
+		output=$(curl --header "PRIVATE-TOKEN: $personal_access_token" "https://127.0.0.1/api/v4/projects/$gitlab_username%2F$repo_name/pipelines")
 	done
 	
 	# check if status has error: all build statusses are returned, so need to check the 

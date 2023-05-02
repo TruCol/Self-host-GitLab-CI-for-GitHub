@@ -17,7 +17,8 @@ setup_tor_website_for_gitlab_server_flag='false'
 gitlab_username_flag='false'
 gitlab_pwd_flag='false'
 gitlab_email_flag='false'
-prerequistes_only_flag='false'
+hub_prerequistes_only_flag='false'
+lab_prerequistes_only_flag='false'
 
 # Specify variable defaults
 gitlab_username="root"
@@ -64,6 +65,10 @@ print_usage() {
 
 while [[ $# -gt 0 ]]; do
   case $1 in
+    -b|--boot)
+      setup_boot_script_flag='true'
+      shift # past argument
+      ;;
     -s|--server)
 	    server_flag='true'
       shift # past argument
@@ -78,6 +83,11 @@ while [[ $# -gt 0 ]]; do
       deploy_ssh_flag='true'
       shift # past argument
       ;;
+    -eu|--external-url)
+      HTTPS_EXTERNAL_URL="$2"
+      shift # past argument
+      shift
+      ;;
     -hubcssh|--github-commit-status-ssh)
       commit_status_ssh_flag='true'
       shift # past argument
@@ -86,10 +96,13 @@ while [[ $# -gt 0 ]]; do
       commit_status_personal_access_token_flag='true'
       shift # past argument
       ;;
-    -b|--boot)
-      setup_boot_script_flag='true'
+    -gs|--gitlab-server)
+      GITLAB_SERVER="$2"
+      GITLAB_SERVER_HTTPS_URL="https://$GITLAB_SERVER"
       shift # past argument
+      shift
       ;;
+    
     -tw|--tor_website)
       setup_tor_website_for_gitlab_server_flag='true'
       shift # past argument
@@ -136,8 +149,12 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       shift
       ;;
-    -p|--prereq)
-      prerequistes_only_flag='true'
+    -hpre|--hubprereq)
+      hub_prerequistes_only_flag='true'
+      shift # past argument
+      ;;
+    -lpre|--labprereq)
+      lab_prerequistes_only_flag='true'
       shift # past argument
       ;;
     -*|--*)
@@ -153,6 +170,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+assert_is_non_empty_string ${HTTPS_EXTERNAL_URL}
+assert_is_non_empty_string ${GITLAB_SERVER}
 
 echo "server_flag                              = ${server_flag}"
 echo "runner_flag                              = ${runner_flag}"
@@ -183,20 +202,26 @@ if [ "$github_pwd_flag" == "true" ]; then
   assert_is_non_empty_string ${github_password}
 fi
 
+# Set GitHub password without displaying it in terminal.
+if [ "$hub_prerequistes_only_flag" == "true" ]; then
+	ensure_github_prerequisites_compliance
+fi
+
 # Set GitLab password without displaying it in terminal.
-if [ "$prerequistes_only_flag" == "true" ]; then
-	ensure_prerequisites_compliance
+if [ "$lab_prerequistes_only_flag" == "true" ]; then
+	ensure_gitlab_prerequisites_compliance
 fi
 
 
 # Start gitlab server installation and gitlab runner installation.
 if [ "$server_flag" == "true" ]; then
   printf "\n Ensuring prequisites are satisfied."
-  ensure_prerequisites_compliance
+  ensure_gitlab_prerequisites_compliance
   printf "\n Installing the GitLab server!"
+  printf "\n TODO: SEPARATE INTERACTION WITH GITHUB FROM: install_and_run_gitlab_server!"
   install_and_run_gitlab_server "$GITLAB_SERVER_PASSWORD_GLOBAL"
 	echo "Installed gitlab server, should be up in a few minutes. You can visit it at:"
-  echo "$GITLAB_SERVER_HTTP_URL"
+  echo "$GITLAB_SERVER_HTTPS_URL"
 fi
 
 

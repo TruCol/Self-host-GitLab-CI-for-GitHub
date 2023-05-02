@@ -91,12 +91,12 @@ install_package() {
 # Register GitLab Runner
 register_gitlab_runner() {
 
-	# TODO: (doubt) goto: http://127.0.0.1/admin/application_settings/ci_cd#js-ci-cd-settings
+	# TODO: (doubt) goto: https://127.0.0.1/admin/application_settings/ci_cd#js-ci-cd-settings
 	# TODO: (doubt) disable "Enable shared runners for new projects"
 
 	
-	#url="http://localhost"
-	local gitlab_url="http://127.0.0.1"
+	#url="https://localhost"
+	local gitlab_url="https://127.0.0.1"
 	local description=trucolrunner
 	#executor=shell
 	local executor=docker

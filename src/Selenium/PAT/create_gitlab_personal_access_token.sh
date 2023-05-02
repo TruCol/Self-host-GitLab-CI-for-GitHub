@@ -91,7 +91,7 @@ check_if_personal_access_token_works() {
 assert_personal_access_token_works() {
 	local personal_access_token="$1"
 
-	if [ $(check_if_personal_access_token_works $personal_access_token) != "TRUE" ]; then
+	if [[ "$(check_if_personal_access_token_works "$personal_access_token")" != "TRUE" ]]; then
 		echo "Error, the GitLab personal access token does not work."
 		exit 56
 	fi

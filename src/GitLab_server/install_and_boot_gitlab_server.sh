@@ -112,6 +112,7 @@ run_gitlab_server_in_docker_container() {
 	  --publish "$GITLAB_PORT_2" \
 	  --publish "$GITLAB_PORT_3" \
 	  --publish "$GITLAB_PORT_4" \
+	  --publish "$GITLAB_PORT_5" \
 	  --name "$GITLAB_NAME" \
 	  --restart always \
 	  --volume "$GITLAB_HOME"/config:/etc/gitlab \

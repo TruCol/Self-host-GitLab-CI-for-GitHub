@@ -33,7 +33,13 @@ chmod +x *.sh
 ```
 Do not do anything with GitHub:
 ```bash
-./install_gitlab.sh -s -r -le somegitlab@email.com -lp -lpre
+./install_gitlab.sh \
+ --server \
+ --gitlab-email somegitlab@email.com \
+ --gitlab-password \
+ --labprereq \
+ --external-url "https://0.0.0.0" \
+ --gitlab-server "0.0.0.0"
 ```
 (You can leave out `-hp` if you're not comfortable typing your GitHub pw in code, then you'll be manually prompted to login via the browser.)
 

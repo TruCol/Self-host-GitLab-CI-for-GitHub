@@ -110,7 +110,10 @@ run_gitlab_server_in_docker_container() {
 	local output
 	output=$(sudo docker run --detach \
 	  --hostname "$GITLAB_SERVER" \
-	  --publish "$GITLAB_PORT_1" --publish "$GITLAB_PORT_2" --publish "$GITLAB_PORT_3" \
+	  --publish "$GITLAB_PORT_1" \
+	  --publish "$GITLAB_PORT_2" \
+	  --publish "$GITLAB_PORT_3" \
+	  --publish "$GITLAB_PORT_4" \
 	  --name "$GITLAB_NAME" \
 	  --restart always \
 	  --volume "$GITLAB_HOME"/config:/etc/gitlab \

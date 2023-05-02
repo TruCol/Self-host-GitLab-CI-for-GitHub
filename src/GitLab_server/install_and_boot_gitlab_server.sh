@@ -104,8 +104,6 @@ run_gitlab_server_in_docker_container() {
 	local gitlab_pwd="$1"
 	
 	gitlab_package=$(get_gitlab_package)
-	read -p "HTTPS_EXTERNAL_URL=$HTTPS_EXTERNAL_URL"
-	read -p "GITLAB_SERVER=$GITLAB_SERVER"
 	
 	local output
 	output=$(sudo docker run --detach \
